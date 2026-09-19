@@ -287,7 +287,40 @@ async function loadAthleteProfile(userId: string) {
   if (data?.display_name) {
     setAthleteName(data.display_name);
   }
+async function loadPrimaryRace(userId: string) {
+  const { data: athlete, error: athleteError } = await supabase
+    .from('athlete_profile')
+    .select('id')
+    .eq('user_id', userId)
+    .single();
 
+  if (athleteError || !athlete) {
+    console.error('Unable to load athlete id:', athleteError);
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('race')
+    .select('name, race_date, priority, location, target_splits')
+    .eq('athlete_id', athlete.id)
+    .eq('priority', 'A')
+    .order('race_date', { ascending: true })
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error('Unable to load primary race:', error);
+    return;
+  }
+
+  setPrimaryRace({
+    name: data.name,
+    raceDate: data.race_date,
+    priority: data.priority,
+    location: data.location ?? '',
+    targetSplits: data.target_splits,
+  });
+}
   setAthleteProfile({
     ftp: data?.ftp_w ?? null,
     runThreshold: data?.run_threshold_sec_per_km ?? null,
