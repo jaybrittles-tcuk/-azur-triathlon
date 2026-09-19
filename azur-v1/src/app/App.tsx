@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   Activity,
+  AlertTriangle,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
+  CheckCircle2,
+  Cloud,
   Database,
   Gauge,
   HeartPulse,
@@ -15,9 +16,10 @@ import {
   TrendingUp,
   Unlock,
 } from 'lucide-react';
+
 import type { PlannedSession, Sport } from '../domain/types';
 
-const nav = [
+const navigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
   [TrendingUp, 'Performance'],
@@ -28,101 +30,161 @@ const nav = [
   [Database, 'Data Sources'],
 ] as const;
 
-type SessionWithDay = PlannedSession & { dayLabel: string; accent: string };
-
-type WeekState = {
-  id: string;
-  label: string;
-  dateRange: string;
-  phase: string;
-  targetHours: number;
-  raceFocus: string;
-  locked: boolean;
-  version: number;
-  sessions: SessionWithDay[];
+type Session = PlannedSession & {
+  dayLabel: string;
+  accent: string;
 };
 
-const baseSessions: SessionWithDay[] = [
+const sessions: Session[] = [
   {
-    id: 'mon-swim', seasonWeekId: 'w1', plannedDate: '2026-09-21', sport: 'swim', title: 'Aerobic Technique Swim',
-    sessionClass: 'easy', priority: 2, durationMin: 45, targets: { rpe: '4–5' }, prescription: {}, rationale: 'Low-cost aerobic work and technique quality.', terrain: 'Pool', status: 'planned', locked: false, version: 1,
-    dayLabel: 'MON', accent: 'swim'
+    id: 'mon-swim',
+    seasonWeekId: 'w1',
+    plannedDate: '2026-09-21',
+    sport: 'swim',
+    title: 'Aerobic Technique Swim',
+    sessionClass: 'easy',
+    priority: 2,
+    durationMin: 45,
+    targets: { rpe: 'RPE 4–5' },
+    prescription: {},
+    rationale: 'Low-cost aerobic work with a focus on technique quality.',
+    terrain: 'Pool',
+    status: 'planned',
+    locked: false,
+    version: 1,
+    dayLabel: 'MON',
+    accent: 'swim',
   },
   {
-    id: 'mon-run', seasonWeekId: 'w1', plannedDate: '2026-09-21', sport: 'run', title: 'Easy Aerobic Run',
-    sessionClass: 'easy', priority: 3, durationMin: 40, targets: { pace: '4:15–4:40/km' }, prescription: {}, rationale: 'Adds frequency without compromising Tuesday.', terrain: 'Flat', status: 'planned', locked: false, version: 1,
-    dayLabel: 'MON', accent: 'run'
+    id: 'tue-bike',
+    seasonWeekId: 'w1',
+    plannedDate: '2026-09-22',
+    sport: 'bike',
+    title: 'Threshold Development',
+    sessionClass: 'intensity',
+    priority: 1,
+    durationMin: 100,
+    targets: { power: '4 × 10 min @ 299–315 W' },
+    prescription: {},
+    rationale:
+      'Raises the power ceiling so full-distance race power costs less physiologically.',
+    terrain: 'Indoor / Road',
+    status: 'planned',
+    locked: true,
+    version: 1,
+    dayLabel: 'TUE',
+    accent: 'bike',
   },
   {
-    id: 'tue-bike', seasonWeekId: 'w1', plannedDate: '2026-09-22', sport: 'bike', title: 'Threshold Development',
-    sessionClass: 'intensity', priority: 1, durationMin: 100, targets: { power: '4×10 min @ 299–315 W' }, prescription: {}, rationale: 'Raises power ceiling so full-distance power costs less physiologically.', terrain: 'Indoor / Road', status: 'planned', locked: true, version: 1,
-    dayLabel: 'TUE', accent: 'bike'
+    id: 'wed-run',
+    seasonWeekId: 'w1',
+    plannedDate: '2026-09-23',
+    sport: 'run',
+    title: 'Controlled Threshold Run',
+    sessionClass: 'intensity',
+    priority: 1,
+    durationMin: 70,
+    targets: { pace: '3 × 12 min @ 3:32–3:40/km' },
+    prescription: {},
+    rationale:
+      'Maintains threshold strength while developing long-course run resilience.',
+    terrain: 'Flat / Rolling',
+    status: 'planned',
+    locked: false,
+    version: 1,
+    dayLabel: 'WED',
+    accent: 'run',
   },
   {
-    id: 'wed-run', seasonWeekId: 'w1', plannedDate: '2026-09-23', sport: 'run', title: 'Controlled Threshold Run',
-    sessionClass: 'intensity', priority: 1, durationMin: 70, targets: { pace: '3×12 min @ 3:32–3:40/km' }, prescription: {}, rationale: 'Develops threshold strength while protecting long-course durability.', terrain: 'Flat / Rolling', status: 'planned', locked: false, version: 1,
-    dayLabel: 'WED', accent: 'run'
+    id: 'thu-bike',
+    seasonWeekId: 'w1',
+    plannedDate: '2026-09-24',
+    sport: 'bike',
+    title: 'Strength Endurance Bike',
+    sessionClass: 'endurance',
+    priority: 1,
+    durationMin: 85,
+    targets: { power: '3 × 15 min @ 258–277 W' },
+    prescription: {},
+    rationale:
+      'Builds sustainable torque without turning Thursday into another threshold day.',
+    terrain: 'Road / Indoor',
+    status: 'planned',
+    locked: false,
+    version: 1,
+    dayLabel: 'THU',
+    accent: 'bike',
   },
   {
-    id: 'wed-swim', seasonWeekId: 'w1', plannedDate: '2026-09-23', sport: 'swim', title: 'Aerobic Swim',
-    sessionClass: 'endurance', priority: 2, durationMin: 45, targets: { rpe: '5' }, prescription: {}, rationale: 'Adds aerobic volume without impact.', terrain: 'Pool', status: 'planned', locked: false, version: 1,
-    dayLabel: 'WED', accent: 'swim'
+    id: 'fri-swim',
+    seasonWeekId: 'w1',
+    plannedDate: '2026-09-25',
+    sport: 'swim',
+    title: 'Endurance Swim',
+    sessionClass: 'endurance',
+    priority: 2,
+    durationMin: 70,
+    targets: { rpe: 'RPE 5–6' },
+    prescription: {},
+    rationale: 'Builds aerobic endurance and pace consistency.',
+    terrain: 'Pool',
+    status: 'planned',
+    locked: false,
+    version: 1,
+    dayLabel: 'FRI',
+    accent: 'swim',
   },
   {
-    id: 'thu-bike', seasonWeekId: 'w1', plannedDate: '2026-09-24', sport: 'bike', title: 'Strength Endurance Bike',
-    sessionClass: 'endurance', priority: 1, durationMin: 85, targets: { power: '3×15 min @ 258–277 W' }, prescription: {}, rationale: 'Builds sustainable torque without turning Thursday into another threshold day.', terrain: 'Road / Indoor', status: 'planned', locked: false, version: 1,
-    dayLabel: 'THU', accent: 'bike'
+    id: 'sat-brick',
+    seasonWeekId: 'w1',
+    plannedDate: '2026-09-26',
+    sport: 'bike',
+    title: 'Long-Course Brick',
+    sessionClass: 'race_specific',
+    priority: 1,
+    durationMin: 220,
+    targets: { power: 'Bike 221–239 W + progressive run' },
+    prescription: {},
+    rationale:
+      'Develops race-specific bike durability and efficient running under fatigue.',
+    terrain: 'Rolling',
+    status: 'planned',
+    locked: true,
+    version: 1,
+    dayLabel: 'SAT',
+    accent: 'bike',
   },
   {
-    id: 'thu-run', seasonWeekId: 'w1', plannedDate: '2026-09-24', sport: 'run', title: 'Easy Off-Bike Run',
-    sessionClass: 'easy', priority: 3, durationMin: 30, targets: { pace: '4:15–4:40/km' }, prescription: {}, rationale: 'Improves resilience with minimal training cost.', terrain: 'Flat', status: 'planned', locked: false, version: 1,
-    dayLabel: 'THU', accent: 'run'
-  },
-  {
-    id: 'fri-swim', seasonWeekId: 'w1', plannedDate: '2026-09-25', sport: 'swim', title: 'Endurance Swim',
-    sessionClass: 'endurance', priority: 2, durationMin: 70, targets: { rpe: '5–6' }, prescription: {}, rationale: 'Builds low-cost endurance and pace consistency.', terrain: 'Pool', status: 'planned', locked: false, version: 1,
-    dayLabel: 'FRI', accent: 'swim'
-  },
-  {
-    id: 'sat-bike', seasonWeekId: 'w1', plannedDate: '2026-09-26', sport: 'bike', title: 'Long-Course Brick Bike',
-    sessionClass: 'race_specific', priority: 1, durationMin: 180, targets: { power: 'Race-relevant blocks @ 221–239 W' }, prescription: {}, rationale: 'Develops late-bike durability and low-variability execution.', terrain: 'Rolling', status: 'planned', locked: true, version: 1,
-    dayLabel: 'SAT', accent: 'bike'
-  },
-  {
-    id: 'sat-run', seasonWeekId: 'w1', plannedDate: '2026-09-26', sport: 'run', title: 'Brick Run',
-    sessionClass: 'race_specific', priority: 1, durationMin: 40, targets: { pace: 'Progressive aerobic' }, prescription: {}, rationale: 'Trains efficient running under bike fatigue.', terrain: 'Flat / Rolling', status: 'planned', locked: true, version: 1,
-    dayLabel: 'SAT', accent: 'run'
-  },
-  {
-    id: 'sun-run', seasonWeekId: 'w1', plannedDate: '2026-09-27', sport: 'run', title: 'Progressive Long Run',
-    sessionClass: 'endurance', priority: 1, durationMin: 85, targets: { pace: 'Easy → steady' }, prescription: {}, rationale: 'Develops long-run durability without marathon-style intensity.', terrain: 'Rolling', status: 'planned', locked: false, version: 1,
-    dayLabel: 'SUN', accent: 'run'
+    id: 'sun-run',
+    seasonWeekId: 'w1',
+    plannedDate: '2026-09-27',
+    sport: 'run',
+    title: 'Progressive Long Run',
+    sessionClass: 'endurance',
+    priority: 1,
+    durationMin: 85,
+    targets: { pace: 'Easy → steady' },
+    prescription: {},
+    rationale:
+      'Develops long-course durability without unnecessary marathon-style intensity.',
+    terrain: 'Rolling',
+    status: 'planned',
+    locked: false,
+    version: 1,
+    dayLabel: 'SUN',
+    accent: 'run',
   },
 ];
 
-const initialWeek: WeekState = {
-  id: 'w1',
-  label: 'Week 1',
-  dateRange: '21–27 Sep 2026',
-  phase: 'Base 1',
-  targetHours: 13.2,
-  raceFocus: 'Long-course foundation',
-  locked: false,
-  version: 1,
-  sessions: baseSessions,
-};
-
-function minutesToLabel(min: number) {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return h ? `${h}h ${m ? `${m}m` : ''}`.trim() : `${m}m`;
-}
-
-function sportLabel(sport: Sport) {
-  return sport.charAt(0).toUpperCase() + sport.slice(1);
-}
-
-function Metric({ label, value, hint }: { label: string; value: string; hint: string }) {
+function Metric({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint: string;
+}) {
   return (
     <div className="metric-card">
       <span className="eyebrow">{label}</span>
@@ -132,104 +194,106 @@ function Metric({ label, value, hint }: { label: string; value: string; hint: st
   );
 }
 
-function SessionEditor({ session, onSave, onToggleLock }: {
-  session: SessionWithDay;
-  onSave: (next: SessionWithDay) => void;
-  onToggleLock: () => void;
+function ProgressRow({
+  label,
+  value,
+  text,
+}: {
+  label: string;
+  value: number;
+  text: string;
 }) {
-  const [draft, setDraft] = useState(session);
-
   return (
-    <aside className="editor-panel">
-      <div className="section-heading">
-        <div>
-          <span className="eyebrow">SESSION EDITOR</span>
-          <h3>{session.title}</h3>
-        </div>
-        <button className="icon-button" onClick={onToggleLock} title={session.locked ? 'Unlock session' : 'Lock session'}>
-          {session.locked ? <Lock size={18} /> : <Unlock size={18} />}
-        </button>
+    <div className="progress-row">
+      <div className="progress-copy">
+        <strong>{label}</strong>
+        <small>{text}</small>
       </div>
 
-      <div className="editor-grid">
-        <label>
-          <span>Title</span>
-          <input value={draft.title} disabled={session.locked} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
-        </label>
-        <label>
-          <span>Duration (min)</span>
-          <input type="number" min={10} value={draft.durationMin} disabled={session.locked} onChange={(e) => setDraft({ ...draft, durationMin: Number(e.target.value) })} />
-        </label>
-        <label>
-          <span>Priority</span>
-          <select value={draft.priority} disabled={session.locked} onChange={(e) => setDraft({ ...draft, priority: Number(e.target.value) as 1 | 2 | 3 })}>
-            <option value={1}>Priority 1</option>
-            <option value={2}>Priority 2</option>
-            <option value={3}>Priority 3</option>
-          </select>
-        </label>
-        <label>
-          <span>Terrain</span>
-          <input value={draft.terrain ?? ''} disabled={session.locked} onChange={(e) => setDraft({ ...draft, terrain: e.target.value })} />
-        </label>
-        <label className="wide">
-          <span>Key target</span>
-          <input value={Object.values(draft.targets)[0]?.toString() ?? ''} disabled={session.locked} onChange={(e) => setDraft({ ...draft, targets: { primary: e.target.value } })} />
-        </label>
-        <label className="wide">
-          <span>Why this session matters</span>
-          <textarea rows={4} value={draft.rationale ?? ''} disabled={session.locked} onChange={(e) => setDraft({ ...draft, rationale: e.target.value })} />
-        </label>
+      <div className="progress-track">
+        <span style={{ width: `${value}%` }} />
       </div>
 
-      <div className="editor-actions">
-        <button className="primary-button" disabled={session.locked} onClick={() => onSave({ ...draft, status: draft.version > 1 ? 'edited' : draft.status })}>
-          <Save size={17} /> Save revision
-        </button>
-        {session.locked && <small>This session is locked. Unlock it before editing.</small>}
-      </div>
-
-      <div className="version-note">
-        <span className="eyebrow">VERSION HISTORY</span>
-        <strong>v{session.version}</strong>
-        <small>Original plan is preserved when an edit is saved.</small>
-      </div>
-    </aside>
+      <b>{value}%</b>
+    </div>
   );
+}
+
+function formatDuration(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+
+  if (!hours) return `${remainder}m`;
+
+  return `${hours}h ${remainder ? `${remainder}m` : ''}`.trim();
+}
+
+function sportName(sport: Sport) {
+  return sport.charAt(0).toUpperCase() + sport.slice(1);
 }
 
 export function App() {
   const [activeNav, setActiveNav] = useState('Home');
-  const [week, setWeek] = useState<WeekState>(initialWeek);
-  const [selectedId, setSelectedId] = useState<string>('tue-bike');
-  const [changeLog, setChangeLog] = useState<string[]>([]);
+  const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
+  const [selectedId, setSelectedId] = useState('tue-bike');
+  const [weekVersion, setWeekVersion] = useState(1);
+  const [decision, setDecision] = useState<
+    'pending' | 'accepted' | 'rejected'
+  >('pending');
 
-  const selected = week.sessions.find((s) => s.id === selectedId) ?? week.sessions[0];
-  const totalMinutes = useMemo(() => week.sessions.reduce((sum, s) => sum + s.durationMin, 0), [week.sessions]);
+  const selected =
+    weekSessions.find((session) => session.id === selectedId) ||
+    weekSessions[0];
+
+  const totalMinutes = useMemo(
+    () =>
+      weekSessions.reduce(
+        (total, session) => total + session.durationMin,
+        0,
+      ),
+    [weekSessions],
+  );
+
   const totalHours = totalMinutes / 60;
-  const days = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
 
-  function saveSession(next: SessionWithDay) {
-    setWeek((prev) => ({
-      ...prev,
-      version: prev.version + 1,
-      sessions: prev.sessions.map((s) => s.id === next.id ? { ...next, version: s.version + 1, parentSessionId: s.parentSessionId ?? s.id, status: 'edited' } : s),
-    }));
-    setChangeLog((prev) => [`${next.dayLabel}: ${next.title} saved as a new revision.`, ...prev].slice(0, 6));
+  const daysToRoth = Math.max(
+    0,
+    Math.ceil(
+      (new Date('2027-07-04').getTime() - new Date().getTime()) /
+        86400000,
+    ),
+  );
+
+  const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
+  function toggleLock() {
+    setWeekSessions((current) =>
+      current.map((session) =>
+        session.id === selected.id
+          ? { ...session, locked: !session.locked }
+          : session,
+      ),
+    );
   }
 
-  function toggleSessionLock() {
-    setWeek((prev) => ({
-      ...prev,
-      sessions: prev.sessions.map((s) => s.id === selected.id ? { ...s, locked: !s.locked } : s),
-    }));
+  function updateDuration(value: number) {
+    setWeekSessions((current) =>
+      current.map((session) =>
+        session.id === selected.id
+          ? {
+              ...session,
+              durationMin: value,
+              version: session.version + 1,
+              status: 'edited',
+            }
+          : session,
+      ),
+    );
+
+    setWeekVersion((current) => current + 1);
   }
 
-  function toggleWeekLock() {
-    setWeek((prev) => ({ ...prev, locked: !prev.locked }));
-  }
-
-  function homeView() {
+  function HomeView() {
     return (
       <>
         <section className="hero-grid">
@@ -238,9 +302,20 @@ export function App() {
             <strong>GREEN</strong>
             <p>Recovery signals are broadly stable.</p>
           </div>
-          <Metric label="RACE READINESS" value="62%" hint="+2 pts this week" />
+
+          <Metric
+            label="RACE READINESS"
+            value="62%"
+            hint="+2 points this week"
+          />
+
           <Metric label="FITNESS" value="74" hint="Long-term load" />
-          <Metric label="FORM" value="-8" hint="Productive, not fresh" />
+
+          <Metric
+            label="FORM"
+            value="-8"
+            hint="Productive, not fresh"
+          />
         </section>
 
         <section className="panel">
@@ -249,18 +324,55 @@ export function App() {
               <span className="eyebrow">CURRENT WEEK</span>
               <h3>{totalHours.toFixed(1)} hours planned</h3>
             </div>
-            <span className="status-pill">{week.raceFocus}</span>
+
+            <span className="status-pill">
+              Long-course foundation
+            </span>
           </div>
+
           <div className="session-strip">
             {days.map((day) => {
-              const daySessions = week.sessions.filter((s) => s.dayLabel === day);
-              const duration = daySessions.reduce((sum, s) => sum + s.durationMin, 0);
+              const daySessions = weekSessions.filter(
+                (session) => session.dayLabel === day,
+              );
+
+              const duration = daySessions.reduce(
+                (total, session) => total + session.durationMin,
+                0,
+              );
+
               return (
-                <article className="session-card" key={day} onClick={() => { setActiveNav('Calendar'); if (daySessions[0]) setSelectedId(daySessions[0].id); }}>
+                <article
+                  key={day}
+                  className="session-card"
+                  onClick={() => {
+                    if (daySessions[0]) {
+                      setSelectedId(daySessions[0].id);
+                      setActiveNav('Calendar');
+                    }
+                  }}
+                >
                   <span className="day">{day}</span>
-                  <strong>{daySessions.map((s) => s.title).join(' + ')}</strong>
-                  <small>{minutesToLabel(duration)}</small>
-                  <span className="priority">{daySessions.some((s) => s.priority === 1) ? 'P1' : daySessions.some((s) => s.priority === 2) ? 'P2' : 'P3'}</span>
+
+                  <strong>
+                    {daySessions.length
+                      ? daySessions
+                          .map((session) => session.title)
+                          .join(' + ')
+                      : 'Recovery'}
+                  </strong>
+
+                  <small>{formatDuration(duration)}</small>
+
+                  {daySessions.length > 0 && (
+                    <span className="priority">
+                      {daySessions.some(
+                        (session) => session.priority === 1,
+                      )
+                        ? 'P1'
+                        : 'P2'}
+                    </span>
+                  )}
                 </article>
               );
             })}
@@ -269,88 +381,769 @@ export function App() {
 
         <div className="two-column">
           <section className="panel">
-            <div className="section-heading"><div><span className="eyebrow">COACHING PRIORITIES</span><h3>This week</h3></div></div>
+            <span className="eyebrow">TOP 3 PRIORITIES</span>
+            <h3>This week</h3>
+
             <div className="priority-list">
-              <div><span>01</span><div><strong>Run durability</strong><small>Current weakest long-course marker</small></div></div>
-              <div><span>02</span><div><strong>Bike durability</strong><small>Extend stable output late</small></div></div>
-              <div><span>03</span><div><strong>Maintain threshold</strong><small>Strong enough to preserve</small></div></div>
+              <div>
+                <span>01</span>
+                <div>
+                  <strong>Run durability</strong>
+                  <small>
+                    Current biggest long-course opportunity
+                  </small>
+                </div>
+              </div>
+
+              <div>
+                <span>02</span>
+                <div>
+                  <strong>Bike durability</strong>
+                  <small>
+                    Extend stable output late in long rides
+                  </small>
+                </div>
+              </div>
+
+              <div>
+                <span>03</span>
+                <div>
+                  <strong>Maintain threshold</strong>
+                  <small>
+                    Fitness is strong enough to preserve
+                  </small>
+                </div>
+              </div>
             </div>
           </section>
 
           <section className="panel coach-decision">
-            <div className="section-heading"><div><span className="eyebrow">LATEST COACH DECISION</span><h3>Continue as planned</h3></div><RefreshCw size={21} /></div>
-            <p>Recovery is stable and execution remains productive. No change to this week's load is required.</p>
-            <button onClick={() => setActiveNav('Weekly Review')}>View rationale</button>
+            <span className="eyebrow">
+              LATEST COACH DECISION
+            </span>
+
+            <h3>Continue as planned</h3>
+
+            <p>
+              Recovery is stable and current training stress remains
+              appropriate for this phase.
+            </p>
+
+            <button onClick={() => setActiveNav('Weekly Review')}>
+              View rationale
+            </button>
           </section>
         </div>
       </>
     );
   }
 
-  function calendarView() {
+  function CalendarView() {
     return (
       <div className="calendar-layout">
         <div>
-          <section className="calendar-toolbar panel">
+          <section className="panel calendar-toolbar">
             <div>
               <span className="eyebrow">ACTIVE WEEK</span>
-              <h3>{week.label} · {week.dateRange}</h3>
-              <small>{week.phase} · {week.raceFocus} · Plan v{week.version}</small>
-            </div>
-            <div className="toolbar-actions">
-              <button className="icon-button"><ChevronLeft size={18} /></button>
-              <button className="week-lock" onClick={toggleWeekLock}>{week.locked ? <Lock size={16} /> : <Unlock size={16} />}{week.locked ? ' Week locked' : ' Lock week'}</button>
-              <button className="icon-button"><ChevronRight size={18} /></button>
+              <h3>21–27 September 2026</h3>
+              <small>
+                Base 1 · Long-course foundation · Plan v
+                {weekVersion}
+              </small>
             </div>
           </section>
 
-          <section className="calendar-grid panel">
+          <section className="panel calendar-grid">
             {days.map((day) => {
-              const sessions = week.sessions.filter((s) => s.dayLabel === day);
-              const dayMinutes = sessions.reduce((sum, s) => sum + s.durationMin, 0);
+              const daySessions = weekSessions.filter(
+                (session) => session.dayLabel === day,
+              );
+
               return (
                 <div className="calendar-day" key={day}>
-                  <div className="calendar-day-head"><span>{day}</span><small>{minutesToLabel(dayMinutes)}</small></div>
+                  <div className="calendar-day-head">
+                    <span>{day}</span>
+                  </div>
+
                   <div className="day-stack">
-                    {sessions.map((session) => (
+                    {daySessions.map((session) => (
                       <button
                         key={session.id}
-                        className={`calendar-session ${session.accent} ${selectedId === session.id ? 'selected' : ''}`}
+                        className={`calendar-session ${
+                          session.accent
+                        } ${
+                          selected.id === session.id
+                            ? 'selected'
+                            : ''
+                        }`}
                         onClick={() => setSelectedId(session.id)}
                       >
                         <div className="calendar-session-top">
-                          <span>{sportLabel(session.sport)}</span>
+                          <span>{sportName(session.sport)}</span>
+
                           {session.locked && <Lock size={13} />}
                         </div>
+
                         <strong>{session.title}</strong>
-                        <small>{minutesToLabel(session.durationMin)} · P{session.priority}</small>
-                        <span>{Object.values(session.targets)[0]?.toString()}</span>
+
+                        <small>
+                          {formatDuration(session.durationMin)} · P
+                          {session.priority}
+                        </small>
+
+                        <span>
+                          {Object.values(session.targets)[0]?.toString()}
+                        </span>
                       </button>
                     ))}
-                    {!sessions.length && <div className="empty-day">No session</div>}
                   </div>
                 </div>
               );
             })}
           </section>
-
-          <div className="calendar-summary-grid">
-            <section className="panel">
-              <span className="eyebrow">WEEKLY VOLUME</span>
-              <h3>{totalHours.toFixed(1)} h currently scheduled</h3>
-              <p>Master target: {week.targetHours.toFixed(1)} h. The working calendar can differ from the master plan, but the reference version remains preserved.</p>
-            </section>
-            <section className="panel">
-              <span className="eyebrow">RECENT CHANGES</span>
-              <div className="change-log">
-                {changeLog.length ? changeLog.map((item) => <small key={item}>{item}</small>) : <small>No edits in this version yet.</small>}
-              </div>
-            </section>
-          </div>
         </div>
 
-        <SessionEditor session={selected} onSave={saveSession} onToggleLock={toggleSessionLock} />
+        <aside className="editor-panel">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">SESSION EDITOR</span>
+              <h3>{selected.title}</h3>
+            </div>
+
+            <button className="icon-button" onClick={toggleLock}>
+              {selected.locked ? (
+                <Lock size={18} />
+              ) : (
+                <Unlock size={18} />
+              )}
+            </button>
+          </div>
+
+          <div className="editor-grid">
+            <label>
+              <span>Duration</span>
+
+              <input
+                type="number"
+                value={selected.durationMin}
+                disabled={selected.locked}
+                onChange={(event) =>
+                  updateDuration(Number(event.target.value))
+                }
+              />
+            </label>
+
+            <label className="wide">
+              <span>Primary target</span>
+
+              <input
+                value={
+                  Object.values(selected.targets)[0]?.toString() ||
+                  ''
+                }
+                disabled
+              />
+            </label>
+
+            <label className="wide">
+              <span>Why this matters</span>
+
+              <textarea
+                rows={5}
+                value={selected.rationale || ''}
+                disabled
+              />
+            </label>
+          </div>
+
+          <div className="version-note">
+            <span className="eyebrow">VERSION</span>
+            <strong>v{selected.version}</strong>
+            <small>
+              Original prescription remains preserved.
+            </small>
+          </div>
+
+          <button className="primary-button">
+            <Save size={17} />
+            Save revision
+          </button>
+        </aside>
       </div>
+    );
+  }
+
+  function PerformanceView() {
+    return (
+      <>
+        <section className="hero-grid">
+          <Metric
+            label="FITNESS · CTL"
+            value="74"
+            hint="+3 over four weeks"
+          />
+
+          <Metric
+            label="FATIGUE · ATL"
+            value="82"
+            hint="Elevated after current block"
+          />
+
+          <Metric
+            label="FORM · TSB"
+            value="-8"
+            hint="Productive training range"
+          />
+
+          <Metric
+            label="WEEKLY LOAD"
+            value="612"
+            hint="Inside Base 1 target range"
+          />
+        </section>
+
+        <div className="two-column">
+          <section className="panel">
+            <span className="eyebrow">
+              DISCIPLINE READINESS
+            </span>
+
+            <h3>Current long-course profile</h3>
+
+            <div className="progress-list">
+              <ProgressRow
+                label="Bike"
+                value={68}
+                text="Threshold strong · durability building"
+              />
+
+              <ProgressRow
+                label="Run"
+                value={59}
+                text="Primary opportunity: late-run durability"
+              />
+
+              <ProgressRow
+                label="Swim"
+                value={64}
+                text="Consistency improving"
+              />
+            </div>
+          </section>
+
+          <section className="panel">
+            <span className="eyebrow">
+              INTENSITY DISTRIBUTION
+            </span>
+
+            <h3>Planned this week</h3>
+
+            <div className="distribution-grid">
+              <div>
+                <strong>72%</strong>
+                <span>Easy / endurance</span>
+              </div>
+
+              <div>
+                <strong>18%</strong>
+                <span>Threshold / quality</span>
+              </div>
+
+              <div>
+                <strong>10%</strong>
+                <span>Race specific</span>
+              </div>
+            </div>
+
+            <p className="panel-note">
+              The current block is intentionally aerobic dominant.
+              Threshold is maintained while durability gradually
+              increases.
+            </p>
+          </section>
+        </div>
+      </>
+    );
+  }
+
+  function RecoveryView() {
+    return (
+      <>
+        <section className="hero-grid">
+          <div className="readiness-panel green">
+            <span className="eyebrow light">
+              TODAY'S READINESS
+            </span>
+
+            <strong>GREEN</strong>
+
+            <p>
+              Proceed with the planned training unless subjective feel
+              changes.
+            </p>
+          </div>
+
+          <Metric
+            label="HRV"
+            value="+4%"
+            hint="vs 30-day baseline"
+          />
+
+          <Metric
+            label="RESTING HR"
+            value="-2 bpm"
+            hint="vs baseline"
+          />
+
+          <Metric
+            label="SLEEP"
+            value="7h 42m"
+            hint="+18m vs baseline"
+          />
+        </section>
+
+        <div className="two-column">
+          <section className="panel">
+            <span className="eyebrow">
+              RECOVERY SIGNALS
+            </span>
+
+            <h3>Rolling context</h3>
+
+            <div className="signal-list">
+              <div>
+                <CheckCircle2 size={18} />
+                <div>
+                  <strong>HRV stable</strong>
+                  <small>
+                    No multi-day suppression pattern.
+                  </small>
+                </div>
+              </div>
+
+              <div>
+                <CheckCircle2 size={18} />
+                <div>
+                  <strong>Sleep adequate</strong>
+                  <small>
+                    Supports the current training block.
+                  </small>
+                </div>
+              </div>
+
+              <div>
+                <AlertTriangle size={18} />
+                <div>
+                  <strong>Fatigue elevated</strong>
+                  <small>
+                    Expected following cumulative training.
+                  </small>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="panel">
+            <span className="eyebrow">
+              RECOVERY WARNING
+            </span>
+
+            <h3>No active warning</h3>
+
+            <p className="panel-note">
+              Azur will strengthen warnings when poor recovery signals
+              persist for multiple days or combine with unusually high
+              RPE, training load or a reported niggle.
+            </p>
+          </section>
+        </div>
+      </>
+    );
+  }
+
+  function RacesView() {
+    return (
+      <>
+        <section className="panel race-hero">
+          <div>
+            <span className="eyebrow">
+              A RACE · 4 JULY 2027
+            </span>
+
+            <h3>Challenge Roth</h3>
+
+            <p>Primary full-distance target · Sub-9 hours</p>
+          </div>
+
+          <div className="race-total">
+            <span>Target</span>
+            <strong>&lt; 9:00</strong>
+            <small>{daysToRoth} days remaining</small>
+          </div>
+        </section>
+
+        <section className="panel">
+          <span className="eyebrow">
+            TARGET EXECUTION
+          </span>
+
+          <h3>Roth race model</h3>
+
+          <div className="race-splits">
+            <div>
+              <span>Swim</span>
+              <strong>1:00</strong>
+              <small>
+                Controlled start and efficient rhythm.
+              </small>
+            </div>
+
+            <div>
+              <span>Bike</span>
+              <strong>4:30</strong>
+              <small>
+                Race-relevant range around 221–239 W.
+              </small>
+            </div>
+
+            <div>
+              <span>Run</span>
+              <strong>2:55</strong>
+              <small>
+                Durability and late-race control.
+              </small>
+            </div>
+
+            <div>
+              <span>Transitions</span>
+              <strong>~10m</strong>
+              <small>
+                Efficient execution across T1 and T2.
+              </small>
+            </div>
+          </div>
+        </section>
+
+        <div className="two-column">
+          <section className="panel">
+            <span className="eyebrow">PREP RACE</span>
+            <h3>Ironman 70.3 Bolton</h3>
+
+            <p className="panel-note">
+              June 2027 · B race used to test pacing, race execution
+              and durability.
+            </p>
+          </section>
+
+          <section className="panel">
+            <span className="eyebrow">
+              POST-ROTH BUILD
+            </span>
+
+            <h3>Ironman Leeds</h3>
+
+            <p className="panel-note">
+              Recovery → Easy aerobic → Reintroduce intensity →
+              Leeds-specific rebuild.
+            </p>
+          </section>
+        </div>
+      </>
+    );
+  }
+
+  function BenchmarksView() {
+    return (
+      <>
+        <section className="hero-grid">
+          <Metric
+            label="BIKE FTP"
+            value="315 W"
+            hint="4.38 W/kg at 72 kg"
+          />
+
+          <Metric
+            label="RUN THRESHOLD"
+            value="3:27/km"
+            hint="Current threshold"
+          />
+
+          <Metric
+            label="SWIM THRESHOLD"
+            value="1:30/100m"
+            hint="Current benchmark"
+          />
+
+          <Metric
+            label="BODY WEIGHT"
+            value="72 kg"
+            hint="Roth target: 70 kg"
+          />
+        </section>
+
+        <section className="panel">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">
+                BENCHMARK CYCLE
+              </span>
+
+              <h3>Current coaching interpretation</h3>
+            </div>
+
+            <span className="status-pill">
+              8-WEEK CYCLE
+            </span>
+          </div>
+
+          <div className="benchmark-table">
+            <div className="benchmark-head">
+              <span>Metric</span>
+              <span>Current</span>
+              <span>Direction</span>
+              <span>Interpretation</span>
+            </div>
+
+            <div>
+              <strong>Bike FTP</strong>
+              <span>315 W</span>
+              <span className="good-text">
+                Maintain / build
+              </span>
+              <small>
+                Extend durability rather than chasing FTP alone.
+              </small>
+            </div>
+
+            <div>
+              <strong>Run threshold</strong>
+              <span>3:27/km</span>
+              <span className="good-text">Maintain</span>
+              <small>
+                Bigger opportunity exists in long-course durability.
+              </small>
+            </div>
+
+            <div>
+              <strong>Swim threshold</strong>
+              <span>1:30/100m</span>
+              <span>Build economy</span>
+              <small>
+                Improve repeatability and relaxed aerobic speed.
+              </small>
+            </div>
+
+            <div>
+              <strong>Weight</strong>
+              <span>72 kg</span>
+              <span>Context only</span>
+              <small>
+                Track trend without compromising recovery.
+              </small>
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
+
+  function WeeklyReviewView() {
+    return (
+      <>
+        <section className="hero-grid">
+          <Metric
+            label="PLANNED VOLUME"
+            value={`${totalHours.toFixed(1)} h`}
+            hint="Current working week"
+          />
+
+          <Metric
+            label="KEY SESSIONS"
+            value="5"
+            hint="Priority 1 sessions"
+          />
+
+          <Metric
+            label="RACE READINESS"
+            value="62%"
+            hint="+2 points"
+          />
+
+          <Metric
+            label="COACH DECISION"
+            value="CONTINUE"
+            hint="Current recommendation"
+          />
+        </section>
+
+        <div className="two-column">
+          <section className="panel">
+            <span className="eyebrow">IMPROVING</span>
+            <h3>Bike durability</h3>
+
+            <p className="panel-note">
+              Stable power late in longer work is improving. Continue
+              extending controlled race-relevant output.
+            </p>
+          </section>
+
+          <section className="panel">
+            <span className="eyebrow">LAGGING</span>
+            <h3>Run durability</h3>
+
+            <p className="panel-note">
+              Threshold is strong enough. Long-course resilience remains
+              the largest current opportunity.
+            </p>
+          </section>
+        </div>
+
+        <section className="panel coach-review">
+          <span className="eyebrow">
+            COACH RECOMMENDATION
+          </span>
+
+          <h3>Continue the current load</h3>
+
+          <p>
+            <strong>Why:</strong> recovery markers are stable and
+            current training stress remains appropriate for Base 1.
+          </p>
+
+          <p>
+            <strong>Long-term benefit:</strong> consistent aerobic work
+            now gives us more room to introduce race-specific stress
+            later without forcing large jumps in load.
+          </p>
+
+          <div className="decision-actions">
+            <button
+              className={
+                decision === 'accepted'
+                  ? 'decision active'
+                  : 'decision'
+              }
+              onClick={() => setDecision('accepted')}
+            >
+              Accept recommendation
+            </button>
+
+            <button
+              className={
+                decision === 'rejected'
+                  ? 'decision reject active'
+                  : 'decision reject'
+              }
+              onClick={() => setDecision('rejected')}
+            >
+              Keep plan manually
+            </button>
+          </div>
+
+          {decision !== 'pending' && (
+            <small className="decision-result">
+              Decision recorded: {decision}. Azur never changes the
+              training plan without your approval.
+            </small>
+          )}
+        </section>
+      </>
+    );
+  }
+
+  function DataSourcesView() {
+    return (
+      <>
+        <section className="panel">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">
+                DATA SOURCES
+              </span>
+
+              <h3>Connections & sync status</h3>
+            </div>
+
+            <Cloud size={21} />
+          </div>
+
+          <div className="source-list">
+            <div className="source-row">
+              <div>
+                <strong>Garmin</strong>
+                <small>
+                  Primary activity + recovery source
+                </small>
+              </div>
+
+              <span className="source-state">Planned</span>
+
+              <small>Awaiting API connection</small>
+            </div>
+
+            <div className="source-row">
+              <div>
+                <strong>TrainingPeaks</strong>
+                <small>Reference source</small>
+              </div>
+
+              <span className="source-state">Planned</span>
+
+              <small>No write-back in v1</small>
+            </div>
+
+            <div className="source-row">
+              <div>
+                <strong>Strava</strong>
+                <small>Secondary activity source</small>
+              </div>
+
+              <span className="source-state">Optional</span>
+
+              <small>Not connected</small>
+            </div>
+
+            <div className="source-row">
+              <div>
+                <strong>Intervals.icu</strong>
+                <small>Secondary analysis source</small>
+              </div>
+
+              <span className="source-state">Optional</span>
+
+              <small>Not connected</small>
+            </div>
+          </div>
+        </section>
+
+        <div className="two-column">
+          <section className="panel">
+            <span className="eyebrow">
+              MANUAL IMPORT
+            </span>
+
+            <h3>CSV · FIT · TCX · GPX</h3>
+
+            <p className="panel-note">
+              Manual activities will be de-duplicated automatically.
+              Raw source data and processed analysis remain separate.
+            </p>
+          </section>
+
+          <section className="panel">
+            <span className="eyebrow">
+              DATA PRINCIPLE
+            </span>
+
+            <h3>Garmin first</h3>
+
+            <p className="panel-note">
+              Garmin will become the primary source for activity,
+              recovery and morning health data.
+            </p>
+          </section>
+        </div>
+      </>
     );
   }
 
@@ -358,41 +1151,82 @@ export function App() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand-block">
-          <img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" className="brand-logo" />
-          <div><span className="brand-kicker">PERSONAL PERFORMANCE</span><h1>Azur</h1></div>
+          <img
+            src="/brand/azur-logo.png"
+            alt="Azur Triathlon Coaching"
+            className="brand-logo"
+          />
+
+          <div>
+            <span className="brand-kicker">
+              PERSONAL PERFORMANCE
+            </span>
+
+            <h1>Azur</h1>
+          </div>
         </div>
 
         <nav>
-          {nav.map(([Icon, label]) => (
-            <button className={activeNav === label ? 'nav-item active' : 'nav-item'} key={label} onClick={() => setActiveNav(label)}>
-              <Icon size={19} /><span>{label}</span>
+          {navigation.map(([Icon, label]) => (
+            <button
+              key={label}
+              className={
+                activeNav === label
+                  ? 'nav-item active'
+                  : 'nav-item'
+              }
+              onClick={() => setActiveNav(label)}
+            >
+              <Icon size={19} />
+              <span>{label}</span>
             </button>
           ))}
         </nav>
 
         <div className="sidebar-footer">
-          <span className="eyebrow">PRIMARY TARGET</span>
+          <span className="eyebrow">
+            PRIMARY TARGET
+          </span>
+
           <strong>Challenge Roth</strong>
+
           <small>4 July 2027 · Sub-9</small>
         </div>
       </aside>
 
       <main>
         <header className="topbar">
-          <div><span className="eyebrow">{week.label.toUpperCase()} · {week.phase.toUpperCase()}</span><h2>{activeNav === 'Home' ? 'Good morning, Jay.' : activeNav}</h2><p>{activeNav === 'Calendar' ? 'Plan, lock and revise the week without losing the original version.' : 'Aerobic consistency + durability'}</p></div>
-          <div className="race-countdown"><span className="eyebrow">DAYS TO ROTH</span><strong>288</strong></div>
+          <div>
+            <span className="eyebrow">
+              WEEK 1 · BASE 1
+            </span>
+
+            <h2>
+              {activeNav === 'Home'
+                ? 'Good morning, Jay.'
+                : activeNav}
+            </h2>
+
+            <p>Aerobic consistency + durability</p>
+          </div>
+
+          <div className="race-countdown">
+            <span className="eyebrow">
+              DAYS TO ROTH
+            </span>
+
+            <strong>{daysToRoth}</strong>
+          </div>
         </header>
 
-        {activeNav === 'Home' && homeView()}
-        {activeNav === 'Calendar' && calendarView()}
-        {activeNav !== 'Home' && activeNav !== 'Calendar' && (
-          <section className="panel placeholder-view">
-            <img src="/brand/azur-logo.png" alt="Azur" />
-            <span className="eyebrow">CONNECTED MODULE</span>
-            <h3>{activeNav}</h3>
-            <p>This navigation route is now part of the working shell. Its prototype logic will be connected to the shared state next.</p>
-          </section>
-        )}
+        {activeNav === 'Home' && <HomeView />}
+        {activeNav === 'Calendar' && <CalendarView />}
+        {activeNav === 'Performance' && <PerformanceView />}
+        {activeNav === 'Recovery' && <RecoveryView />}
+        {activeNav === 'Races' && <RacesView />}
+        {activeNav === 'Benchmarks' && <BenchmarksView />}
+        {activeNav === 'Weekly Review' && <WeeklyReviewView />}
+        {activeNav === 'Data Sources' && <DataSourcesView />}
       </main>
     </div>
   );
