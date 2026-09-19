@@ -247,7 +247,23 @@ export function App() {
   const [decision, setDecision] = useState<
     'pending' | 'accepted' | 'rejected'
   >('pending');
+useEffect(() => {
+  supabase.auth.getSession().then(({ data }) => {
+    setIsAuthenticated(!!data.session);
+    setAuthReady(true);
+  });
 
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    setIsAuthenticated(!!session);
+    setAuthReady(true);
+  });
+
+  return () => {
+    subscription.unsubscribe();
+  };
+}, []);
   const selected =
     weekSessions.find((session) => session.id === selectedId) ||
     weekSessions[0];
