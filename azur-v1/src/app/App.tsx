@@ -244,6 +244,13 @@ export function App() {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [athleteName, setAthleteName] = useState('Athlete');
+  const [athleteProfile, setAthleteProfile] = useState({
+  ftp: null as number | null,
+  runThreshold: null as number | null,
+  swimThreshold: null as number | null,
+  weight: null as number | null,
+  targetWeight: null as number | null,
+});
   const [activeNav, setActiveNav] = useState('Home');
   const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
   const [selectedId, setSelectedId] = useState('tue-bike');
@@ -251,10 +258,12 @@ export function App() {
   const [decision, setDecision] = useState<
     'pending' | 'accepted' | 'rejected'
   >('pending');
-  async function loadAthleteProfile(userId: string) {
+async function loadAthleteProfile(userId: string) {
   const { data, error } = await supabase
     .from('athlete_profile')
-    .select('display_name')
+    .select(
+      'display_name, ftp_w, run_threshold_sec_per_km, swim_threshold_sec_per_100m, weight_kg, target_weight_kg'
+    )
     .eq('user_id', userId)
     .single();
 
@@ -266,6 +275,14 @@ export function App() {
   if (data?.display_name) {
     setAthleteName(data.display_name);
   }
+
+  setAthleteProfile({
+    ftp: data?.ftp_w ?? null,
+    runThreshold: data?.run_threshold_sec_per_km ?? null,
+    swimThreshold: data?.swim_threshold_sec_per_100m ?? null,
+    weight: data?.weight_kg ?? null,
+    targetWeight: data?.target_weight_kg ?? null,
+  });
 }
 useEffect(() => {
 supabase.auth.getSession().then(({ data }) => {
