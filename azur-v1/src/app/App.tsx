@@ -287,6 +287,16 @@ async function loadAthleteProfile(userId: string) {
   if (data?.display_name) {
     setAthleteName(data.display_name);
   }
+
+  setAthleteProfile({
+    ftp: data?.ftp_w ?? null,
+    runThreshold: data?.run_threshold_sec_per_km ?? null,
+    swimThreshold: data?.swim_threshold_sec_per_100m ?? null,
+    weight: data?.weight_kg ?? null,
+    targetWeight: data?.target_weight_kg ?? null,
+  });
+}
+
 async function loadPrimaryRace(userId: string) {
   const { data: athlete, error: athleteError } = await supabase
     .from('athlete_profile')
@@ -321,38 +331,31 @@ async function loadPrimaryRace(userId: string) {
     targetSplits: data.target_splits,
   });
 }
-  setAthleteProfile({
-    ftp: data?.ftp_w ?? null,
-    runThreshold: data?.run_threshold_sec_per_km ?? null,
-    swimThreshold: data?.swim_threshold_sec_per_100m ?? null,
-    weight: data?.weight_kg ?? null,
-    targetWeight: data?.target_weight_kg ?? null,
-  });
-}
+
 useEffect(() => {
-supabase.auth.getSession().then(({ data }) => {
-  setIsAuthenticated(!!data.session);
+  supabase.auth.getSession().then(({ data }) => {
+    setIsAuthenticated(!!data.session);
 
-if (data.session?.user) {
-  loadAthleteProfile(data.session.user.id);
-  loadPrimaryRace(data.session.user.id);
-}
+    if (data.session?.user) {
+      loadAthleteProfile(data.session.user.id);
+      loadPrimaryRace(data.session.user.id);
+    }
 
-  setAuthReady(true);
-});
+    setAuthReady(true);
+  });
 
   const {
     data: { subscription },
-  } supabase.auth.onAuthStateChange((_event, session) => {
-  setIsAuthenticated(!!session);
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    setIsAuthenticated(!!session);
 
-if (session?.user) {
-  loadAthleteProfile(session.user.id);
-  loadPrimaryRace(session.user.id);
-}
+    if (session?.user) {
+      loadAthleteProfile(session.user.id);
+      loadPrimaryRace(session.user.id);
+    }
 
-  setAuthReady(true);
-});
+    setAuthReady(true);
+  });
 
   return () => {
     subscription.unsubscribe();
