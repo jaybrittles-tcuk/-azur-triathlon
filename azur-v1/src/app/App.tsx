@@ -925,31 +925,59 @@ supabase.auth.getSession().then(({ data }) => {
   function BenchmarksView() {
     return (
       <>
-        <section className="hero-grid">
-          <Metric
-            label="BIKE FTP"
-            value="315 W"
-            hint="4.38 W/kg at 72 kg"
-          />
+<section className="hero-grid">
+  <Metric
+    label="BIKE FTP"
+    value={
+      athleteProfile.ftp
+        ? `${athleteProfile.ftp} W`
+        : '—'
+    }
+    hint={
+      athleteProfile.ftp && athleteProfile.weight
+        ? `${(athleteProfile.ftp / athleteProfile.weight).toFixed(2)} W/kg`
+        : 'Current FTP'
+    }
+  />
 
-          <Metric
-            label="RUN THRESHOLD"
-            value="3:27/km"
-            hint="Current threshold"
-          />
+  <Metric
+    label="RUN THRESHOLD"
+    value={
+      athleteProfile.runThreshold
+        ? `${Math.floor(athleteProfile.runThreshold / 60)}:${String(
+            athleteProfile.runThreshold % 60
+          ).padStart(2, '0')}/km`
+        : '—'
+    }
+    hint="Current threshold"
+  />
 
-          <Metric
-            label="SWIM THRESHOLD"
-            value="1:30/100m"
-            hint="Current benchmark"
-          />
+  <Metric
+    label="SWIM THRESHOLD"
+    value={
+      athleteProfile.swimThreshold
+        ? `${Math.floor(athleteProfile.swimThreshold / 60)}:${String(
+            athleteProfile.swimThreshold % 60
+          ).padStart(2, '0')}/100m`
+        : '—'
+    }
+    hint="Current benchmark"
+  />
 
-          <Metric
-            label="BODY WEIGHT"
-            value="72 kg"
-            hint="Roth target: 70 kg"
-          />
-        </section>
+  <Metric
+    label="BODY WEIGHT"
+    value={
+      athleteProfile.weight
+        ? `${athleteProfile.weight} kg`
+        : '—'
+    }
+    hint={
+      athleteProfile.targetWeight
+        ? `Target: ${athleteProfile.targetWeight} kg`
+        : 'Current weight'
+    }
+  />
+</section>
 
         <section className="panel">
           <div className="section-heading">
