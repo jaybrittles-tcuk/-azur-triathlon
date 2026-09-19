@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Activity,
+import { supabase } from '../lib/supabase';  Activity,
   AlertTriangle,
   CalendarDays,
   CheckCircle2,
