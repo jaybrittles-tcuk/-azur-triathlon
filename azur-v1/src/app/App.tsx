@@ -251,11 +251,32 @@ export function App() {
   const [decision, setDecision] = useState<
     'pending' | 'accepted' | 'rejected'
   >('pending');
+  async function loadAthleteProfile(userId: string) {
+  const { data, error } = await supabase
+    .from('athlete_profile')
+    .select('display_name')
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    console.error('Unable to load athlete profile:', error);
+    return;
+  }
+
+  if (data?.display_name) {
+    setAthleteName(data.display_name);
+  }
+}
 useEffect(() => {
-  supabase.auth.getSession().then(({ data }) => {
-    setIsAuthenticated(!!data.session);
-    setAuthReady(true);
-  });
+supabase.auth.getSession().then(({ data }) => {
+  setIsAuthenticated(!!data.session);
+
+  if (data.session?.user) {
+    loadAthleteProfile(data.session.user.id);
+  }
+
+  setAuthReady(true);
+});
 
   const {
     data: { subscription },
