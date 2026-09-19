@@ -1004,7 +1004,11 @@ supabase.auth.getSession().then(({ data }) => {
 
             <div>
               <strong>Bike FTP</strong>
-              <span>315 W</span>
+              <span>
+  {athleteProfile.ftp
+    ? `${athleteProfile.ftp} W`
+    : '—'}
+</span>
               <span className="good-text">
                 Maintain / build
               </span>
@@ -1015,7 +1019,13 @@ supabase.auth.getSession().then(({ data }) => {
 
             <div>
               <strong>Run threshold</strong>
-              <span>3:27/km</span>
+              <span>
+  {athleteProfile.runThreshold
+    ? `${Math.floor(athleteProfile.runThreshold / 60)}:${String(
+        athleteProfile.runThreshold % 60
+      ).padStart(2, '0')}/km`
+    : '—'}
+</span>
               <span className="good-text">Maintain</span>
               <small>
                 Bigger opportunity exists in long-course durability.
@@ -1024,7 +1034,13 @@ supabase.auth.getSession().then(({ data }) => {
 
             <div>
               <strong>Swim threshold</strong>
-              <span>1:30/100m</span>
+              <span>
+  {athleteProfile.swimThreshold
+    ? `${Math.floor(athleteProfile.swimThreshold / 60)}:${String(
+        athleteProfile.swimThreshold % 60
+      ).padStart(2, '0')}/100m`
+    : '—'}
+</span>
               <span>Build economy</span>
               <small>
                 Improve repeatability and relaxed aerobic speed.
@@ -1033,7 +1049,11 @@ supabase.auth.getSession().then(({ data }) => {
 
             <div>
               <strong>Weight</strong>
-              <span>72 kg</span>
+              <span>
+  {athleteProfile.weight
+    ? `${athleteProfile.weight} kg`
+    : '—'}
+</span>
               <span>Context only</span>
               <small>
                 Track trend without compromising recovery.
