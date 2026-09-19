@@ -1172,8 +1172,6 @@ useEffect(() => {
     );
   }
 
-  return (
-    function DataSourcesView() {
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
 
