@@ -239,10 +239,12 @@ function sportName(sport: Sport) {
 export function App() {
   const [authReady, setAuthReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-const [email, setEmail] = useState('');
-const [password, setPassword] = useState('');
-const [authError, setAuthError] = useState('');
-const [authLoading, setAuthLoading] = useState(false);  const [activeNav, setActiveNav] = useState('Home');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [athleteName, setAthleteName] = useState('Athlete');
+  const [activeNav, setActiveNav] = useState('Home');
   const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
   const [selectedId, setSelectedId] = useState('tue-bike');
   const [weekVersion, setWeekVersion] = useState(1);
