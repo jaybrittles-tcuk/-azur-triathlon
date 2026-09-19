@@ -333,9 +333,10 @@ useEffect(() => {
 supabase.auth.getSession().then(({ data }) => {
   setIsAuthenticated(!!data.session);
 
-  if (data.session?.user) {
-    loadAthleteProfile(data.session.user.id);
-  }
+if (data.session?.user) {
+  loadAthleteProfile(data.session.user.id);
+  loadPrimaryRace(data.session.user.id);
+}
 
   setAuthReady(true);
 });
@@ -345,9 +346,10 @@ supabase.auth.getSession().then(({ data }) => {
   } supabase.auth.onAuthStateChange((_event, session) => {
   setIsAuthenticated(!!session);
 
-  if (session?.user) {
-    loadAthleteProfile(session.user.id);
-  }
+if (session?.user) {
+  loadAthleteProfile(session.user.id);
+  loadPrimaryRace(session.user.id);
+}
 
   setAuthReady(true);
 });
