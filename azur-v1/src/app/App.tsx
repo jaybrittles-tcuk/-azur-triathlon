@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+
 import {
-import { supabase } from '../lib/supabase';  Activity,
+  Activity,
   AlertTriangle,
   CalendarDays,
   CheckCircle2,
@@ -16,6 +17,9 @@ import { supabase } from '../lib/supabase';  Activity,
   TrendingUp,
   Unlock,
 } from 'lucide-react';
+
+import type { PlannedSession, Sport } from '../domain/types';
+import { supabase } from '../lib/supabase';
 
 import type { PlannedSession, Sport } from '../domain/types';
 
