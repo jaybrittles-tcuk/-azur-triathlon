@@ -237,6 +237,9 @@ function sportName(sport: Sport) {
 }
 
 export function App() {
+  const [authReady, setAuthReady] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const [activeNav, setActiveNav] = useState('Home');
   const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
   const [selectedId, setSelectedId] = useState('tue-bike');
