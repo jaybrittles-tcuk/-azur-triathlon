@@ -239,8 +239,10 @@ function sportName(sport: Sport) {
 export function App() {
   const [authReady, setAuthReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const [activeNav, setActiveNav] = useState('Home');
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const [authError, setAuthError] = useState('');
+const [authLoading, setAuthLoading] = useState(false);  const [activeNav, setActiveNav] = useState('Home');
   const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
   const [selectedId, setSelectedId] = useState('tue-bike');
   const [weekVersion, setWeekVersion] = useState(1);
@@ -1171,6 +1173,106 @@ useEffect(() => {
   }
 
   return (
+    function DataSourcesView() {
+  return (
+    <>
+      ...
+    </>
+  );
+}
+
+async function handleLogin(event: React.FormEvent) {
+  event.preventDefault();
+
+  setAuthLoading(true);
+  setAuthError('');
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    setAuthError(error.message);
+  }
+
+  setAuthLoading(false);
+}
+
+if (!authReady) {
+  return (
+    <div className="login-screen">
+      <div className="login-card">
+        <img
+          src="/brand/azur-logo.png"
+          alt="Azur Triathlon Coaching"
+          className="login-logo"
+        />
+
+        <p>Loading Azur...</p>
+      </div>
+    </div>
+  );
+}
+
+if (!isAuthenticated) {
+  return (
+    <div className="login-screen">
+      <form className="login-card" onSubmit={handleLogin}>
+        <img
+          src="/brand/azur-logo.png"
+          alt="Azur Triathlon Coaching"
+          className="login-logo"
+        />
+
+        <span className="eyebrow">ATHLETE LOGIN</span>
+
+        <h2>Welcome to Azur</h2>
+
+        <p>
+          Sign in to access your training, performance and recovery data.
+        </p>
+
+        <label>
+          <span>Email</span>
+
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </label>
+
+        <label>
+          <span>Password</span>
+
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+        </label>
+
+        {authError && (
+          <div className="login-error">{authError}</div>
+        )}
+
+        <button
+          className="primary-button"
+          type="submit"
+          disabled={authLoading}
+        >
+          {authLoading ? 'Signing in...' : 'Sign in'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+return (
+  <div className="app-shell">
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand-block">
