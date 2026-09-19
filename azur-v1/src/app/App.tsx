@@ -280,10 +280,15 @@ supabase.auth.getSession().then(({ data }) => {
 
   const {
     data: { subscription },
-  } = supabase.auth.onAuthStateChange((_event, session) => {
-    setIsAuthenticated(!!session);
-    setAuthReady(true);
-  });
+  } supabase.auth.onAuthStateChange((_event, session) => {
+  setIsAuthenticated(!!session);
+
+  if (session?.user) {
+    loadAthleteProfile(session.user.id);
+  }
+
+  setAuthReady(true);
+});
 
   return () => {
     subscription.unsubscribe();
