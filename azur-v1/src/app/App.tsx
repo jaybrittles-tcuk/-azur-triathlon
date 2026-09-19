@@ -251,6 +251,18 @@ export function App() {
   weight: null as number | null,
   targetWeight: null as number | null,
 });
+  const [primaryRace, setPrimaryRace] = useState({
+  name: '',
+  raceDate: '',
+  priority: '',
+  location: '',
+  targetSplits: null as null | {
+    swim?: string;
+    bike?: string;
+    run?: string;
+    target_total?: string;
+  },
+});
   const [activeNav, setActiveNav] = useState('Home');
   const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
   const [selectedId, setSelectedId] = useState('tue-bike');
