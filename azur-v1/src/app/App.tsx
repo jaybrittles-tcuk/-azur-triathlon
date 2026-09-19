@@ -1318,11 +1318,11 @@ useEffect(() => {
               WEEK 1 · BASE 1
             </span>
 
-            <h2>
-              {activeNav === 'Home'
-                ? 'Good morning, Jay.'
-                : activeNav}
-            </h2>
+<h2>
+  {activeNav === 'Home'
+    ? `Good morning, ${athleteName}.`
+    : activeNav}
+</h2>
 
             <p>Aerobic consistency + durability</p>
           </div>
