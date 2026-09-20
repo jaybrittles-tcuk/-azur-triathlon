@@ -1152,8 +1152,7 @@ const daysToRace = primaryRace.raceDate
   }
 
   function WeeklyReviewView() {
-    return (
-      function ProfileView() {
+function ProfileView() {
   return (
     <>
       <section className="panel">
@@ -1169,20 +1168,22 @@ const daysToRace = primaryRace.raceDate
             )}
           </div>
 
-<div className="profile-header-copy">
-  <span className="eyebrow">ATHLETE PROFILE</span>
-  <h3>{athleteName}</h3>
-  <p className="panel-note">
-    Your current Azur athlete profile and performance settings.
-  </p>
-</div>
+          <div className="profile-header-copy">
+            <span className="eyebrow">ATHLETE PROFILE</span>
+            <h3>{athleteName}</h3>
+            <p className="panel-note">
+              Your current Azur athlete profile and performance settings.
+            </p>
+          </div>
 
-<button
-  className="profile-edit-button"
-  onClick={() => setProfileEditing((current) => !current)}
->
-  {profileEditing ? 'Cancel editing' : 'Edit profile'}
-</button>
+          <button
+            className="profile-edit-button"
+            onClick={() =>
+              setProfileEditing((current) => !current)
+            }
+          >
+            {profileEditing ? 'Cancel editing' : 'Edit profile'}
+          </button>
         </div>
       </section>
 
@@ -1298,108 +1299,110 @@ const daysToRace = primaryRace.raceDate
     </>
   );
 }
-      <>
-        <section className="hero-grid">
-          <Metric
-            label="PLANNED VOLUME"
-            value={`${totalHours.toFixed(1)} h`}
-            hint="Current working week"
-          />
 
-          <Metric
-            label="KEY SESSIONS"
-            value="5"
-            hint="Priority 1 sessions"
-          />
+function WeeklyReviewView() {
+  return (
+    <>
+      <section className="hero-grid">
+        <Metric
+          label="PLANNED VOLUME"
+          value={`${totalHours.toFixed(1)} h`}
+          hint="Current working week"
+        />
 
-          <Metric
-            label="RACE READINESS"
-            value="62%"
-            hint="+2 points"
-          />
+        <Metric
+          label="KEY SESSIONS"
+          value="5"
+          hint="Priority 1 sessions"
+        />
 
-          <Metric
-            label="COACH DECISION"
-            value="CONTINUE"
-            hint="Current recommendation"
-          />
+        <Metric
+          label="RACE READINESS"
+          value="62%"
+          hint="+2 points"
+        />
+
+        <Metric
+          label="COACH DECISION"
+          value="CONTINUE"
+          hint="Current recommendation"
+        />
+      </section>
+
+      <div className="two-column">
+        <section className="panel">
+          <span className="eyebrow">IMPROVING</span>
+          <h3>Bike durability</h3>
+
+          <p className="panel-note">
+            Stable power late in longer work is improving. Continue
+            extending controlled race-relevant output.
+          </p>
         </section>
 
-        <div className="two-column">
-          <section className="panel">
-            <span className="eyebrow">IMPROVING</span>
-            <h3>Bike durability</h3>
+        <section className="panel">
+          <span className="eyebrow">LAGGING</span>
+          <h3>Run durability</h3>
 
-            <p className="panel-note">
-              Stable power late in longer work is improving. Continue
-              extending controlled race-relevant output.
-            </p>
-          </section>
+          <p className="panel-note">
+            Threshold is strong enough. Long-course resilience remains
+            the largest current opportunity.
+          </p>
+        </section>
+      </div>
 
-          <section className="panel">
-            <span className="eyebrow">LAGGING</span>
-            <h3>Run durability</h3>
+      <section className="panel coach-review">
+        <span className="eyebrow">
+          COACH RECOMMENDATION
+        </span>
 
-            <p className="panel-note">
-              Threshold is strong enough. Long-course resilience remains
-              the largest current opportunity.
-            </p>
-          </section>
+        <h3>Continue the current load</h3>
+
+        <p>
+          <strong>Why:</strong> recovery markers are stable and
+          current training stress remains appropriate for Base 1.
+        </p>
+
+        <p>
+          <strong>Long-term benefit:</strong> consistent aerobic work
+          now gives us more room to introduce race-specific stress
+          later without forcing large jumps in load.
+        </p>
+
+        <div className="decision-actions">
+          <button
+            className={
+              decision === 'accepted'
+                ? 'decision active'
+                : 'decision'
+            }
+            onClick={() => setDecision('accepted')}
+          >
+            Accept recommendation
+          </button>
+
+          <button
+            className={
+              decision === 'rejected'
+                ? 'decision reject active'
+                : 'decision reject'
+            }
+            onClick={() => setDecision('rejected')}
+          >
+            Keep plan manually
+          </button>
         </div>
 
-        <section className="panel coach-review">
-          <span className="eyebrow">
-            COACH RECOMMENDATION
-          </span>
-
-          <h3>Continue the current load</h3>
-
-          <p>
-            <strong>Why:</strong> recovery markers are stable and
-            current training stress remains appropriate for Base 1.
-          </p>
-
-          <p>
-            <strong>Long-term benefit:</strong> consistent aerobic work
-            now gives us more room to introduce race-specific stress
-            later without forcing large jumps in load.
-          </p>
-
-          <div className="decision-actions">
-            <button
-              className={
-                decision === 'accepted'
-                  ? 'decision active'
-                  : 'decision'
-              }
-              onClick={() => setDecision('accepted')}
-            >
-              Accept recommendation
-            </button>
-
-            <button
-              className={
-                decision === 'rejected'
-                  ? 'decision reject active'
-                  : 'decision reject'
-              }
-              onClick={() => setDecision('rejected')}
-            >
-              Keep plan manually
-            </button>
-          </div>
-
-          {decision !== 'pending' && (
-            <small className="decision-result">
-              Decision recorded: {decision}. Azur never changes the
-              training plan without your approval.
-            </small>
-          )}
-        </section>
-      </>
-    );
-  }
-
+        {decision !== 'pending' && (
+          <small className="decision-result">
+            Decision recorded: {decision}. Azur never changes the
+            training plan without your approval.
+          </small>
+        )}
+      </section>
+    </>
+  );
+}
   function DataSourcesView() {
     return (
       <>
