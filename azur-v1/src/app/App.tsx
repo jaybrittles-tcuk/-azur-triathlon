@@ -246,6 +246,7 @@ export function App() {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [athleteName, setAthleteName] = useState('Athlete');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [accountOpen, setAccountOpen] = useState(false);
   const [athleteProfile, setAthleteProfile] = useState({
   ftp: null as number | null,
@@ -276,9 +277,9 @@ export function App() {
 async function loadAthleteProfile(userId: string) {
   const { data, error } = await supabase
     .from('athlete_profile')
-    .select(
-      'display_name, ftp_w, run_threshold_sec_per_km, swim_threshold_sec_per_100m, weight_kg, target_weight_kg'
-    )
+.select(
+  'display_name, avatar_url, ftp_w, run_threshold_sec_per_km, swim_threshold_sec_per_100m, weight_kg, target_weight_kg'
+)
     .eq('user_id', userId)
     .single();
 
