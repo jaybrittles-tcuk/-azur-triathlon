@@ -71,12 +71,18 @@ button {
 }
 
 .sidebar {
-  background: var(--navy);
+  background:
+    linear-gradient(
+      180deg,
+      #071525 0%,
+      #0a1c30 100%
+    );
   color: #fff;
-  padding: 24px 18px;
+  padding: 26px 18px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  box-shadow: 12px 0 40px rgba(7, 21, 37, 0.08);
 }
 
 .brand-block {
@@ -117,13 +123,17 @@ nav {
   color: #9fb0c1;
   background: transparent;
   border: 0;
-  border-radius: 12px;
-  padding: 11px 12px;
+  border-radius: 14px;
+  padding: 12px 13px;
   display: flex;
   align-items: center;
   gap: 11px;
   text-align: left;
   font-weight: 650;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .nav-item:hover,
