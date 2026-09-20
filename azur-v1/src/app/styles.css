@@ -1131,10 +1131,10 @@ main {
     border-radius: 50%;
   }
 
-  .account-avatar {
-    width: 42px;
-    height: 42px;
-  }
+.account-avatar {
+  width: 50px;
+  height: 50px;
+}
 }
 .account-avatar img {
   width: 100%;
