@@ -1722,12 +1722,12 @@ async function handleProfileSave() {
     ftp_w: profileDraft.ftp
       ? Number(profileDraft.ftp)
       : null,
-    run_threshold_sec_per_km: profileDraft.runThreshold
-      ? Number(profileDraft.runThreshold)
-      : null,
-    swim_threshold_sec_per_100m: profileDraft.swimThreshold
-      ? Number(profileDraft.swimThreshold)
-      : null,
+run_threshold_sec_per_km: profileDraft.runThreshold
+  ? parsePaceInput(profileDraft.runThreshold)
+  : null,
+swim_threshold_sec_per_100m: profileDraft.swimThreshold
+  ? parsePaceInput(profileDraft.swimThreshold)
+  : null,
     weight_kg: profileDraft.weight
       ? Number(profileDraft.weight)
       : null,
