@@ -291,8 +291,9 @@ async function loadAthleteProfile(userId: string) {
   if (data?.display_name) {
     setAthleteName(data.display_name);
   }
-
-  setAthleteProfile({
+if (data?.avatar_url) {
+  setAvatarUrl(data.avatar_url);
+}  setAthleteProfile({
     ftp: data?.ftp_w ?? null,
     runThreshold: data?.run_threshold_sec_per_km ?? null,
     swimThreshold: data?.swim_threshold_sec_per_100m ?? null,
