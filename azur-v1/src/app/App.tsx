@@ -1211,60 +1211,132 @@ function ProfileView() {
           <span className="eyebrow">PERFORMANCE PROFILE</span>
           <h3>Current thresholds</h3>
 
-          <div className="profile-settings-list">
-            <div>
-              <span>Bike FTP</span>
-              <strong>
-                {athleteProfile.ftp
-                  ? `${athleteProfile.ftp} W`
-                  : '—'}
-              </strong>
-            </div>
+<div className="profile-settings-list">
+  <div>
+    <span>Bike FTP</span>
 
-            <div>
-              <span>Run threshold</span>
-              <strong>
-                {athleteProfile.runThreshold
-                  ? `${Math.floor(
-                      athleteProfile.runThreshold / 60,
-                    )}:${String(
-                      athleteProfile.runThreshold % 60,
-                    ).padStart(2, '0')}/km`
-                  : '—'}
-              </strong>
-            </div>
+    {profileEditing ? (
+      <input
+        type="number"
+        value={profileDraft.ftp}
+        onChange={(event) =>
+          setProfileDraft({
+            ...profileDraft,
+            ftp: event.target.value,
+          })
+        }
+      />
+    ) : (
+      <strong>
+        {athleteProfile.ftp
+          ? `${athleteProfile.ftp} W`
+          : '—'}
+      </strong>
+    )}
+  </div>
 
-            <div>
-              <span>Swim threshold</span>
-              <strong>
-                {athleteProfile.swimThreshold
-                  ? `${Math.floor(
-                      athleteProfile.swimThreshold / 60,
-                    )}:${String(
-                      athleteProfile.swimThreshold % 60,
-                    ).padStart(2, '0')}/100m`
-                  : '—'}
-              </strong>
-            </div>
+  <div>
+    <span>Run threshold</span>
 
-            <div>
-              <span>Current weight</span>
-              <strong>
-                {athleteProfile.weight
-                  ? `${athleteProfile.weight} kg`
-                  : '—'}
-              </strong>
-            </div>
+    {profileEditing ? (
+      <input
+        type="number"
+        value={profileDraft.runThreshold}
+        onChange={(event) =>
+          setProfileDraft({
+            ...profileDraft,
+            runThreshold: event.target.value,
+          })
+        }
+      />
+    ) : (
+      <strong>
+        {athleteProfile.runThreshold
+          ? `${Math.floor(
+              athleteProfile.runThreshold / 60,
+            )}:${String(
+              athleteProfile.runThreshold % 60,
+            ).padStart(2, '0')}/km`
+          : '—'}
+      </strong>
+    )}
+  </div>
 
-            <div>
-              <span>Target weight</span>
-              <strong>
-                {athleteProfile.targetWeight
-                  ? `${athleteProfile.targetWeight} kg`
-                  : '—'}
-              </strong>
-            </div>
-          </div>
+  <div>
+    <span>Swim threshold</span>
+
+    {profileEditing ? (
+      <input
+        type="number"
+        value={profileDraft.swimThreshold}
+        onChange={(event) =>
+          setProfileDraft({
+            ...profileDraft,
+            swimThreshold: event.target.value,
+          })
+        }
+      />
+    ) : (
+      <strong>
+        {athleteProfile.swimThreshold
+          ? `${Math.floor(
+              athleteProfile.swimThreshold / 60,
+            )}:${String(
+              athleteProfile.swimThreshold % 60,
+            ).padStart(2, '0')}/100m`
+          : '—'}
+      </strong>
+    )}
+  </div>
+
+  <div>
+    <span>Current weight</span>
+
+    {profileEditing ? (
+      <input
+        type="number"
+        step="0.1"
+        value={profileDraft.weight}
+        onChange={(event) =>
+          setProfileDraft({
+            ...profileDraft,
+            weight: event.target.value,
+          })
+        }
+      />
+    ) : (
+      <strong>
+        {athleteProfile.weight
+          ? `${athleteProfile.weight} kg`
+          : '—'}
+      </strong>
+    )}
+  </div>
+
+  <div>
+    <span>Target weight</span>
+
+    {profileEditing ? (
+      <input
+        type="number"
+        step="0.1"
+        value={profileDraft.targetWeight}
+        onChange={(event) =>
+          setProfileDraft({
+            ...profileDraft,
+            targetWeight: event.target.value,
+          })
+        }
+      />
+    ) : (
+      <strong>
+        {athleteProfile.targetWeight
+          ? `${athleteProfile.targetWeight} kg`
+          : '—'}
+      </strong>
+    )}
+  </div>
+</div>
         </section>
 
         <section className="panel">
