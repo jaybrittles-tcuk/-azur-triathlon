@@ -291,8 +291,8 @@ main {
 }
 
 .panel {
-  margin-top: 16px;
-  padding: 19px;
+  margin-top: 18px;
+  padding: 22px;
 }
 
 .section-heading {
@@ -304,8 +304,11 @@ main {
 
 .section-heading h3,
 .panel h3 {
-  margin: 4px 0 0;
-  font-size: 20px;
+  margin: 5px 0 0;
+  font-size: 21px;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--navy);
 }
 
 .status-pill,
