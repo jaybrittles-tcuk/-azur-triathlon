@@ -1152,6 +1152,144 @@ const daysToRace = primaryRace.raceDate
 
   function WeeklyReviewView() {
     return (
+      function ProfileView() {
+  return (
+    <>
+      <section className="panel">
+        <div className="profile-header">
+          <div className="profile-avatar-large">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={`${athleteName} profile`}
+              />
+            ) : (
+              <User size={34} />
+            )}
+          </div>
+
+          <div>
+            <span className="eyebrow">ATHLETE PROFILE</span>
+            <h3>{athleteName}</h3>
+            <p className="panel-note">
+              Your current Azur athlete profile and performance settings.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="two-column">
+        <section className="panel">
+          <span className="eyebrow">PERFORMANCE PROFILE</span>
+          <h3>Current thresholds</h3>
+
+          <div className="profile-settings-list">
+            <div>
+              <span>Bike FTP</span>
+              <strong>
+                {athleteProfile.ftp
+                  ? `${athleteProfile.ftp} W`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Run threshold</span>
+              <strong>
+                {athleteProfile.runThreshold
+                  ? `${Math.floor(
+                      athleteProfile.runThreshold / 60,
+                    )}:${String(
+                      athleteProfile.runThreshold % 60,
+                    ).padStart(2, '0')}/km`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Swim threshold</span>
+              <strong>
+                {athleteProfile.swimThreshold
+                  ? `${Math.floor(
+                      athleteProfile.swimThreshold / 60,
+                    )}:${String(
+                      athleteProfile.swimThreshold % 60,
+                    ).padStart(2, '0')}/100m`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Current weight</span>
+              <strong>
+                {athleteProfile.weight
+                  ? `${athleteProfile.weight} kg`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Target weight</span>
+              <strong>
+                {athleteProfile.targetWeight
+                  ? `${athleteProfile.targetWeight} kg`
+                  : '—'}
+              </strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="panel">
+          <span className="eyebrow">PRIMARY TARGET</span>
+          <h3>{primaryRace.name || 'No race selected'}</h3>
+
+          <div className="profile-settings-list">
+            <div>
+              <span>Priority</span>
+              <strong>
+                {primaryRace.priority
+                  ? `${primaryRace.priority} Race`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Location</span>
+              <strong>{primaryRace.location || '—'}</strong>
+            </div>
+
+            <div>
+              <span>Race date</span>
+              <strong>
+                {primaryRace.raceDate
+                  ? new Date(
+                      primaryRace.raceDate,
+                    ).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>Target time</span>
+              <strong>
+                {primaryRace.targetSplits?.target_total
+                  ? primaryRace.targetSplits.target_total.slice(
+                      0,
+                      5,
+                    )
+                  : '—'}
+              </strong>
+            </div>
+          </div>
+        </section>
+      </div>
+    </>
+  );
+}
       <>
         <section className="hero-grid">
           <Metric
@@ -1667,8 +1805,9 @@ async function handleSignOut() {
         {activeNav === 'Performance' && <PerformanceView />}
         {activeNav === 'Recovery' && <RecoveryView />}
         {activeNav === 'Races' && <RacesView />}
-        {activeNav === 'Benchmarks' && <BenchmarksView />}
-        {activeNav === 'Weekly Review' && <WeeklyReviewView />}
+{activeNav === 'Benchmarks' && <BenchmarksView />}
+{activeNav === 'Profile' && <ProfileView />}
+{activeNav === 'Weekly Review' && <WeeklyReviewView />}
         {activeNav === 'Data Sources' && <DataSourcesView />}
       </main>
     </div>
