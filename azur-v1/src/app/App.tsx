@@ -250,6 +250,13 @@ export function App() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [profileEditing, setProfileEditing] = useState(false);
+  const [profileDraft, setProfileDraft] = useState({
+  ftp: '',
+  runThreshold: '',
+  swimThreshold: '',
+  weight: '',
+  targetWeight: '',
+});
   const [athleteProfile, setAthleteProfile] = useState({
   ftp: null as number | null,
   runThreshold: null as number | null,
