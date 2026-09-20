@@ -1522,13 +1522,48 @@ async function handleSignOut() {
             <p>Aerobic consistency + durability</p>
           </div>
 
-          <div className="race-countdown">
-<span className="eyebrow">
-  DAYS TO {primaryRace.name ? primaryRace.name.toUpperCase() : 'A RACE'}
-</span>
+<div className="topbar-actions">
+  <div className="race-countdown">
+    <span className="eyebrow">
+      DAYS TO{' '}
+      {primaryRace.name
+        ? primaryRace.name.toUpperCase()
+        : 'A RACE'}
+    </span>
 
-<strong>{daysToRace}</strong>
-          </div>
+    <strong>{daysToRace}</strong>
+  </div>
+
+  <div className="account-menu">
+    <button
+      className="account-button"
+      onClick={() => setAccountOpen((current) => !current)}
+    >
+      <div className="account-avatar">
+        <User size={20} />
+      </div>
+
+      <div className="account-copy">
+        <strong>{athleteName}</strong>
+        <small>Athlete</small>
+      </div>
+    </button>
+
+    {accountOpen && (
+      <div className="account-dropdown">
+        <div className="account-dropdown-head">
+          <strong>{athleteName}</strong>
+          <small>Azur athlete account</small>
+        </div>
+
+        <button onClick={handleSignOut}>
+          <LogOut size={16} />
+          Sign out
+        </button>
+      </div>
+    )}
+  </div>
+</div>
         </header>
 
         {activeNav === 'Home' && <HomeView />}
