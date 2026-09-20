@@ -1625,6 +1625,16 @@ async function handleSignOut() {
       <small>Azur athlete account</small>
     </div>
 
+    <button
+      onClick={() => {
+        setActiveNav('Profile');
+        setAccountOpen(false);
+      }}
+    >
+      <User size={16} />
+      Profile & settings
+    </button>
+
     <label className="avatar-upload-button">
       <User size={16} />
 
