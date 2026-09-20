@@ -908,11 +908,15 @@ const daysToRace = primaryRace.raceDate
             <p>Primary full-distance target · Sub-9 hours</p>
           </div>
 
-          <div className="race-total">
-            <span>Target</span>
-            <strong>&lt; 9:00</strong>
-            <small>{daysToRace} days remaining</small>
-          </div>
+<div className="race-total">
+  <span>Target</span>
+  <strong>
+    {primaryRace.targetSplits?.target_total
+      ? primaryRace.targetSplits.target_total.slice(0, 5)
+      : '—'}
+  </strong>
+  <small>{daysToRace} days remaining</small>
+</div>
         </section>
 
         <section className="panel">
@@ -925,7 +929,11 @@ const daysToRace = primaryRace.raceDate
           <div className="race-splits">
             <div>
               <span>Swim</span>
-              <strong>1:00</strong>
+           <strong>
+  {primaryRace.targetSplits?.swim
+    ? primaryRace.targetSplits.swim.slice(0, 5)
+    : '—'}
+</strong>
               <small>
                 Controlled start and efficient rhythm.
               </small>
@@ -933,7 +941,11 @@ const daysToRace = primaryRace.raceDate
 
             <div>
               <span>Bike</span>
-              <strong>4:30</strong>
+              <strong>
+  {primaryRace.targetSplits?.bike
+    ? primaryRace.targetSplits.bike.slice(0, 5)
+    : '—'}
+</strong>
               <small>
                 Race-relevant range around 221–239 W.
               </small>
@@ -941,7 +953,11 @@ const daysToRace = primaryRace.raceDate
 
             <div>
               <span>Run</span>
-              <strong>2:55</strong>
+            <strong>
+  {primaryRace.targetSplits?.run
+    ? primaryRace.targetSplits.run.slice(0, 5)
+    : '—'}
+</strong>
               <small>
                 Durability and late-race control.
               </small>
