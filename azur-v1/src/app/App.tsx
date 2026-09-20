@@ -250,6 +250,8 @@ export function App() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [profileEditing, setProfileEditing] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+const [profileSaveMessage, setProfileSaveMessage] = useState('');
   function formatPaceInput(seconds: number | null) {
   if (!seconds) return '';
 
