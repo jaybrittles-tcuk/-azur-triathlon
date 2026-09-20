@@ -889,11 +889,21 @@ const daysToRace = primaryRace.raceDate
       <>
         <section className="panel race-hero">
           <div>
-            <span className="eyebrow">
-              A RACE · 4 JULY 2027
-            </span>
+<span className="eyebrow">
+  {primaryRace.priority || 'A'} RACE ·{' '}
+  {primaryRace.raceDate
+    ? new Date(primaryRace.raceDate).toLocaleDateString(
+        'en-GB',
+        {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        },
+      )
+    : '—'}
+</span>
 
-            <h3>Challenge Roth</h3>
+<h3>{primaryRace.name || 'Primary Race'}</h3>
 
             <p>Primary full-distance target · Sub-9 hours</p>
           </div>
