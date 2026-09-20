@@ -11,11 +11,13 @@ import {
   HeartPulse,
   Home,
   Lock,
+  LogOut,
   Medal,
   RefreshCw,
   Save,
   TrendingUp,
   Unlock,
+  User,
 } from 'lucide-react';
 
 import type { PlannedSession, Sport } from '../domain/types';
@@ -244,6 +246,7 @@ export function App() {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [athleteName, setAthleteName] = useState('Athlete');
+  const [accountOpen, setAccountOpen] = useState(false);
   const [athleteProfile, setAthleteProfile] = useState({
   ftp: null as number | null,
   runThreshold: null as number | null,
@@ -1361,7 +1364,12 @@ const daysToRace = primaryRace.raceDate
 
     setAuthLoading(false);
   }
+async function handleSignOut() {
+  await supabase.auth.signOut();
 
+  setAccountOpen(false);
+  setIsAuthenticated(false);
+}
   if (!authReady) {
     return (
       <div className="login-screen">
