@@ -1151,7 +1151,6 @@ const daysToRace = primaryRace.raceDate
     );
   }
 
-  function WeeklyReviewView() {
 function ProfileView() {
   return (
     <>
