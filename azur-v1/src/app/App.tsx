@@ -1613,7 +1613,6 @@ async function handleSignOut() {
   setAccountOpen(false);
   setIsAuthenticated(false);
 }
-  async function handleAvatarUpload(
  async function handleAvatarUpload(
   event: React.ChangeEvent<HTMLInputElement>,
 ) {
