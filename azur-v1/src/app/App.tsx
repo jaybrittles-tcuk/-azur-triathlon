@@ -1541,9 +1541,16 @@ async function handleSignOut() {
       className="account-button"
       onClick={() => setAccountOpen((current) => !current)}
     >
-      <div className="account-avatar">
-        <User size={20} />
-      </div>
+<div className="account-avatar">
+  {avatarUrl ? (
+    <img
+      src={avatarUrl}
+      alt={`${athleteName} profile`}
+    />
+  ) : (
+    <User size={20} />
+  )}
+</div>
 
       <div className="account-copy">
         <strong>{athleteName}</strong>
