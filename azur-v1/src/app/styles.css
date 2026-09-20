@@ -244,21 +244,25 @@ main {
 .panel:hover {
   border-color: rgba(15, 127, 229, 0.14);
   box-shadow: var(--shadow-md);
-}.metric-card {
-  padding: 18px;
+.metric-card {
+  padding: 20px;
 }
 
 .metric-card strong {
   display: block;
-  margin-top: 11px;
-  font-size: 32px;
-  letter-spacing: -.04em;
+  margin-top: 12px;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--navy);
 }
 
 .metric-card small {
   display: block;
-  margin-top: 7px;
+  margin-top: 9px;
   color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .readiness-panel {
