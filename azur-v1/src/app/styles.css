@@ -297,19 +297,28 @@ main {
 }
 
 .session-card {
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  padding: 13px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 14px;
   min-height: 132px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
   cursor: pointer;
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
 }
 
 .session-card:hover {
-  transform: translateY(-1px);
-  border-color: rgba(15,143,211,.35);
+  transform: translateY(-2px);
+  border-color: rgba(15, 127, 229, 0.22);
+  box-shadow: var(--shadow-md);
+}
 }
 
 .session-card .day {
