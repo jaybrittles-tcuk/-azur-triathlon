@@ -376,13 +376,16 @@ useEffect(() => {
 
   const totalHours = totalMinutes / 60;
 
-  const daysToRoth = Math.max(
-    0,
-    Math.ceil(
-      (new Date('2027-07-04').getTime() - new Date().getTime()) /
-        86400000,
-    ),
-  );
+const daysToRace = primaryRace.raceDate
+  ? Math.max(
+      0,
+      Math.ceil(
+        (new Date(primaryRace.raceDate).getTime() -
+          new Date().getTime()) /
+          86400000,
+      ),
+    )
+  : 0;
 
   const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
