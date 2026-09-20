@@ -1630,8 +1630,51 @@ async function handleSignOut() {
     setAvatarUploading(false);
     return;
   }
+async function handleProfileSave() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const fileExtension = file.name.split('.').pop() || 'jpg';
+  if (!user) return;
+
+  const updatedProfile = {
+    ftp_w: profileDraft.ftp
+      ? Number(profileDraft.ftp)
+      : null,
+    run_threshold_sec_per_km: profileDraft.runThreshold
+      ? Number(profileDraft.runThreshold)
+      : null,
+    swim_threshold_sec_per_100m: profileDraft.swimThreshold
+      ? Number(profileDraft.swimThreshold)
+      : null,
+    weight_kg: profileDraft.weight
+      ? Number(profileDraft.weight)
+      : null,
+    target_weight_kg: profileDraft.targetWeight
+      ? Number(profileDraft.targetWeight)
+      : null,
+  };
+
+  const { error } = await supabase
+    .from('athlete_profile')
+    .update(updatedProfile)
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error('Unable to update athlete profile:', error);
+    return;
+  }
+
+  setAthleteProfile({
+    ftp: updatedProfile.ftp_w,
+    runThreshold: updatedProfile.run_threshold_sec_per_km,
+    swimThreshold: updatedProfile.swim_threshold_sec_per_100m,
+    weight: updatedProfile.weight_kg,
+    targetWeight: updatedProfile.target_weight_kg,
+  });
+
+  setProfileEditing(false);
+}  const fileExtension = file.name.split('.').pop() || 'jpg';
   const filePath = `${user.id}/profile.${fileExtension}`;
 
   const { error: uploadError } = await supabase.storage
