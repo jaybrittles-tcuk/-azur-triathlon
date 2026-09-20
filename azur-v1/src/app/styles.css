@@ -1082,6 +1082,47 @@ nav {
 
   .editor-grid label.wide {
     grid-column: auto;
+    .calendar-layout {
+  display: block;
+}
+
+.calendar-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  overflow-x: visible;
+  padding: 0;
+}
+
+.calendar-day {
+  min-width: 0;
+  min-height: auto;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.calendar-day-head {
+  padding: 12px 14px;
+  background: var(--surface);
+}
+
+.day-stack {
+  padding: 10px;
+}
+
+.calendar-session {
+  border-radius: 14px;
+  padding: 13px;
+}
+
+.editor-panel {
+  position: static;
+  margin-top: 16px;
+  width: 100%;
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
+}
   }
 }
 
