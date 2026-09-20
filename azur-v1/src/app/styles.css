@@ -1048,9 +1048,27 @@ nav {
 
 .metric-card strong {
   font-size: 28px;
-}  .session-strip {
-    grid-template-columns: repeat(2, 1fr);
-  }
+}
+  .session-strip {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.session-card {
+  min-height: 145px;
+  padding: 15px;
+  border-radius: 16px;
+}
+
+.session-card strong {
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.session-card small {
+  font-size: 12px;
+  line-height: 1.4;
+}
 
   .editor-grid {
     grid-template-columns: 1fr;
