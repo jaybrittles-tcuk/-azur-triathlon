@@ -249,6 +249,7 @@ export function App() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [profileEditing, setProfileEditing] = useState(false);
   const [athleteProfile, setAthleteProfile] = useState({
   ftp: null as number | null,
   runThreshold: null as number | null,
@@ -1168,13 +1169,20 @@ const daysToRace = primaryRace.raceDate
             )}
           </div>
 
-          <div>
-            <span className="eyebrow">ATHLETE PROFILE</span>
-            <h3>{athleteName}</h3>
-            <p className="panel-note">
-              Your current Azur athlete profile and performance settings.
-            </p>
-          </div>
+<div className="profile-header-copy">
+  <span className="eyebrow">ATHLETE PROFILE</span>
+  <h3>{athleteName}</h3>
+  <p className="panel-note">
+    Your current Azur athlete profile and performance settings.
+  </p>
+</div>
+
+<button
+  className="profile-edit-button"
+  onClick={() => setProfileEditing((current) => !current)}
+>
+  {profileEditing ? 'Cancel editing' : 'Edit profile'}
+</button>
         </div>
       </section>
 
