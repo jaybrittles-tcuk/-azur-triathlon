@@ -1269,7 +1269,7 @@ swimThreshold:
 
     {profileEditing ? (
       <input
-        type="number"
+        type="text"
         value={profileDraft.runThreshold}
         onChange={(event) =>
           setProfileDraft({
@@ -1296,7 +1296,7 @@ swimThreshold:
 
     {profileEditing ? (
       <input
-        type="number"
+        type="text"
         value={profileDraft.swimThreshold}
         onChange={(event) =>
           setProfileDraft({
