@@ -1016,12 +1016,22 @@ nav {
   line-height: 1;
 }
 
-  .hero-grid,
-  .two-column {
-    grid-template-columns: 1fr;
-  }
+.hero-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
 
-  .session-strip {
+.two-column {
+  grid-template-columns: 1fr;
+}
+.metric-card {
+  min-height: 118px;
+  padding: 16px;
+}
+
+.metric-card strong {
+  font-size: 28px;
+}  .session-strip {
     grid-template-columns: repeat(2, 1fr);
   }
 
