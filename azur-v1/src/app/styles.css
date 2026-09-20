@@ -988,18 +988,33 @@ nav {
     padding: 18px 14px 30px;
   }
 
-  .topbar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+.topbar {
+  position: relative;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 4px 84px 18px 0;
+}
 
-  .topbar h2 {
-    font-size: 24px;
-  }
+.topbar h2 {
+  font-size: 28px;
+  line-height: 1.05;
+}
 
-  .race-countdown strong {
-    font-size: 32px;
-  }
+.topbar p {
+  font-size: 13px;
+}
+
+.race-countdown {
+  text-align: left;
+  margin-top: 4px;
+}
+
+.race-countdown strong {
+  font-size: 34px;
+  line-height: 1;
+}
 
   .hero-grid,
   .two-column {
