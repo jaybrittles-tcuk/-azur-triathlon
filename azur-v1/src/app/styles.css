@@ -1115,9 +1115,25 @@ main {
 }
 
 @media (max-width: 720px) {
+  .topbar {
+    position: relative;
+    padding-right: 88px;
+  }
+
   .topbar-actions {
     width: 100%;
-    justify-content: space-between;
+    display: block;
+  }
+
+  .race-countdown {
+    text-align: left;
+    margin-top: 18px;
+  }
+
+  .account-menu {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
   .account-copy {
@@ -1125,14 +1141,19 @@ main {
   }
 
   .account-button {
-    padding: 6px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
     border-radius: 50%;
   }
 
-.account-avatar {
-  width: 65px;
-  height: 65px;
-}
+  .account-avatar {
+    width: 72px;
+    height: 72px;
+    border: 3px solid #ffffff;
+    box-shadow: 0 6px 18px rgba(6, 28, 51, 0.14);
+  }
 }
 .account-avatar img {
   width: 100%;
