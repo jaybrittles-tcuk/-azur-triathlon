@@ -917,34 +917,72 @@ main {
     display: block;
   }
 
-  .sidebar {
-    min-height: auto;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 9px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
+.sidebar {
+  min-height: auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(7, 21, 37, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(7, 21, 37, 0.16);
+  scrollbar-width: none;
+}
 
-  .brand-block {
-    border: 0;
-    padding: 0 8px 0 0;
-  }
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
 
-  .brand-logo {
-    width: 42px;
-    height: 42px;
-  }
+.brand-block {
+  border: 0;
+  padding: 0 4px 0 0;
+  flex-shrink: 0;
+}
 
-  nav {
-    display: flex;
-    margin: 0;
-  }
+.brand-block > div {
+  display: none;
+}
 
-  .nav-item {
-    padding: 10px;
-  }
+.brand-logo {
+  width: 44px;
+  height: 44px;
+}
+
+nav {
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  width: max-content;
+}
+
+.nav-item {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 14px;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0;
+}
+
+.nav-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-item:hover {
+  transform: none;
+}
+
+.nav-item.active {
+  background: rgba(15, 127, 229, 0.24);
+  box-shadow: inset 0 -3px var(--amber);
+}
 
   main {
     padding: 18px 14px 30px;
