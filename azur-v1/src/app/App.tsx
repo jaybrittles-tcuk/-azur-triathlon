@@ -247,6 +247,7 @@ export function App() {
   const [authLoading, setAuthLoading] = useState(false);
   const [athleteName, setAthleteName] = useState('Athlete');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [athleteProfile, setAthleteProfile] = useState({
   ftp: null as number | null,
@@ -1371,6 +1372,65 @@ async function handleSignOut() {
 
   setAccountOpen(false);
   setIsAuthenticated(false);
+}
+  async function handleAvatarUpload(
+  event: React.ChangeEvent<HTMLInputElement>,
+) {
+  const file = event.target.files?.[0];
+
+  if (!file) return;
+
+  setAvatarUploading(true);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    setAvatarUploading(false);
+    return;
+  }
+
+  const fileExtension = file.name.split('.').pop() || 'jpg';
+  const filePath = `${user.id}/profile.${fileExtension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, file, {
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error('Unable to upload avatar:', uploadError);
+    setAvatarUploading(false);
+    return;
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(filePath);
+
+  const newAvatarUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`;
+
+  const { error: profileError } = await supabase
+    .from('athlete_profile')
+    .update({
+      avatar_url: newAvatarUrl,
+    })
+    .eq('user_id', user.id);
+
+  if (profileError) {
+    console.error(
+      'Unable to save avatar to athlete profile:',
+      profileError,
+    );
+
+    setAvatarUploading(false);
+    return;
+  }
+
+  setAvatarUrl(newAvatarUrl);
+  setAvatarUploading(false);
 }
   if (!authReady) {
     return (
