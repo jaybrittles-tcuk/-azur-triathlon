@@ -161,14 +161,18 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 24px;
-  margin-bottom: 24px;
+  gap: 28px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .topbar h2 {
-  margin: 5px 0;
-  font-size: 31px;
-  letter-spacing: -.035em;
+  margin: 6px 0 4px;
+  font-size: 34px;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  color: var(--navy);
 }
 
 .topbar p {
