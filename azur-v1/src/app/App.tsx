@@ -1217,10 +1217,10 @@ function ProfileView() {
     if (!profileEditing) {
       setProfileDraft({
         ftp: athleteProfile.ftp?.toString() || '',
-        runThreshold:
-          athleteProfile.runThreshold?.toString() || '',
-        swimThreshold:
-          athleteProfile.swimThreshold?.toString() || '',
+ runThreshold:
+  formatPaceInput(athleteProfile.runThreshold),
+swimThreshold:
+  formatPaceInput(athleteProfile.swimThreshold),
         weight: athleteProfile.weight?.toString() || '',
         targetWeight:
           athleteProfile.targetWeight?.toString() || '',
