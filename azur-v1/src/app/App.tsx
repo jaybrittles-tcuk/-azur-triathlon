@@ -1614,6 +1614,7 @@ async function handleSignOut() {
   setIsAuthenticated(false);
 }
   async function handleAvatarUpload(
+ async function handleAvatarUpload(
   event: React.ChangeEvent<HTMLInputElement>,
 ) {
   const file = event.target.files?.[0];
@@ -1630,6 +1631,49 @@ async function handleSignOut() {
     setAvatarUploading(false);
     return;
   }
+
+  const fileExtension = file.name.split('.').pop() || 'jpg';
+  const filePath = `${user.id}/profile.${fileExtension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, file, {
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error('Unable to upload avatar:', uploadError);
+    setAvatarUploading(false);
+    return;
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(filePath);
+
+  const newAvatarUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`;
+
+  const { error: profileError } = await supabase
+    .from('athlete_profile')
+    .update({
+      avatar_url: newAvatarUrl,
+    })
+    .eq('user_id', user.id);
+
+  if (profileError) {
+    console.error(
+      'Unable to save avatar to athlete profile:',
+      profileError,
+    );
+
+    setAvatarUploading(false);
+    return;
+  }
+
+  setAvatarUrl(newAvatarUrl);
+  setAvatarUploading(false);
+}
+
 async function handleProfileSave() {
   const {
     data: { user },
@@ -1674,46 +1718,6 @@ async function handleProfileSave() {
   });
 
   setProfileEditing(false);
-}  const fileExtension = file.name.split('.').pop() || 'jpg';
-  const filePath = `${user.id}/profile.${fileExtension}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from('avatars')
-    .upload(filePath, file, {
-      upsert: true,
-    });
-
-  if (uploadError) {
-    console.error('Unable to upload avatar:', uploadError);
-    setAvatarUploading(false);
-    return;
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from('avatars')
-    .getPublicUrl(filePath);
-
-  const newAvatarUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`;
-
-  const { error: profileError } = await supabase
-    .from('athlete_profile')
-    .update({
-      avatar_url: newAvatarUrl,
-    })
-    .eq('user_id', user.id);
-
-  if (profileError) {
-    console.error(
-      'Unable to save avatar to athlete profile:',
-      profileError,
-    );
-
-    setAvatarUploading(false);
-    return;
-  }
-
-  setAvatarUrl(newAvatarUrl);
-  setAvatarUploading(false);
 }
   if (!authReady) {
     return (
