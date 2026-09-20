@@ -1470,15 +1470,32 @@ const daysToRace = primaryRace.raceDate
           ))}
         </nav>
 
-        <div className="sidebar-footer">
-          <span className="eyebrow">
-            PRIMARY TARGET
-          </span>
+<div className="sidebar-footer">
+  <span className="eyebrow">
+    PRIMARY TARGET
+  </span>
 
-          <strong>Challenge Roth</strong>
+  <strong>
+    {primaryRace.name || 'Primary Race'}
+  </strong>
 
-          <small>4 July 2027 · Sub-9</small>
-        </div>
+  <small>
+    {primaryRace.raceDate
+      ? new Date(primaryRace.raceDate).toLocaleDateString(
+          'en-GB',
+          {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          },
+        )
+      : '—'}
+    {' · '}
+    {primaryRace.targetSplits?.target_total
+      ? `Target ${primaryRace.targetSplits.target_total.slice(0, 5)}`
+      : 'Target not set'}
+  </small>
+</div>
       </aside>
 
       <main>
