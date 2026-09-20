@@ -1080,9 +1080,11 @@ nav {
     grid-template-columns: 1fr;
   }
 
-  .editor-grid label.wide {
-    grid-column: auto;
-    .calendar-layout {
+.editor-grid label.wide {
+  grid-column: auto;
+}
+
+.calendar-layout {
   display: block;
 }
 
@@ -1123,7 +1125,6 @@ nav {
   border-radius: 18px;
   box-shadow: var(--shadow-sm);
 }
-  }
 }
 
 @media (max-width: 620px) {
