@@ -1337,6 +1337,15 @@ function ProfileView() {
     )}
   </div>
 </div>
+{profileEditing && (
+  <button
+    className="primary-button"
+    onClick={handleProfileSave}
+  >
+    <Save size={17} />
+    Save changes
+  </button>
+)}
         </section>
 
         <section className="panel">
