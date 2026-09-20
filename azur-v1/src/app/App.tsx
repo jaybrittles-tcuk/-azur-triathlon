@@ -911,7 +911,7 @@ const daysToRace = primaryRace.raceDate
           <div className="race-total">
             <span>Target</span>
             <strong>&lt; 9:00</strong>
-            <small>{daysToRoth} days remaining</small>
+            <small>{daysToRace} days remaining</small>
           </div>
         </section>
 
@@ -1482,11 +1482,11 @@ const daysToRace = primaryRace.raceDate
           </div>
 
           <div className="race-countdown">
-            <span className="eyebrow">
-              DAYS TO ROTH
-            </span>
+<span className="eyebrow">
+  DAYS TO {primaryRace.name ? primaryRace.name.toUpperCase() : 'A RACE'}
+</span>
 
-            <strong>{daysToRoth}</strong>
+<strong>{daysToRace}</strong>
           </div>
         </header>
 
