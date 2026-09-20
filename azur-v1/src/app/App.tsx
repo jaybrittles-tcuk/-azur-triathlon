@@ -1618,19 +1618,36 @@ async function handleSignOut() {
       </div>
     </button>
 
-    {accountOpen && (
-      <div className="account-dropdown">
-        <div className="account-dropdown-head">
-          <strong>{athleteName}</strong>
-          <small>Azur athlete account</small>
-        </div>
+{accountOpen && (
+  <div className="account-dropdown">
+    <div className="account-dropdown-head">
+      <strong>{athleteName}</strong>
+      <small>Azur athlete account</small>
+    </div>
 
-        <button onClick={handleSignOut}>
-          <LogOut size={16} />
-          Sign out
-        </button>
-      </div>
-    )}
+    <label className="avatar-upload-button">
+      <User size={16} />
+
+      {avatarUploading
+        ? 'Uploading...'
+        : avatarUrl
+          ? 'Change profile photo'
+          : 'Add profile photo'}
+
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={handleAvatarUpload}
+        disabled={avatarUploading}
+      />
+    </label>
+
+    <button onClick={handleSignOut}>
+      <LogOut size={16} />
+      Sign out
+    </button>
+  </div>
+)}
   </div>
 </div>
         </header>
