@@ -1048,6 +1048,8 @@ main {
     var(--azure-bright)
   );
   color: #ffffff;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .account-copy {
