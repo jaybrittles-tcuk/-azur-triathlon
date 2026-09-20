@@ -138,12 +138,24 @@ nav {
 
 .nav-item:hover,
 .nav-item.active {
-  color: #fff;
-  background: rgba(19,125,221,.16);
+  color: #ffffff;
+  background: rgba(15, 127, 229, 0.16);
+}
+
+.nav-item:hover {
+  transform: translateX(2px);
 }
 
 .nav-item.active {
-  box-shadow: inset 3px 0 var(--amber);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15, 127, 229, 0.24),
+      rgba(15, 127, 229, 0.10)
+    );
+  box-shadow:
+    inset 3px 0 var(--amber),
+    0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
 .sidebar-footer {
