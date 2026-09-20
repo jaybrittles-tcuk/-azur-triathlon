@@ -244,6 +244,8 @@ main {
 .panel:hover {
   border-color: rgba(15, 127, 229, 0.14);
   box-shadow: var(--shadow-md);
+}
+
 .metric-card {
   padding: 20px;
 }
