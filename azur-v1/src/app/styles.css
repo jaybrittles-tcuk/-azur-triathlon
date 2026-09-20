@@ -1134,3 +1134,25 @@ main {
   object-fit: cover;
   border-radius: 50%;
 }
+.avatar-upload-button {
+  width: 100%;
+  margin-top: 6px;
+  border: 0;
+  background: transparent;
+  border-radius: 9px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.avatar-upload-button:hover {
+  background: #f4f7fa;
+}
+
+.avatar-upload-button input {
+  display: none;
+}
