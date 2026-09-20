@@ -250,6 +250,35 @@ export function App() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [profileEditing, setProfileEditing] = useState(false);
+  function formatPaceInput(seconds: number | null) {
+  if (!seconds) return '';
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
+}
+
+function parsePaceInput(value: string) {
+  const parts = value.split(':');
+
+  if (parts.length !== 2) return null;
+
+  const minutes = Number(parts[0]);
+  const seconds = Number(parts[1]);
+
+  if (
+    !Number.isFinite(minutes) ||
+    !Number.isFinite(seconds) ||
+    minutes < 0 ||
+    seconds < 0 ||
+    seconds > 59
+  ) {
+    return null;
+  }
+
+  return minutes * 60 + seconds;
+}
   const [profileDraft, setProfileDraft] = useState({
   ftp: '',
   runThreshold: '',
