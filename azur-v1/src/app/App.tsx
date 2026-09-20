@@ -1182,14 +1182,27 @@ function ProfileView() {
             </p>
           </div>
 
-          <button
-            className="profile-edit-button"
-            onClick={() =>
-              setProfileEditing((current) => !current)
-            }
-          >
-            {profileEditing ? 'Cancel editing' : 'Edit profile'}
-          </button>
+<button
+  className="profile-edit-button"
+  onClick={() => {
+    if (!profileEditing) {
+      setProfileDraft({
+        ftp: athleteProfile.ftp?.toString() || '',
+        runThreshold:
+          athleteProfile.runThreshold?.toString() || '',
+        swimThreshold:
+          athleteProfile.swimThreshold?.toString() || '',
+        weight: athleteProfile.weight?.toString() || '',
+        targetWeight:
+          athleteProfile.targetWeight?.toString() || '',
+      });
+    }
+
+    setProfileEditing((current) => !current);
+  }}
+>
+  {profileEditing ? 'Cancel editing' : 'Edit profile'}
+</button>
         </div>
       </section>
 
