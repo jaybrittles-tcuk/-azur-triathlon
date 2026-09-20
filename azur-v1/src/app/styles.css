@@ -1129,6 +1129,11 @@ main {
     padding: 6px;
     border-radius: 50%;
   }
+
+  .account-avatar {
+    width: 42px;
+    height: 42px;
+  }
 }
 .account-avatar img {
   width: 100%;
