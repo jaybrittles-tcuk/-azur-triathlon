@@ -776,6 +776,42 @@ const daysToRace = primaryRace.raceDate
     <strong>{selected.prescription.focus}</strong>
   </div>
 )}
+{Array.isArray(selected.prescription?.warmup) && (
+  <div className="wide">
+    <span className="eyebrow">WARM-UP</span>
+
+    {selected.prescription.warmup.map(
+      (block: any, index: number) => (
+        <div key={index}>
+          <strong>
+            {block.reps ? `${block.reps} × ` : ''}
+            {block.duration_min
+              ? `${block.duration_min} min`
+              : block.duration_sec
+                ? `${block.duration_sec} sec`
+                : ''}
+          </strong>
+
+          {block.target && (
+            <div>{block.target}</div>
+          )}
+
+          {block.notes && (
+            <small>{block.notes}</small>
+          )}
+
+          {block.recovery_sec && (
+            <div>
+              <small>
+                {block.recovery_sec} sec easy recovery
+              </small>
+            </div>
+          )}
+        </div>
+      ),
+    )}
+  </div>
+)}
 {Array.isArray(selected.prescription?.main_set) && (
   <div className="wide">
     <span className="eyebrow">MAIN SET</span>
