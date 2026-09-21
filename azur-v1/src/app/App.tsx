@@ -360,6 +360,30 @@ async function loadPrimaryRace(userId: string) {
     console.error('Unable to load athlete id:', athleteError);
     return;
   }
+
+  const { data, error } = await supabase
+    .from('race')
+    .select('name, race_date, priority, location, target_splits')
+    .eq('athlete_id', athlete.id)
+    .eq('priority', 'A')
+    .order('race_date', { ascending: true })
+    .limit(1)
+    .single();
+
+  if (error) {
+    console.error('Unable to load primary race:', error);
+    return;
+  }
+
+  setPrimaryRace({
+    name: data.name,
+    raceDate: data.race_date,
+    priority: data.priority,
+    location: data.location ?? '',
+    targetSplits: data.target_splits,
+  });
+}
+
 async function loadPlannedSessions(userId: string) {
   const { data: athlete, error: athleteError } = await supabase
     .from('athlete_profile')
@@ -417,28 +441,7 @@ async function loadPlannedSessions(userId: string) {
   setWeekSessions(liveSessions);
   setSelectedId(liveSessions[0].id);
 }
-  const { data, error } = await supabase
-    .from('race')
-    .select('name, race_date, priority, location, target_splits')
-    .eq('athlete_id', athlete.id)
-    .eq('priority', 'A')
-    .order('race_date', { ascending: true })
-    .limit(1)
-    .single();
 
-  if (error) {
-    console.error('Unable to load primary race:', error);
-    return;
-  }
-
-  setPrimaryRace({
-    name: data.name,
-    raceDate: data.race_date,
-    priority: data.priority,
-    location: data.location ?? '',
-    targetSplits: data.target_splits,
-  });
-}
 
 useEffect(() => {
   supabase.auth.getSession().then(({ data }) => {
