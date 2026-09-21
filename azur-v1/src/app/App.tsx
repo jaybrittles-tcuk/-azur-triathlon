@@ -944,15 +944,13 @@ const daysToRace = primaryRace.raceDate
               />
             </label>
 
-            <label className="wide">
-              <span>Why this matters</span>
+<div className="wide session-block">
+  <span className="eyebrow">WHY THIS MATTERS</span>
 
-              <textarea
-                rows={5}
-                value={selected.rationale || ''}
-                disabled
-              />
-            </label>
+  <div className="session-block-item">
+    <div>{selected.rationale}</div>
+  </div>
+</div>
             <label>
   <span>Session RPE</span>
 
