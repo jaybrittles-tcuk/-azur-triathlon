@@ -770,9 +770,9 @@ const daysToRace = primaryRace.raceDate
                           {session.priority}
                         </small>
 
-                        <span>
-                          {Object.values(session.targets)[0]?.toString()}
-                        </span>
+<span className="calendar-session-target">
+  {Object.values(session.targets)[0]?.toString()}
+</span>
                       </button>
                     ))}
                   </div>
