@@ -985,13 +985,6 @@ const daysToRace = primaryRace.raceDate
 
           </div>
 
-          <div className="version-note">
-            <span className="eyebrow">VERSION</span>
-            <strong>v{selected.version}</strong>
-            <small>
-              Original prescription remains preserved.
-            </small>
-          </div>
 <button
   className="primary-button"
   onClick={handleSessionFeedbackSave}
@@ -1008,10 +1001,7 @@ const daysToRace = primaryRace.raceDate
   <small className="feedback-message">
     {sessionFeedbackMessage}
   </small>
-)}          <button className="primary-button">
-            <Save size={17} />
-            Save revision
-          </button>
+)}         
         </aside>
       </div>
     );
