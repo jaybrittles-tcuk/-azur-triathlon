@@ -538,8 +538,10 @@ main {
   border: 1px solid rgba(96, 117, 138, 0.14);
   font-size: 9px;
   font-weight: 850;
-  letter-spacing: 0.04em;
-}.calendar-session strong {
+line-height: 1.35;
+}
+
+.editor-panel {
   font-size: 13px;
 }
 
