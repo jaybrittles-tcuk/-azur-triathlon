@@ -477,8 +477,34 @@ if (session?.user) {
   const selected =
     weekSessions.find((session) => session.id === selectedId) ||
     weekSessions[0];
+useEffect(() => {
+  async function loadSessionFeedback() {
+    if (!selected?.id) return;
 
-  const totalMinutes = useMemo(
+    setSessionFeedbackMessage('');
+
+    const { data, error } = await supabase
+      .from('session_feedback')
+      .select('session_rpe, notes')
+      .eq('planned_session_id', selected.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error(
+        'Unable to load session feedback:',
+        error,
+      );
+      return;
+    }
+
+    setSessionFeedback({
+      rpe: data?.session_rpe?.toString() ?? '',
+      notes: data?.notes ?? '',
+    });
+  }
+
+  loadSessionFeedback();
+}, [selected?.id]);  const totalMinutes = useMemo(
     () =>
       weekSessions.reduce(
         (total, session) => total + session.durationMin,
