@@ -517,14 +517,17 @@ main {
 
 .calendar-session.swim {
   background: #eef8ff;
+  border-left: 4px solid #4aa8ff;
 }
 
 .calendar-session.bike {
   background: #fff8e8;
+  border-left: 4px solid #f3b33d;
 }
 
 .calendar-session.run {
   background: #f2f9f4;
+  border-left: 4px solid #52a66f;
 }
 
 .calendar-session-top {
