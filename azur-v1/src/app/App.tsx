@@ -794,12 +794,12 @@ const daysToRace = primaryRace.raceDate
   </div>
 )}
 {Array.isArray(selected.prescription?.warmup) && (
-  <div className="wide">
+ <div className="wide session-block">
     <span className="eyebrow">WARM-UP</span>
 
     {selected.prescription.warmup.map(
       (block: any, index: number) => (
-        <div key={index}>
+       <div key={index} className="session-block-item">
           <strong>
             {block.reps ? `${block.reps} × ` : ''}
             {block.duration_min
