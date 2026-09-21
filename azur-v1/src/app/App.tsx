@@ -770,6 +770,12 @@ const daysToRace = primaryRace.raceDate
           </div>
 
           <div className="editor-grid">
+            {selected.prescription?.focus && (
+  <div className="wide">
+    <span className="eyebrow">FOCUS</span>
+    <strong>{selected.prescription.focus}</strong>
+  </div>
+)}
             <label>
               <span>Duration</span>
 
