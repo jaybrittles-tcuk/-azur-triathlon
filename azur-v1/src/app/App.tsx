@@ -924,17 +924,15 @@ const daysToRace = primaryRace.raceDate
   <strong>{formatDuration(selected.durationMin)}</strong>
 </div>
 
-            <label className="wide">
-              <span>Primary target</span>
+<div className="wide session-block">
+  <span className="eyebrow">PRIMARY TARGET</span>
 
-              <input
-                value={
-                  Object.values(selected.targets)[0]?.toString() ||
-                  ''
-                }
-                disabled
-              />
-            </label>
+  <div className="session-block-item">
+    <strong>
+      {Object.values(selected.targets)[0]?.toString() || ''}
+    </strong>
+  </div>
+</div>
 
 <div className="wide session-block">
   <span className="eyebrow">WHY THIS MATTERS</span>
