@@ -758,6 +758,23 @@ const daysToRace = primaryRace.raceDate
             <div>
               <span className="eyebrow">SESSION DETAIL</span>
               <h3>{selected.title}</h3>
+              <div className="session-detail-meta">
+  <span>{sportName(selected.sport)}</span>
+
+  <span>
+    {new Date(
+      `${selected.plannedDate}T12:00:00`,
+    ).toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    })}
+  </span>
+
+  <span>{formatDuration(selected.durationMin)}</span>
+
+  <span>Priority {selected.priority}</span>
+</div>
             </div>
 
             <button className="icon-button" onClick={toggleLock}>
