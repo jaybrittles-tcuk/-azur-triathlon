@@ -756,7 +756,7 @@ const daysToRace = primaryRace.raceDate
 >
           <div className="section-heading">
             <div>
-              <span className="eyebrow">SESSION EDITOR</span>
+              <span className="eyebrow">SESSION DETAIL</span>
               <h3>{selected.title}</h3>
             </div>
 
