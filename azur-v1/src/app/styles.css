@@ -511,8 +511,10 @@ main {
 }
 
 .calendar-session.selected {
-  outline: 2px solid var(--azure);
-  outline-offset: 1px;
+  border-color: rgba(15, 127, 229, 0.45);
+  box-shadow:
+    0 0 0 2px rgba(15, 127, 229, 0.10),
+    0 10px 24px rgba(7, 21, 37, 0.08);
 }
 
 .calendar-session.swim {
