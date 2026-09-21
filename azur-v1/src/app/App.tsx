@@ -750,7 +750,10 @@ const daysToRace = primaryRace.raceDate
           </section>
         </div>
 
-        <aside className="editor-panel">
+        <aside
+  id="session-editor"
+  className="editor-panel"
+>
           <div className="section-heading">
             <div>
               <span className="eyebrow">SESSION EDITOR</span>
