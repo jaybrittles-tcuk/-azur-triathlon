@@ -919,18 +919,10 @@ const daysToRace = primaryRace.raceDate
       </div>
     )}
   </div>
-)}         <label>
-              <span>Duration</span>
-
-              <input
-                type="number"
-                value={selected.durationMin}
-                disabled={selected.locked}
-                onChange={(event) =>
-                  updateDuration(Number(event.target.value))
-                }
-              />
-            </label>
+)}      <div className="session-block">
+  <span className="eyebrow">DURATION</span>
+  <strong>{formatDuration(selected.durationMin)}</strong>
+</div>
 
             <label className="wide">
               <span>Primary target</span>
