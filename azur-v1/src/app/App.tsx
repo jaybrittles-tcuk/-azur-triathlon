@@ -797,14 +797,9 @@ const daysToRace = primaryRace.raceDate
  <div className="wide session-block">
     <span className="eyebrow">WARM-UP</span>
 
-    {selected.prescription.warmup.map(
-      (block: any, index: number) => (
-      <div key={index} className="session-block-item">
-  <span className="eyebrow">
-    {block.discipline.toUpperCase()}
-  </span>
-)}} className="session-block-item">
-         
+{selected.prescription.warmup.map(
+  (block: any, index: number) => (
+    <div key={index} className="session-block-item">
           <strong>
             {block.reps ? `${block.reps} × ` : ''}
             {block.distance_m
