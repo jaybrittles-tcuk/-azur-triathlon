@@ -2401,7 +2401,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
         </header>
 
         {activeNav === 'Home' && <HomeView />}
-        {activeNav === 'Calendar' && <CalendarView />}
+        {activeNav === 'Calendar' && CalendarView()}
         {activeNav === 'Performance' && <PerformanceView />}
         {activeNav === 'Recovery' && <RecoveryView />}
         {activeNav === 'Races' && <RacesView />}
