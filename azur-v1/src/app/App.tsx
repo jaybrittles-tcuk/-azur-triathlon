@@ -838,6 +838,11 @@ const daysToRace = primaryRace.raceDate
     {selected.prescription.main_set.map(
       (block: any, index: number) => (
       <div key={index} className="session-block-item">
+        {block.discipline && (
+  <span className="eyebrow">
+    {block.discipline.toUpperCase()}
+  </span>
+)}
 <strong>
   {block.reps ? `${block.reps} × ` : ''}
   {block.distance_m
