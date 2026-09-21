@@ -525,8 +525,21 @@ main {
   text-transform: uppercase;
   color: #60758a;
 }
+.calendar-session-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 
-.calendar-session strong {
+.calendar-session-status > span {
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(96, 117, 138, 0.14);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}.calendar-session strong {
   font-size: 13px;
 }
 
