@@ -555,8 +555,23 @@ main {
 .calendar-session strong {
   font-size: 13px;
 }
+.calendar-session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 
-.calendar-session small,
+.calendar-session-meta span {
+  font-size: 10px;
+  font-weight: 750;
+  color: var(--muted);
+}
+
+.calendar-session-meta span + span::before {
+  content: "•";
+  margin-right: 6px;
+  color: var(--muted-light);
+}.calendar-session small,
 .calendar-session > span:last-child {
   color: var(--muted);
   font-size: 11px;
