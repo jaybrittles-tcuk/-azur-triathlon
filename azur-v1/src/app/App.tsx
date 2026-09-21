@@ -879,6 +879,29 @@ const daysToRace = primaryRace.raceDate
       ),
     )}
   </div>
+)}          
+            {selected.prescription?.fueling && (
+  <div className="wide">
+    <span className="eyebrow">FUELING</span>
+
+    {selected.prescription.fueling.carbs_per_hour && (
+      <div>
+        <strong>
+          {selected.prescription.fueling.carbs_per_hour}
+        </strong>
+        <small> carbohydrate per hour</small>
+      </div>
+    )}
+
+    {selected.prescription.fueling.fluid_per_hour && (
+      <div>
+        <strong>
+          {selected.prescription.fueling.fluid_per_hour}
+        </strong>
+        <small> fluid per hour</small>
+      </div>
+    )}
+  </div>
 )}            <label>
               <span>Duration</span>
 
