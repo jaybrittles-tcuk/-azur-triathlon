@@ -776,6 +776,51 @@ const daysToRace = primaryRace.raceDate
     <strong>{selected.prescription.focus}</strong>
   </div>
 )}
+{Array.isArray(selected.prescription?.main_set) && (
+  <div className="wide">
+    <span className="eyebrow">MAIN SET</span>
+
+    {selected.prescription.main_set.map(
+      (block: any, index: number) => (
+        <div key={index}>
+          <strong>
+            {block.reps} × {block.duration_min} min
+          </strong>
+
+          <div>
+            {block.target}
+          </div>
+
+          {block.ftp_percent && (
+            <small>
+              {block.ftp_percent} FTP
+            </small>
+          )}
+
+          {block.cadence && (
+            <small>
+              · {block.cadence}
+            </small>
+          )}
+
+          {block.rpe && (
+            <small>
+              · RPE {block.rpe}
+            </small>
+          )}
+
+          {block.recovery_min && (
+            <div>
+              <small>
+                {block.recovery_min} min easy recovery
+              </small>
+            </div>
+          )}
+        </div>
+      ),
+    )}
+  </div>
+)}
             <label>
               <span>Duration</span>
 
