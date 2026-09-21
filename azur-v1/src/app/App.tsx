@@ -944,7 +944,23 @@ const daysToRace = primaryRace.raceDate
         <small> fluid per hour</small>
       </div>
     )}
+{selected.prescription.fueling.sodium_per_hour && (
+  <div className="session-block-item">
+    <strong>
+      {selected.prescription.fueling.sodium_per_hour}
+    </strong>
+    <small> sodium per hour</small>
+  </div>
+)}
 
+{selected.prescription.fueling.notes && (
+  <div className="session-block-item">
+    <strong>Fueling note</strong>
+    <div>
+      {selected.prescription.fueling.notes}
+    </div>
+  </div>
+)}
     {selected.prescription.fueling.pre_session && (
       <div className="session-block-item">
         <strong>Before session</strong>
