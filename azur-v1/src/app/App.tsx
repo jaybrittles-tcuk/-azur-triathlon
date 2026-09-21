@@ -897,21 +897,21 @@ const daysToRace = primaryRace.raceDate
     )}
   </div>
 )}          
-            {selected.prescription?.fueling && (
+{selected.prescription?.fueling && (
   <div className="wide session-block">
     <span className="eyebrow">FUELING</span>
 
     {selected.prescription.fueling.carbs_per_hour && (
-    <div className="session-block-item">
+      <div className="session-block-item">
         <strong>
           {selected.prescription.fueling.carbs_per_hour}
         </strong>
         <small> carbohydrate per hour</small>
-    <div className="session-block-item">
+      </div>
     )}
 
     {selected.prescription.fueling.fluid_per_hour && (
-      <div>
+      <div className="session-block-item">
         <strong>
           {selected.prescription.fueling.fluid_per_hour}
         </strong>
@@ -919,7 +919,7 @@ const daysToRace = primaryRace.raceDate
       </div>
     )}
   </div>
-)}            <label>
+)}         <label>
               <span>Duration</span>
 
               <input
