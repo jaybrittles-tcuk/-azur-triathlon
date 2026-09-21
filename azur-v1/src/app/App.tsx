@@ -857,11 +857,6 @@ const daysToRace = primaryRace.raceDate
     )}
   </div>
 )}
-{Array.isArray(selected.prescription?.main_set) && (
-  ...
-)}
-
-PASTE COOL-DOWN HERE
 
 <label>
   <span>Duration</span>
