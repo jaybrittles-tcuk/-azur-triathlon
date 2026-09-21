@@ -875,12 +875,12 @@ const daysToRace = primaryRace.raceDate
   </div>
 )}
 {Array.isArray(selected.prescription?.cooldown) && (
-  <div className="wide">
+  <div className="wide session-block">
     <span className="eyebrow">COOL-DOWN</span>
 
     {selected.prescription.cooldown.map(
       (block: any, index: number) => (
-        <div key={index}>
+       <div key={index} className="session-block-item">
           <strong>
             {block.duration_min} min
           </strong>
