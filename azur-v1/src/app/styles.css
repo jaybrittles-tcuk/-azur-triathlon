@@ -630,6 +630,8 @@ main {
 }.editor-grid input,
 .editor-grid textarea {
   width: 100%;
+    box-sizing: border-box;
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: 11px;
   padding: 10px 11px;
@@ -1174,6 +1176,8 @@ nav {
   position: static;
   margin-top: 16px;
   width: 100%;
+    box-sizing: border-box;
+  min-width: 0;
   border-radius: 18px;
   box-shadow: var(--shadow-sm);
 }
