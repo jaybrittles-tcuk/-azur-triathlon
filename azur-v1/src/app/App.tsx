@@ -983,21 +983,6 @@ const daysToRace = primaryRace.raceDate
   </div>
 </div>
 
-<label className="wide">
-  <span>Athlete notes</span>
-
-  <textarea
-    rows={4}
-    value={sessionFeedback.notes}
-    onChange={(event) =>
-      setSessionFeedback({
-        ...sessionFeedback,
-        notes: event.target.value,
-      })
-    }
-    placeholder="How did the session feel?"
-  />
-</label>
           </div>
 
           <div className="version-note">
