@@ -858,8 +858,6 @@ const daysToRace = primaryRace.raceDate
   </div>
 )}
 
-<label>
-  <span>Duration</span>
             <label>
               <span>Duration</span>
 
