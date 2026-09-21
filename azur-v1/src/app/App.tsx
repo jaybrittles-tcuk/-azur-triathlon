@@ -726,6 +726,39 @@ const daysToRace = primaryRace.raceDate
                 disabled
               />
             </label>
+            <label>
+  <span>Session RPE</span>
+
+  <input
+    type="number"
+    min="1"
+    max="10"
+    value={sessionFeedback.rpe}
+    onChange={(event) =>
+      setSessionFeedback({
+        ...sessionFeedback,
+        rpe: event.target.value,
+      })
+    }
+    placeholder="1–10"
+  />
+</label>
+
+<label className="wide">
+  <span>Athlete notes</span>
+
+  <textarea
+    rows={4}
+    value={sessionFeedback.notes}
+    onChange={(event) =>
+      setSessionFeedback({
+        ...sessionFeedback,
+        notes: event.target.value,
+      })
+    }
+    placeholder="How did the session feel?"
+  />
+</label>
           </div>
 
           <div className="version-note">
