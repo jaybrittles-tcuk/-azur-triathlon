@@ -504,7 +504,9 @@ useEffect(() => {
   }
 
   loadSessionFeedback();
-}, [selected?.id]);  const totalMinutes = useMemo(
+}, [selected?.id]);
+
+const totalMinutes = useMemo(
     () =>
       weekSessions.reduce(
         (total, session) => total + session.durationMin,
