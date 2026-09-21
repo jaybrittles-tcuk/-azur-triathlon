@@ -941,23 +941,47 @@ const daysToRace = primaryRace.raceDate
     <div>{selected.rationale}</div>
   </div>
 </div>
-            <label>
-  <span>Session RPE</span>
+<div className="wide session-block">
+  <span className="eyebrow">ATHLETE FEEDBACK</span>
 
-  <input
-    type="number"
-    min="1"
-    max="10"
-    value={sessionFeedback.rpe}
-    onChange={(event) =>
-      setSessionFeedback({
-        ...sessionFeedback,
-        rpe: event.target.value,
-      })
-    }
-    placeholder="1–10"
-  />
-</label>
+  <div className="session-block-item">
+    <label>
+      <span>Session RPE</span>
+
+      <input
+        type="number"
+        min="1"
+        max="10"
+        value={sessionFeedback.rpe}
+        onChange={(event) =>
+          setSessionFeedback({
+            ...sessionFeedback,
+            rpe: event.target.value,
+          })
+        }
+        placeholder="1–10"
+      />
+    </label>
+  </div>
+
+  <div className="session-block-item">
+    <label>
+      <span>Notes</span>
+
+      <textarea
+        rows={4}
+        value={sessionFeedback.notes}
+        onChange={(event) =>
+          setSessionFeedback({
+            ...sessionFeedback,
+            notes: event.target.value,
+          })
+        }
+        placeholder="How did the session feel?"
+      />
+    </label>
+  </div>
+</div>
 
 <label className="wide">
   <span>Athlete notes</span>
