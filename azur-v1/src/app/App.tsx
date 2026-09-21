@@ -832,8 +832,23 @@ const daysToRace = primaryRace.raceDate
               Original prescription remains preserved.
             </small>
           </div>
+<button
+  className="primary-button"
+  onClick={handleSessionFeedbackSave}
+  disabled={sessionFeedbackSaving}
+>
+  <Save size={17} />
 
-          <button className="primary-button">
+  {sessionFeedbackSaving
+    ? 'Saving feedback...'
+    : 'Save athlete feedback'}
+</button>
+
+{sessionFeedbackMessage && (
+  <small className="feedback-message">
+    {sessionFeedbackMessage}
+  </small>
+)}          <button className="primary-button">
             <Save size={17} />
             Save revision
           </button>
