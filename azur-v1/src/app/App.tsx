@@ -311,12 +311,13 @@ function parsePaceInput(value: string) {
   const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
   const [selectedId, setSelectedId] = useState('tue-bike');
   const [weekVersion, setWeekVersion] = useState(1);
-  const [sessionFeedback, setSessionFeedback] = useState({
-    const [sessionFeedbackSaving, setSessionFeedbackSaving] = useState(false);
-const [sessionFeedbackMessage, setSessionFeedbackMessage] = useState('');
+const [sessionFeedback, setSessionFeedback] = useState({
   rpe: '',
   notes: '',
 });
+
+const [sessionFeedbackSaving, setSessionFeedbackSaving] = useState(false);
+const [sessionFeedbackMessage, setSessionFeedbackMessage] = useState('');
   const [decision, setDecision] = useState<
     'pending' | 'accepted' | 'rejected'
   >('pending');
