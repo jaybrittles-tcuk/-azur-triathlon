@@ -802,11 +802,13 @@ const daysToRace = primaryRace.raceDate
        <div key={index} className="session-block-item">
           <strong>
             {block.reps ? `${block.reps} × ` : ''}
-            {block.duration_min
-              ? `${block.duration_min} min`
-              : block.duration_sec
-                ? `${block.duration_sec} sec`
-                : ''}
+            {block.distance_m
+  ? `${block.distance_m} m`
+  : block.duration_min
+    ? `${block.duration_min} min`
+    : block.duration_sec
+      ? `${block.duration_sec} sec`
+      : ''}
           </strong>
 
           {block.target && (
