@@ -898,16 +898,16 @@ const daysToRace = primaryRace.raceDate
   </div>
 )}          
             {selected.prescription?.fueling && (
-  <div className="wide">
+  <div className="wide session-block">
     <span className="eyebrow">FUELING</span>
 
     {selected.prescription.fueling.carbs_per_hour && (
-      <div>
+    <div className="session-block-item">
         <strong>
           {selected.prescription.fueling.carbs_per_hour}
         </strong>
         <small> carbohydrate per hour</small>
-      </div>
+    <div className="session-block-item">
     )}
 
     {selected.prescription.fueling.fluid_per_hour && (
