@@ -1859,6 +1859,62 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 
   setProfileEditing(false);
 }
+  async function handleSessionFeedbackSave() {
+  setSessionFeedbackSaving(true);
+  setSessionFeedbackMessage('');
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    setSessionFeedbackSaving(false);
+    return;
+  }
+
+  const { data: athlete, error: athleteError } = await supabase
+    .from('athlete_profile')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (athleteError || !athlete) {
+    console.error(
+      'Unable to load athlete for session feedback:',
+      athleteError,
+    );
+    setSessionFeedbackSaving(false);
+    setSessionFeedbackMessage('Unable to save feedback.');
+    return;
+  }
+
+  const { error } = await supabase
+    .from('session_feedback')
+    .upsert(
+      {
+        athlete_id: athlete.id,
+        planned_session_id: selected.id,
+        session_rpe: sessionFeedback.rpe
+          ? Number(sessionFeedback.rpe)
+          : null,
+        notes: sessionFeedback.notes.trim() || null,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: 'planned_session_id',
+      },
+    );
+
+  if (error) {
+    console.error('Unable to save session feedback:', error);
+    setSessionFeedbackSaving(false);
+    setSessionFeedbackMessage('Unable to save feedback.');
+    return;
+  }
+
+  setSessionFeedbackSaving(false);
+  setSessionFeedbackMessage('Feedback saved.');
+}
   if (!authReady) {
     return (
       <div className="login-screen">
