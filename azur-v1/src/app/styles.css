@@ -571,7 +571,9 @@ main {
   content: "•";
   margin-right: 6px;
   color: var(--muted-light);
-}.calendar-session small,
+}
+
+.calendar-session small,
 .calendar-session > span:last-child {
   color: var(--muted);
   font-size: 11px;
