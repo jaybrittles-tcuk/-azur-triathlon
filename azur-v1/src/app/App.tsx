@@ -765,10 +765,10 @@ const daysToRace = primaryRace.raceDate
 
                         <strong>{session.title}</strong>
 
-                        <small>
-                          {formatDuration(session.durationMin)} · P
-                          {session.priority}
-                        </small>
+ <div className="calendar-session-meta">
+  <span>{formatDuration(session.durationMin)}</span>
+  <span>Priority {session.priority}</span>
+</div>
 
 <span className="calendar-session-target">
   {Object.values(session.targets)[0]?.toString()}
