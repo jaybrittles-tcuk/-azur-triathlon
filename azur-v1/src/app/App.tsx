@@ -886,9 +886,11 @@ const daysToRace = primaryRace.raceDate
     {selected.prescription.cooldown.map(
       (block: any, index: number) => (
        <div key={index} className="session-block-item">
-          <strong>
-            {block.duration_min} min
-          </strong>
+<strong>
+  {block.distance_m
+    ? `${block.distance_m} m`
+    : `${block.duration_min} min`}
+</strong>
 
           {block.target && (
             <div>{block.target}</div>
