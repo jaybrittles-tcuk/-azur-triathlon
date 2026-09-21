@@ -360,7 +360,63 @@ async function loadPrimaryRace(userId: string) {
     console.error('Unable to load athlete id:', athleteError);
     return;
   }
+async function loadPlannedSessions(userId: string) {
+  const { data: athlete, error: athleteError } = await supabase
+    .from('athlete_profile')
+    .select('id')
+    .eq('user_id', userId)
+    .single();
 
+  if (athleteError || !athlete) {
+    console.error('Unable to load athlete id for sessions:', athleteError);
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('planned_session')
+    .select(
+      'id, planned_date, sport, title, session_class, priority, duration_min, targets, prescription, rationale, terrain, status, locked, version',
+    )
+    .eq('athlete_id', athlete.id)
+    .eq('is_active_version', true)
+    .order('planned_date', { ascending: true });
+
+  if (error) {
+    console.error('Unable to load planned sessions:', error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    return;
+  }
+
+  const liveSessions: Session[] = data.map((session) => ({
+    id: session.id,
+    seasonWeekId: '',
+    plannedDate: session.planned_date,
+    sport: session.sport,
+    title: session.title,
+    sessionClass: session.session_class,
+    priority: session.priority,
+    durationMin: session.duration_min,
+    targets: session.targets ?? {},
+    prescription: session.prescription ?? {},
+    rationale: session.rationale ?? '',
+    terrain: session.terrain ?? '',
+    status: session.status,
+    locked: session.locked,
+    version: session.version,
+    dayLabel: new Date(
+      `${session.planned_date}T12:00:00`,
+    )
+      .toLocaleDateString('en-GB', { weekday: 'short' })
+      .toUpperCase(),
+    accent: session.sport,
+  }));
+
+  setWeekSessions(liveSessions);
+  setSelectedId(liveSessions[0].id);
+}
   const { data, error } = await supabase
     .from('race')
     .select('name, race_date, priority, location, target_splits')
