@@ -712,7 +712,18 @@ const daysToRace = primaryRace.raceDate
                             ? 'selected'
                             : ''
                         }`}
-                        onClick={() => setSelectedId(session.id)}
+                      onClick={() => {
+  setSelectedId(session.id);
+
+  setTimeout(() => {
+    document
+      .getElementById('session-editor')
+      ?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+  }, 50);
+}}
                       >
                         <div className="calendar-session-top">
                           <span>{sportName(session.sport)}</span>
