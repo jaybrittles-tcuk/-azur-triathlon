@@ -871,8 +871,21 @@ const daysToRace = primaryRace.raceDate
               · RPE {block.rpe}
             </small>
           )}
+{block.pace && (
+  <div>
+    <small>
+      Pace: {block.pace}
+    </small>
+  </div>
+)}
 
-          {block.recovery_min && (
+{block.notes && (
+  <div>
+    <small>
+      {block.notes}
+    </small>
+  </div>
+)}          {block.recovery_min && (
             <div>
               <small>
                 {block.recovery_min} min easy recovery
