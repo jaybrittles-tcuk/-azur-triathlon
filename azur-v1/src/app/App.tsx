@@ -753,11 +753,15 @@ const daysToRace = primaryRace.raceDate
   }, 50);
 }}
                       >
-                        <div className="calendar-session-top">
-                          <span>{sportName(session.sport)}</span>
+<div className="calendar-session-top">
+  <span>{sportName(session.sport)}</span>
 
-                          {session.locked && <Lock size={13} />}
-                        </div>
+  <div className="calendar-session-status">
+    <span>{session.status}</span>
+
+    {session.locked && <Lock size={13} />}
+  </div>
+</div>
 
                         <strong>{session.title}</strong>
 
