@@ -918,13 +918,33 @@ const daysToRace = primaryRace.raceDate
     )}
 
     {selected.prescription.fueling.fluid_per_hour && (
+      <div className="session-block-item">
+        <strong>
+          {selected.prescription.fueling.fluid_per_hour}
+        </strong>
+        <small> fluid per hour</small>
+      </div>
+    )}
+
     {selected.prescription.fueling.pre_session && (
-  <div className="session-block-item">
-    <strong>Before session</strong>
-    <div>
-      {selected.prescription.fueling.pre_session}
-    </div>
+      <div className="session-block-item">
+        <strong>Before session</strong>
+        <div>
+          {selected.prescription.fueling.pre_session}
+        </div>
+      </div>
+    )}
+
+    {selected.prescription.fueling.during_session && (
+      <div className="session-block-item">
+        <strong>During session</strong>
+        <div>
+          {selected.prescription.fueling.during_session}
+        </div>
+      </div>
+    )}
   </div>
+)}
 )}
 
 {selected.prescription.fueling.during_session && (
