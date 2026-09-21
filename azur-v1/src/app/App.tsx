@@ -830,12 +830,12 @@ const daysToRace = primaryRace.raceDate
   </div>
 )}
 {Array.isArray(selected.prescription?.main_set) && (
-  <div className="wide">
+<div className="wide session-block">
     <span className="eyebrow">MAIN SET</span>
 
     {selected.prescription.main_set.map(
       (block: any, index: number) => (
-        <div key={index}>
+      <div key={index} className="session-block-item">
           <strong>
             {block.reps} × {block.duration_min} min
           </strong>
