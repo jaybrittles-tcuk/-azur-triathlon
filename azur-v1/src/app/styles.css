@@ -590,8 +590,44 @@ main {
 .editor-grid label.wide {
   grid-column: 1 / -1;
 }
+.session-block {
+  grid-column: 1 / -1;
+  padding: 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  background: var(--surface);
+}
 
-.editor-grid input,
+.session-block > .eyebrow {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.session-block-item {
+  padding: 10px 0;
+  border-top: 1px solid var(--border-soft);
+}
+
+.session-block-item:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.session-block-item strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+
+.session-block-item div {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.session-block-item small {
+  color: var(--muted);
+  line-height: 1.5;
+}.editor-grid input,
 .editor-grid textarea {
   width: 100%;
   border: 1px solid var(--border);
