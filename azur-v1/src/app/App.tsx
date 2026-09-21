@@ -950,10 +950,6 @@ const daysToRace = primaryRace.raceDate
   <span className="eyebrow">DURATION</span>
   <strong>{formatDuration(selected.durationMin)}</strong>
 </div>
-)}      <div className="session-block">
-  <span className="eyebrow">DURATION</span>
-  <strong>{formatDuration(selected.durationMin)}</strong>
-</div>
 
 <div className="wide session-block">
   <span className="eyebrow">PRIMARY TARGET</span>
