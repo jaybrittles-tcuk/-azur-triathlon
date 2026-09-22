@@ -1151,10 +1151,10 @@ const todaySession = weekSessions.find(
           </strong>
         </div>
 
-        <div>
-          <span>EXECUTION</span>
-          <strong>On target</strong>
-        </div>
+<div>
+  <span>MATCH STATUS</span>
+  <strong>Matched</strong>
+</div>
       </div>
     </div>
     )}
