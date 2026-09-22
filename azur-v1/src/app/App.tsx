@@ -665,11 +665,11 @@ const powerFadePct =
       100
     : null;
 
-  heartRateRiseBpm,
+const heartRateRiseBpm =
   firstInterval?.heartRate != null &&
   lastInterval?.heartRate != null
     ? lastInterval.heartRate - firstInterval.heartRate
-   : null;
+    : null;
 
 return {
   intervals,
