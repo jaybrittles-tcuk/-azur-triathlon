@@ -2329,3 +2329,123 @@ nav {
     line-height: 1 !important;
   }
 }
+/* ========================================
+   COMPLETED SESSION SUMMARY
+   ======================================== */
+
+.completed-session-summary {
+  position: relative;
+  overflow: hidden;
+
+  padding: 20px !important;
+
+  border: 1px solid rgba(72, 211, 148, 0.18) !important;
+  border-radius: 20px !important;
+
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(72, 211, 148, 0.10),
+      transparent 42%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(12, 34, 39, 0.96),
+      rgba(8, 25, 33, 0.96)
+    ) !important;
+
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255,255,255,0.025);
+}
+
+.completed-session-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.completed-session-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.completed-session-heading .eyebrow {
+  color: #61d99a !important;
+}
+
+.completed-session-heading strong {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.completed-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+
+  border: 1px solid rgba(72, 211, 148, 0.28);
+  border-radius: 50%;
+
+  background: rgba(72, 211, 148, 0.10);
+
+  color: #61d99a;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.completed-session-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  margin-top: 18px;
+  padding-top: 16px;
+
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+.completed-session-metrics > div {
+  min-width: 0;
+  padding: 0 12px;
+
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+
+.completed-session-metrics > div:first-child {
+  padding-left: 0;
+}
+
+.completed-session-metrics > div:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.completed-session-metrics span {
+  display: block;
+  margin-bottom: 5px;
+
+  color: rgba(255,255,255,0.36);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+}
+
+.completed-session-metrics strong {
+  display: block;
+
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.completed-session-metrics > div:last-child strong {
+  color: #61d99a;
+}
