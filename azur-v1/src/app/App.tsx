@@ -1154,7 +1154,6 @@ const todaySession = weekSessions.find(
         </div>
 
 <div>
-<div>
   <span>MATCH STATUS</span>
   <strong>Matched</strong>
 </div>
