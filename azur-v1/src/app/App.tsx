@@ -556,8 +556,15 @@ const daysToRace = primaryRace.raceDate
 
     setWeekVersion((current) => current + 1);
   }
+const now = new Date();
 
-function HomeView() {
+const todayKey = `${now.getFullYear()}-${String(
+  now.getMonth() + 1,
+).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+const todaySession = weekSessions.find(
+  (session) => session.plannedDate === todayKey,
+);function HomeView() {
     return (
       <>
         <section className="mobile-home-hero">
