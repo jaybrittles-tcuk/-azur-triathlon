@@ -619,66 +619,79 @@ const todaySession = weekSessions.find(
           />
         </section>
 
-        <section className="panel">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">CURRENT WEEK</span>
-              <h3>{totalHours.toFixed(1)} hours planned</h3>
-            </div>
+<section className="panel today-training-card">
+  <div className="today-training-heading">
+    <div>
+      <span className="eyebrow">TODAY</span>
+      <h3>
+        {now.toLocaleDateString('en-GB', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+        })}
+      </h3>
+    </div>
 
-            <span className="status-pill">
-              Long-course foundation
-            </span>
-          </div>
+    <button onClick={() => setActiveNav('Calendar')}>
+      View calendar
+    </button>
+  </div>
 
-          <div className="session-strip">
-            {days.map((day) => {
-              const daySessions = weekSessions.filter(
-                (session) => session.dayLabel === day,
-              );
+  {todaySession ? (
+    <div
+      className={`today-workout ${todaySession.sport}`}
+      onClick={() => {
+        setSelectedId(todaySession.id);
+        setActiveNav('Calendar');
+      }}
+    >
+      <div className="today-workout-top">
+        <span className="today-sport">
+          {sportName(todaySession.sport)}
+        </span>
 
-              const duration = daySessions.reduce(
-                (total, session) => total + session.durationMin,
-                0,
-              );
+        <span className="today-priority">
+          P{todaySession.priority}
+        </span>
+      </div>
 
-              return (
-                <article
-                  key={day}
-                  className="session-card"
-                  onClick={() => {
-                    if (daySessions[0]) {
-                      setSelectedId(daySessions[0].id);
-                      setActiveNav('Calendar');
-                    }
-                  }}
-                >
-                  <span className="day">{day}</span>
+      <h2>{todaySession.title}</h2>
 
-                  <strong>
-                    {daySessions.length
-                      ? daySessions
-                          .map((session) => session.title)
-                          .join(' + ')
-                      : 'Recovery'}
-                  </strong>
+      <p className="today-target">
+        {Object.values(todaySession.targets)[0]?.toString()}
+      </p>
 
-                  <small>{formatDuration(duration)}</small>
+      <div className="today-workout-stats">
+        <div>
+          <span>DURATION</span>
+          <strong>
+            {formatDuration(todaySession.durationMin)}
+          </strong>
+        </div>
 
-                  {daySessions.length > 0 && (
-                    <span className="priority">
-                      {daySessions.some(
-                        (session) => session.priority === 1,
-                      )
-                        ? 'P1'
-                        : 'P2'}
-                    </span>
-                  )}
-                </article>
-              );
-            })}
-          </div>
-        </section>
+        <div>
+          <span>SESSION</span>
+          <strong>{todaySession.sessionClass}</strong>
+        </div>
+
+        <div>
+          <span>STATUS</span>
+          <strong>{todaySession.status}</strong>
+        </div>
+      </div>
+
+      <div className="today-workout-cta">
+        View workout
+        <span>→</span>
+      </div>
+    </div>
+  ) : (
+    <div className="today-rest">
+      <strong>Recovery day</strong>
+      <p>No structured training is planned for today.</p>
+    </div>
+  )}
+</section>
 
         <div className="two-column">
           <section className="panel">
