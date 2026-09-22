@@ -692,12 +692,22 @@ const todaySession = weekSessions.find(
       </p>
 
       <div className="today-workout-stats">
-        <div>
-          <span>DURATION</span>
-          <strong>
-            {formatDuration(todaySession.durationMin)}
-          </strong>
-        </div>
+<div>
+  <span>
+    {todaySession.status === 'completed'
+      ? 'PLANNED / DONE'
+      : 'DURATION'}
+  </span>
+
+  <strong>
+    {todaySession.status === 'completed' &&
+    todaySession.completedDurationSec
+      ? `${formatDuration(todaySession.durationMin)} / ${formatDuration(
+          Math.round(todaySession.completedDurationSec / 60),
+        )}`
+      : formatDuration(todaySession.durationMin)}
+  </strong>
+</div>
 
         <div>
           <span>SESSION</span>
