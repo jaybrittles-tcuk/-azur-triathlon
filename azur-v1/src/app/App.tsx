@@ -429,7 +429,9 @@ async function loadPlannedSessions(userId: string) {
   const { data: completedActivities, error: completedError } =
     await supabase
       .from('completed_activity')
-    .select('planned_session_id, duration_sec')
+ .select(
+  'planned_session_id, duration_sec, distance_m, processed_metrics',
+)
       .eq('athlete_id', athlete.id)
       .not('planned_session_id', 'is', null);
 
