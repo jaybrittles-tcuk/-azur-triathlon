@@ -414,6 +414,26 @@ async function loadPlannedSessions(userId: string) {
     return;
   }
 
+  const { data: completedActivities, error: completedError } =
+    await supabase
+      .from('completed_activity')
+      .select('planned_session_id')
+      .eq('athlete_id', athlete.id)
+      .not('planned_session_id', 'is', null);
+
+  if (completedError) {
+    console.error(
+      'Unable to load completed activities:',
+      completedError,
+    );
+  }
+
+  const completedSessionIds = new Set(
+    (completedActivities ?? [])
+      .map((activity) => activity.planned_session_id)
+      .filter(Boolean),
+  );
+
   const liveSessions: Session[] = data.map((session) => ({
     id: session.id,
     seasonWeekId: '',
