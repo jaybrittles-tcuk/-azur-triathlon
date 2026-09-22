@@ -447,7 +447,9 @@ async function loadPlannedSessions(userId: string) {
     prescription: session.prescription ?? {},
     rationale: session.rationale ?? '',
     terrain: session.terrain ?? '',
-    status: session.status,
+       status: completedSessionIds.has(session.id)
+      ? 'completed'
+      : session.status,
     locked: session.locked,
     version: session.version,
     dayLabel: new Date(
