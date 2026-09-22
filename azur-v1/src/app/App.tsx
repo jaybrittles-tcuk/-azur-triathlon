@@ -461,10 +461,31 @@ const completedBySessionId = new Map(
     title: session.title,
     sessionClass: session.session_class,
     priority: session.priority,
-    durationMin: session.duration_min,
-    completedDurationSec:
+durationMin: session.duration_min,
+
+completedDurationSec:
   completedBySessionId.get(session.id)?.duration_sec ?? undefined,
-    targets: session.targets ?? {},
+
+completedDistanceM:
+  completedBySessionId.get(session.id)?.distance_m != null
+    ? Number(completedBySessionId.get(session.id)?.distance_m)
+    : undefined,
+
+completedMetrics: (() => {
+  const metrics =
+    completedBySessionId.get(session.id)?.processed_metrics ?? {};
+
+  return {
+    averagePower: metrics.average_power,
+    normalizedPower: metrics.normalized_power,
+    averageHeartRate: metrics.average_heart_rate,
+    maxHeartRate: metrics.max_heart_rate,
+    calories: metrics.calories,
+    trainingLoad: metrics.training_load,
+  };
+})(),
+
+targets: session.targets ?? {},
     prescription: session.prescription ?? {},
     rationale: session.rationale ?? '',
     terrain: session.terrain ?? '',
