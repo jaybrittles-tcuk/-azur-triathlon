@@ -1225,6 +1225,25 @@ const todaySession = weekSessions.find(
                 {selected.completedMetrics.trainingLoad ?? '—'}
               </strong>
             </div>
+            <div>
+  <span>CALORIES</span>
+  <strong>
+    {selected.completedMetrics.calories
+      ? `${selected.completedMetrics.calories} kcal`
+      : '—'}
+  </strong>
+</div>
+
+<div>
+  <span>SOURCE</span>
+  <strong>
+    {selected.completedSource
+      ? selected.completedSource
+          .replaceAll('_', ' ')
+          .toUpperCase()
+      : '—'}
+  </strong>
+</div>
           </div>
         </div>
       )}
