@@ -715,7 +715,7 @@ const todaySession = weekSessions.find(
           <div className="coach-insight-focus">
             <div>
               <span>FOCUS</span>
-              <strong>Bike threshold</strong>
+            <strong>Threshold power</strong>
             </div>
 
             <div>
