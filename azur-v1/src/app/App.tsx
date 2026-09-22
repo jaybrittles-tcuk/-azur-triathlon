@@ -557,12 +557,12 @@ const daysToRace = primaryRace.raceDate
     setWeekVersion((current) => current + 1);
   }
 
-  function HomeView() {
+function HomeView() {
     return (
       <>
-
-  <div
-    className="race-hero-card"
+        <section className="mobile-home-hero">
+          <div
+            className="race-hero-card"
     style={{
       backgroundImage:
         "linear-gradient(180deg, rgba(4,15,28,0.10) 0%, rgba(4,15,28,0.92) 100%), url('/race-images/roth.jpg')",
