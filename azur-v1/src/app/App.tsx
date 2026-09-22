@@ -560,11 +560,6 @@ const daysToRace = primaryRace.raceDate
   function HomeView() {
     return (
       <>
-        <section className="mobile-home-hero">
-  <div className="mobile-home-welcome">
-    <span>Welcome back,</span>
-    <strong>{athleteName}</strong>
-  </div>
 
   <div
     className="race-hero-card"
