@@ -22,7 +22,7 @@ import {
 
 import type { PlannedSession, Sport } from '../domain/types';
 import { supabase } from '../lib/supabase';
-
+import { keySessionExecution } from '../lib/calculations/sessionExecution';
 
 
 const navigation = [
