@@ -2449,3 +2449,27 @@ nav {
 .completed-session-metrics > div:last-child strong {
   color: #61d99a;
 }
+/* WORKOUT DETAIL — TEXT CONTRAST FIX */
+
+.editor-panel .session-block > strong,
+.editor-panel .session-block-item strong {
+  color: #10243a !important;
+}
+
+.editor-panel .session-block-item div {
+  color: #10243a !important;
+}
+
+.editor-panel .session-block-item small {
+  color: #71839a !important;
+}
+
+/* Keep completed-session card text on dark background */
+.editor-panel .completed-session-summary strong {
+  color: #ffffff !important;
+}
+
+.editor-panel .completed-session-summary
+.completed-session-metrics > div:last-child strong {
+  color: #61d99a !important;
+}
