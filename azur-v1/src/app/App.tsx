@@ -472,7 +472,10 @@ completedDistanceM:
   completedBySessionId.get(session.id)?.distance_m != null
     ? Number(completedBySessionId.get(session.id)?.distance_m)
     : undefined,
-
+    
+completedSource:
+  completedBySessionId.get(session.id)?.source ?? undefined,
+    
 completedMetrics: (() => {
   const metrics =
     completedBySessionId.get(session.id)?.processed_metrics ?? {};
