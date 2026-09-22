@@ -633,13 +633,14 @@ if (session?.user) {
     }),
   );
 
-  return {
-    intervals,
-    completed: intervals.length,
-    onTarget: intervals.filter(
-      (interval) => interval.onTarget,
-    ).length,
-  };
+return {
+  intervals,
+  planned: Number(plannedMainSet?.reps ?? intervals.length),
+  completed: intervals.length,
+  onTarget: intervals.filter(
+    (interval) => interval.onTarget,
+  ).length,
+};
 })();
 useEffect(() => {
   async function loadSessionFeedback() {
