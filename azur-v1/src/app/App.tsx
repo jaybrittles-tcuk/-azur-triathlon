@@ -1154,12 +1154,79 @@ const todaySession = weekSessions.find(
         </div>
 
 <div>
+<div>
   <span>MATCH STATUS</span>
   <strong>Matched</strong>
 </div>
       </div>
+
+      {selected.completedMetrics && (
+        <div className="completed-activity-details">
+          <div className="completed-activity-title">
+            <span>ACTIVITY DATA</span>
+
+            {selected.completedMetrics.isTest && (
+              <span className="test-data-badge">TEST DATA</span>
+            )}
+          </div>
+
+          <div className="completed-activity-grid">
+            <div>
+              <span>DISTANCE</span>
+              <strong>
+                {selected.completedDistanceM
+                  ? `${(selected.completedDistanceM / 1000).toFixed(1)} km`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>AVG POWER</span>
+              <strong>
+                {selected.completedMetrics.averagePower
+                  ? `${selected.completedMetrics.averagePower} W`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>NORMALIZED POWER</span>
+              <strong>
+                {selected.completedMetrics.normalizedPower
+                  ? `${selected.completedMetrics.normalizedPower} W`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>AVG HR</span>
+              <strong>
+                {selected.completedMetrics.averageHeartRate
+                  ? `${selected.completedMetrics.averageHeartRate} bpm`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>MAX HR</span>
+              <strong>
+                {selected.completedMetrics.maxHeartRate
+                  ? `${selected.completedMetrics.maxHeartRate} bpm`
+                  : '—'}
+              </strong>
+            </div>
+
+            <div>
+              <span>TRAINING LOAD</span>
+              <strong>
+                {selected.completedMetrics.trainingLoad ?? '—'}
+              </strong>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-    )}
+  )}
 
 <div className="wide session-block">
   <span className="eyebrow">PRIMARY TARGET</span>
