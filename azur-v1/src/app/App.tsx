@@ -547,6 +547,18 @@ if (session?.user) {
   const selected =
     weekSessions.find((session) => session.id === selectedId) ||
     weekSessions[0];
+  const selectedExecution =
+  selected?.status === 'completed' &&
+  selected.completedDurationSec
+    ? keySessionExecution({
+        plannedDurationMin: selected.durationMin,
+        completedDurationMin:
+          selected.completedDurationSec / 60,
+        rpe: sessionFeedback.rpe
+          ? Number(sessionFeedback.rpe)
+          : undefined,
+      })
+    : null;
 useEffect(() => {
   async function loadSessionFeedback() {
     if (!selected?.id) return;
