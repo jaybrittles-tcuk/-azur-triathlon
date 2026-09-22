@@ -1807,3 +1807,8 @@ nav {
     color: #77e3a7 !important;
   }
 }
+@media (max-width: 720px) {
+  .mobile-home-hero + .hero-grid {
+    display: none;
+  }
+}
