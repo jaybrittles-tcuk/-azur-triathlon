@@ -2473,3 +2473,102 @@ nav {
 .completed-session-metrics > div:last-child strong {
   color: #61d99a !important;
 }
+/* ========================================
+   COMPLETED ACTIVITY DATA
+   ======================================== */
+
+.completed-activity-details {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.completed-activity-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.completed-activity-title > span:first-child {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+
+.test-data-badge {
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 193, 77, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 193, 77, 0.08);
+  color: #ffc14d;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+.completed-activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+
+.completed-activity-grid > div {
+  min-width: 0;
+  padding: 10px 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.completed-activity-grid > div:nth-child(3n) {
+  border-right: 0;
+}
+
+.completed-activity-grid > div:nth-last-child(-n + 3) {
+  border-bottom: 0;
+}
+
+.completed-activity-grid span {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.36);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.09em;
+}
+
+.completed-activity-grid strong {
+  display: block;
+  color: #ffffff !important;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .completed-activity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .completed-activity-grid > div {
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .completed-activity-grid > div:nth-child(3n) {
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .completed-activity-grid > div:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .completed-activity-grid > div:nth-last-child(-n + 3) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  .completed-activity-grid > div:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+}
