@@ -434,7 +434,12 @@ async function loadPlannedSessions(userId: string) {
       .map((activity) => activity.planned_session_id)
       .filter(Boolean),
   );
-
+const completedBySessionId = new Map(
+  (completedActivities ?? []).map((activity) => [
+    activity.planned_session_id,
+    activity,
+  ]),
+);
   const liveSessions: Session[] = data.map((session) => ({
     id: session.id,
     seasonWeekId: '',
@@ -444,6 +449,8 @@ async function loadPlannedSessions(userId: string) {
     sessionClass: session.session_class,
     priority: session.priority,
     durationMin: session.duration_min,
+    completedDurationSec:
+  completedBySessionId.get(session.id)?.duration_sec ?? undefined,
     targets: session.targets ?? {},
     prescription: session.prescription ?? {},
     rationale: session.rationale ?? '',
