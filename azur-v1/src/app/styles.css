@@ -1995,3 +1995,173 @@ nav {
     color: rgba(255, 255, 255, 0.55);
   }
 }
+/* TODAY CARD — PREMIUM MOBILE REFINEMENT */
+
+@media (max-width: 720px) {
+
+  .today-training-card {
+    margin-top: 24px !important;
+  }
+
+  .today-training-heading {
+    display: block !important;
+    margin-bottom: 12px !important;
+  }
+
+  .today-training-heading h3 {
+    margin: 5px 0 0 !important;
+    font-size: 18px !important;
+    font-weight: 750 !important;
+    color: rgba(255,255,255,0.72) !important;
+  }
+
+  .today-training-heading button {
+    display: none !important;
+  }
+
+  .today-workout {
+    padding: 22px !important;
+    border: 1px solid rgba(120, 170, 215, 0.15) !important;
+    border-left: 1px solid rgba(120, 170, 215, 0.15) !important;
+    border-radius: 24px !important;
+
+    background:
+      radial-gradient(
+        circle at 100% 0%,
+        rgba(22, 142, 255, 0.14),
+        transparent 38%
+      ),
+      linear-gradient(
+        145deg,
+        #0d1b2a 0%,
+        #091522 100%
+      ) !important;
+
+    box-shadow:
+      0 18px 45px rgba(0,0,0,0.22),
+      inset 0 1px 0 rgba(255,255,255,0.03) !important;
+  }
+
+  .today-workout-top {
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 15px !important;
+  }
+
+  .today-sport,
+  .today-priority {
+    display: inline-flex !important;
+    align-items: center !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .today-sport {
+    padding: 6px 10px !important;
+    border-radius: 999px !important;
+    background: rgba(243,179,61,0.12) !important;
+    border: 1px solid rgba(243,179,61,0.22) !important;
+    color: #f3b33d !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+  }
+
+  .today-priority {
+    padding: 6px 10px !important;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.09) !important;
+    color: rgba(255,255,255,0.68) !important;
+    font-size: 10px !important;
+  }
+
+  .today-workout h2 {
+    margin: 0 !important;
+    max-width: 90%;
+    font-size: 25px !important;
+    line-height: 1.08 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.035em !important;
+  }
+
+  .today-target {
+    margin: 10px 0 22px !important;
+    color: rgba(255,255,255,0.66) !important;
+    font-size: 14px !important;
+    font-weight: 550 !important;
+  }
+
+  .today-workout-stats {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    padding: 15px 0 !important;
+    border-top: 1px solid rgba(255,255,255,0.08) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  }
+
+  .today-workout-stats > div {
+    display: block !important;
+    padding: 0 10px !important;
+    border-right: 1px solid rgba(255,255,255,0.07) !important;
+  }
+
+  .today-workout-stats > div:first-child {
+    padding-left: 0 !important;
+  }
+
+  .today-workout-stats > div:last-child {
+    padding-right: 0 !important;
+    border-right: 0 !important;
+  }
+
+  .today-workout-stats span {
+    display: block !important;
+    margin-bottom: 5px !important;
+    color: rgba(255,255,255,0.38) !important;
+    font-size: 8px !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .today-workout-stats strong {
+    display: block !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+  }
+
+  .today-workout-cta {
+    display: flex !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    margin-top: 18px !important;
+    padding: 0 18px !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+
+    border-radius: 14px !important;
+
+    background:
+      linear-gradient(
+        135deg,
+        #1597f5,
+        #0877df
+      ) !important;
+
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+
+    box-shadow:
+      0 10px 24px rgba(8,119,223,0.22) !important;
+  }
+
+  .today-workout-cta span {
+    color: #ffffff !important;
+    font-size: 18px !important;
+  }
+}
