@@ -588,6 +588,32 @@ if (session?.user) {
   Array.isArray(selected?.prescription?.main_set)
     ? selected.prescription.main_set[0]
     : null;
+  const plannedPowerRange = (() => {
+  if (
+    selected?.sport !== 'bike' ||
+    !plannedMainSet?.ftp_percent ||
+    !athleteProfile.ftp
+  ) {
+    return null;
+  }
+
+  const percentages = String(plannedMainSet.ftp_percent)
+    .match(/\d+(?:\.\d+)?/g)
+    ?.map(Number);
+
+  if (!percentages || percentages.length < 2) {
+    return null;
+  }
+
+  return {
+    min: Math.round(
+      athleteProfile.ftp * (percentages[0] / 100),
+    ),
+    max: Math.round(
+      athleteProfile.ftp * (percentages[1] / 100),
+    ),
+  };
+})();
 useEffect(() => {
   async function loadSessionFeedback() {
     if (!selected?.id) return;
