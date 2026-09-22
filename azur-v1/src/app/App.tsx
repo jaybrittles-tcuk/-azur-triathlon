@@ -479,7 +479,28 @@ completedDistanceM:
     
 completedSource:
   completedBySessionId.get(session.id)?.source ?? undefined,
-    
+    completedIntervals: (() => {
+  const metrics =
+    completedBySessionId.get(session.id)?.processed_metrics ?? {};
+
+  const intervals = metrics.completed_intervals;
+
+  if (!Array.isArray(intervals)) {
+    return undefined;
+  }
+
+  return intervals.map((interval) => ({
+    durationSec: Number(interval.duration_sec),
+    averagePower:
+      interval.average_power != null
+        ? Number(interval.average_power)
+        : undefined,
+    averageHeartRate:
+      interval.average_heart_rate != null
+        ? Number(interval.average_heart_rate)
+        : undefined,
+  }));
+})(),
 completedMetrics: (() => {
   const metrics =
     completedBySessionId.get(session.id)?.processed_metrics ?? {};
