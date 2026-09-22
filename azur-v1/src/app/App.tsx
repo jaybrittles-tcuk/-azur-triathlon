@@ -622,16 +622,34 @@ if (session?.user) {
     return null;
   }
 
-  const intervals = selected.completedIntervals.map(
-    (interval, index) => ({
+const plannedIntervalDurationSec =
+  Number(plannedMainSet?.duration_min ?? 0) * 60;
+
+const intervals = selected.completedIntervals.map(
+  (interval, index) => {
+    const durationDifference =
+      plannedIntervalDurationSec > 0
+        ? Math.abs(
+            interval.durationSec - plannedIntervalDurationSec,
+          ) / plannedIntervalDurationSec
+        : null;
+
+    return {
       number: index + 1,
       power: interval.averagePower,
-      onTarget:
+      durationSec: interval.durationSec,
+
+      powerOnTarget:
         interval.averagePower != null &&
         interval.averagePower >= plannedPowerRange.min &&
         interval.averagePower <= plannedPowerRange.max,
-    }),
-  );
+
+      durationOnTarget:
+        durationDifference != null &&
+        durationDifference <= 0.05,
+    };
+  },
+);
 
 return {
   intervals,
