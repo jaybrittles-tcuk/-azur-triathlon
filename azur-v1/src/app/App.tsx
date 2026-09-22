@@ -639,10 +639,12 @@ const intervals = selected.completedIntervals.map(
       power: interval.averagePower,
       durationSec: interval.durationSec,
 
-  onTarget:
-        interval.averagePower != null &&
-        interval.averagePower >= plannedPowerRange.min &&
-        interval.averagePower <= plannedPowerRange.max,
+onTarget:
+  interval.averagePower != null &&
+  interval.averagePower >= plannedPowerRange.min &&
+  interval.averagePower <= plannedPowerRange.max &&
+  durationDifference != null &&
+  durationDifference <= 0.05,
 
       durationOnTarget:
         durationDifference != null &&
