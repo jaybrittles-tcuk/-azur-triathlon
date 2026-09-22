@@ -1433,6 +1433,31 @@ const todaySession = weekSessions.find(
         </div>
       ))}
     </div>
+    <div className="execution-trend">
+  <span>EXECUTION TREND</span>
+
+  <div className="execution-trend-grid">
+    <div>
+      <small>POWER CHANGE</small>
+      <strong>
+        {intervalPowerAnalysis.powerFadePct != null
+          ? `${intervalPowerAnalysis.powerFadePct.toFixed(1)}%`
+          : '—'}
+      </strong>
+      <p>First to last work interval</p>
+    </div>
+
+    <div>
+      <small>HEART RATE CHANGE</small>
+      <strong>
+        {intervalPowerAnalysis.heartRateRiseBpm != null
+          ? `${intervalPowerAnalysis.heartRateRiseBpm > 0 ? '+' : ''}${intervalPowerAnalysis.heartRateRiseBpm} bpm`
+          : '—'}
+      </strong>
+      <p>First to last work interval</p>
+    </div>
+  </div>
+</div>
   </div>
 )}
   </div>
