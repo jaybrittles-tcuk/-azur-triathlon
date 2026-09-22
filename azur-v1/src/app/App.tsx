@@ -42,8 +42,9 @@ type Session = PlannedSession & {
 
   completedDurationSec?: number;
   completedDistanceM?: number;
-
-completedMetrics?: {
+completedSource?: string;
+  
+  completedMetrics?: {
   averagePower?: number;
   normalizedPower?: number;
   averageHeartRate?: number;
