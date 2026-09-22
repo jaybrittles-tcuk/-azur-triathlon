@@ -1088,8 +1088,42 @@ const todaySession = weekSessions.find(
   <span className="eyebrow">DURATION</span>
   <strong>{formatDuration(selected.durationMin)}</strong>
 </div>
+{selected.status === 'completed' &&
+  selected.completedDurationSec && (
+    <div className="wide session-block completed-session-summary">
+      <div className="completed-session-heading">
+        <div>
+          <span className="eyebrow">SESSION COMPLETE</span>
+          <strong>Workout matched successfully</strong>
+        </div>
 
-<div className="wide session-block">
+        <span className="completed-check">✓</span>
+      </div>
+
+      <div className="completed-session-metrics">
+        <div>
+          <span>PLANNED</span>
+          <strong>
+            {formatDuration(selected.durationMin)}
+          </strong>
+        </div>
+
+        <div>
+          <span>COMPLETED</span>
+          <strong>
+            {formatDuration(
+              Math.round(selected.completedDurationSec / 60),
+            )}
+          </strong>
+        </div>
+
+        <div>
+          <span>EXECUTION</span>
+          <strong>On target</strong>
+        </div>
+      </div>
+    </div>
+  )}<div className="wide session-block">
   <span className="eyebrow">PRIMARY TARGET</span>
 
   <div className="session-block-item">
