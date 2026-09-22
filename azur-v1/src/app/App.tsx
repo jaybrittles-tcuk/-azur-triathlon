@@ -1441,7 +1441,7 @@ const todaySession = weekSessions.find(
       <small>POWER CHANGE</small>
       <strong>
         {intervalPowerAnalysis.powerFadePct != null
-          ? `${intervalPowerAnalysis.powerFadePct.toFixed(1)}%`
+         ? `${intervalPowerAnalysis.powerFadePct > 0 ? '−' : '+'}${Math.abs(intervalPowerAnalysis.powerFadePct).toFixed(1)}%`
           : '—'}
       </strong>
       <p>First to last work interval</p>
