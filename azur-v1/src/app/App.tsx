@@ -653,11 +653,28 @@ onTarget:
     };
   },
 );
+const firstInterval = intervals[0];
+const lastInterval = intervals[intervals.length - 1];
 
-return {
+const powerFadePct =
+  firstInterval?.power != null &&
+  lastInterval?.power != null &&
+  firstInterval.power > 0
+    ? ((firstInterval.power - lastInterval.power) /
+        firstInterval.power) *
+      100
+    : null;
+
+const heartRateRiseBpm =
+  firstInterval?.heartRate != null &&
+  lastInterval?.heartRate != null
+    ? lastInterval.heartRate - firstInterval.heartRate
+    : null;return {
   intervals,
   planned: Number(plannedMainSet?.reps ?? intervals.length),
   completed: intervals.length,
+  powerFadePct,
+heartRateRiseBpm,
   onTarget: intervals.filter(
     (interval) => interval.onTarget,
   ).length,
