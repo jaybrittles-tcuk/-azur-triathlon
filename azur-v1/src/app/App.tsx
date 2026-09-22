@@ -560,6 +560,41 @@ const daysToRace = primaryRace.raceDate
   function HomeView() {
     return (
       <>
+        <section className="mobile-home-hero">
+  <div className="mobile-home-welcome">
+    <span>Welcome back,</span>
+    <strong>{athleteName}</strong>
+  </div>
+
+  <div
+    className="race-hero-card"
+    style={{
+      backgroundImage:
+        "linear-gradient(180deg, rgba(4,15,28,0.10) 0%, rgba(4,15,28,0.92) 100%), url('/race-images/roth.jpg')",
+    }}
+  >
+    <div className="race-hero-top">
+      <span className="race-current-dot" />
+      <span>CURRENT · A RACE</span>
+    </div>
+
+    <div className="race-hero-content">
+      <div className="race-countdown-number">
+        {daysToRace}
+        <span> days</span>
+      </div>
+
+      <p>until</p>
+
+      <h2>{primaryRace.name || 'Challenge Roth'}</h2>
+
+      <div className="race-hero-meta">
+        <span>BASE PHASE</span>
+        <span>{totalHours.toFixed(1)}h planned this week</span>
+      </div>
+    </div>
+  </div>
+</section>
         <section className="hero-grid">
           <div className="readiness-panel green">
             <span className="eyebrow light">DAILY READINESS</span>
