@@ -693,61 +693,42 @@ const todaySession = weekSessions.find(
   )}
 </section>
 
-        <div className="two-column">
-          <section className="panel">
-            <span className="eyebrow">TOP 3 PRIORITIES</span>
-            <h3>This week</h3>
-
-            <div className="priority-list">
-              <div>
-                <span>01</span>
-                <div>
-                  <strong>Run durability</strong>
-                  <small>
-                    Current biggest long-course opportunity
-                  </small>
-                </div>
-              </div>
-
-              <div>
-                <span>02</span>
-                <div>
-                  <strong>Bike durability</strong>
-                  <small>
-                    Extend stable output late in long rides
-                  </small>
-                </div>
-              </div>
-
-              <div>
-                <span>03</span>
-                <div>
-                  <strong>Maintain threshold</strong>
-                  <small>
-                    Fitness is strong enough to preserve
-                  </small>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="panel coach-decision">
-            <span className="eyebrow">
-              LATEST COACH DECISION
+        <section className="coach-insight-card">
+          <div className="coach-insight-top">
+            <span className="coach-insight-label">
+              AZUR COACH INSIGHT
             </span>
 
-            <h3>Continue as planned</h3>
+            <span className="coach-insight-status">
+              ON TRACK
+            </span>
+          </div>
 
-            <p>
-              Recovery is stable and current training stress remains
-              appropriate for this phase.
-            </p>
+          <h3>Why today matters</h3>
 
-            <button onClick={() => setActiveNav('Weekly Review')}>
-              View rationale
-            </button>
-          </section>
-        </div>
+          <p>
+            Today’s threshold work develops your ability to sustain
+            strong, controlled power while building the durability
+            required for long-course racing.
+          </p>
+
+          <div className="coach-insight-focus">
+            <div>
+              <span>FOCUS</span>
+              <strong>Bike threshold</strong>
+            </div>
+
+            <div>
+              <span>LONG-TERM BENEFIT</span>
+              <strong>Race-day durability</strong>
+            </div>
+          </div>
+
+          <button onClick={() => setActiveNav('Weekly Review')}>
+            View coaching rationale
+            <span>→</span>
+          </button>
+        </section>
       </>
     );
   }
