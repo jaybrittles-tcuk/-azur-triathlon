@@ -1364,6 +1364,37 @@ const todaySession = weekSessions.find(
       : 'Completed training time was below plan. Azur will consider this alongside recovery, athlete feedback and upcoming sessions.'}
 </p>
     </div>
+   
+    {intervalPowerAnalysis && (
+  <div className="interval-analysis">
+    <div className="interval-analysis-heading">
+      <span>INTERVAL EXECUTION</span>
+
+      <strong>
+        {intervalPowerAnalysis.onTarget}/
+        {intervalPowerAnalysis.planned} on target
+      </strong>
+    </div>
+
+    <div className="interval-analysis-grid">
+      {intervalPowerAnalysis.intervals.map((interval) => (
+        <div key={interval.number}>
+          <span>INTERVAL {interval.number}</span>
+
+          <strong>
+            {interval.power != null
+              ? `${interval.power} W`
+              : '—'}
+          </strong>
+
+          <small>
+            {interval.onTarget ? '✓ ON TARGET' : 'OUTSIDE TARGET'}
+          </small>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
   </div>
 )}
 
