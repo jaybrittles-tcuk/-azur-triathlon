@@ -1264,7 +1264,24 @@ const todaySession = weekSessions.find(
 
 <div className="wide session-block">
   <span className="eyebrow">PRIMARY TARGET</span>
+{selectedExecution && (
+  <div className="wide session-block session-analysis-card">
+    <span className="eyebrow">AZUR SESSION ANALYSIS</span>
 
+    <div className="session-analysis-row">
+      <div>
+        <span>DURATION ADHERENCE</span>
+        <strong>
+          {Math.round(selectedExecution.duration)}%
+        </strong>
+      </div>
+
+      <p>
+        Completed duration compared with the planned session.
+      </p>
+    </div>
+  </div>
+)}
   <div className="session-block-item">
     <strong>
       {Object.values(selected.targets)[0]?.toString() || ''}
