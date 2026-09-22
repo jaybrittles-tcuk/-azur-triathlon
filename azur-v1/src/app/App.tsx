@@ -39,7 +39,18 @@ const navigation = [
 type Session = PlannedSession & {
   dayLabel: string;
   accent: string;
+
   completedDurationSec?: number;
+  completedDistanceM?: number;
+
+  completedMetrics?: {
+    averagePower?: number;
+    normalizedPower?: number;
+    averageHeartRate?: number;
+    maxHeartRate?: number;
+    calories?: number;
+    trainingLoad?: number;
+  };
 };
 
 const sessions: Session[] = [
