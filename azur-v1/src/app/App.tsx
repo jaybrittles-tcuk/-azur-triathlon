@@ -665,11 +665,13 @@ const powerFadePct =
       100
     : null;
 
-const heartRateRiseBpm =
+  heartRateRiseBpm,
   firstInterval?.heartRate != null &&
   lastInterval?.heartRate != null
     ? lastInterval.heartRate - firstInterval.heartRate
-    : null;return {
+   : null;
+
+return {
   intervals,
   planned: Number(plannedMainSet?.reps ?? intervals.length),
   completed: intervals.length,
