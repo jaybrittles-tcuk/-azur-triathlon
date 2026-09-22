@@ -614,6 +614,33 @@ if (session?.user) {
     ),
   };
 })();
+  const intervalPowerAnalysis = (() => {
+  if (
+    !plannedPowerRange ||
+    !selected?.completedIntervals?.length
+  ) {
+    return null;
+  }
+
+  const intervals = selected.completedIntervals.map(
+    (interval, index) => ({
+      number: index + 1,
+      power: interval.averagePower,
+      onTarget:
+        interval.averagePower != null &&
+        interval.averagePower >= plannedPowerRange.min &&
+        interval.averagePower <= plannedPowerRange.max,
+    }),
+  );
+
+  return {
+    intervals,
+    completed: intervals.length,
+    onTarget: intervals.filter(
+      (interval) => interval.onTarget,
+    ).length,
+  };
+})();
 useEffect(() => {
   async function loadSessionFeedback() {
     if (!selected?.id) return;
