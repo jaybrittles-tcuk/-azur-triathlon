@@ -1812,3 +1812,8 @@ nav {
     display: none;
   }
 }
+@media (max-width: 720px) {
+  .race-countdown {
+    display: none !important;
+  }
+}
