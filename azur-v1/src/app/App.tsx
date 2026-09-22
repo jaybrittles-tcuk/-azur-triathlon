@@ -43,7 +43,11 @@ type Session = PlannedSession & {
   completedDurationSec?: number;
   completedDistanceM?: number;
 completedSource?: string;
-  
+  completedIntervals?: Array<{
+  durationSec: number;
+  averagePower?: number;
+  averageHeartRate?: number;
+}>;
   completedMetrics?: {
   averagePower?: number;
   normalizedPower?: number;
