@@ -636,8 +636,9 @@ const intervals = selected.completedIntervals.map(
 
     return {
       number: index + 1,
-      power: interval.averagePower,
-      durationSec: interval.durationSec,
+power: interval.averagePower,
+heartRate: interval.averageHeartRate,
+durationSec: interval.durationSec,
 
 onTarget:
   interval.averagePower != null &&
