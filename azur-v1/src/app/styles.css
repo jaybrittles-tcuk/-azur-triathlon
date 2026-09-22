@@ -1762,3 +1762,48 @@ nav {
     color: #72baff;
   }
 }
+/* FORCE MOBILE ATHLETE HOME DARK */
+
+@media (max-width: 720px) {
+  html,
+  body,
+  #root,
+  .app-shell,
+  main {
+    background: #07111f !important;
+  }
+
+  main {
+    min-height: 100vh;
+  }
+
+  .hero-grid .metric-card {
+    background: #0c1826 !important;
+    border-color: rgba(255, 255, 255, 0.07) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  .hero-grid .metric-card strong {
+    color: #ffffff !important;
+  }
+
+  .hero-grid .metric-card small,
+  .hero-grid .metric-card span {
+    color: rgba(255, 255, 255, 0.58);
+  }
+
+  .readiness-panel {
+    background:
+      linear-gradient(
+        145deg,
+        rgba(31, 120, 87, 0.34),
+        rgba(12, 24, 38, 0.96)
+      ) !important;
+    border-color: rgba(85, 213, 151, 0.16) !important;
+  }
+
+  .readiness-panel strong {
+    color: #77e3a7 !important;
+  }
+}
