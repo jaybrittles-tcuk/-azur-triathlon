@@ -43,14 +43,15 @@ type Session = PlannedSession & {
   completedDurationSec?: number;
   completedDistanceM?: number;
 
-  completedMetrics?: {
-    averagePower?: number;
-    normalizedPower?: number;
-    averageHeartRate?: number;
-    maxHeartRate?: number;
-    calories?: number;
-    trainingLoad?: number;
-  };
+completedMetrics?: {
+  averagePower?: number;
+  normalizedPower?: number;
+  averageHeartRate?: number;
+  maxHeartRate?: number;
+  calories?: number;
+  trainingLoad?: number;
+  isTest?: boolean;
+};
 };
 
 const sessions: Session[] = [
@@ -482,6 +483,7 @@ completedMetrics: (() => {
     maxHeartRate: metrics.max_heart_rate,
     calories: metrics.calories,
     trainingLoad: metrics.training_load,
+    isTest: metrics.test_fixture === true,
   };
 })(),
 
