@@ -39,6 +39,7 @@ const navigation = [
 type Session = PlannedSession & {
   dayLabel: string;
   accent: string;
+  completedDurationSec?: number;
 };
 
 const sessions: Session[] = [
