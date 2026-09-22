@@ -1817,3 +1817,181 @@ nav {
     display: none !important;
   }
 }
+/* ========================================
+   PREMIUM TODAY TRAINING CARD
+   ======================================== */
+
+@media (max-width: 720px) {
+  .today-training-card {
+    margin-top: 20px;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .today-training-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .today-training-heading .eyebrow {
+    color: #5eb4ff !important;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+
+  .today-training-heading h3 {
+    margin: 3px 0 0;
+    color: #ffffff;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+  }
+
+  .today-training-heading button {
+    border: 0;
+    padding: 0 0 2px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .today-workout {
+    position: relative;
+    overflow: hidden;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    background:
+      radial-gradient(
+        circle at 100% 0%,
+        rgba(15, 127, 229, 0.20),
+        transparent 42%
+      ),
+      linear-gradient(145deg, #101e2e, #0a1522);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.20);
+    cursor: pointer;
+  }
+
+  .today-workout.bike {
+    border-left: 3px solid #f3b33d;
+  }
+
+  .today-workout.run {
+    border-left: 3px solid #59c982;
+  }
+
+  .today-workout.swim {
+    border-left: 3px solid #4aa8ff;
+  }
+
+  .today-workout-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .today-sport {
+    color: rgba(255, 255, 255, 0.60);
+    font-size: 11px;
+    font-weight: 850;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .today-priority {
+    padding: 5px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 850;
+  }
+
+  .today-workout h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 23px;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+  }
+
+  .today-target {
+    margin: 9px 0 20px;
+    color: #8bc9ff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .today-workout-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 14px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .today-workout-stats > div {
+    min-width: 0;
+  }
+
+  .today-workout-stats span {
+    display: block;
+    margin-bottom: 4px;
+    color: rgba(255, 255, 255, 0.38);
+    font-size: 8px;
+    font-weight: 850;
+    letter-spacing: 0.10em;
+  }
+
+  .today-workout-stats strong {
+    display: block;
+    overflow: hidden;
+    color: #ffffff !important;
+    font-size: 12px;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    text-transform: capitalize;
+    white-space: nowrap;
+  }
+
+  .today-workout-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .today-workout-cta span {
+    color: #5eb4ff;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .today-rest {
+    padding: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px;
+    background: #0c1826;
+  }
+
+  .today-rest strong {
+    color: #ffffff;
+  }
+
+  .today-rest p {
+    margin-bottom: 0;
+    color: rgba(255, 255, 255, 0.55);
+  }
+}
