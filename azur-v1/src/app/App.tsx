@@ -584,6 +584,10 @@ if (session?.user) {
           : undefined,
       })
     : null;
+  const plannedMainSet =
+  Array.isArray(selected?.prescription?.main_set)
+    ? selected.prescription.main_set[0]
+    : null;
 useEffect(() => {
   async function loadSessionFeedback() {
     if (!selected?.id) return;
