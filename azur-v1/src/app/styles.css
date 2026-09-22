@@ -2295,3 +2295,37 @@ nav {
     font-size: 17px;
   }
 }
+/* COACH INSIGHT — PREMIUM CTA */
+
+@media (max-width: 720px) {
+  .coach-insight-card button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+
+    width: 100% !important;
+    min-height: 48px !important;
+    margin-top: 18px !important;
+    padding: 0 18px !important;
+
+    border: 1px solid rgba(40, 169, 255, 0.72) !important;
+    border-radius: 999px !important;
+
+    background: rgba(15, 127, 229, 0.04) !important;
+
+    color: #4db4ff !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+
+    box-shadow:
+      inset 0 0 18px rgba(15, 127, 229, 0.035) !important;
+  }
+
+  .coach-insight-card button span {
+    color: #4db4ff !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+  }
+}
