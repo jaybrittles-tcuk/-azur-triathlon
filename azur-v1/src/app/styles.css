@@ -1705,3 +1705,60 @@ nav {
     color: rgba(255, 255, 255, 0.78);
   }
 }
+/* MOBILE HOME DARK SHELL */
+
+@media (max-width: 720px) {
+  body {
+    background: #07111f;
+  }
+
+  main {
+    background:
+      radial-gradient(
+        circle at 85% 5%,
+        rgba(15, 127, 229, 0.14),
+        transparent 28%
+      ),
+      #07111f;
+    color: #ffffff;
+  }
+
+  main > .topbar h2 {
+    color: #ffffff;
+  }
+
+  main > .topbar p {
+    color: rgba(255, 255, 255, 0.58);
+  }
+
+  .mobile-home-hero + .hero-grid .metric-card,
+  .mobile-home-hero + .hero-grid .readiness-panel {
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+  }
+
+  .mobile-home-hero ~ .panel,
+  .mobile-home-hero ~ .two-column .panel {
+    background: #0c1826;
+    border-color: rgba(255, 255, 255, 0.07);
+    box-shadow: none;
+    color: #ffffff;
+  }
+
+  .mobile-home-hero ~ .panel h3,
+  .mobile-home-hero ~ .two-column .panel h3,
+  .mobile-home-hero ~ .panel strong,
+  .mobile-home-hero ~ .two-column .panel strong {
+    color: #ffffff;
+  }
+
+  .mobile-home-hero ~ .panel small,
+  .mobile-home-hero ~ .two-column .panel small {
+    color: rgba(255, 255, 255, 0.58);
+  }
+
+  .mobile-home-hero ~ .panel .eyebrow,
+  .mobile-home-hero ~ .two-column .panel .eyebrow {
+    color: #72baff;
+  }
+}
