@@ -704,13 +704,13 @@ const todaySession = weekSessions.find(
             </span>
           </div>
 
-          <h3>Why today matters</h3>
+<h3>Why today matters</h3>
 
-          <p>
-            Today’s threshold work develops your ability to sustain
-            strong, controlled power while building the durability
-            required for long-course racing.
-          </p>
+<p>
+  Today’s threshold session builds sustainable bike power
+  while improving your ability to hold it late in
+  long-course racing.
+</p>
 
           <div className="coach-insight-focus">
             <div>
