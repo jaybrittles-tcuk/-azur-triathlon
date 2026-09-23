@@ -63,3 +63,17 @@ export function calculateBikeTrainingStress(args: {
     intensityFactor,
   };
 }
+export function isTrainingLoadEligible(args: {
+  source?: string;
+  isTest?: boolean;
+}) {
+  if (args.isTest === true) {
+    return false;
+  }
+
+  if (args.source === 'manual_test') {
+    return false;
+  }
+
+  return true;
+}
