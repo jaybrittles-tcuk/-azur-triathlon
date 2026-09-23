@@ -1512,6 +1512,10 @@ const todaySession = weekSessions.find(
 )}
   </div>
 )}
+  </div>
+)}
+  </div>
+)}
 
 <div className="wide session-block">
   <span className="eyebrow">PRIMARY TARGET</span>
