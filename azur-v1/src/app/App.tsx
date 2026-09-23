@@ -867,7 +867,15 @@ useEffect(() => {
   }
 
   loadRecoveryContext();
-}, [selected?.plannedDate]);const totalMinutes = useMemo(
+}, [selected?.plannedDate]);
+  const hasRecoveryData =
+  recoveryContext.hrvVs30dPct != null &&
+  recoveryContext.rhrVs30dPct != null &&
+  recoveryContext.sleepVs30dPct != null &&
+  recoveryContext.priorDayRpe != null &&
+  recoveryContext.loadFatigueSignal != null &&
+  recoveryContext.niggleSeverity != null;
+  const totalMinutes = useMemo(
     () =>
       weekSessions.reduce(
         (total, session) => total + session.durationMin,
