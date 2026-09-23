@@ -1308,9 +1308,12 @@ const todaySession = weekSessions.find(
 <h3>Why today matters</h3>
 
 <p>
-  Today’s threshold session builds sustainable bike power
-  while improving your ability to hold it late in
-  long-course racing.
+  {todaySession
+    ? todaySession.rationale ||
+      `Today's ${sportName(
+        todaySession.sport,
+      ).toLowerCase()} session supports your current training focus.`
+    : 'Today is a recovery day. Recovery supports adaptation from recent training.'}
 </p>
 
           <div className="coach-insight-focus">
