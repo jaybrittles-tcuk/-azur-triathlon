@@ -374,13 +374,49 @@ useEffect(() => {
         ...activity,
         calculatedStress: result?.stress ?? null,
       };
-    });
+    })
+    .filter((activity) => activity.calculatedStress != null);
 
-  console.log(
-    'Azur eligible bike training stress:',
-    bikeActivitiesWithStress,
+  if (bikeActivitiesWithStress.length === 0) {
+    return;
+  }
+
+  const stressByDate = new Map<string, number>();
+
+  bikeActivitiesWithStress.forEach((activity) => {
+    const date = new Date(activity.start_time)
+      .toISOString()
+      .slice(0, 10);
+
+    stressByDate.set(
+      date,
+      (stressByDate.get(date) ?? 0) + activity.calculatedStress,
+    );
+  });
+
+  const firstDate = new Date(
+    bikeActivitiesWithStress[0].start_time,
   );
-}, [trainingLoadActivities, athleteProfile.ftp]);
+
+  const today = new Date();
+
+  const dailyStress = [];
+
+  for (
+    let date = new Date(firstDate);
+    date <= today;
+    date.setDate(date.getDate() + 1)
+  ) {
+    const dateKey = date.toISOString().slice(0, 10);
+
+    dailyStress.push({
+      date: dateKey,
+      stress: stressByDate.get(dateKey) ?? 0,
+    });
+  }
+
+  console.log('Azur daily training stress:', dailyStress);
+}, [trainingLoadActivities, athleteProfile.ftp]); [trainingLoadActivities, athleteProfile.ftp]);
   const [recoveryContext, setRecoveryContext] = useState({
   hrvVs30dPct: null as number | null,
   rhrVs30dPct: null as number | null,
