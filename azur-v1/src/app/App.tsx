@@ -336,6 +336,15 @@ const [sessionFeedback, setSessionFeedback] = useState({
 
 const [sessionFeedbackSaving, setSessionFeedbackSaving] = useState(false);
 const [sessionFeedbackMessage, setSessionFeedbackMessage] = useState('');
+  const [recoveryContext, setRecoveryContext] = useState({
+  hrvVs30dPct: null as number | null,
+  rhrVs30dPct: null as number | null,
+  sleepVs30dPct: null as number | null,
+  priorDayRpe: null as number | null,
+  loadFatigueSignal: null as number | null,
+  niggleSeverity: null as number | null,
+  poorDaysLast3: 0,
+});
   const [decision, setDecision] = useState<
     'pending' | 'accepted' | 'rejected'
   >('pending');
