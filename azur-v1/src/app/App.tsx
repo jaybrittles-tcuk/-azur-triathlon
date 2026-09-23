@@ -1494,7 +1494,7 @@ const todaySession = weekSessions.find(
     </div>
   </div>
       
-      {intervalInterpretation && (
+  {intervalInterpretation && (
   <div className="azur-interpretation">
     <span>AZUR INTERPRETATION</span>
 
@@ -1507,7 +1507,6 @@ const todaySession = weekSessions.find(
     )}
   </div>
 )}
-</div>
   </div>
 )}
   </div>
