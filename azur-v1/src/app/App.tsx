@@ -230,7 +230,7 @@ function ProgressRow({
   text,
 }: {
   label: string;
-  value: number;
+  value: number | null;
   text: string;
 }) {
   return (
@@ -241,8 +241,17 @@ function ProgressRow({
       </div>
 
       <div className="progress-track">
-        <span style={{ width: `${value}%` }} />
+        <span
+          style={{
+            width: value != null ? `${value}%` : '0%',
+          }}
+        />
       </div>
+
+      <b>{value != null ? `${value}%` : '—'}</b>
+    </div>
+  );
+}
 
       <b>{value}%</b>
     </div>
