@@ -455,14 +455,14 @@ async function loadPlannedSessions(userId: string) {
     return;
   }
 
-  const { data: completedActivities, error: completedError } =
-    await supabase
-      .from('completed_activity')
-.select(
-  'planned_session_id, duration_sec, distance_m, source, processed_metrics',
-)
-      .eq('athlete_id', athlete.id)
-      .not('planned_session_id', 'is', null);
+const { data: completedActivities, error: completedError } =
+  await supabase
+    .from('completed_activity')
+    .select(
+      'planned_session_id, sport, start_time, duration_sec, distance_m, source, processed_metrics',
+    )
+    .eq('athlete_id', athlete.id)
+    .order('start_time', { ascending: true });
 
   if (completedError) {
     console.error(
