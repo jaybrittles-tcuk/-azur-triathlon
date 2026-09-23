@@ -778,7 +778,47 @@ const prescribedRpeMin =
   recoveryReadiness?.color === 'red';
 
 const recoveryIsRed =
-  recoveryReadiness?.color === 'red';return {
+return {
+  status:
+    !allIntervalsOnTarget ||
+    rpeAboveTarget ||
+    recoveryNeedsReview
+      ? 'REVIEW'
+      : 'MAINTAIN',
+
+  title:
+    recoveryIsRed
+      ? 'Recovery signals require attention'
+      : recoveryNeedsReview
+        ? 'Recovery signals suggest caution'
+        : allIntervalsOnTarget && rpeAboveTarget
+          ? 'Execution achieved — monitor response'
+          : allIntervalsOnTarget
+            ? 'Continue current progression'
+            : 'Review before progressing',
+
+  summary:
+    recoveryIsRed
+      ? 'Your recovery signals indicate elevated strain around this session. Workout execution should be considered alongside this recovery context before increasing training demand.'
+      : recoveryNeedsReview
+        ? 'Your recovery signals suggest some accumulated fatigue. This does not automatically require a plan change, but it adds important context to the session response.'
+        : allIntervalsOnTarget && rpeAboveTarget
+          ? `The prescribed interval work was achieved, but your reported RPE of ${athleteRpe} was above the prescribed RPE range of ${prescribedRpeMin}–${prescribedRpeMax}. This suggests the session required more effort than intended.`
+          : allIntervalsOnTarget
+            ? 'This session supports your current threshold development focus. One successful workout is not enough evidence to increase training demand.'
+            : 'Part of the prescribed interval work was missed. Azur will consider this alongside recovery and athlete feedback before recommending any change.',
+
+  nextStep:
+    recoveryIsRed
+      ? 'Review recovery and training stress before progressing the next key session. Azur will not change the plan without athlete approval.'
+      : recoveryNeedsReview
+        ? 'Maintain or adjust training only when the wider recovery trend and upcoming session demands support it. Any plan change requires athlete approval.'
+        : allIntervalsOnTarget && rpeAboveTarget
+          ? 'No plan change is recommended from this session alone. Azur will compare your next sessions and recovery data before deciding whether progression is appropriate.'
+          : allIntervalsOnTarget
+            ? 'Azur will compare this execution with upcoming threshold sessions, recovery and athlete feedback before recommending progression.'
+            : 'Maintain the current plan until execution, recovery and athlete feedback provide enough evidence for a coaching decision.',
+};
   status:
     !allIntervalsOnTarget || rpeAboveTarget
       ? 'REVIEW'
