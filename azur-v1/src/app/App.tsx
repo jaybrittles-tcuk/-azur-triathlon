@@ -2023,7 +2023,7 @@ const todaySession = weekSessions.find(
   }
   hint={`${trainingLoad.eligibleActivities} eligible activities`}
 />
-
+</section> 
         <div className="two-column">
           <section className="panel">
             <span className="eyebrow">
