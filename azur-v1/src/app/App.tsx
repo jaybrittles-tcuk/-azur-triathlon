@@ -2707,11 +2707,15 @@ function WeeklyReviewView() {
           hint="+2 points"
         />
 
-        <Metric
-          label="COACH DECISION"
-          value="CONTINUE"
-          hint="Current recommendation"
-        />
+<Metric
+  label="WEEKLY LOAD"
+  value={
+    trainingLoad.weeklyStress != null
+      ? String(trainingLoad.weeklyStress)
+      : '—'
+  }
+  hint={`${trainingLoad.eligibleActivities} eligible activities`}
+/>
       </section>
 
       <div className="two-column">
