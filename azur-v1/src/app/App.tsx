@@ -339,8 +339,18 @@ const [sessionFeedback, setSessionFeedback] = useState({
 
 const [sessionFeedbackSaving, setSessionFeedbackSaving] = useState(false);
 const [sessionFeedbackMessage, setSessionFeedbackMessage] = useState('');
-  const [recoveryContext, setRecoveryContext] = useState({
-    const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
+
+const [trainingLoad, setTrainingLoad] = useState({
+  fitness: null as number | null,
+  fatigue: null as number | null,
+  form: null as number | null,
+  weeklyStress: null as number | null,
+  eligibleActivities: 0,
+});
+
+const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
+
+const [recoveryContext, setRecoveryContext] = useState({
   hrvVs30dPct: null as number | null,
   rhrVs30dPct: null as number | null,
   sleepVs30dPct: null as number | null,
