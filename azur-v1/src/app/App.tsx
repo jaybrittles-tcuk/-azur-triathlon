@@ -1493,6 +1493,19 @@ const todaySession = weekSessions.find(
       <p>First to last work interval</p>
     </div>
   </div>
+      {intervalInterpretation && (
+  <div className="azur-interpretation">
+    <span>AZUR INTERPRETATION</span>
+
+    <strong>{intervalInterpretation.title}</strong>
+
+    <p>{intervalInterpretation.summary}</p>
+
+    {intervalInterpretation.trend && (
+      <p>{intervalInterpretation.trend}</p>
+    )}
+  </div>
+)}
 </div>
   </div>
 )}
