@@ -26,9 +26,11 @@ import { keySessionExecution } from '../lib/calculations/sessionExecution';
 import { dailyReadiness } from '../lib/calculations/recovery';
 import {
   calculateBikeTrainingStress,
+  calculateRunTrainingStress,
+  calculateSwimTrainingStress,
   calculateTrainingLoad,
   isTrainingLoadEligible,
-} from '../lib/calculations/trainingLoad';const navigation = [
+} from '../lib/calculations/trainingLoad';
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
   [TrendingUp, 'Performance'],
