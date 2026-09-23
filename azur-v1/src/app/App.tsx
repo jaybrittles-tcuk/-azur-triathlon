@@ -821,32 +821,7 @@ return {
             ? 'Azur will compare this execution with upcoming threshold sessions, recovery and athlete feedback before recommending progression.'
             : 'Maintain the current plan until execution, recovery and athlete feedback provide enough evidence for a coaching decision.',
 };
-  status:
-    !allIntervalsOnTarget || rpeAboveTarget
-      ? 'REVIEW'
-      : 'MAINTAIN',
-
-  title:
-    allIntervalsOnTarget && rpeAboveTarget
-      ? 'Execution achieved — monitor response'
-      : allIntervalsOnTarget
-        ? 'Continue current progression'
-        : 'Review before progressing',
-
-  summary:
-    allIntervalsOnTarget && rpeAboveTarget
-? `The prescribed interval work was achieved, but your reported RPE of ${athleteRpe} was above the prescribed RPE range of ${prescribedRpeMin}–${prescribedRpeMax}. This suggests the session required more effort than intended.`
-      : allIntervalsOnTarget
-        ? 'This session supports your current threshold development focus. One successful workout is not enough evidence to increase training demand.'
-        : 'Part of the prescribed interval work was missed. Azur will consider this alongside recovery and athlete feedback before recommending any change.',
-
-  nextStep:
-    allIntervalsOnTarget && rpeAboveTarget
-      ? 'No plan change is recommended from this session alone. Azur will compare your next sessions and recovery data before deciding whether progression is appropriate.'
-      : allIntervalsOnTarget
-        ? 'Azur will compare this execution with upcoming threshold sessions, recovery and athlete feedback before recommending progression.'
-        : 'Maintain the current plan until execution, recovery and athlete feedback provide enough evidence for a coaching decision.',
-};
+  
 })();
 useEffect(() => {
   async function loadSessionFeedback() {
