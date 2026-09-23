@@ -416,7 +416,7 @@ useEffect(() => {
   }
 
   console.log('Azur daily training stress:', dailyStress);
-}, [trainingLoadActivities, athleteProfile.ftp]); [trainingLoadActivities, athleteProfile.ftp]);
+}, [trainingLoadActivities, athleteProfile.ftp]);
   const [recoveryContext, setRecoveryContext] = useState({
   hrvVs30dPct: null as number | null,
   rhrVs30dPct: null as number | null,
