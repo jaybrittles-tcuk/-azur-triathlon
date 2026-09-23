@@ -718,6 +718,31 @@ heartRateRiseBpm,
         : null,
   };
 })();
+  const coachingImpact = (() => {
+  if (!intervalPowerAnalysis) {
+    return null;
+  }
+
+  const allIntervalsOnTarget =
+    intervalPowerAnalysis.onTarget ===
+    intervalPowerAnalysis.planned;
+
+  return {
+    status: allIntervalsOnTarget ? 'MAINTAIN' : 'REVIEW',
+
+    title: allIntervalsOnTarget
+      ? 'Continue current progression'
+      : 'Review before progressing',
+
+    summary: allIntervalsOnTarget
+      ? 'This session supports your current threshold development focus. One successful workout is not enough evidence to increase training demand.'
+      : 'Part of the prescribed interval work was missed. Azur will consider this alongside recovery and athlete feedback before recommending any change.',
+
+    nextStep: allIntervalsOnTarget
+      ? 'Azur will compare this execution with upcoming threshold sessions, recovery and athlete feedback before recommending progression.'
+      : 'Maintain the current plan until execution, recovery and athlete feedback provide enough evidence for a coaching decision.',
+  };
+})();
 useEffect(() => {
   async function loadSessionFeedback() {
     if (!selected?.id) return;
