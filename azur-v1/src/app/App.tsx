@@ -1317,10 +1317,14 @@ const todaySession = weekSessions.find(
 </p>
 
           <div className="coach-insight-focus">
-            <div>
-              <span>FOCUS</span>
-            <strong>Threshold power</strong>
-            </div>
+<div>
+  <span>FOCUS</span>
+  <strong>
+    {todaySession
+      ? todaySession.sessionClass
+      : 'Recovery'}
+  </strong>
+</div>
 
             <div>
               <span>LONG-TERM BENEFIT</span>
