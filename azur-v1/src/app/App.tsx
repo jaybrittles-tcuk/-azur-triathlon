@@ -2117,12 +2117,20 @@ const todaySession = weekSessions.find(
     return (
       <>
         <section className="hero-grid">
-          <div className="readiness-panel green">
-            <span className="eyebrow light">
-              TODAY'S READINESS
-            </span>
+<div
+  className={`readiness-panel ${
+    recoveryReadiness?.color ?? ''
+  }`}
+>
+  <span className="eyebrow light">
+    TODAY'S READINESS
+  </span>
 
-            <strong>GREEN</strong>
+  <strong>
+    {recoveryReadiness
+      ? recoveryReadiness.color.toUpperCase()
+      : '—'}
+  </strong>
 
             <p>
               Proceed with the planned training unless subjective feel
