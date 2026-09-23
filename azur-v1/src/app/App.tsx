@@ -2086,28 +2086,27 @@ const todaySession = weekSessions.find(
 
             <h3>Planned this week</h3>
 
-            <div className="distribution-grid">
-              <div>
-                <strong>72%</strong>
-                <span>Easy / endurance</span>
-              </div>
+<div className="distribution-grid">
+  <div>
+    <strong>—</strong>
+    <span>Easy / endurance</span>
+  </div>
 
-              <div>
-                <strong>18%</strong>
-                <span>Threshold / quality</span>
-              </div>
+  <div>
+    <strong>—</strong>
+    <span>Threshold / quality</span>
+  </div>
 
-              <div>
-                <strong>10%</strong>
-                <span>Race specific</span>
-              </div>
-            </div>
+  <div>
+    <strong>—</strong>
+    <span>Race specific</span>
+  </div>
+</div>
 
-            <p className="panel-note">
-              The current block is intentionally aerobic dominant.
-              Threshold is maintained while durability gradually
-              increases.
-            </p>
+<p className="panel-note">
+  Azur will calculate your intensity distribution from your planned
+  and completed sessions once enough training data is available.
+</p>
           </section>
         </div>
       </>
