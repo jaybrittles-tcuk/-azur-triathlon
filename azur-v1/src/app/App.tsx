@@ -1535,6 +1535,30 @@ const todaySession = weekSessions.find(
     )}
   </div>
 )}
+)}
+
+{coachingImpact && (
+  <div className="coaching-impact">
+    <div className="coaching-impact-heading">
+      <span>COACHING IMPACT</span>
+      <strong>{coachingImpact.status}</strong>
+    </div>
+
+    <h4>{coachingImpact.title}</h4>
+
+    <p>{coachingImpact.summary}</p>
+
+    <div className="coaching-impact-next">
+      <span>WHAT HAPPENS NEXT</span>
+      <p>{coachingImpact.nextStep}</p>
+    </div>
+  </div>
+)}
+
+  </div>
+)}
+  </div>
+)}
   </div>
 )}
   </div>
