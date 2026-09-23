@@ -23,7 +23,7 @@ import {
 import type { PlannedSession, Sport } from '../domain/types';
 import { supabase } from '../lib/supabase';
 import { keySessionExecution } from '../lib/calculations/sessionExecution';
-
+import { dailyReadiness } from '../lib/calculations/recovery';
 
 const navigation = [
   [Home, 'Home'],
