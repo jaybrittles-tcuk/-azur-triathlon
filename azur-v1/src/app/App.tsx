@@ -451,9 +451,41 @@ useEffect(() => {
       ? loadSeries[loadSeries.length - 1]
       : null;
 
-  console.log('Azur daily training stress:', dailyStress);
-  console.log('Azur combined training load series:', loadSeries);
-  console.log('Azur latest combined training load:', latestLoad);
+const last7Days = dailyStress.slice(-7);
+
+const weeklyStress = last7Days.reduce(
+  (total, day) => total + day.stress,
+  0,
+);
+
+const hasSufficientHistory =
+  dailyStress.length >= 42 &&
+  activitiesWithStress.length >= 8;
+
+setTrainingLoad({
+  fitness:
+    hasSufficientHistory && latestLoad
+      ? Math.round(latestLoad.fitness)
+      : null,
+
+  fatigue:
+    hasSufficientHistory && latestLoad
+      ? Math.round(latestLoad.fatigue)
+      : null,
+
+  form:
+    hasSufficientHistory && latestLoad
+      ? Math.round(latestLoad.form)
+      : null,
+
+  weeklyStress: Math.round(weeklyStress),
+
+  eligibleActivities: activitiesWithStress.length,
+});
+
+console.log('Azur daily training stress:', dailyStress);
+console.log('Azur combined training load series:', loadSeries);
+console.log('Azur latest combined training load:', latestLoad);
 }, [
   trainingLoadActivities,
   athleteProfile.ftp,
