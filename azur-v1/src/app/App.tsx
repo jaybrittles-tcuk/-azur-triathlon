@@ -1181,13 +1181,33 @@ const todaySession = weekSessions.find(
             hint="+2 points this week"
           />
 
-          <Metric label="FITNESS" value="74" hint="Long-term load" />
+ <Metric
+  label="FITNESS"
+  value={
+    trainingLoad.fitness != null
+      ? String(trainingLoad.fitness)
+      : '—'
+  }
+  hint={
+    trainingLoad.fitness != null
+      ? 'Long-term load'
+      : 'Building history'
+  }
+/>
 
-          <Metric
-            label="FORM"
-            value="-8"
-            hint="Productive, not fresh"
-          />
+<Metric
+  label="FORM"
+  value={
+    trainingLoad.form != null
+      ? String(trainingLoad.form)
+      : '—'
+  }
+  hint={
+    trainingLoad.form != null
+      ? 'Fitness minus fatigue'
+      : 'Building history'
+  }
+/>
         </section>
 
 <section className="panel today-training-card">
