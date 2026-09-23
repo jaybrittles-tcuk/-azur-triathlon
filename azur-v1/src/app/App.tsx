@@ -470,7 +470,7 @@ async function loadPlannedSessions(userId: string) {
       completedError,
     );
   }
-
+setTrainingLoadActivities(completedActivities ?? []);
   const completedSessionIds = new Set(
     (completedActivities ?? [])
       .map((activity) => activity.planned_session_id)
