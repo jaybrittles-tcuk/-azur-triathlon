@@ -31,6 +31,7 @@ import {
   calculateTrainingLoad,
   isTrainingLoadEligible,
 } from '../lib/calculations/trainingLoad';
+const navigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
   [TrendingUp, 'Performance'],
