@@ -340,6 +340,7 @@ const [sessionFeedback, setSessionFeedback] = useState({
 const [sessionFeedbackSaving, setSessionFeedbackSaving] = useState(false);
 const [sessionFeedbackMessage, setSessionFeedbackMessage] = useState('');
   const [recoveryContext, setRecoveryContext] = useState({
+    const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
   hrvVs30dPct: null as number | null,
   rhrVs30dPct: null as number | null,
   sleepVs30dPct: null as number | null,
