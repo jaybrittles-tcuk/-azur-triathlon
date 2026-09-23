@@ -682,6 +682,42 @@ heartRateRiseBpm,
   ).length,
 };
 })();
+  const intervalInterpretation = (() => {
+  if (!intervalPowerAnalysis) {
+    return null;
+  }
+
+  const allIntervalsOnTarget =
+    intervalPowerAnalysis.onTarget ===
+    intervalPowerAnalysis.planned;
+
+  const powerChange =
+    intervalPowerAnalysis.powerFadePct != null
+      ? `${intervalPowerAnalysis.powerFadePct > 0 ? '−' : '+'}${Math.abs(
+          intervalPowerAnalysis.powerFadePct,
+        ).toFixed(1)}%`
+      : null;
+
+  const heartRateChange =
+    intervalPowerAnalysis.heartRateRiseBpm != null
+      ? `${intervalPowerAnalysis.heartRateRiseBpm > 0 ? '+' : ''}${intervalPowerAnalysis.heartRateRiseBpm} bpm`
+      : null;
+
+  return {
+    title: allIntervalsOnTarget
+      ? 'Planned interval stimulus achieved'
+      : 'Planned interval stimulus partially achieved',
+
+    summary: allIntervalsOnTarget
+      ? `All ${intervalPowerAnalysis.planned} prescribed work intervals were completed within the required power and duration targets.`
+      : `${intervalPowerAnalysis.onTarget} of ${intervalPowerAnalysis.planned} prescribed work intervals were completed within the required power and duration targets.`,
+
+    trend:
+      powerChange && heartRateChange
+        ? `From the first to final work interval, power changed by ${powerChange} while heart rate changed by ${heartRateChange}.`
+        : null,
+  };
+})();
 useEffect(() => {
   async function loadSessionFeedback() {
     if (!selected?.id) return;
