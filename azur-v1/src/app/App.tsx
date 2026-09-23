@@ -726,7 +726,25 @@ heartRateRiseBpm,
   const allIntervalsOnTarget =
     intervalPowerAnalysis.onTarget ===
     intervalPowerAnalysis.planned;
+const athleteRpe = sessionFeedback.rpe
+  ? Number(sessionFeedback.rpe)
+  : null;
 
+const prescribedRpeValues = plannedMainSet?.rpe
+  ? String(plannedMainSet.rpe)
+      .match(/\d+(?:\.\d+)?/g)
+      ?.map(Number)
+  : null;
+
+const prescribedRpeMax =
+  prescribedRpeValues?.length
+    ? Math.max(...prescribedRpeValues)
+    : null;
+
+const rpeAboveTarget =
+  athleteRpe != null &&
+  prescribedRpeMax != null &&
+  athleteRpe > prescribedRpeMax;
   return {
     status: allIntervalsOnTarget ? 'MAINTAIN' : 'REVIEW',
 
