@@ -773,8 +773,12 @@ const prescribedRpeMin =
   athleteRpe != null &&
   prescribedRpeMax != null &&
   athleteRpe > prescribedRpeMax;
-    
-return {
+    const recoveryNeedsReview =
+  recoveryReadiness?.color === 'amber' ||
+  recoveryReadiness?.color === 'red';
+
+const recoveryIsRed =
+  recoveryReadiness?.color === 'red';return {
   status:
     !allIntervalsOnTarget || rpeAboveTarget
       ? 'REVIEW'
