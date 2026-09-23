@@ -2745,18 +2745,23 @@ function WeeklyReviewView() {
           COACH RECOMMENDATION
         </span>
 
-        <h3>Continue the current load</h3>
+<h3>
+  {trainingLoad.fitness != null
+    ? 'Training load review'
+    : 'Building enough history'}
+</h3>
 
-        <p>
-          <strong>Why:</strong> recovery markers are stable and
-          current training stress remains appropriate for Base 1.
-        </p>
+<p>
+  <strong>Why:</strong>{' '}
+  {trainingLoad.fitness != null
+    ? `Azur is currently tracking ${trainingLoad.weeklyStress ?? 0} stress points across the last seven days, with Fitness at ${trainingLoad.fitness}, Fatigue at ${trainingLoad.fatigue}, and Form at ${trainingLoad.form}.`
+    : 'Azur is still collecting enough eligible swim, bike and run history before making a load-based coaching recommendation.'}
+</p>
 
-        <p>
-          <strong>Long-term benefit:</strong> consistent aerobic work
-          now gives us more room to introduce race-specific stress
-          later without forcing large jumps in load.
-        </p>
+<p>
+  <strong>Long-term benefit:</strong>{' '}
+  Using genuine completed training data allows future recommendations to reflect your actual training response rather than assumed or placeholder load values.
+</p>
 
         <div className="decision-actions">
           <button
