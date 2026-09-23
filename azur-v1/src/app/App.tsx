@@ -470,7 +470,15 @@ async function loadPlannedSessions(userId: string) {
       completedError,
     );
   }
-setTrainingLoadActivities(completedActivities ?? []);
+const eligibleTrainingLoadActivities = (completedActivities ?? []).filter(
+  (activity) =>
+    isTrainingLoadEligible({
+      source: activity.source,
+      isTest: activity.processed_metrics?.is_test === true,
+    }),
+);
+
+setTrainingLoadActivities(eligibleTrainingLoadActivities);
   const completedSessionIds = new Set(
     (completedActivities ?? [])
       .map((activity) => activity.planned_session_id)
