@@ -1973,29 +1973,56 @@ const todaySession = weekSessions.find(
       <>
         <section className="hero-grid">
           <Metric
-            label="FITNESS · CTL"
-            value="74"
-            hint="+3 over four weeks"
-          />
+  label="FITNESS · CTL"
+  value={
+    trainingLoad.fitness != null
+      ? String(trainingLoad.fitness)
+      : '—'
+  }
+  hint={
+    trainingLoad.fitness != null
+      ? 'Long-term training load'
+      : 'Building history'
+  }
+/>
 
-          <Metric
-            label="FATIGUE · ATL"
-            value="82"
-            hint="Elevated after current block"
-          />
+<Metric
+  label="FATIGUE · ATL"
+  value={
+    trainingLoad.fatigue != null
+      ? String(trainingLoad.fatigue)
+      : '—'
+  }
+  hint={
+    trainingLoad.fatigue != null
+      ? 'Short-term training load'
+      : 'Building history'
+  }
+/>
 
-          <Metric
-            label="FORM · TSB"
-            value="-8"
-            hint="Productive training range"
-          />
+<Metric
+  label="FORM · TSB"
+  value={
+    trainingLoad.form != null
+      ? String(trainingLoad.form)
+      : '—'
+  }
+  hint={
+    trainingLoad.form != null
+      ? 'Fitness minus fatigue'
+      : 'Building history'
+  }
+/>
 
-          <Metric
-            label="WEEKLY LOAD"
-            value="612"
-            hint="Inside Base 1 target range"
-          />
-        </section>
+<Metric
+  label="WEEKLY LOAD"
+  value={
+    trainingLoad.weeklyStress != null
+      ? String(trainingLoad.weeklyStress)
+      : '—'
+  }
+  hint={`${trainingLoad.eligibleActivities} eligible activities`}
+/>
 
         <div className="two-column">
           <section className="panel">
