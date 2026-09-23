@@ -415,7 +415,16 @@ useEffect(() => {
     });
   }
 
-  console.log('Azur daily training stress:', dailyStress);
+const loadSeries = calculateTrainingLoad(dailyStress);
+
+const latestLoad =
+  loadSeries.length > 0
+    ? loadSeries[loadSeries.length - 1]
+    : null;
+
+console.log('Azur daily training stress:', dailyStress);
+console.log('Azur bike training load series:', loadSeries);
+console.log('Azur latest bike training load:', latestLoad);
 }, [trainingLoadActivities, athleteProfile.ftp]);
   const [recoveryContext, setRecoveryContext] = useState({
   hrvVs30dPct: null as number | null,
