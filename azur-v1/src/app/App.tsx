@@ -597,6 +597,23 @@ if (session?.user) {
   Array.isArray(selected?.prescription?.main_set)
     ? selected.prescription.main_set[0]
     : null;
+  const recoveryReadiness =
+  recoveryContext.hrvVs30dPct != null &&
+  recoveryContext.rhrVs30dPct != null &&
+  recoveryContext.sleepVs30dPct != null &&
+  recoveryContext.priorDayRpe != null &&
+  recoveryContext.loadFatigueSignal != null &&
+  recoveryContext.niggleSeverity != null
+    ? dailyReadiness({
+        hrvVs30dPct: recoveryContext.hrvVs30dPct,
+        rhrVs30dPct: recoveryContext.rhrVs30dPct,
+        sleepVs30dPct: recoveryContext.sleepVs30dPct,
+        priorDayRpe: recoveryContext.priorDayRpe,
+        loadFatigueSignal: recoveryContext.loadFatigueSignal,
+        niggleSeverity: recoveryContext.niggleSeverity,
+        poorDaysLast3: recoveryContext.poorDaysLast3,
+      })
+    : null;
   const plannedPowerRange = (() => {
   if (
     selected?.sport !== 'bike' ||
