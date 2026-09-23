@@ -778,6 +778,8 @@ const prescribedRpeMin =
   recoveryReadiness?.color === 'red';
 
 const recoveryIsRed =
+  recoveryReadiness?.color === 'red';
+
 return {
   status:
     !allIntervalsOnTarget ||
