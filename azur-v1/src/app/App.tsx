@@ -1326,10 +1326,20 @@ const todaySession = weekSessions.find(
   </strong>
 </div>
 
-            <div>
-              <span>LONG-TERM BENEFIT</span>
-              <strong>Race-day durability</strong>
-            </div>
+<div>
+  <span>LONG-TERM BENEFIT</span>
+  <strong>
+    {todaySession
+      ? todaySession.sport === 'bike'
+        ? 'Bike durability'
+        : todaySession.sport === 'run'
+          ? 'Run durability'
+          : todaySession.sport === 'swim'
+            ? 'Swim efficiency'
+            : 'Training adaptation'
+      : 'Recovery and adaptation'}
+  </strong>
+</div>
           </div>
 
           <button onClick={() => setActiveNav('Weekly Review')}>
