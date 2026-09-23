@@ -24,8 +24,11 @@ import type { PlannedSession, Sport } from '../domain/types';
 import { supabase } from '../lib/supabase';
 import { keySessionExecution } from '../lib/calculations/sessionExecution';
 import { dailyReadiness } from '../lib/calculations/recovery';
-
-const navigation = [
+import {
+  calculateBikeTrainingStress,
+  calculateTrainingLoad,
+  isTrainingLoadEligible,
+} from '../lib/calculations/trainingLoad';const navigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
   [TrendingUp, 'Performance'],
