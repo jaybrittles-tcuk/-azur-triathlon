@@ -380,7 +380,8 @@ useEffect(() => {
     'Azur eligible bike training stress:',
     bikeActivitiesWithStress,
   );
-}, [trainingLoadActivities, athleteProfile.ftp]);const [recoveryContext, setRecoveryContext] = useState({
+}, [trainingLoadActivities, athleteProfile.ftp]);
+  const [recoveryContext, setRecoveryContext] = useState({
   hrvVs30dPct: null as number | null,
   rhrVs30dPct: null as number | null,
   sleepVs30dPct: null as number | null,
