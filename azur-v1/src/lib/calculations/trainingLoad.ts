@@ -77,3 +77,62 @@ export function isTrainingLoadEligible(args: {
 
   return true;
 }
+export function calculateRunTrainingStress(args: {
+  durationSec: number;
+  distanceM: number;
+  thresholdSecPerKm: number;
+}) {
+  if (
+    args.durationSec <= 0 ||
+    args.distanceM <= 0 ||
+    args.thresholdSecPerKm <= 0
+  ) {
+    return null;
+  }
+
+  const actualSecPerKm =
+    args.durationSec / (args.distanceM / 1000);
+
+  const intensityFactor =
+    args.thresholdSecPerKm / actualSecPerKm;
+
+  const stress =
+    (args.durationSec / 3600) *
+    Math.pow(intensityFactor, 2) *
+    100;
+
+  return {
+    stress: Math.round(stress),
+    intensityFactor,
+  };
+}
+
+export function calculateSwimTrainingStress(args: {
+  durationSec: number;
+  distanceM: number;
+  thresholdSecPer100m: number;
+}) {
+  if (
+    args.durationSec <= 0 ||
+    args.distanceM <= 0 ||
+    args.thresholdSecPer100m <= 0
+  ) {
+    return null;
+  }
+
+  const actualSecPer100m =
+    args.durationSec / (args.distanceM / 100);
+
+  const intensityFactor =
+    args.thresholdSecPer100m / actualSecPer100m;
+
+  const stress =
+    (args.durationSec / 3600) *
+    Math.pow(intensityFactor, 2) *
+    100;
+
+  return {
+    stress: Math.round(stress),
+    intensityFactor,
+  };
+}
