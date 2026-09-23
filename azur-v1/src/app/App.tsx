@@ -353,25 +353,54 @@ const [trainingLoad, setTrainingLoad] = useState({
 
 const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
 useEffect(() => {
-  if (!athleteProfile.ftp || trainingLoadActivities.length === 0) {
+  if (trainingLoadActivities.length === 0) {
     return;
   }
 
-  const bikeActivitiesWithStress = trainingLoadActivities
-    .filter(
-      (activity) =>
-        activity.sport === 'bike' &&
-        activity.duration_sec > 0 &&
-        activity.processed_metrics?.normalized_power != null,
-    )
+  const activitiesWithStress = trainingLoadActivities
     .map((activity) => {
-      const result = calculateBikeTrainingStress({
-        durationSec: Number(activity.duration_sec),
-        normalizedPower: Number(
-          activity.processed_metrics.normalized_power,
-        ),
-        ftp: athleteProfile.ftp as number,
-      });
+      let result = null;
+
+      if (
+        activity.sport === 'bike' &&
+        athleteProfile.ftp &&
+        activity.duration_sec > 0 &&
+        activity.processed_metrics?.normalized_power != null
+      ) {
+        result = calculateBikeTrainingStress({
+          durationSec: Number(activity.duration_sec),
+          normalizedPower: Number(
+            activity.processed_metrics.normalized_power,
+          ),
+          ftp: athleteProfile.ftp,
+        });
+      }
+
+      if (
+        activity.sport === 'run' &&
+        athleteProfile.runThreshold &&
+        activity.duration_sec > 0 &&
+        activity.distance_m != null
+      ) {
+        result = calculateRunTrainingStress({
+          durationSec: Number(activity.duration_sec),
+          distanceM: Number(activity.distance_m),
+          thresholdSecPerKm: athleteProfile.runThreshold,
+        });
+      }
+
+      if (
+        activity.sport === 'swim' &&
+        athleteProfile.swimThreshold &&
+        activity.duration_sec > 0 &&
+        activity.distance_m != null
+      ) {
+        result = calculateSwimTrainingStress({
+          durationSec: Number(activity.duration_sec),
+          distanceM: Number(activity.distance_m),
+          thresholdSecPer100m: athleteProfile.swimThreshold,
+        });
+      }
 
       return {
         ...activity,
@@ -380,13 +409,13 @@ useEffect(() => {
     })
     .filter((activity) => activity.calculatedStress != null);
 
-  if (bikeActivitiesWithStress.length === 0) {
+  if (activitiesWithStress.length === 0) {
     return;
   }
 
   const stressByDate = new Map<string, number>();
 
-  bikeActivitiesWithStress.forEach((activity) => {
+  activitiesWithStress.forEach((activity) => {
     const date = new Date(activity.start_time)
       .toISOString()
       .slice(0, 10);
@@ -397,10 +426,7 @@ useEffect(() => {
     );
   });
 
-  const firstDate = new Date(
-    bikeActivitiesWithStress[0].start_time,
-  );
-
+  const firstDate = new Date(activitiesWithStress[0].start_time);
   const today = new Date();
 
   const dailyStress = [];
@@ -418,17 +444,22 @@ useEffect(() => {
     });
   }
 
-const loadSeries = calculateTrainingLoad(dailyStress);
+  const loadSeries = calculateTrainingLoad(dailyStress);
 
-const latestLoad =
-  loadSeries.length > 0
-    ? loadSeries[loadSeries.length - 1]
-    : null;
+  const latestLoad =
+    loadSeries.length > 0
+      ? loadSeries[loadSeries.length - 1]
+      : null;
 
-console.log('Azur daily training stress:', dailyStress);
-console.log('Azur bike training load series:', loadSeries);
-console.log('Azur latest bike training load:', latestLoad);
-}, [trainingLoadActivities, athleteProfile.ftp]);
+  console.log('Azur daily training stress:', dailyStress);
+  console.log('Azur combined training load series:', loadSeries);
+  console.log('Azur latest combined training load:', latestLoad);
+}, [
+  trainingLoadActivities,
+  athleteProfile.ftp,
+  athleteProfile.runThreshold,
+  athleteProfile.swimThreshold,
+]);
   const [recoveryContext, setRecoveryContext] = useState({
   hrvVs30dPct: null as number | null,
   rhrVs30dPct: null as number | null,
