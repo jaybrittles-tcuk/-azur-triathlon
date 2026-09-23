@@ -813,8 +813,61 @@ useEffect(() => {
 
   loadSessionFeedback();
 }, [selected?.id]);
+useEffect(() => {
+  async function loadRecoveryContext() {
+    if (!selected?.plannedDate) return;
 
-const totalMinutes = useMemo(
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const { data: athlete, error: athleteError } =
+      await supabase
+        .from('athlete_profile')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+    if (athleteError || !athlete) {
+      console.error(
+        'Unable to load athlete for recovery:',
+        athleteError,
+      );
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('recovery_record')
+      .select(
+        'hrv_vs_30d_pct, rhr_vs_30d_pct, sleep_vs_30d_pct, prior_day_rpe, load_fatigue_signal, niggle_severity',
+      )
+      .eq('athlete_id', athlete.id)
+      .eq('record_date', selected.plannedDate)
+      .maybeSingle();
+
+    if (error) {
+      console.error(
+        'Unable to load recovery context:',
+        error,
+      );
+      return;
+    }
+
+    setRecoveryContext({
+      hrvVs30dPct: data?.hrv_vs_30d_pct ?? null,
+      rhrVs30dPct: data?.rhr_vs_30d_pct ?? null,
+      sleepVs30dPct: data?.sleep_vs_30d_pct ?? null,
+      priorDayRpe: data?.prior_day_rpe ?? null,
+      loadFatigueSignal: data?.load_fatigue_signal ?? null,
+      niggleSeverity: data?.niggle_severity ?? null,
+      poorDaysLast3: 0,
+    });
+  }
+
+  loadRecoveryContext();
+}, [selected?.plannedDate]);const totalMinutes = useMemo(
     () =>
       weekSessions.reduce(
         (total, session) => total + session.durationMin,
