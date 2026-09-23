@@ -349,8 +349,38 @@ const [trainingLoad, setTrainingLoad] = useState({
 });
 
 const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
+useEffect(() => {
+  if (!athleteProfile.ftp || trainingLoadActivities.length === 0) {
+    return;
+  }
 
-const [recoveryContext, setRecoveryContext] = useState({
+  const bikeActivitiesWithStress = trainingLoadActivities
+    .filter(
+      (activity) =>
+        activity.sport === 'bike' &&
+        activity.duration_sec > 0 &&
+        activity.processed_metrics?.normalized_power != null,
+    )
+    .map((activity) => {
+      const result = calculateBikeTrainingStress({
+        durationSec: Number(activity.duration_sec),
+        normalizedPower: Number(
+          activity.processed_metrics.normalized_power,
+        ),
+        ftp: athleteProfile.ftp as number,
+      });
+
+      return {
+        ...activity,
+        calculatedStress: result?.stress ?? null,
+      };
+    });
+
+  console.log(
+    'Azur eligible bike training stress:',
+    bikeActivitiesWithStress,
+  );
+}, [trainingLoadActivities, athleteProfile.ftp]);const [recoveryContext, setRecoveryContext] = useState({
   hrvVs30dPct: null as number | null,
   rhrVs30dPct: null as number | null,
   sleepVs30dPct: null as number | null,
