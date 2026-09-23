@@ -1535,6 +1535,8 @@ const todaySession = weekSessions.find(
     )}
   </div>
 )}
+
+  </div>
 )}
 
 {coachingImpact && (
@@ -1555,12 +1557,6 @@ const todaySession = weekSessions.find(
   </div>
 )}
 
-  </div>
-)}
-  </div>
-)}
-  </div>
-)}
   </div>
 )}
 
