@@ -37,3 +37,29 @@ export function calculateTrainingLoad(
     };
   });
 }
+export function calculateBikeTrainingStress(args: {
+  durationSec: number;
+  normalizedPower: number;
+  ftp: number;
+}) {
+  if (
+    args.durationSec <= 0 ||
+    args.normalizedPower <= 0 ||
+    args.ftp <= 0
+  ) {
+    return null;
+  }
+
+  const intensityFactor =
+    args.normalizedPower / args.ftp;
+
+  const stress =
+    (args.durationSec / 3600) *
+    Math.pow(intensityFactor, 2) *
+    100;
+
+  return {
+    stress: Math.round(stress),
+    intensityFactor,
+  };
+}
