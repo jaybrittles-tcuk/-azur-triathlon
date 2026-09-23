@@ -1469,7 +1469,7 @@ const todaySession = weekSessions.find(
         </div>
       ))}
     </div>
-    <div className="execution-trend">
+<div className="execution-trend">
   <span>EXECUTION TREND</span>
 
   <div className="execution-trend-grid">
@@ -1477,7 +1477,9 @@ const todaySession = weekSessions.find(
       <small>POWER CHANGE</small>
       <strong>
         {intervalPowerAnalysis.powerFadePct != null
-         ? `${intervalPowerAnalysis.powerFadePct > 0 ? '−' : '+'}${Math.abs(intervalPowerAnalysis.powerFadePct).toFixed(1)}%`
+          ? `${intervalPowerAnalysis.powerFadePct > 0 ? '−' : '+'}${Math.abs(
+              intervalPowerAnalysis.powerFadePct,
+            ).toFixed(1)}%`
           : '—'}
       </strong>
       <p>First to last work interval</p>
@@ -1493,8 +1495,9 @@ const todaySession = weekSessions.find(
       <p>First to last work interval</p>
     </div>
   </div>
-      
-  {intervalInterpretation && (
+</div>
+
+{intervalInterpretation && (
   <div className="azur-interpretation">
     <span>AZUR INTERPRETATION</span>
 
@@ -1505,8 +1508,6 @@ const todaySession = weekSessions.find(
     {intervalInterpretation.trend && (
       <p>{intervalInterpretation.trend}</p>
     )}
-  </div>
-)}
   </div>
 )}
   </div>
