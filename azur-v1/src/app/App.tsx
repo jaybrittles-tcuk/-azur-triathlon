@@ -2059,23 +2059,23 @@ const todaySession = weekSessions.find(
             <h3>Current long-course profile</h3>
 
             <div className="progress-list">
-              <ProgressRow
-                label="Bike"
-                value={68}
-                text="Threshold strong · durability building"
-              />
+<ProgressRow
+  label="Bike"
+  value={null}
+  text="Building history"
+/>
 
-              <ProgressRow
-                label="Run"
-                value={59}
-                text="Primary opportunity: late-run durability"
-              />
+<ProgressRow
+  label="Run"
+  value={null}
+  text="Building history"
+/>
 
-              <ProgressRow
-                label="Swim"
-                value={64}
-                text="Consistency improving"
-              />
+<ProgressRow
+  label="Swim"
+  value={null}
+  text="Building history"
+/>
             </div>
           </section>
 
