@@ -745,7 +745,7 @@ const rpeAboveTarget =
   athleteRpe != null &&
   prescribedRpeMax != null &&
   athleteRpe > prescribedRpeMax;
-  return {
+    
 return {
   status:
     !allIntervalsOnTarget || rpeAboveTarget
