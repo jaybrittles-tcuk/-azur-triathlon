@@ -3494,6 +3494,29 @@ setImportStatus(
     maxHeartRate ? `${maxHeartRate} bpm max HR` : null,
     averagePower ? `${averagePower} W avg` : null,
     normalizedPower ? `${normalizedPower} W NP` : null,
+      } catch (error) {
+    console.error('FIT import error:', error);
+
+    setImportStatus(
+      `FIT parse failed · ${String(error)}`,
+    );
+  } finally {
+    setImportLoading(false);
+  }
+}
+
+function DataSourcesView() {
+  return (
+    <>
+      <section className="panel">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">
+              DATA SOURCES
+            </span>
+
+            <h3>Connections & sync status</h3>
+          </div>
   ]
     .filter(Boolean)
     .join(' · '),
