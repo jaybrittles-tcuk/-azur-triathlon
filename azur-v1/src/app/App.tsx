@@ -2603,29 +2603,28 @@ onClick={() => {
           </div>
         </section>
 
-        <div className="two-column">
-          <section className="panel">
-            <span className="eyebrow">PREP RACE</span>
-            <h3>Ironman 70.3 Bolton</h3>
+<div className="two-column">
+  <section className="panel">
+    <span className="eyebrow">PREP RACE</span>
+    <h3>Not set</h3>
 
-            <p className="panel-note">
-              June 2027 · B race used to test pacing, race execution
-              and durability.
-            </p>
-          </section>
+    <p className="panel-note">
+      Add a preparation race to track race-specific pacing, execution and durability.
+    </p>
+  </section>
 
-          <section className="panel">
-            <span className="eyebrow">
-              POST-ROTH BUILD
-            </span>
+  <section className="panel">
+    <span className="eyebrow">
+      NEXT TRAINING BLOCK
+    </span>
 
-            <h3>Ironman Leeds</h3>
+    <h3>Not set</h3>
 
-            <p className="panel-note">
-              Recovery → Easy aerobic → Reintroduce intensity →
-              Leeds-specific rebuild.
-            </p>
-          </section>
+    <p className="panel-note">
+      Azur will use your primary race and future race schedule to shape the next training block.
+    </p>
+  </section>
+</div>
         </div>
       </>
     );
