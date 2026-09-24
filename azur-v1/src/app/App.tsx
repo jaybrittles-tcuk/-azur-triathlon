@@ -3331,7 +3331,7 @@ function WeeklyReviewView() {
 
       <p>
         {new Date(
-          completedActivityFeed[0].start_time,
+       completedActivityFeed[selectedStravaActivity]
         ).toLocaleString('en-GB', {
           day: 'numeric',
           month: 'long',
@@ -3345,7 +3345,7 @@ function WeeklyReviewView() {
         <div>
           <strong>
             {Math.round(
-              completedActivityFeed[0].duration_sec / 60,
+           completedActivityFeed[selectedStravaActivity]
             )}{' '}
             min
           </strong>
@@ -3355,7 +3355,7 @@ function WeeklyReviewView() {
         <div>
           <strong>
             {(
-              Number(completedActivityFeed[0].distance_m ?? 0) /
+             completedActivityFeed[selectedStravaActivity]
               1000
             ).toFixed(2)}{' '}
             km
@@ -3365,7 +3365,7 @@ function WeeklyReviewView() {
 
         <div>
           <strong>
-            {completedActivityFeed[0].processed_metrics
+           completedActivityFeed[selectedStravaActivity]
               ?.averageHeartRate ?? '—'}
           </strong>
           <span>Avg HR</span>
@@ -3373,7 +3373,7 @@ function WeeklyReviewView() {
 
         <div>
           <strong>
-            {completedActivityFeed[0].processed_metrics
+           completedActivityFeed[selectedStravaActivity]
               ?.averagePower ?? '—'}
           </strong>
           <span>Avg Power</span>
