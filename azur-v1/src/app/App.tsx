@@ -2320,10 +2320,15 @@ onClick={() => {
       : '—'}
   </strong>
 
-            <p>
-              Proceed with the planned training unless subjective feel
-              changes.
-            </p>
+ <p>
+  {recoveryReadiness
+    ? recoveryReadiness.implication === 'proceed_as_planned'
+      ? 'Recovery signals support proceeding with the planned training.'
+      : recoveryReadiness.implication === 'hold_or_trim_cost'
+        ? 'Recovery signals suggest holding or slightly reducing training cost today.'
+        : 'Recovery signals suggest reducing training stress today.'
+    : 'Add recovery data to generate today’s readiness guidance.'}
+</p>
           </div>
 
 <Metric
