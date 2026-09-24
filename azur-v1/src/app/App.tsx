@@ -1464,7 +1464,6 @@ const todaySession = weekSessions.find(
     : 'Training week'}
 </h3>
 <small>
-<small>
   {calendarWeekSessions.length} sessions ·{' '}
   {(
     calendarWeekSessions.reduce(
@@ -1473,8 +1472,6 @@ const todaySession = weekSessions.find(
     ) / 60
   ).toFixed(1)}
   h planned · Plan v{weekVersion}
-</small>
-  {weekVersion}
 </small>
             </div>
           </section>
