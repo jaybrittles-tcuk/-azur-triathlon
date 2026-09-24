@@ -1407,9 +1407,36 @@ const todaySession = weekSessions.find(
                 (session) => session.dayLabel === day,
               );
 
-              return (
-            <div
-  className={`calendar-day-head ${
+return (
+  <div className="calendar-day" key={day}>
+    <div
+      className={`calendar-day-head ${
+        daySessions.some(
+          (session) => session.plannedDate === todayKey,
+        )
+          ? 'today'
+          : ''
+      }`}
+    >
+      <div>
+        <span>{day}</span>
+
+        <strong>
+          {daySessions[0]
+            ? new Date(
+                `${daySessions[0].plannedDate}T12:00:00`,
+              ).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+              })
+            : ''}
+        </strong>
+      </div>
+
+      {daySessions.some(
+        (session) => session.plannedDate === todayKey,
+      ) && <small>TODAY</small>}
+    </div>
     daySessions.some(
       (session) => session.plannedDate === todayKey,
     )
