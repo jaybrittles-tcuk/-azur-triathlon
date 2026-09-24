@@ -3131,33 +3131,30 @@ nav {
   }
 
 .calendar-session.run {
-  background:
-    linear-gradient(
-      90deg,
-      rgba(240, 138, 50, 0.08) 0%,
-      rgba(255, 255, 255, 0.98) 32%,
-      #ffffff 100%
-    );
+  background: linear-gradient(
+    90deg,
+    #fff7f1 0%,
+    #ffffff 24%,
+    #ffffff 100%
+  );
 }
 
 .calendar-session.bike {
-  background:
-    linear-gradient(
-      90deg,
-      rgba(224, 173, 52, 0.09) 0%,
-      rgba(255, 255, 255, 0.98) 32%,
-      #ffffff 100%
-    );
+  background: linear-gradient(
+    90deg,
+    #fff9ed 0%,
+    #ffffff 24%,
+    #ffffff 100%
+  );
 }
 
 .calendar-session.swim {
-  background:
-    linear-gradient(
-      90deg,
-      rgba(45, 158, 232, 0.08) 0%,
-      rgba(255, 255, 255, 0.98) 32%,
-      #ffffff 100%
-    );
+  background: linear-gradient(
+    90deg,
+    #f2f9ff 0%,
+    #ffffff 24%,
+    #ffffff 100%
+  );
 }
 
   .calendar-session:active {
