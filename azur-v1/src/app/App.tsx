@@ -3517,15 +3517,7 @@ function WeeklyReviewView() {
     {importFiles.length === 1 ? '' : 's'} selected
   </small>
 )}
-            
-</label>
-
-{importFiles.length > 0 && (
-  <small className="manual-import-count">
-    {importFiles.length} file
-    {importFiles.length === 1 ? '' : 's'} selected
-  </small>
-)}            
+             
           </section>
 
           <section className="panel">
