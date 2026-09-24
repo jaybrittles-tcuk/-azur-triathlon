@@ -2326,23 +2326,35 @@ onClick={() => {
             </p>
           </div>
 
-          <Metric
-            label="HRV"
-            value="+4%"
-            hint="vs 30-day baseline"
-          />
+<Metric
+  label="HRV"
+  value={
+    recoveryContext.hrvVs30dPct != null
+      ? `${recoveryContext.hrvVs30dPct > 0 ? '+' : ''}${recoveryContext.hrvVs30dPct}%`
+      : '—'
+  }
+  hint="vs 30-day baseline"
+/>
 
-          <Metric
-            label="RESTING HR"
-            value="-2 bpm"
-            hint="vs baseline"
-          />
+<Metric
+  label="RESTING HR"
+  value={
+    recoveryContext.rhrVs30dPct != null
+      ? `${recoveryContext.rhrVs30dPct > 0 ? '+' : ''}${recoveryContext.rhrVs30dPct}%`
+      : '—'
+  }
+  hint="vs 30-day baseline"
+/>
 
-          <Metric
-            label="SLEEP"
-            value="7h 42m"
-            hint="+18m vs baseline"
-          />
+<Metric
+  label="SLEEP"
+  value={
+    recoveryContext.sleepVs30dPct != null
+      ? `${recoveryContext.sleepVs30dPct > 0 ? '+' : ''}${recoveryContext.sleepVs30dPct}%`
+      : '—'
+  }
+  hint="vs 30-day baseline"
+/>
         </section>
 
         <div className="two-column">
