@@ -3755,3 +3755,57 @@ nav {
     min-height: auto;
   }
 }
+.strava-sync-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.strava-sync-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(252, 76, 2, 0.08);
+  color: #fc4c02;
+}
+
+.strava-sync-copy {
+  min-width: 0;
+}
+
+.strava-sync-copy .eyebrow {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.strava-sync-copy strong {
+  display: block;
+}
+
+.strava-sync-copy small {
+  display: block;
+  margin-top: 3px;
+}
+
+.strava-sync-status {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(74, 179, 112, 0.1);
+  color: #3c9660;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+@media (max-width: 620px) {
+  .strava-sync-card {
+    grid-template-columns: auto 1fr;
+  }
+
+  .strava-sync-status {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
