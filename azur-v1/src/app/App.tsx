@@ -374,6 +374,8 @@ function parsePaceInput(value: string) {
   const [selectedStravaActivity, setSelectedStravaActivity] =
   useState<string | null>(null);
   const [importFiles, setImportFiles] = useState<File[]>([]);
+  const [importStatus, setImportStatus] = useState('');
+const [importLoading, setImportLoading] = useState(false);
   const [weekVersion, setWeekVersion] = useState(1);
 const [sessionFeedback, setSessionFeedback] = useState({
   rpe: '',
