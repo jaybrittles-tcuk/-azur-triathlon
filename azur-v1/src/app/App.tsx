@@ -3482,7 +3482,17 @@ const startTime =
   firstSession?.start_time ??
   firstSession?.timestamp ??
   null;
+const sportMap: Record<string, 'swim' | 'bike' | 'run'> = {
+  running: 'run',
+  run: 'run',
+  cycling: 'bike',
+  bike: 'bike',
+  swimming: 'swim',
+  swim: 'swim',
+};
 
+const mappedSport =
+  sportMap[String(firstSession?.sport ?? '').toLowerCase()];
 setImportStatus(
   [
     `FIT parsed successfully`,
