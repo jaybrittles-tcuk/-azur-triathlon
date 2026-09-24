@@ -3715,9 +3715,11 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
       <main>
         <header className="topbar">
           <div>
-            <span className="eyebrow">
-              WEEK 1 · BASE 1
-            </span>
+ <span className="eyebrow">
+  {activeNav === 'Strava Feed'
+    ? 'INTEGRATIONS'
+    : 'WEEK 1 · BASE 1'}
+</span>
 
 <h2>
   {activeNav === 'Home'
@@ -3725,7 +3727,11 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     : activeNav}
 </h2>
 
-            <p>Aerobic consistency + durability</p>
+          <p>
+  {activeNav === 'Strava Feed'
+    ? 'Recent activities and sync status'
+    : 'Aerobic consistency + durability'}
+</p>
           </div>
 
 <div className="topbar-actions">
