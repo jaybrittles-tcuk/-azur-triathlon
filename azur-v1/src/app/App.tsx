@@ -2523,7 +2523,11 @@ onClick={() => {
 
 <h3>{primaryRace.name || 'Primary Race'}</h3>
 
-            <p>Primary full-distance target · Sub-9 hours</p>
+            <p>
+  {primaryRace.targetSplits?.target_total
+    ? `Primary race target · ${primaryRace.targetSplits.target_total.slice(0, 5)}`
+    : 'Primary race target'}
+</p>
           </div>
 
 <div className="race-total">
