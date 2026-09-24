@@ -3564,7 +3564,6 @@ setImportStatus(
     averageHeartRate ? `${averageHeartRate} bpm avg HR` : null,
     maxHeartRate ? `${maxHeartRate} bpm max HR` : null,
     averagePower ? `${averagePower} W avg` : null,
-    normalizedPower ? `${normalizedPower} W NP` : null,
   ]
     .filter(Boolean)
     .join(' · '),
