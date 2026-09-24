@@ -3372,13 +3372,40 @@ function WeeklyReviewView() {
     <span>Avg HR</span>
   </div>
 
-  <div>
-    <strong>
-      {completedActivityFeed[selectedStravaActivity].processed_metrics
-        ?.averagePower ?? '—'}
-    </strong>
-    <span>Avg Power</span>
-  </div>
+ <div>
+  <strong>
+    {completedActivityFeed[selectedStravaActivity].sport === 'bike'
+      ? `${completedActivityFeed[selectedStravaActivity].processed_metrics
+          ?.averagePower ?? '—'} W`
+      : completedActivityFeed[selectedStravaActivity].sport === 'run'
+        ? (() => {
+            const activity =
+              completedActivityFeed[selectedStravaActivity];
+
+            const distanceKm =
+              Number(activity.distance_m ?? 0) / 1000;
+
+            if (!distanceKm || !activity.duration_sec) return '—';
+
+            const paceSecPerKm =
+              activity.duration_sec / distanceKm;
+
+            const minutes = Math.floor(paceSecPerKm / 60);
+            const seconds = Math.round(paceSecPerKm % 60);
+
+            return `${minutes}:${String(seconds).padStart(2, '0')}/km`;
+          })()
+        : '—'}
+  </strong>
+
+  <span>
+    {completedActivityFeed[selectedStravaActivity].sport === 'bike'
+      ? 'Avg Power'
+      : completedActivityFeed[selectedStravaActivity].sport === 'run'
+        ? 'Avg Pace'
+        : 'Pace'}
+  </span>
+</div>
 </div>
 
       <p className="panel-note">
