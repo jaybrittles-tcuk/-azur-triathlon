@@ -3575,7 +3575,9 @@ const arrayBuffer = await fitFile.arrayBuffer();
   type="button"
   className="primary-button manual-import-button"
   disabled={importFiles.length === 0 || importLoading}
-onClick={handleImportActivities}
+onClick={() => {
+  setImportStatus('Button tap detected.');
+}}
 >
   {importLoading ? 'Importing...' : 'Import activities'}
 </button>
