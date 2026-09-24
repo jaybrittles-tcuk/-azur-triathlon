@@ -3488,3 +3488,220 @@ nav {
     margin-top: 10px;
   }
 }
+/* ========================================
+   STRAVA FEED
+   ======================================== */
+
+.strava-feed-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 22px 18px;
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      135deg,
+      #fc4c02 0%,
+      #ff6a2c 100%
+    );
+  color: #ffffff;
+  box-shadow: 0 18px 40px rgba(252, 76, 2, 0.18);
+}
+
+.strava-feed-hero h2 {
+  margin: 6px 0 6px;
+  color: #ffffff;
+}
+
+.strava-feed-hero p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.strava-feed-hero .eyebrow {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.strava-connected-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  white-space: nowrap;
+}
+
+.strava-connected-pill span {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.strava-connected-pill strong {
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.strava-connected-pill i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #7dffb0;
+  display: block;
+}
+
+.strava-sync-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.strava-sync-card strong {
+  display: block;
+  color: #10243a;
+}
+
+.strava-sync-card small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.strava-feed-section {
+  margin-top: 22px;
+}
+
+.strava-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.strava-activity-card {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--border-soft);
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgba(12, 28, 45, 0.06);
+}
+
+.strava-activity-card.swim {
+  border-left: 5px solid #2d9ee8;
+  background: linear-gradient(90deg, #f3f9ff 0%, #ffffff 22%);
+}
+
+.strava-activity-card.bike {
+  border-left: 5px solid #e0ad34;
+  background: linear-gradient(90deg, #fff9ef 0%, #ffffff 22%);
+}
+
+.strava-activity-card.run {
+  border-left: 5px solid #52a66f;
+  background: linear-gradient(90deg, #f4fbf6 0%, #ffffff 22%);
+}
+
+.strava-activity-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.strava-activity-top span {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #7c8ea1;
+  margin-bottom: 4px;
+}
+
+.strava-activity-top h3 {
+  margin: 0;
+  color: #10243a;
+  font-size: 19px;
+}
+
+.strava-activity-top small {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(16, 36, 58, 0.06);
+  color: #5a6f86;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.strava-activity-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.strava-activity-metrics div {
+  padding: 12px 10px;
+  border-radius: 14px;
+  background: rgba(16, 36, 58, 0.04);
+}
+
+.strava-activity-metrics strong {
+  display: block;
+  color: #10243a;
+  font-size: 16px;
+  line-height: 1.1;
+}
+
+.strava-activity-metrics span {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #728397;
+}
+
+.strava-activity-card .workout-shape {
+  margin-top: 16px;
+  background: rgba(7, 21, 33, 0.04);
+}
+
+@media (max-width: 620px) {
+  .strava-feed-hero {
+    flex-direction: column;
+    padding: 18px 16px;
+    border-radius: 20px;
+  }
+
+  .strava-connected-pill {
+    width: fit-content;
+  }
+
+  .strava-sync-card {
+    padding: 16px;
+  }
+
+  .strava-activity-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .strava-activity-top {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .strava-activity-top h3 {
+    font-size: 18px;
+  }
+
+  .strava-activity-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .strava-activity-metrics div {
+    padding: 11px 10px;
+  }
+}
