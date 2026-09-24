@@ -3521,7 +3521,6 @@ function DataSourcesView() {
 
             <h3>Connections & sync status</h3>
           </div>
-            </div>
 
             <Cloud size={21} />
           </div>
