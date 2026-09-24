@@ -3193,16 +3193,23 @@ function WeeklyReviewView() {
   </div>
 </section>
 
-      <section className="panel strava-sync-card">
-        <div>
-          <strong>Latest sync: 2 min ago</strong>
-          <small>
-            This week: 5 activities · Training load updated
-          </small>
-        </div>
+<section className="panel strava-sync-card">
+  <div className="strava-sync-icon">
+    <RefreshCw size={19} />
+  </div>
 
-        <RefreshCw size={20} />
-      </section>
+  <div className="strava-sync-copy">
+    <span className="eyebrow">LIVE SYNC</span>
+    <strong>Latest sync: 2 min ago</strong>
+    <small>
+      5 activities this week · Training load updated
+    </small>
+  </div>
+
+  <span className="strava-sync-status">
+    Active
+  </span>
+</section>
 
       <section className="strava-feed-section">
         <div className="section-heading">
