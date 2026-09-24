@@ -40,6 +40,7 @@ const navigation = [
   [Gauge, 'Benchmarks'],
   [Activity, 'Weekly Review'],
   [Database, 'Data Sources'],
+  [RefreshCw, 'Strava Feed'],
 ] as const;
 
 type Session = PlannedSession & {
