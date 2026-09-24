@@ -3498,6 +3498,45 @@ function WeeklyReviewView() {
               Manual activities will be de-duplicated automatically.
               Raw source data and processed analysis remain separate.
             </p>
+<label className="manual-import-picker">
+  <span>Select activity files</span>
+
+  <input
+    type="file"
+    multiple
+    accept=".fit,.tcx,.gpx,.csv"
+    onChange={(event) =>
+      setImportFiles(Array.from(event.target.files ?? []))
+    }
+  />
+</label>
+
+{importFiles.length > 0 && (
+  <small className="manual-import-count">
+    {importFiles.length} file
+    {importFiles.length === 1 ? '' : 's'} selected
+  </small>
+)}
+            
+<label className="manual-import-picker">
+  <span>Select activity files</span>
+
+  <input
+    type="file"
+    multiple
+    accept=".fit,.tcx,.gpx,.csv"
+    onChange={(event) =>
+      setImportFiles(Array.from(event.target.files ?? []))
+    }
+  />
+</label>
+
+{importFiles.length > 0 && (
+  <small className="manual-import-count">
+    {importFiles.length} file
+    {importFiles.length === 1 ? '' : 's'} selected
+  </small>
+)}            
           </section>
 
           <section className="panel">
