@@ -3310,7 +3310,6 @@ function WeeklyReviewView() {
     </div>
   </article>
 ))}
-)}
 
         </div>
       </section>
