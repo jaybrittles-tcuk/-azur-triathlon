@@ -369,6 +369,7 @@ function parsePaceInput(value: string) {
   const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
   const [selectedId, setSelectedId] = useState('tue-bike');
   const [sessionDetailOpen, setSessionDetailOpen] = useState(false);
+  const [calendarWeekOffset, setCalendarWeekOffset] = useState(0);
   const [weekVersion, setWeekVersion] = useState(1);
 const [sessionFeedback, setSessionFeedback] = useState({
   rpe: '',
