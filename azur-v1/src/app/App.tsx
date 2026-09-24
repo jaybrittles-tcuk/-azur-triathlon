@@ -3333,6 +3333,55 @@ function WeeklyReviewView() {
     </button>
   </div>
 </section>
+      {selectedStravaActivity === 'swim' && (
+  <div
+    className="session-detail-overlay"
+    onClick={() => setSelectedStravaActivity(null)}
+  >
+    <aside
+      className="editor-panel session-detail-modal"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <button
+        className="session-detail-close"
+        type="button"
+        onClick={() => setSelectedStravaActivity(null)}
+      >
+        ×
+      </button>
+
+      <span className="eyebrow">STRAVA ACTIVITY</span>
+      <h2>Morning Technique Swim</h2>
+      <p>Today · 07:12</p>
+
+      <div className="strava-activity-metrics">
+        <div>
+          <strong>45:32</strong>
+          <span>Duration</span>
+        </div>
+
+        <div>
+          <strong>2,200 m</strong>
+          <span>Distance</span>
+        </div>
+
+        <div>
+          <strong>2:04/100m</strong>
+          <span>Pace</span>
+        </div>
+
+        <div>
+          <strong>132 bpm</strong>
+          <span>Avg HR</span>
+        </div>
+      </div>
+
+      <p className="panel-note">
+        Matched to your planned swim session.
+      </p>
+    </aside>
+  </div>
+)}
     </>
   );
 }
