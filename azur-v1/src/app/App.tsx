@@ -18,6 +18,8 @@ import {
   TrendingUp,
   Unlock,
   User,
+  ChevronRight,
+Waves,
 } from 'lucide-react';
 
 import type { PlannedSession, Sport } from '../domain/types';
@@ -3220,14 +3222,23 @@ function WeeklyReviewView() {
 
         <div className="strava-activity-list">
           <article className="strava-activity-card swim">
-            <div className="strava-activity-top">
-              <div>
-                <span>SWIM · Today 07:12</span>
-                <h3>Morning Technique Swim</h3>
-              </div>
+<div className="strava-activity-top">
+  <div className="strava-activity-title">
+    <div className="strava-sport-icon swim">
+      <Waves size={18} />
+    </div>
 
-              <small>Matched to session</small>
-            </div>
+    <div>
+      <span>SWIM · Today 07:12</span>
+      <h3>Morning Technique Swim</h3>
+    </div>
+  </div>
+
+  <div className="strava-activity-actions">
+    <small>Matched to session</small>
+    <ChevronRight size={18} />
+  </div>
+</div>
 
             <div className="strava-activity-metrics">
               <div><strong>45:32</strong><span>Duration</span></div>
