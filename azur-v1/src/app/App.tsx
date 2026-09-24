@@ -3556,7 +3556,7 @@ if (insertError) {
 }
 setImportStatus(
   [
-    `FIT parsed successfully`,
+   `Activity imported successfully`,
     `${firstSession?.sport ?? 'activity'}`,
     startTime ? `Start ${String(startTime)}` : null,
     durationSec ? `${Math.round(durationSec / 60)} min` : null,
