@@ -1533,7 +1533,12 @@ const todaySession = weekSessions.find(
               );
 
 return (
-  <div className="calendar-day" key={day}>
+<div
+  className={`calendar-day ${
+    daySessions.length === 0 ? 'empty-day' : ''
+  }`}
+  key={day}
+>
     <div
       className={`calendar-day-head ${
         daySessions.some(
