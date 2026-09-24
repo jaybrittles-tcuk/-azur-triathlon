@@ -20,6 +20,8 @@ import {
   User,
   ChevronRight,
 Waves,
+  Bike,
+Footprints,
 } from 'lucide-react';
 
 import type { PlannedSession, Sport } from '../domain/types';
@@ -3249,23 +3251,43 @@ function WeeklyReviewView() {
 
             <WorkoutShape sessionClass="endurance" />
           </article>
+<div className="strava-activity-top">
+  <div className="strava-activity-title">
+    <div className="strava-sport-icon bike">
+      <Bike size={18} />
+    </div>
 
-          <article className="strava-activity-card bike">
-            <div className="strava-activity-top">
-              <div>
-                <span>BIKE · Yesterday 17:28</span>
-                <h3>Threshold Development</h3>
-              </div>
+    <div>
+      <span>BIKE · Yesterday 17:28</span>
+      <h3>Threshold Development</h3>
+    </div>
+  </div>
+
+  <div className="strava-activity-actions">
+    <small>Auto-synced from Strava</small>
+    <ChevronRight size={18} />
+  </div>
+</div>
 
               <small>Auto-synced from Strava</small>
             </div>
+<div className="strava-activity-top">
+  <div className="strava-activity-title">
+    <div className="strava-sport-icon run">
+      <Footprints size={18} />
+    </div>
 
-            <div className="strava-activity-metrics">
-              <div><strong>1:42:15</strong><span>Duration</span></div>
-              <div><strong>52.3 km</strong><span>Distance</span></div>
-              <div><strong>306 W</strong><span>Avg Power</span></div>
-              <div><strong>148 bpm</strong><span>Avg HR</span></div>
-            </div>
+    <div>
+      <span>RUN · Mon 21 Sep, 18:04</span>
+      <h3>Easy Run</h3>
+    </div>
+  </div>
+
+  <div className="strava-activity-actions">
+    <small>Imported</small>
+    <ChevronRight size={18} />
+  </div>
+</div>
 
             <WorkoutShape sessionClass="intensity" />
           </article>
