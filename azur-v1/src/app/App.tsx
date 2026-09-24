@@ -3433,9 +3433,13 @@ function WeeklyReviewView() {
 
   try {
     setImportLoading(true);
-    setImportStatus(`Reading ${fitFile.name}...`);
+setImportStatus(
+  `Reading ${fitFile.name} · ${(fitFile.size / 1024).toFixed(0)} KB...`,
+);
 
-    const arrayBuffer = await fitFile.arrayBuffer();
+await new Promise((resolve) => setTimeout(resolve, 150));
+
+const arrayBuffer = await fitFile.arrayBuffer();
 
     const parser = new FitParser({
       mode: 'list',
