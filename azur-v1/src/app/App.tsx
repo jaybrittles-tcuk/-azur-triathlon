@@ -1427,9 +1427,9 @@ const calendarWeekSessions = useMemo(() => {
             <div>
               <span className="eyebrow">ACTIVE WEEK</span>
 <h3>
-  {weekSessions.length > 0
+{calendarWeekSessions.length > 0
     ? (() => {
-        const dates = weekSessions
+       const dates = calendarWeekSessions
           .map((session) => new Date(`${session.plannedDate}T12:00:00`))
           .sort((a, b) => a.getTime() - b.getTime());
 
@@ -1470,7 +1470,7 @@ const calendarWeekSessions = useMemo(() => {
 
           <section className="panel calendar-grid">
             {days.map((day) => {
-              const daySessions = weekSessions.filter(
+             const daySessions = calendarWeekSessions.filter(
                 (session) => session.dayLabel === day,
               );
 
