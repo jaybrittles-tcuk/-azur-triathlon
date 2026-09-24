@@ -371,6 +371,8 @@ function parsePaceInput(value: string) {
   const [selectedId, setSelectedId] = useState('tue-bike');
   const [sessionDetailOpen, setSessionDetailOpen] = useState(false);
   const [calendarWeekOffset, setCalendarWeekOffset] = useState(0);
+  const [selectedStravaActivity, setSelectedStravaActivity] =
+  useState<string | null>(null);
   const [weekVersion, setWeekVersion] = useState(1);
 const [sessionFeedback, setSessionFeedback] = useState({
   rpe: '',
