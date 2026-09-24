@@ -3581,9 +3581,7 @@ const parser = new FitParser({
   type="button"
   className="primary-button manual-import-button"
   disabled={importFiles.length === 0 || importLoading}
-onClick={() => {
-  setImportStatus('Button tap detected.');
-}}
+onClick={handleImportActivities}
 >
   {importLoading ? 'Importing...' : 'Import activities'}
 </button>
