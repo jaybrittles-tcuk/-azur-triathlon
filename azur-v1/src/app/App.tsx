@@ -3232,17 +3232,18 @@ function WeeklyReviewView() {
         </div>
 
         <div className="strava-activity-list">
-{completedActivityFeed[0] && (
+{completedActivityFeed.map((activity, index) => (
   <article
-    className={`strava-activity-card ${completedActivityFeed[0].sport}`}
-  onClick={() => setSelectedStravaActivity(0)} 
-    >
+    key={`${activity.source}-${activity.start_time}-${index}`}
+    className={`strava-activity-card ${activity.sport}`}
+    onClick={() => setSelectedStravaActivity(index)}
+  >
     <div className="strava-activity-top">
       <div className="strava-activity-title">
-        <div className={`strava-sport-icon ${completedActivityFeed[0].sport}`}>
-          {completedActivityFeed[0].sport === 'run' ? (
+        <div className={`strava-sport-icon ${activity.sport}`}>
+          {activity.sport === 'run' ? (
             <Footprints size={18} />
-          ) : completedActivityFeed[0].sport === 'bike' ? (
+          ) : activity.sport === 'bike' ? (
             <Bike size={18} />
           ) : (
             <Waves size={18} />
@@ -3251,10 +3252,8 @@ function WeeklyReviewView() {
 
         <div>
           <span>
-            {completedActivityFeed[0].sport.toUpperCase()} ·{' '}
-            {new Date(
-              completedActivityFeed[0].start_time,
-            ).toLocaleString('en-GB', {
+            {activity.sport.toUpperCase()} ·{' '}
+            {new Date(activity.start_time).toLocaleString('en-GB', {
               day: 'numeric',
               month: 'short',
               hour: '2-digit',
@@ -3263,7 +3262,7 @@ function WeeklyReviewView() {
           </span>
 
           <h3>
-            {completedActivityFeed[0].source === 'manual_fit'
+            {activity.source === 'manual_fit'
               ? 'Garmin FIT Activity'
               : 'Completed Activity'}
           </h3>
@@ -3271,7 +3270,11 @@ function WeeklyReviewView() {
       </div>
 
       <div className="strava-activity-actions">
-        <small>Manual FIT</small>
+        <small>
+          {activity.source === 'manual_fit'
+            ? 'Manual FIT'
+            : activity.source}
+        </small>
         <ChevronRight size={18} />
       </div>
     </div>
@@ -3279,42 +3282,34 @@ function WeeklyReviewView() {
     <div className="strava-activity-metrics">
       <div>
         <strong>
-          {Math.round(
-            completedActivityFeed[0].duration_sec / 60,
-          )}{' '}
-          min
+          {Math.round(activity.duration_sec / 60)} min
         </strong>
         <span>Duration</span>
       </div>
 
       <div>
         <strong>
-          {(
-            Number(completedActivityFeed[0].distance_m ?? 0) /
-            1000
-          ).toFixed(2)}{' '}
-          km
+          {(Number(activity.distance_m ?? 0) / 1000).toFixed(2)} km
         </strong>
         <span>Distance</span>
       </div>
 
       <div>
         <strong>
-          {completedActivityFeed[0].processed_metrics
-            ?.averageHeartRate ?? '—'}
+          {activity.processed_metrics?.averageHeartRate ?? '—'}
         </strong>
         <span>Avg HR</span>
       </div>
 
       <div>
         <strong>
-          {completedActivityFeed[0].processed_metrics
-            ?.averagePower ?? '—'}
+          {activity.processed_metrics?.averagePower ?? '—'}
         </strong>
         <span>Avg Power</span>
       </div>
     </div>
   </article>
+))}
 )}
 
         </div>
