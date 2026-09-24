@@ -2548,7 +2548,11 @@ onClick={() => {
             TARGET EXECUTION
           </span>
 
-          <h3>Roth race model</h3>
+<h3>
+  {primaryRace.name
+    ? `${primaryRace.name} race model`
+    : 'Primary race model'}
+</h3>
 
           <div className="race-splits">
             <div>
