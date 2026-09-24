@@ -3493,6 +3493,67 @@ const sportMap: Record<string, 'swim' | 'bike' | 'run'> = {
 
 const mappedSport =
   sportMap[String(firstSession?.sport ?? '').toLowerCase()];
+    if (!mappedSport || !startTime || durationSec <= 0) {
+  throw new Error('FIT activity is missing required activity data.');
+}
+
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+  throw new Error('No signed-in athlete found.');
+}
+
+const { data: athlete, error: athleteError } = await supabase
+  .from('athlete_profile')
+  .select('id')
+  .eq('user_id', user.id)
+  .single();
+
+if (athleteError || !athlete) {
+  throw new Error('Unable to resolve athlete profile.');
+}
+
+const sourceActivityId = [
+  new Date(startTime).toISOString(),
+  mappedSport,
+  Math.round(durationSec),
+  Math.round(distanceKm * 1000),
+].join('-');
+
+const { error: insertError } = await supabase
+  .from('completed_activity')
+  .upsert(
+    {
+      athlete_id: athlete.id,
+      sport: mappedSport,
+      source: 'manual_fit',
+      source_activity_id: sourceActivityId,
+      start_time: new Date(startTime).toISOString(),
+      duration_sec: Math.round(durationSec),
+      distance_m: Math.round(distanceKm * 1000),
+
+      processed_metrics: {
+        averageHeartRate,
+        maxHeartRate,
+        averagePower,
+      },
+
+      raw_payload: {
+        file_name: fitFile.name,
+        session: firstSession,
+      },
+    },
+    {
+      onConflict: 'source,source_activity_id',
+      ignoreDuplicates: true,
+    },
+  );
+
+if (insertError) {
+  throw insertError;
+}
 setImportStatus(
   [
     `FIT parsed successfully`,
