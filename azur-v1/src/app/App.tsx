@@ -1428,10 +1428,10 @@ const todaySession = weekSessions.find(
       })()
     : 'Training week'}
 </h3>
-              <small>
-                Base 1 · Long-course foundation · Plan v
-                {weekVersion}
-              </small>
+<small>
+  {weekSessions.length} sessions · {totalHours.toFixed(1)}h planned · Plan v
+  {weekVersion}
+</small>
             </div>
           </section>
 
