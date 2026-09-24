@@ -3448,17 +3448,6 @@ setImportStatus(
 setImportLoading(false);
 return;
 
-    const parsed = await parser.parseAsync(arrayBuffer);
-
-    setImportStatus(
-      `Parsed successfully · ${
-        parsed.sessions?.length ?? 0
-      } session(s) · ${
-        parsed.laps?.length ?? 0
-      } lap(s) · ${
-        parsed.records?.length ?? 0
-      } records`,
-    );
   } catch (error) {
     console.error(error);
     setImportStatus('FIT file could not be parsed.');
