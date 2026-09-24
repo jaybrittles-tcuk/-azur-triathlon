@@ -3174,6 +3174,104 @@ function WeeklyReviewView() {
     </>
   );
 }
+  function StravaFeedView() {
+  return (
+    <>
+      <section className="strava-feed-hero">
+        <div>
+          <span className="eyebrow">INTEGRATIONS</span>
+          <h2>Strava Live Feed</h2>
+          <p>Your latest activities, automatically synced.</p>
+        </div>
+
+        <div className="strava-connected-pill">
+          <span>▲</span>
+          <strong>Strava connected</strong>
+          <i />
+        </div>
+      </section>
+
+      <section className="panel strava-sync-card">
+        <div>
+          <strong>Latest sync: 2 min ago</strong>
+          <small>
+            This week: 5 activities · Training load updated
+          </small>
+        </div>
+
+        <RefreshCw size={20} />
+      </section>
+
+      <section className="strava-feed-section">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">RECENT ACTIVITIES</span>
+          </div>
+        </div>
+
+        <div className="strava-activity-list">
+          <article className="strava-activity-card swim">
+            <div className="strava-activity-top">
+              <div>
+                <span>SWIM · Today 07:12</span>
+                <h3>Morning Technique Swim</h3>
+              </div>
+
+              <small>Matched to session</small>
+            </div>
+
+            <div className="strava-activity-metrics">
+              <div><strong>45:32</strong><span>Duration</span></div>
+              <div><strong>2,200 m</strong><span>Distance</span></div>
+              <div><strong>2:04/100m</strong><span>Pace</span></div>
+              <div><strong>132 bpm</strong><span>Avg HR</span></div>
+            </div>
+
+            <WorkoutShape sessionClass="endurance" />
+          </article>
+
+          <article className="strava-activity-card bike">
+            <div className="strava-activity-top">
+              <div>
+                <span>BIKE · Yesterday 17:28</span>
+                <h3>Threshold Development</h3>
+              </div>
+
+              <small>Auto-synced from Strava</small>
+            </div>
+
+            <div className="strava-activity-metrics">
+              <div><strong>1:42:15</strong><span>Duration</span></div>
+              <div><strong>52.3 km</strong><span>Distance</span></div>
+              <div><strong>306 W</strong><span>Avg Power</span></div>
+              <div><strong>148 bpm</strong><span>Avg HR</span></div>
+            </div>
+
+            <WorkoutShape sessionClass="intensity" />
+          </article>
+
+          <article className="strava-activity-card run">
+            <div className="strava-activity-top">
+              <div>
+                <span>RUN · Mon 21 Sep, 18:04</span>
+                <h3>Easy Run</h3>
+              </div>
+
+              <small>Imported</small>
+            </div>
+
+            <div className="strava-activity-metrics">
+              <div><strong>38:26</strong><span>Duration</span></div>
+              <div><strong>7.2 km</strong><span>Distance</span></div>
+              <div><strong>5:20/km</strong><span>Pace</span></div>
+              <div><strong>142 bpm</strong><span>Avg HR</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </>
+  );
+}
   function DataSourcesView() {
     return (
       <>
