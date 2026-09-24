@@ -247,7 +247,9 @@ function WorkoutShape({
       ))}
     </div>
   );
-}function ProgressRow({
+}
+
+function ProgressRow({
   label,
   value,
   text,
