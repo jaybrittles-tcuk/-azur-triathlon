@@ -1433,10 +1433,22 @@ onClick={() => {
           </section>
         </div>
 
-        <aside
-  id="session-editor"
-  className="editor-panel"
->
+{sessionDetailOpen && (
+  <div
+    className="session-detail-overlay"
+    onClick={() => setSessionDetailOpen(false)}
+  >
+    <aside
+      className="editor-panel session-detail-modal"
+      onClick={(event) => event.stopPropagation()}
+    >
+      <button
+        className="session-detail-close"
+        onClick={() => setSessionDetailOpen(false)}
+        aria-label="Close session detail"
+      >
+        ×
+      </button>
           <div className="section-heading">
             <div>
               <span className="eyebrow">SESSION DETAIL</span>
@@ -1982,7 +1994,9 @@ onClick={() => {
     {sessionFeedbackMessage}
   </small>
 )}         
-        </aside>
+          </aside>
+  </div>
+)}
       </div>
     );
   }
