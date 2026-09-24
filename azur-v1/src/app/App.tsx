@@ -1165,6 +1165,43 @@ const todayKey = `${now.getFullYear()}-${String(
   now.getMonth() + 1,
 ).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 const calendarWeekSessions = useMemo(() => {
+  const calendarWeekDates = useMemo(() => {
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
+
+  const daysFromMonday = (start.getDay() + 6) % 7;
+
+  start.setDate(
+    start.getDate() -
+      daysFromMonday +
+      calendarWeekOffset * 7,
+  );
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+
+    const dateKey = `${date.getFullYear()}-${String(
+      date.getMonth() + 1,
+    ).padStart(2, '0')}-${String(
+      date.getDate(),
+    ).padStart(2, '0')}`;
+
+    return {
+      date,
+      dateKey,
+      dayLabel: date
+        .toLocaleDateString('en-GB', {
+          weekday: 'short',
+        })
+        .toUpperCase(),
+      dayNumber: date.getDate(),
+    };
+  });
+}, [calendarWeekOffset, todayKey]);
   const start = new Date(
     now.getFullYear(),
     now.getMonth(),
