@@ -3177,19 +3177,21 @@ function WeeklyReviewView() {
   function StravaFeedView() {
   return (
     <>
-      <section className="strava-feed-hero">
-        <div>
-          <span className="eyebrow">INTEGRATIONS</span>
-          <h2>Strava Live Feed</h2>
-          <p>Your latest activities, automatically synced.</p>
-        </div>
+     <section className="strava-feed-hero">
+  <div>
+    <span className="eyebrow">CONNECTED ACCOUNT</span>
+    <h2>Strava is connected</h2>
+    <p>
+      New activities will sync automatically into Azur.
+    </p>
+  </div>
 
-        <div className="strava-connected-pill">
-          <span>▲</span>
-          <strong>Strava connected</strong>
-          <i />
-        </div>
-      </section>
+  <div className="strava-connected-pill">
+    <span>▲</span>
+    <strong>Live sync active</strong>
+    <i />
+  </div>
+</section>
 
       <section className="panel strava-sync-card">
         <div>
