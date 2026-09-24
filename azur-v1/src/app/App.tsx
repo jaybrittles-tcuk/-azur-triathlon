@@ -3519,7 +3519,28 @@ function WeeklyReviewView() {
     {importFiles.length === 1 ? '' : 's'} selected
   </small>
 )}
-             
+<button
+  type="button"
+  className="primary-button manual-import-button"
+  disabled={importFiles.length === 0 || importLoading}
+  onClick={() => {
+    setImportLoading(true);
+    setImportStatus(
+      `Ready to process ${importFiles.length} selected file${
+        importFiles.length === 1 ? '' : 's'
+      }.`,
+    );
+    setImportLoading(false);
+  }}
+>
+  {importLoading ? 'Importing...' : 'Import activities'}
+</button>
+
+{importStatus && (
+  <small className="manual-import-status">
+    {importStatus}
+  </small>
+)}
           </section>
 
           <section className="panel">
