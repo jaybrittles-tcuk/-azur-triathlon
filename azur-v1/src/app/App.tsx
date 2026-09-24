@@ -3546,12 +3546,19 @@ function WeeklyReviewView() {
   <span>Select activity files</span>
 
   <input
-    type="file"
-    multiple
-    onChange={(event) =>
-      setImportFiles(Array.from(event.target.files ?? []))
+  type="file"
+  onChange={(event) => {
+    const files = Array.from(event.target.files ?? []);
+
+    setImportFiles(files);
+
+    if (files.length > 0) {
+      setImportStatus(`Selected: ${files[0].name}`);
+    } else {
+      setImportStatus('No file selected.');
     }
-  />
+  }}
+/>
 </label>
 
 {importFiles.length > 0 && (
