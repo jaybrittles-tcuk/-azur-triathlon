@@ -3319,7 +3319,78 @@ function WeeklyReviewView() {
 
         </div>
       </section>
-    
+    {selectedStravaActivity && completedActivityFeed[0] && (
+  <div className="session-detail-overlay">
+    <aside className="session-detail-panel">
+      <button
+        className="session-detail-close"
+        type="button"
+        onClick={() => setSelectedStravaActivity(null)}
+      >
+        ×
+      </button>
+
+      <span className="eyebrow">COMPLETED ACTIVITY</span>
+
+      <h2>Garmin FIT Activity</h2>
+
+      <p>
+        {new Date(
+          completedActivityFeed[0].start_time,
+        ).toLocaleString('en-GB', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}
+      </p>
+
+      <div className="strava-activity-metrics">
+        <div>
+          <strong>
+            {Math.round(
+              completedActivityFeed[0].duration_sec / 60,
+            )}{' '}
+            min
+          </strong>
+          <span>Duration</span>
+        </div>
+
+        <div>
+          <strong>
+            {(
+              Number(completedActivityFeed[0].distance_m ?? 0) /
+              1000
+            ).toFixed(2)}{' '}
+            km
+          </strong>
+          <span>Distance</span>
+        </div>
+
+        <div>
+          <strong>
+            {completedActivityFeed[0].processed_metrics
+              ?.averageHeartRate ?? '—'}
+          </strong>
+          <span>Avg HR</span>
+        </div>
+
+        <div>
+          <strong>
+            {completedActivityFeed[0].processed_metrics
+              ?.averagePower ?? '—'}
+          </strong>
+          <span>Avg Power</span>
+        </div>
+      </div>
+
+      <p className="panel-note">
+        Imported from Garmin FIT and stored in your Azur activity history.
+      </p>
+    </aside>
+  </div>
+)}
      
     </>
   );
