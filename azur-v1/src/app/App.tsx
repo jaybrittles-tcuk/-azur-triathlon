@@ -3518,17 +3518,6 @@ function WeeklyReviewView() {
   </small>
 )}
             
-<label className="manual-import-picker">
-  <span>Select activity files</span>
-
-  <input
-    type="file"
-    multiple
-    accept=".fit,.tcx,.gpx,.csv"
-    onChange={(event) =>
-      setImportFiles(Array.from(event.target.files ?? []))
-    }
-  />
 </label>
 
 {importFiles.length > 0 && (
