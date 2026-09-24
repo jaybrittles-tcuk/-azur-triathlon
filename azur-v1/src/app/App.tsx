@@ -1201,7 +1201,9 @@ const calendarWeekSessions = useMemo(() => {
       session.plannedDate >= startKey &&
       session.plannedDate <= endKey,
   );
-}, [weekSessions, calendarWeekOffset, todayKey]);const todaySession = weekSessions.find(
+}, [weekSessions, calendarWeekOffset, todayKey]);
+
+const todaySession = weekSessions.find(
   (session) => session.plannedDate === todayKey,
 );function HomeView() {
     return (
@@ -1462,7 +1464,16 @@ const calendarWeekSessions = useMemo(() => {
     : 'Training week'}
 </h3>
 <small>
-  {weekSessions.length} sessions · {totalHours.toFixed(1)}h planned · Plan v
+<small>
+  {calendarWeekSessions.length} sessions ·{' '}
+  {(
+    calendarWeekSessions.reduce(
+      (total, session) => total + session.durationMin,
+      0,
+    ) / 60
+  ).toFixed(1)}
+  h planned · Plan v{weekVersion}
+</small>
   {weekVersion}
 </small>
             </div>
