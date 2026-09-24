@@ -3273,3 +3273,171 @@ nav {
     display: none;
   }
 }
+/* ========================================
+   TRAINING CALENDAR WEEK STRIP
+   ======================================== */
+
+.calendar-week-strip {
+  padding: 18px;
+  border-radius: 22px;
+}
+
+.calendar-strip-top {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendar-strip-top > div {
+  text-align: center;
+}
+
+.calendar-strip-top h3 {
+  margin: 4px 0 0;
+  font-size: 20px;
+}
+
+.calendar-strip-top > button {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: #10243a;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.calendar-strip-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.calendar-strip-day {
+  min-width: 0;
+  padding: 9px 4px 8px;
+  border-radius: 14px;
+  text-align: center;
+  border: 1px solid transparent;
+}
+
+.calendar-strip-day > span {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  color: #7a8da1;
+  margin-bottom: 5px;
+}
+
+.calendar-strip-day > strong {
+  display: block;
+  font-size: 18px;
+  color: #10243a;
+  line-height: 1;
+}
+
+.calendar-strip-day.today {
+  border-color: #1f7fe5;
+  background: #eef7ff;
+  box-shadow: 0 0 0 2px rgba(31, 127, 229, 0.08);
+}
+
+.calendar-strip-day.today > span,
+.calendar-strip-day.today > strong {
+  color: #0f7fe5;
+}
+
+.calendar-strip-dots {
+  min-height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  margin-top: 7px;
+}
+
+.calendar-strip-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  display: block;
+}
+
+.calendar-strip-dots i.swim {
+  background: #2d9ee8;
+}
+
+.calendar-strip-dots i.bike {
+  background: #e0ad34;
+}
+
+.calendar-strip-dots i.run {
+  background: #52a66f;
+}
+
+.calendar-strip-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.calendar-strip-footer small {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.calendar-strip-footer button {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: #10243a;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+@media (max-width: 620px) {
+  .calendar-week-strip {
+    padding: 16px 14px;
+    border-radius: 20px;
+  }
+
+  .calendar-strip-top {
+    grid-template-columns: 40px 1fr 40px;
+    gap: 8px;
+  }
+
+  .calendar-strip-top > button {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .calendar-strip-top h3 {
+    font-size: 18px;
+  }
+
+  .calendar-strip-days {
+    gap: 3px;
+    margin-top: 16px;
+  }
+
+  .calendar-strip-day {
+    padding: 8px 2px;
+    border-radius: 12px;
+  }
+
+  .calendar-strip-day > strong {
+    font-size: 17px;
+  }
+
+  .calendar-strip-footer {
+    margin-top: 12px;
+  }
+}
