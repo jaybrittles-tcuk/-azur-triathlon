@@ -3399,12 +3399,13 @@ function WeeklyReviewView() {
       ? (() => {
           const activity =
             completedActivityFeed[selectedStravaActivity];
-
-          const distanceM =
-            Number(activity.distance_m ?? 0);
-
-          if (!distanceM || !activity.duration_sec) return '—';
-
+{completedActivityFeed[selectedStravaActivity].sport === 'bike'
+  ? 'Avg Power'
+  : completedActivityFeed[selectedStravaActivity].sport === 'run'
+    ? 'Avg Pace'
+    : completedActivityFeed[selectedStravaActivity].sport === 'swim'
+      ? 'Avg Pace'
+      : 'Pace'}
           const paceSecPer100m =
             activity.duration_sec / (distanceM / 100);
 
