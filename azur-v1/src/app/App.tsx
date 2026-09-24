@@ -2370,37 +2370,82 @@ onClick={() => {
 
             <h3>Rolling context</h3>
 
-            <div className="signal-list">
-              <div>
-                <CheckCircle2 size={18} />
-                <div>
-                  <strong>HRV stable</strong>
-                  <small>
-                    No multi-day suppression pattern.
-                  </small>
-                </div>
-              </div>
+<div className="signal-list">
+  <div>
+    {recoveryContext.hrvVs30dPct != null &&
+    recoveryContext.hrvVs30dPct < -5 ? (
+      <AlertTriangle size={18} />
+    ) : (
+      <CheckCircle2 size={18} />
+    )}
 
-              <div>
-                <CheckCircle2 size={18} />
-                <div>
-                  <strong>Sleep adequate</strong>
-                  <small>
-                    Supports the current training block.
-                  </small>
-                </div>
-              </div>
+    <div>
+      <strong>
+        {recoveryContext.hrvVs30dPct == null
+          ? 'HRV data unavailable'
+          : recoveryContext.hrvVs30dPct < -5
+            ? 'HRV below baseline'
+            : 'HRV within expected range'}
+      </strong>
 
-              <div>
-                <AlertTriangle size={18} />
-                <div>
-                  <strong>Fatigue elevated</strong>
-                  <small>
-                    Expected following cumulative training.
-                  </small>
-                </div>
-              </div>
-            </div>
+      <small>
+        {recoveryContext.hrvVs30dPct == null
+          ? 'Add recovery data to assess HRV against your 30-day baseline.'
+          : `${recoveryContext.hrvVs30dPct > 0 ? '+' : ''}${recoveryContext.hrvVs30dPct}% vs 30-day baseline.`}
+      </small>
+    </div>
+  </div>
+
+  <div>
+    {recoveryContext.sleepVs30dPct != null &&
+    recoveryContext.sleepVs30dPct < -5 ? (
+      <AlertTriangle size={18} />
+    ) : (
+      <CheckCircle2 size={18} />
+    )}
+
+    <div>
+      <strong>
+        {recoveryContext.sleepVs30dPct == null
+          ? 'Sleep data unavailable'
+          : recoveryContext.sleepVs30dPct < -5
+            ? 'Sleep below baseline'
+            : 'Sleep within expected range'}
+      </strong>
+
+      <small>
+        {recoveryContext.sleepVs30dPct == null
+          ? 'Add recovery data to assess sleep against your 30-day baseline.'
+          : `${recoveryContext.sleepVs30dPct > 0 ? '+' : ''}${recoveryContext.sleepVs30dPct}% vs 30-day baseline.`}
+      </small>
+    </div>
+  </div>
+
+  <div>
+    {recoveryContext.loadFatigueSignal != null &&
+    recoveryContext.loadFatigueSignal >= 80 ? (
+      <AlertTriangle size={18} />
+    ) : (
+      <CheckCircle2 size={18} />
+    )}
+
+    <div>
+      <strong>
+        {recoveryContext.loadFatigueSignal == null
+          ? 'Fatigue data unavailable'
+          : recoveryContext.loadFatigueSignal >= 80
+            ? 'Fatigue elevated'
+            : 'Fatigue within expected range'}
+      </strong>
+
+      <small>
+        {recoveryContext.loadFatigueSignal == null
+          ? 'Add recovery data to assess current fatigue.'
+          : `Current fatigue signal: ${recoveryContext.loadFatigueSignal}.`}
+      </small>
+    </div>
+  </div>
+</div>
           </section>
 
           <section className="panel">
