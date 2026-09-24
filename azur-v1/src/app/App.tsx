@@ -3313,11 +3313,19 @@ function WeeklyReviewView() {
               <small>No write-back in v1</small>
             </div>
 
-            <div className="source-row">
-              <div>
-                <strong>Strava</strong>
-                <small>Secondary activity source</small>
-              </div>
+         <div
+  className="source-row source-row-action"
+  onClick={() => setActiveNav('Strava Feed')}
+>
+  <div>
+    <strong>Strava</strong>
+    <small>Activity sync + live feed</small>
+  </div>
+
+  <span className="source-state">Preview</span>
+
+  <small>Open feed →</small>
+</div>
 
               <span className="source-state">Optional</span>
 
