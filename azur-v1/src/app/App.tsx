@@ -3232,37 +3232,89 @@ function WeeklyReviewView() {
         </div>
 
         <div className="strava-activity-list">
-<article
-  className="strava-activity-card swim"
-  onClick={() => setSelectedStravaActivity('swim')}
->
-<div className="strava-activity-top">
-  <div className="strava-activity-title">
-    <div className="strava-sport-icon swim">
-      <Waves size={18} />
+{completedActivityFeed[0] && (
+  <article
+    className={`strava-activity-card ${completedActivityFeed[0].sport}`}
+  >
+    <div className="strava-activity-top">
+      <div className="strava-activity-title">
+        <div className={`strava-sport-icon ${completedActivityFeed[0].sport}`}>
+          {completedActivityFeed[0].sport === 'run' ? (
+            <Footprints size={18} />
+          ) : completedActivityFeed[0].sport === 'bike' ? (
+            <Bike size={18} />
+          ) : (
+            <Waves size={18} />
+          )}
+        </div>
+
+        <div>
+          <span>
+            {completedActivityFeed[0].sport.toUpperCase()} ·{' '}
+            {new Date(
+              completedActivityFeed[0].start_time,
+            ).toLocaleString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </span>
+
+          <h3>
+            {completedActivityFeed[0].source === 'manual_fit'
+              ? 'Garmin FIT Activity'
+              : 'Completed Activity'}
+          </h3>
+        </div>
+      </div>
+
+      <div className="strava-activity-actions">
+        <small>Manual FIT</small>
+        <ChevronRight size={18} />
+      </div>
     </div>
 
-    <div>
-      <span>SWIM · Today 07:12</span>
-      <h3>Morning Technique Swim</h3>
+    <div className="strava-activity-metrics">
+      <div>
+        <strong>
+          {Math.round(
+            completedActivityFeed[0].duration_sec / 60,
+          )}{' '}
+          min
+        </strong>
+        <span>Duration</span>
+      </div>
+
+      <div>
+        <strong>
+          {(
+            Number(completedActivityFeed[0].distance_m ?? 0) /
+            1000
+          ).toFixed(2)}{' '}
+          km
+        </strong>
+        <span>Distance</span>
+      </div>
+
+      <div>
+        <strong>
+          {completedActivityFeed[0].processed_metrics
+            ?.averageHeartRate ?? '—'}
+        </strong>
+        <span>Avg HR</span>
+      </div>
+
+      <div>
+        <strong>
+          {completedActivityFeed[0].processed_metrics
+            ?.averagePower ?? '—'}
+        </strong>
+        <span>Avg Power</span>
+      </div>
     </div>
-  </div>
-
-  <div className="strava-activity-actions">
-    <small>Matched to session</small>
-    <ChevronRight size={18} />
-  </div>
-</div>
-
-            <div className="strava-activity-metrics">
-              <div><strong>45:32</strong><span>Duration</span></div>
-              <div><strong>2,200 m</strong><span>Distance</span></div>
-              <div><strong>2:04/100m</strong><span>Pace</span></div>
-              <div><strong>132 bpm</strong><span>Avg HR</span></div>
-            </div>
-
-            <WorkoutShape sessionClass="endurance" />
-          </article>
+  </article>
+)}
 <article
   className="strava-activity-card bike"
   onClick={() => setSelectedStravaActivity('bike')}
