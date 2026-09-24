@@ -3419,7 +3419,7 @@ function WeeklyReviewView() {
     </>
   );
 }
-  async function handleImportActivities() {
+ async function handleImportActivities() {
   if (importFiles.length === 0) return;
 
   const fitFile = importFiles.find((file) =>
@@ -3427,30 +3427,48 @@ function WeeklyReviewView() {
   );
 
   if (!fitFile) {
-    setImportStatus('Select at least one FIT file for this first test.');
+    setImportStatus('Select a FIT file to import.');
     return;
   }
 
   try {
     setImportLoading(true);
-setImportStatus(
-  `Reading ${fitFile.name} · ${(fitFile.size / 1024).toFixed(0)} KB...`,
-);
 
-await new Promise((resolve) => setTimeout(resolve, 150));
+    setImportStatus(
+      `Reading ${fitFile.name} · ${(fitFile.size / 1024).toFixed(0)} KB...`,
+    );
 
-const arrayBuffer = await fitFile.arrayBuffer();
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
-setImportStatus(
-  `File received successfully · ${fitFile.name} · ${arrayBuffer.byteLength} bytes`,
-);
+    const arrayBuffer = await fitFile.arrayBuffer();
 
-setImportLoading(false);
-return;
+    setImportStatus('File loaded · parsing FIT activity...');
 
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    const parser = new FitParser({
+      mode: 'list',
+      speedUnit: 'km/h',
+      lengthUnit: 'km',
+    });
+
+    const parsed = await parser.parseAsync(arrayBuffer);
+
+    const firstSession = parsed.sessions?.[0] as any;
+
+    setImportStatus(
+      `FIT parsed successfully · ${
+        firstSession?.sport ?? 'activity'
+      } · ${parsed.sessions?.length ?? 0} session(s) · ${
+        parsed.laps?.length ?? 0
+      } lap(s) · ${parsed.records?.length ?? 0} records`,
+    );
   } catch (error) {
-    console.error(error);
-    setImportStatus('FIT file could not be parsed.');
+    console.error('FIT import error:', error);
+
+    setImportStatus(
+      `FIT parse failed · ${String(error)}`,
+    );
   } finally {
     setImportLoading(false);
   }
