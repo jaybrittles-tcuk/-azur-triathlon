@@ -3566,14 +3566,6 @@ function WeeklyReviewView() {
   className="primary-button manual-import-button"
   disabled={importFiles.length === 0 || importLoading}
 onClick={handleImportActivities}
-    setImportLoading(true);
-    setImportStatus(
-      `Ready to process ${importFiles.length} selected file${
-        importFiles.length === 1 ? '' : 's'
-      }.`,
-    );
-    setImportLoading(false);
-  }}
 >
   {importLoading ? 'Importing...' : 'Import activities'}
 </button>
