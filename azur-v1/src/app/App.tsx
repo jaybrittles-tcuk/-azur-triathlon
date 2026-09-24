@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-
+import FitParser from 'fit-file-parser';
 import {
   Activity,
   AlertTriangle,
