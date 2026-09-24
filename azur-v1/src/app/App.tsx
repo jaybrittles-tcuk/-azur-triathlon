@@ -3225,7 +3225,10 @@ function WeeklyReviewView() {
         </div>
 
         <div className="strava-activity-list">
-          <article className="strava-activity-card swim">
+<article
+  className="strava-activity-card swim"
+  onClick={() => setSelectedStravaActivity('swim')}
+>
 <div className="strava-activity-top">
   <div className="strava-activity-title">
     <div className="strava-sport-icon swim">
