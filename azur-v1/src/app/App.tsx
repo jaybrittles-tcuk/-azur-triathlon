@@ -1230,11 +1230,15 @@ const todaySession = weekSessions.find(
       <p>until</p>
 
       <h2>{primaryRace.name || 'Challenge Roth'}</h2>
+<div className="race-hero-meta">
+  <span>
+    {weekSessions.length} sessions planned
+  </span>
 
-      <div className="race-hero-meta">
-        <span>BASE PHASE</span>
-        <span>{totalHours.toFixed(1)}h planned this week</span>
-      </div>
+  <span>
+    {totalHours.toFixed(1)}h this week
+  </span>
+</div>
     </div>
   </div>
 </section>
