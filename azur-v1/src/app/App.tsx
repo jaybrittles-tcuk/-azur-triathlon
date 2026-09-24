@@ -1436,8 +1436,6 @@ return (
       {daySessions.some(
         (session) => session.plannedDate === todayKey,
 
-    (session) => session.plannedDate === todayKey,
-  ) && <small>TODAY</small>}
 </div>
 
                   <div className="day-stack">
