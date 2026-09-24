@@ -3442,16 +3442,11 @@ await new Promise((resolve) => setTimeout(resolve, 150));
 const arrayBuffer = await fitFile.arrayBuffer();
 
 setImportStatus(
-  `File loaded successfully · ${arrayBuffer.byteLength} bytes`,
+  `File received successfully · ${fitFile.name} · ${arrayBuffer.byteLength} bytes`,
 );
 
-await new Promise((resolve) => setTimeout(resolve, 1000));
-
-const parser = new FitParser({
-      mode: 'list',
-      speedUnit: 'km/h',
-      lengthUnit: 'km',
-    });
+setImportLoading(false);
+return;
 
     const parsed = await parser.parseAsync(arrayBuffer);
 
