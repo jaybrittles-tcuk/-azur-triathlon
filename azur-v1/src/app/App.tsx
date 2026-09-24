@@ -3269,6 +3269,26 @@ function WeeklyReviewView() {
           </article>
         </div>
       </section>
+      <section className="strava-feed-actions">
+  <span className="eyebrow">FEED ACTIONS</span>
+
+  <div className="strava-action-grid">
+    <button type="button">
+      <strong>Review activity</strong>
+      <small>Add notes or feedback</small>
+    </button>
+
+    <button type="button">
+      <strong>Update training load</strong>
+      <small>Recalculate manually</small>
+    </button>
+
+    <button type="button">
+      <strong>Resync Strava</strong>
+      <small>Last sync 2 min ago</small>
+    </button>
+  </div>
+</section>
     </>
   );
 }
