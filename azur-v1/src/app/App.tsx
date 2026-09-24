@@ -2508,7 +2508,9 @@ onClick={() => {
         <section className="panel race-hero">
           <div>
 <span className="eyebrow">
-  {primaryRace.priority || 'A'} RACE ·{' '}
+ {primaryRace.priority
+  ? `${primaryRace.priority} RACE · `
+  : 'PRIMARY RACE · '}
   {primaryRace.raceDate
     ? new Date(primaryRace.raceDate).toLocaleDateString(
         'en-GB',
