@@ -3327,10 +3327,6 @@ function WeeklyReviewView() {
   <small>Open feed →</small>
 </div>
 
-              <span className="source-state">Optional</span>
-
-              <small>Not connected</small>
-            </div>
 
             <div className="source-row">
               <div>
