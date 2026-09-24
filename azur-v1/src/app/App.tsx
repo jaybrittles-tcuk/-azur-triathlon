@@ -2574,9 +2574,11 @@ onClick={() => {
     ? primaryRace.targetSplits.bike.slice(0, 5)
     : '—'}
 </strong>
-              <small>
-                Race-relevant range around 221–239 W.
-              </small>
+      <small>
+  {athleteProfile.ftp
+    ? `Target power guidance will be based on your current FTP of ${athleteProfile.ftp} W.`
+    : 'Add a current FTP to generate race-specific bike power guidance.'}
+</small>
             </div>
 
             <div>
