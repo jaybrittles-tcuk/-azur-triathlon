@@ -1239,11 +1239,31 @@ const todaySession = weekSessions.find(
   </div>
 </section>
         <section className="hero-grid">
-          <div className="readiness-panel green">
-            <span className="eyebrow light">DAILY READINESS</span>
-            <strong>GREEN</strong>
-            <p>Recovery signals are broadly stable.</p>
-          </div>
+    <div
+  className={`readiness-panel ${
+    recoveryReadiness?.color ?? ''
+  }`}
+>
+  <span className="eyebrow light">
+    DAILY READINESS
+  </span>
+
+  <strong>
+    {recoveryReadiness
+      ? recoveryReadiness.color.toUpperCase()
+      : '—'}
+  </strong>
+
+  <p>
+    {recoveryReadiness
+      ? recoveryReadiness.implication === 'proceed_as_planned'
+        ? 'Recovery signals support proceeding with the planned training.'
+        : recoveryReadiness.implication === 'hold_or_trim_cost'
+          ? 'Recovery signals suggest holding or slightly reducing training cost today.'
+          : 'Recovery signals suggest reducing training stress today.'
+      : 'Add recovery data to generate today’s readiness guidance.'}
+  </p>
+</div>
 
           <Metric
             label="RACE READINESS"
