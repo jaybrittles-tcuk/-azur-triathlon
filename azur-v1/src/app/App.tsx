@@ -3235,7 +3235,7 @@ function WeeklyReviewView() {
 {completedActivityFeed[0] && (
   <article
     className={`strava-activity-card ${completedActivityFeed[0].sport}`}
-    onClick={() => setSelectedStravaActivity('run')}  
+  onClick={() => setSelectedStravaActivity(0)} 
     >
     <div className="strava-activity-top">
       <div className="strava-activity-title">
