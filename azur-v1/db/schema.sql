@@ -229,3 +229,19 @@ CREATE TABLE transition_state (
   outcome decision_outcome NOT NULL DEFAULT 'pending',
   created_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE athlete_integration (
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  athlete_id uuid NOT NULL REFERENCES athlete_profile(id) ON DELETE CASCADE,
+  provider text NOT NULL,
+  provider_athlete_id text,
+  access_token text,
+  refresh_token text,
+  token_expires_at timestamptz,
+  scopes text,
+  connected_at timestamptz NOT NULL DEFAULT now(),
+  last_sync_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+
+  UNIQUE (athlete_id, provider)
+);
