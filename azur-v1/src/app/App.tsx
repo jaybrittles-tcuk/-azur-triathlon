@@ -1473,6 +1473,35 @@ const todaySession = weekSessions.find(
   ).toFixed(1)}
   h planned · Plan v{weekVersion}
 </small>
+              <div className="calendar-week-nav">
+  <button
+    type="button"
+    onClick={() =>
+      setCalendarWeekOffset((current) => current - 1)
+    }
+    aria-label="Previous week"
+  >
+    ‹
+  </button>
+
+  <button
+    type="button"
+    className="calendar-week-today"
+    onClick={() => setCalendarWeekOffset(0)}
+  >
+    This week
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
+      setCalendarWeekOffset((current) => current + 1)
+    }
+    aria-label="Next week"
+  >
+    ›
+  </button>
+</div>
             </div>
           </section>
 
