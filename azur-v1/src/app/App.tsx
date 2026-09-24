@@ -2625,7 +2625,6 @@ onClick={() => {
     </p>
   </section>
 </div>
-        </div>
       </>
     );
   }
