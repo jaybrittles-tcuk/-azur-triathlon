@@ -1168,8 +1168,40 @@ const now = new Date();
 const todayKey = `${now.getFullYear()}-${String(
   now.getMonth() + 1,
 ).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+const calendarWeekSessions = useMemo(() => {
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
 
-const todaySession = weekSessions.find(
+  const daysFromMonday = (start.getDay() + 6) % 7;
+
+  start.setDate(
+    start.getDate() -
+      daysFromMonday +
+      calendarWeekOffset * 7,
+  );
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  const toDateKey = (date: Date) =>
+    `${date.getFullYear()}-${String(
+      date.getMonth() + 1,
+    ).padStart(2, '0')}-${String(
+      date.getDate(),
+    ).padStart(2, '0')}`;
+
+  const startKey = toDateKey(start);
+  const endKey = toDateKey(end);
+
+  return weekSessions.filter(
+    (session) =>
+      session.plannedDate >= startKey &&
+      session.plannedDate <= endKey,
+  );
+}, [weekSessions, calendarWeekOffset, todayKey]);const todaySession = weekSessions.find(
   (session) => session.plannedDate === todayKey,
 );function HomeView() {
     return (
