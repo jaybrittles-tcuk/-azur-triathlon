@@ -278,10 +278,6 @@ function ProgressRow({
   );
 }
 
-      <b>{value}%</b>
-    </div>
-  );
-}
 
 function formatDuration(minutes: number) {
   const hours = Math.floor(minutes / 60);
