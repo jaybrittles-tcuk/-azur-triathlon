@@ -3494,7 +3494,11 @@ setImportStatus(
     maxHeartRate ? `${maxHeartRate} bpm max HR` : null,
     averagePower ? `${averagePower} W avg` : null,
     normalizedPower ? `${normalizedPower} W NP` : null,
-      } catch (error) {
+  ]
+    .filter(Boolean)
+    .join(' · '),
+);
+  } catch (error) {
     console.error('FIT import error:', error);
 
     setImportStatus(
@@ -3517,10 +3521,6 @@ function DataSourcesView() {
 
             <h3>Connections & sync status</h3>
           </div>
-  ]
-    .filter(Boolean)
-    .join(' · '),
-);
             </div>
 
             <Cloud size={21} />
