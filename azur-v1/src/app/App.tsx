@@ -655,6 +655,9 @@ const { data: completedActivities, error: completedError } =
       completedError,
     );
   }
+  setCompletedActivityFeed(
+  [...(completedActivities ?? [])].reverse(),
+);
 const eligibleTrainingLoadActivities = (completedActivities ?? []).filter(
   (activity) =>
     isTrainingLoadEligible({
