@@ -3315,37 +3315,6 @@ function WeeklyReviewView() {
     </div>
   </article>
 )}
-<article
-  className="strava-activity-card bike"
-  onClick={() => setSelectedStravaActivity('bike')}
->
-  <div className="strava-activity-top">
-    <div className="strava-activity-title">
-      <div className="strava-sport-icon bike">
-        <Bike size={18} />
-      </div>
-
-      <div>
-        <span>BIKE · Yesterday 17:28</span>
-        <h3>Threshold Development</h3>
-      </div>
-    </div>
-
-    <div className="strava-activity-actions">
-      <small>Auto-synced from Strava</small>
-      <ChevronRight size={18} />
-    </div>
-  </div>
-
-  <div className="strava-activity-metrics">
-    <div><strong>1:42:15</strong><span>Duration</span></div>
-    <div><strong>52.3 km</strong><span>Distance</span></div>
-    <div><strong>306 W</strong><span>Avg Power</span></div>
-    <div><strong>148 bpm</strong><span>Avg HR</span></div>
-  </div>
-
-  <WorkoutShape sessionClass="intensity" />
-</article>
 
 <article
   className="strava-activity-card run"
@@ -3378,35 +3347,7 @@ function WeeklyReviewView() {
 </article>
         </div>
       </section>
-      <section className="strava-feed-actions">
-  <span className="eyebrow">FEED ACTIONS</span>
-
-  <div className="strava-action-grid">
-    <button type="button">
-      <strong>Review activity</strong>
-      <small>Add notes or feedback</small>
-    </button>
-
-    <button type="button">
-      <strong>Update training load</strong>
-      <small>Recalculate manually</small>
-    </button>
-
-    <button type="button">
-      <strong>Resync Strava</strong>
-      <small>Last sync 2 min ago</small>
-    </button>
-  </div>
-</section>
-{selectedStravaActivity && (
-  <div
-    className="session-detail-overlay"
-    onClick={() => setSelectedStravaActivity(null)}
-  >
-    <aside
-      className="editor-panel session-detail-modal"
-      onClick={(event) => event.stopPropagation()}
-    >
+    
       <button
         className="session-detail-close"
         type="button"
