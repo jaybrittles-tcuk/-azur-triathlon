@@ -1483,85 +1483,98 @@ const todaySession = weekSessions.find(
     return (
       <div className="calendar-layout">
         <div>
-          <section className="panel calendar-toolbar">
-            <div>
-              <span className="eyebrow">ACTIVE WEEK</span>
-<h3>
-{calendarWeekSessions.length > 0
-    ? (() => {
-       const dates = calendarWeekSessions
-          .map((session) => new Date(`${session.plannedDate}T12:00:00`))
-          .sort((a, b) => a.getTime() - b.getTime());
+<section className="panel calendar-toolbar calendar-week-strip">
+  <div className="calendar-strip-top">
+    <button
+      type="button"
+      onClick={() =>
+        setCalendarWeekOffset((current) => current - 1)
+      }
+      aria-label="Previous week"
+    >
+      ‹
+    </button>
 
-        const first = dates[0];
-        const last = dates[dates.length - 1];
+    <div>
+      <span className="eyebrow">TRAINING CALENDAR</span>
 
-        const sameMonth =
-          first.getMonth() === last.getMonth() &&
-          first.getFullYear() === last.getFullYear();
+      <h3>
+        {calendarWeekDates[0]?.date.toLocaleDateString(
+          'en-GB',
+          {
+            month: 'long',
+            year: 'numeric',
+          },
+        )}
+      </h3>
+    </div>
 
-        if (sameMonth) {
-          return `${first.getDate()}–${last.getDate()} ${last.toLocaleDateString(
-            'en-GB',
-            {
-              month: 'long',
-              year: 'numeric',
-            },
-          )}`;
-        }
+    <button
+      type="button"
+      onClick={() =>
+        setCalendarWeekOffset((current) => current + 1)
+      }
+      aria-label="Next week"
+    >
+      ›
+    </button>
+  </div>
 
-        return `${first.toLocaleDateString('en-GB', {
-          day: 'numeric',
-          month: 'short',
-        })} – ${last.toLocaleDateString('en-GB', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        })}`;
-      })()
-    : 'Training week'}
-</h3>
-<small>
-  {calendarWeekSessions.length} sessions ·{' '}
-  {(
-    calendarWeekSessions.reduce(
-      (total, session) => total + session.durationMin,
-      0,
-    ) / 60
-  ).toFixed(1)}
-  h planned · Plan v{weekVersion}
-</small>
-              <div className="calendar-week-nav">
-  <button
-    type="button"
-    onClick={() =>
-      setCalendarWeekOffset((current) => current - 1)
-    }
-    aria-label="Previous week"
-  >
-    ‹
-  </button>
+  <div className="calendar-strip-days">
+    {calendarWeekDates.map((day) => {
+      const sessionsForDate =
+        calendarWeekSessions.filter(
+          (session) =>
+            session.plannedDate === day.dateKey,
+        );
 
-  <button
-    type="button"
-    className="calendar-week-today"
-    onClick={() => setCalendarWeekOffset(0)}
-  >
-    This week
-  </button>
+      return (
+        <div
+          key={day.dateKey}
+          className={`calendar-strip-day ${
+            day.dateKey === todayKey ? 'today' : ''
+          }`}
+        >
+          <span>{day.dayLabel.slice(0, 1)}</span>
 
-  <button
-    type="button"
-    onClick={() =>
-      setCalendarWeekOffset((current) => current + 1)
-    }
-    aria-label="Next week"
-  >
-    ›
-  </button>
-</div>
-            </div>
-          </section>
+          <strong>{day.dayNumber}</strong>
+
+          <div className="calendar-strip-dots">
+            {sessionsForDate.slice(0, 3).map((session) => (
+              <i
+                key={session.id}
+                className={session.sport}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <div className="calendar-strip-footer">
+    <small>
+      {calendarWeekSessions.length} sessions ·{' '}
+      {(
+        calendarWeekSessions.reduce(
+          (total, session) =>
+            total + session.durationMin,
+          0,
+        ) / 60
+      ).toFixed(1)}
+      h planned
+    </small>
+
+    {calendarWeekOffset !== 0 && (
+      <button
+        type="button"
+        onClick={() => setCalendarWeekOffset(0)}
+      >
+        This week
+      </button>
+    )}
+  </div>
+</section>
 
 <section className="panel calendar-grid">
   {calendarWeekSessions.length === 0 ? (
