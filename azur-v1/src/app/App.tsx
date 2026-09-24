@@ -3454,36 +3454,50 @@ function WeeklyReviewView() {
 
     const parsed = await parser.parseAsync(arrayBuffer);
 
-    const firstSession = parsed.sessions?.[0] as any;
+   const firstSession = parsed.sessions?.[0] as any;
 
-    setImportStatus(
-      `FIT parsed successfully · ${
-        firstSession?.sport ?? 'activity'
-      } · ${parsed.sessions?.length ?? 0} session(s) · ${
-        parsed.laps?.length ?? 0
-      } lap(s) · ${parsed.records?.length ?? 0} records`,
-    );
-  } catch (error) {
-    console.error('FIT import error:', error);
+const durationSec = Number(
+  firstSession?.total_timer_time ??
+  firstSession?.total_elapsed_time ??
+  0,
+);
 
-    setImportStatus(
-      `FIT parse failed · ${String(error)}`,
-    );
-  } finally {
-    setImportLoading(false);
-  }
-}
-  function DataSourcesView() {
-    return (
-      <>
-        <section className="panel">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">
-                DATA SOURCES
-              </span>
+const distanceKm = Number(
+  firstSession?.total_distance ?? 0,
+);
 
-              <h3>Connections & sync status</h3>
+const averageHeartRate =
+  firstSession?.avg_heart_rate ?? null;
+
+const maxHeartRate =
+  firstSession?.max_heart_rate ?? null;
+
+const averagePower =
+  firstSession?.avg_power ?? null;
+
+const normalizedPower =
+  firstSession?.normalized_power ?? null;
+
+const startTime =
+  firstSession?.start_time ??
+  firstSession?.timestamp ??
+  null;
+
+setImportStatus(
+  [
+    `FIT parsed successfully`,
+    `${firstSession?.sport ?? 'activity'}`,
+    startTime ? `Start ${String(startTime)}` : null,
+    durationSec ? `${Math.round(durationSec / 60)} min` : null,
+    distanceKm ? `${distanceKm.toFixed(2)} km` : null,
+    averageHeartRate ? `${averageHeartRate} bpm avg HR` : null,
+    maxHeartRate ? `${maxHeartRate} bpm max HR` : null,
+    averagePower ? `${averagePower} W avg` : null,
+    normalizedPower ? `${normalizedPower} W NP` : null,
+  ]
+    .filter(Boolean)
+    .join(' · '),
+);
             </div>
 
             <Cloud size={21} />
