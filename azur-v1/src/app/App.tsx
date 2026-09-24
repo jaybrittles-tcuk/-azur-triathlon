@@ -3791,6 +3791,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 {activeNav === 'Profile' && <ProfileView />}
 {activeNav === 'Weekly Review' && <WeeklyReviewView />}
         {activeNav === 'Data Sources' && <DataSourcesView />}
+        {activeNav === 'Strava Feed' && <StravaFeedView />}
       </main>
     </div>
   );
