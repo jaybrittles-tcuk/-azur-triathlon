@@ -394,6 +394,7 @@ const [trainingLoad, setTrainingLoad] = useState({
 });
 
 const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
+  const [completedActivityFeed, setCompletedActivityFeed] = useState<any[]>([]);
 useEffect(() => {
   if (trainingLoadActivities.length === 0) {
     return;
