@@ -3161,3 +3161,37 @@ nav {
     transform: scale(0.985);
   }
 }
+/* Calendar day date + today state */
+
+.calendar-day-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calendar-day-head > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.calendar-day-head strong {
+  font-size: 13px;
+  color: #10243a;
+}
+
+.calendar-day-head small {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #10243a;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+
+.calendar-day-head.today span,
+.calendar-day-head.today strong {
+  color: #0f7fe5;
+}
