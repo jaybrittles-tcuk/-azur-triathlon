@@ -3329,56 +3329,57 @@ function WeeklyReviewView() {
 
       <h2>Garmin FIT Activity</h2>
 
-      <p>
-        {new Date(
-       completedActivityFeed[selectedStravaActivity]
-        ).toLocaleString('en-GB', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })}
-      </p>
+    <p>
+  {new Date(
+    completedActivityFeed[selectedStravaActivity].start_time,
+  ).toLocaleString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })}
+</p>
 
-      <div className="strava-activity-metrics">
-        <div>
-          <strong>
-            {Math.round(
-           completedActivityFeed[selectedStravaActivity]
-            )}{' '}
-            min
-          </strong>
-          <span>Duration</span>
-        </div>
+<div className="strava-activity-metrics">
+  <div>
+    <strong>
+      {Math.round(
+        completedActivityFeed[selectedStravaActivity].duration_sec / 60,
+      )}{' '}
+      min
+    </strong>
+    <span>Duration</span>
+  </div>
 
-        <div>
-          <strong>
-            {(
-             completedActivityFeed[selectedStravaActivity]
-              1000
-            ).toFixed(2)}{' '}
-            km
-          </strong>
-          <span>Distance</span>
-        </div>
+  <div>
+    <strong>
+      {(
+        Number(
+          completedActivityFeed[selectedStravaActivity].distance_m ?? 0,
+        ) / 1000
+      ).toFixed(2)}{' '}
+      km
+    </strong>
+    <span>Distance</span>
+  </div>
 
-        <div>
-          <strong>
-           completedActivityFeed[selectedStravaActivity]
-              ?.averageHeartRate ?? '—'}
-          </strong>
-          <span>Avg HR</span>
-        </div>
+  <div>
+    <strong>
+      {completedActivityFeed[selectedStravaActivity].processed_metrics
+        ?.averageHeartRate ?? '—'}
+    </strong>
+    <span>Avg HR</span>
+  </div>
 
-        <div>
-          <strong>
-           completedActivityFeed[selectedStravaActivity]
-              ?.averagePower ?? '—'}
-          </strong>
-          <span>Avg Power</span>
-        </div>
-      </div>
+  <div>
+    <strong>
+      {completedActivityFeed[selectedStravaActivity].processed_metrics
+        ?.averagePower ?? '—'}
+    </strong>
+    <span>Avg Power</span>
+  </div>
+</div>
 
       <p className="panel-note">
         Imported from Garmin FIT and stored in your Azur activity history.
