@@ -3316,35 +3316,6 @@ function WeeklyReviewView() {
   </article>
 )}
 
-<article
-  className="strava-activity-card run"
-  onClick={() => setSelectedStravaActivity('run')}
->
-  <div className="strava-activity-top">
-    <div className="strava-activity-title">
-      <div className="strava-sport-icon run">
-        <Footprints size={18} />
-      </div>
-
-      <div>
-        <span>RUN · Mon 21 Sep, 18:04</span>
-        <h3>Easy Run</h3>
-      </div>
-    </div>
-
-    <div className="strava-activity-actions">
-      <small>Imported</small>
-      <ChevronRight size={18} />
-    </div>
-  </div>
-
-  <div className="strava-activity-metrics">
-    <div><strong>38:26</strong><span>Duration</span></div>
-    <div><strong>7.2 km</strong><span>Distance</span></div>
-    <div><strong>5:20/km</strong><span>Pace</span></div>
-    <div><strong>142 bpm</strong><span>Avg HR</span></div>
-  </div>
-</article>
         </div>
       </section>
     
