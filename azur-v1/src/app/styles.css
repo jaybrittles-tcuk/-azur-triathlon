@@ -3910,3 +3910,14 @@ nav {
   color: #6f8296;
   font-weight: 700;
 }
+.manual-import-status {
+  display: block;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #eef7ff;
+  color: #10243a !important;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
