@@ -1229,7 +1229,7 @@ const todaySession = weekSessions.find(
 
       <p>until</p>
 
-      <h2>{primaryRace.name || 'Challenge Roth'}</h2>
+     {primaryRace.name || 'Primary race'}
 <div className="race-hero-meta">
   <span>
     {weekSessions.length} sessions planned
