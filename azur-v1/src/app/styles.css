@@ -3880,3 +3880,33 @@ nav {
 .strava-activity-card.run .workout-shape {
   background: rgba(82, 166, 111, 0.10);
 }
+.manual-import-picker {
+  margin-top: 16px;
+  min-height: 96px;
+  padding: 16px;
+  border: 1px dashed rgba(120, 143, 166, 0.35);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.manual-import-picker span {
+  font-weight: 800;
+  color: #10243a;
+}
+
+.manual-import-picker input {
+  width: 100%;
+  font-size: 12px;
+}
+
+.manual-import-count {
+  display: block;
+  margin-top: 10px;
+  color: #6f8296;
+  font-weight: 700;
+}
