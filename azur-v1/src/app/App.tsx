@@ -343,6 +343,7 @@ function parsePaceInput(value: string) {
   const [activeNav, setActiveNav] = useState('Home');
   const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
   const [selectedId, setSelectedId] = useState('tue-bike');
+  const [sessionDetailOpen, setSessionDetailOpen] = useState(false);
   const [weekVersion, setWeekVersion] = useState(1);
 const [sessionFeedback, setSessionFeedback] = useState({
   rpe: '',
@@ -1398,17 +1399,9 @@ const todaySession = weekSessions.find(
                             ? 'selected'
                             : ''
                         }`}
-                      onClick={() => {
+onClick={() => {
   setSelectedId(session.id);
-
-  setTimeout(() => {
-    document
-      .getElementById('session-editor')
-      ?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-  }, 50);
+  setSessionDetailOpen(true);
 }}
                       >
 <div className="calendar-session-top">
