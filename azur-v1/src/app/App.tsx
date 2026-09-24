@@ -3256,7 +3256,10 @@ function WeeklyReviewView() {
 
             <WorkoutShape sessionClass="endurance" />
           </article>
-<article className="strava-activity-card bike">
+<article
+  className="strava-activity-card bike"
+  onClick={() => setSelectedStravaActivity('bike')}
+>
   <div className="strava-activity-top">
     <div className="strava-activity-title">
       <div className="strava-sport-icon bike">
@@ -3285,7 +3288,10 @@ function WeeklyReviewView() {
   <WorkoutShape sessionClass="intensity" />
 </article>
 
-<article className="strava-activity-card run">
+<article
+  className="strava-activity-card run"
+  onClick={() => setSelectedStravaActivity('run')}
+>
   <div className="strava-activity-top">
     <div className="strava-activity-title">
       <div className="strava-sport-icon run">
