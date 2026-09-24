@@ -3235,3 +3235,36 @@ nav {
     flex: 0 0 auto;
   }
 }
+/* Calendar empty state */
+
+.calendar-empty-state {
+  grid-column: 1 / -1;
+  padding: 42px 24px;
+  text-align: center;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid var(--border-soft);
+}
+
+.calendar-empty-state h3 {
+  margin: 7px 0 8px;
+  color: #10243a;
+}
+
+.calendar-empty-state p {
+  max-width: 430px;
+  margin: 0 auto;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.calendar-empty-state button {
+  margin-top: 18px;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 0;
+  background: #10243a;
+  color: #ffffff;
+  font-weight: 800;
+}
