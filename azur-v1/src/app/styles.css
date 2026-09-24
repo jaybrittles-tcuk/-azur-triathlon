@@ -3857,3 +3857,26 @@ nav {
   background: rgba(82, 166, 111, 0.12);
   color: #45925f;
 }
+.strava-activity-card.swim .workout-shape span {
+  background: #2d9ee8;
+}
+
+.strava-activity-card.bike .workout-shape span {
+  background: #e0ad34;
+}
+
+.strava-activity-card.run .workout-shape span {
+  background: #52a66f;
+}
+
+.strava-activity-card.swim .workout-shape {
+  background: rgba(45, 158, 232, 0.10);
+}
+
+.strava-activity-card.bike .workout-shape {
+  background: rgba(224, 173, 52, 0.10);
+}
+
+.strava-activity-card.run .workout-shape {
+  background: rgba(82, 166, 111, 0.10);
+}
