@@ -3848,3 +3848,12 @@ nav {
     padding-left: 49px;
   }
 }
+.strava-sport-icon.bike {
+  background: rgba(224, 173, 52, 0.12);
+  color: #c38b14;
+}
+
+.strava-sport-icon.run {
+  background: rgba(82, 166, 111, 0.12);
+  color: #45925f;
+}
