@@ -2453,13 +2453,25 @@ onClick={() => {
               RECOVERY WARNING
             </span>
 
-            <h3>No active warning</h3>
+  <h3>
+  {!recoveryReadiness
+    ? 'Building recovery history'
+    : recoveryReadiness.color === 'red'
+      ? 'Recovery warning active'
+      : recoveryReadiness.color === 'amber'
+        ? 'Recovery caution'
+        : 'No active warning'}
+</h3>
 
-            <p className="panel-note">
-              Azur will strengthen warnings when poor recovery signals
-              persist for multiple days or combine with unusually high
-              RPE, training load or a reported niggle.
-            </p>
+<p className="panel-note">
+  {!recoveryReadiness
+    ? 'Add recovery data to allow Azur to identify meaningful recovery warnings.'
+    : recoveryReadiness.color === 'red'
+      ? 'Multiple recovery signals are outside the expected range. Training stress should be reviewed before completing the planned session.'
+      : recoveryReadiness.color === 'amber'
+        ? 'Some recovery signals require attention. Azur will consider these alongside training load, RPE and any reported niggle.'
+        : 'Current recovery signals do not meet the threshold for an active warning. Azur will continue to assess changes across recovery, training load, RPE and reported niggles.'}
+</p>
           </section>
         </div>
       </>
