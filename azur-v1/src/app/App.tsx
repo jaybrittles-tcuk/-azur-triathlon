@@ -3319,71 +3319,7 @@ function WeeklyReviewView() {
         </div>
       </section>
     
-      <button
-        className="session-detail-close"
-        type="button"
-        onClick={() => setSelectedStravaActivity(null)}
-      >
-        ×
-      </button>
-
-      <span className="eyebrow">STRAVA ACTIVITY</span>
-
-      <h2>
-        {selectedStravaActivity === 'swim'
-          ? 'Morning Technique Swim'
-          : selectedStravaActivity === 'bike'
-            ? 'Threshold Development'
-            : 'Easy Run'}
-      </h2>
-
-      <p>
-        {selectedStravaActivity === 'swim'
-          ? 'Today · 07:12'
-          : selectedStravaActivity === 'bike'
-            ? 'Yesterday · 17:28'
-            : 'Mon 21 Sep · 18:04'}
-      </p>
-
-      <div className="strava-activity-metrics">
-        {selectedStravaActivity === 'swim' && (
-          <>
-            <div><strong>45:32</strong><span>Duration</span></div>
-            <div><strong>2,200 m</strong><span>Distance</span></div>
-            <div><strong>2:04/100m</strong><span>Pace</span></div>
-            <div><strong>132 bpm</strong><span>Avg HR</span></div>
-          </>
-        )}
-
-        {selectedStravaActivity === 'bike' && (
-          <>
-            <div><strong>1:42:15</strong><span>Duration</span></div>
-            <div><strong>52.3 km</strong><span>Distance</span></div>
-            <div><strong>306 W</strong><span>Avg Power</span></div>
-            <div><strong>148 bpm</strong><span>Avg HR</span></div>
-          </>
-        )}
-
-        {selectedStravaActivity === 'run' && (
-          <>
-            <div><strong>38:26</strong><span>Duration</span></div>
-            <div><strong>7.2 km</strong><span>Distance</span></div>
-            <div><strong>5:20/km</strong><span>Pace</span></div>
-            <div><strong>142 bpm</strong><span>Avg HR</span></div>
-          </>
-        )}
-      </div>
-
-      <p className="panel-note">
-        {selectedStravaActivity === 'swim'
-          ? 'Matched to your planned swim session.'
-          : selectedStravaActivity === 'bike'
-            ? 'Auto-synced from Strava and ready for session matching.'
-            : 'Imported from Strava and ready for review.'}
-      </p>
-    </aside>
-  </div>
-)}
+     
     </>
   );
 }
