@@ -3268,3 +3268,8 @@ nav {
   color: #ffffff;
   font-weight: 800;
 }
+@media (max-width: 620px) {
+  .calendar-day.empty-day {
+    display: none;
+  }
+}
