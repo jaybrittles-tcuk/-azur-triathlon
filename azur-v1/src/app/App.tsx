@@ -3313,7 +3313,8 @@ function WeeklyReviewView() {
 
         </div>
       </section>
-    {selectedStravaActivity && completedActivityFeed[0] && (
+{selectedStravaActivity !== null &&
+  completedActivityFeed[selectedStravaActivity] && (
   <div className="session-detail-overlay">
     <aside className="session-detail-panel">
       <button
