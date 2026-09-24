@@ -3002,3 +3002,56 @@ nav {
     padding-right: 48px;
   }
 }
+/* ========================================
+   CALENDAR WORKOUT SHAPES
+   ======================================== */
+
+.workout-shape {
+  height: 54px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 8px 10px;
+  margin: 4px 0 2px;
+  border-radius: 12px;
+  background: rgba(7, 21, 33, 0.06);
+  overflow: hidden;
+}
+
+.workout-shape span {
+  flex: 1;
+  min-width: 4px;
+  border-radius: 4px 4px 2px 2px;
+  opacity: 0.92;
+}
+
+.calendar-session.run .workout-shape span {
+  background: #f08a32;
+}
+
+.calendar-session.bike .workout-shape span {
+  background: #e0ad34;
+}
+
+.calendar-session.swim .workout-shape span {
+  background: #2d9ee8;
+}
+
+.calendar-session.run .workout-shape {
+  background: rgba(240, 138, 50, 0.10);
+}
+
+.calendar-session.bike .workout-shape {
+  background: rgba(224, 173, 52, 0.10);
+}
+
+.calendar-session.swim .workout-shape {
+  background: rgba(45, 158, 232, 0.10);
+}
+
+@media (max-width: 620px) {
+  .workout-shape {
+    height: 62px;
+    margin-top: 8px;
+  }
+}
