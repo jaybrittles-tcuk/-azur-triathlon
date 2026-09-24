@@ -1438,7 +1438,7 @@ onClick={() => {
 </div>
 
                         <strong>{session.title}</strong>
-
+<WorkoutShape sessionClass={session.sessionClass} />
  <div className="calendar-session-meta">
   <span>{formatDuration(session.durationMin)}</span>
   <span>Priority {session.priority}</span>
