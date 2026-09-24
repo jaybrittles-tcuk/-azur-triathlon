@@ -3441,3 +3441,21 @@ nav {
     margin-top: 12px;
   }
 }
+.calendar-toolbar.calendar-week-strip {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 620px) {
+  .calendar-strip-top {
+    width: 100%;
+  }
+
+  .calendar-strip-days {
+    width: 100%;
+  }
+
+  .calendar-strip-footer {
+    width: 100%;
+  }
+}
