@@ -3548,7 +3548,6 @@ function WeeklyReviewView() {
   <input
     type="file"
     multiple
-    accept=".fit,.tcx,.gpx,.csv"
     onChange={(event) =>
       setImportFiles(Array.from(event.target.files ?? []))
     }
