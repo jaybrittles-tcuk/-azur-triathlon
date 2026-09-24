@@ -3372,49 +3372,48 @@ function WeeklyReviewView() {
     <span>Avg HR</span>
   </div>
 
- <div>
+<div>
   <strong>
-   {completedActivityFeed[selectedStravaActivity].sport === 'bike'
-  ? `${completedActivityFeed[selectedStravaActivity].processed_metrics
-      ?.averagePower ?? '—'} W`
-  : completedActivityFeed[selectedStravaActivity].sport === 'run'
-    ? (() => {
-        const activity =
-          completedActivityFeed[selectedStravaActivity];
+    {completedActivityFeed[selectedStravaActivity].sport === 'bike'
+      ? `${completedActivityFeed[selectedStravaActivity].processed_metrics
+          ?.averagePower ?? '—'} W`
+      : completedActivityFeed[selectedStravaActivity].sport === 'run'
+        ? (() => {
+            const activity =
+              completedActivityFeed[selectedStravaActivity];
 
-        const distanceKm =
-          Number(activity.distance_m ?? 0) / 1000;
+            const distanceKm =
+              Number(activity.distance_m ?? 0) / 1000;
 
-        if (!distanceKm || !activity.duration_sec) return '—';
+            if (!distanceKm || !activity.duration_sec) return '—';
 
-        const paceSecPerKm =
-          activity.duration_sec / distanceKm;
+            const paceSecPerKm =
+              activity.duration_sec / distanceKm;
 
-        const minutes = Math.floor(paceSecPerKm / 60);
-        const seconds = Math.round(paceSecPerKm % 60);
+            const minutes = Math.floor(paceSecPerKm / 60);
+            const seconds = Math.round(paceSecPerKm % 60);
 
-        return `${minutes}:${String(seconds).padStart(2, '0')}/km`;
-      })()
-    : completedActivityFeed[selectedStravaActivity].sport === 'swim'
-      ? (() => {
-          const activity =
-            completedActivityFeed[selectedStravaActivity];
-{completedActivityFeed[selectedStravaActivity].sport === 'bike'
-  ? 'Avg Power'
-  : completedActivityFeed[selectedStravaActivity].sport === 'run'
-    ? 'Avg Pace'
-    : completedActivityFeed[selectedStravaActivity].sport === 'swim'
-      ? 'Avg Pace'
-      : 'Pace'}
-          const paceSecPer100m =
-            activity.duration_sec / (distanceM / 100);
+            return `${minutes}:${String(seconds).padStart(2, '0')}/km`;
+          })()
+        : completedActivityFeed[selectedStravaActivity].sport === 'swim'
+          ? (() => {
+              const activity =
+                completedActivityFeed[selectedStravaActivity];
 
-          const minutes = Math.floor(paceSecPer100m / 60);
-          const seconds = Math.round(paceSecPer100m % 60);
+              const distanceM =
+                Number(activity.distance_m ?? 0);
 
-          return `${minutes}:${String(seconds).padStart(2, '0')}/100m`;
-        })()
-      : '—'}
+              if (!distanceM || !activity.duration_sec) return '—';
+
+              const paceSecPer100m =
+                activity.duration_sec / (distanceM / 100);
+
+              const minutes = Math.floor(paceSecPer100m / 60);
+              const seconds = Math.round(paceSecPer100m % 60);
+
+              return `${minutes}:${String(seconds).padStart(2, '0')}/100m`;
+            })()
+          : '—'}
   </strong>
 
   <span>
@@ -3422,7 +3421,9 @@ function WeeklyReviewView() {
       ? 'Avg Power'
       : completedActivityFeed[selectedStravaActivity].sport === 'run'
         ? 'Avg Pace'
-        : 'Pace'}
+        : completedActivityFeed[selectedStravaActivity].sport === 'swim'
+          ? 'Avg Pace'
+          : 'Pace'}
   </span>
 </div>
 </div>
