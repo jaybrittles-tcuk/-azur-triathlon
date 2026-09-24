@@ -3195,3 +3195,43 @@ nav {
 .calendar-day-head.today strong {
   color: #0f7fe5;
 }
+/* Calendar week navigation */
+
+.calendar-week-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.calendar-week-nav button {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 13px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: #10243a;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.calendar-week-nav .calendar-week-today {
+  font-size: 12px;
+  min-width: auto;
+  padding: 0 16px;
+}
+
+.calendar-week-nav button:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 620px) {
+  .calendar-week-nav {
+    margin-top: 16px;
+  }
+
+  .calendar-week-nav button {
+    flex: 0 0 auto;
+  }
+}
