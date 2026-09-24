@@ -1505,8 +1505,29 @@ const todaySession = weekSessions.find(
             </div>
           </section>
 
-          <section className="panel calendar-grid">
-            {days.map((day) => {
+<section className="panel calendar-grid">
+  {calendarWeekSessions.length === 0 ? (
+    <div className="calendar-empty-state">
+      <span className="eyebrow">NO SESSIONS</span>
+
+      <h3>No structured training planned</h3>
+
+      <p>
+        There are no planned sessions in this week yet.
+        Use the week controls above to browse your training calendar.
+      </p>
+
+      {calendarWeekOffset !== 0 && (
+        <button
+          type="button"
+          onClick={() => setCalendarWeekOffset(0)}
+        >
+          Return to this week
+        </button>
+      )}
+    </div>
+  ) : (
+    days.map((day) => {
              const daySessions = calendarWeekSessions.filter(
                 (session) => session.dayLabel === day,
               );
@@ -1583,8 +1604,9 @@ onClick={() => {
                   </div>
                 </div>
               );
-            })}
-          </section>
+    })
+  )}
+</section>
         </div>
 
 {sessionDetailOpen && (
