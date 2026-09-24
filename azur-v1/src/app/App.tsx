@@ -2593,13 +2593,13 @@ onClick={() => {
               </small>
             </div>
 
-            <div>
-              <span>Transitions</span>
-              <strong>~10m</strong>
-              <small>
-                Efficient execution across T1 and T2.
-              </small>
-            </div>
+  <div>
+  <span>Transitions</span>
+  <strong>—</strong>
+  <small>
+    Transition targets will be added when race-specific execution data is available.
+  </small>
+</div>
           </div>
         </section>
 
