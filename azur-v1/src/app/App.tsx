@@ -1393,7 +1393,41 @@ const todaySession = weekSessions.find(
           <section className="panel calendar-toolbar">
             <div>
               <span className="eyebrow">ACTIVE WEEK</span>
-              <h3>21–27 September 2026</h3>
+<h3>
+  {weekSessions.length > 0
+    ? (() => {
+        const dates = weekSessions
+          .map((session) => new Date(`${session.plannedDate}T12:00:00`))
+          .sort((a, b) => a.getTime() - b.getTime());
+
+        const first = dates[0];
+        const last = dates[dates.length - 1];
+
+        const sameMonth =
+          first.getMonth() === last.getMonth() &&
+          first.getFullYear() === last.getFullYear();
+
+        if (sameMonth) {
+          return `${first.getDate()}–${last.getDate()} ${last.toLocaleDateString(
+            'en-GB',
+            {
+              month: 'long',
+              year: 'numeric',
+            },
+          )}`;
+        }
+
+        return `${first.toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+        })} – ${last.toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        })}`;
+      })()
+    : 'Training week'}
+</h3>
               <small>
                 Base 1 · Long-course foundation · Plan v
                 {weekVersion}
