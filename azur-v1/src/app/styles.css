@@ -3705,3 +3705,53 @@ nav {
     padding: 11px 10px;
   }
 }
+.strava-feed-actions {
+  margin-top: 22px;
+}
+
+.strava-action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.strava-action-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 86px;
+  padding: 15px;
+  border: 1px solid rgba(120, 143, 166, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  text-align: left;
+}
+
+.strava-action-grid button strong {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.strava-action-grid button small {
+  color: #8ea2b7;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.strava-action-grid button:hover {
+  border-color: rgba(252, 76, 2, 0.45);
+  background: rgba(252, 76, 2, 0.06);
+}
+
+@media (max-width: 620px) {
+  .strava-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .strava-action-grid button {
+    min-height: auto;
+  }
+}
