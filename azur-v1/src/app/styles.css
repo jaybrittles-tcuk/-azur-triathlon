@@ -3459,3 +3459,32 @@ nav {
     width: 100%;
   }
 }
+@media (max-width: 620px) {
+  .calendar-week-strip {
+    padding: 14px 14px 12px;
+  }
+
+  .calendar-strip-days {
+    margin-top: 12px;
+  }
+
+  .calendar-strip-day {
+    padding: 6px 2px 7px;
+  }
+
+  .calendar-strip-day.today {
+    border-radius: 11px;
+  }
+
+  .calendar-strip-day > strong {
+    font-size: 16px;
+  }
+
+  .calendar-strip-dots {
+    margin-top: 5px;
+  }
+
+  .calendar-strip-footer {
+    margin-top: 10px;
+  }
+}
