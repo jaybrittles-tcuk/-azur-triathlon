@@ -1408,10 +1408,34 @@ const todaySession = weekSessions.find(
               );
 
               return (
-                <div className="calendar-day" key={day}>
-                  <div className="calendar-day-head">
-                    <span>{day}</span>
-                  </div>
+            <div
+  className={`calendar-day-head ${
+    daySessions.some(
+      (session) => session.plannedDate === todayKey,
+    )
+      ? 'today'
+      : ''
+  }`}
+>
+  <div>
+    <span>{day}</span>
+
+    <strong>
+      {daySessions[0]
+        ? new Date(
+            `${daySessions[0].plannedDate}T12:00:00`,
+          ).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+          })
+        : ''}
+    </strong>
+  </div>
+
+  {daySessions.some(
+    (session) => session.plannedDate === todayKey,
+  ) && <small>TODAY</small>}
+</div>
 
                   <div className="day-stack">
                     {daySessions.map((session) => (
