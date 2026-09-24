@@ -3419,6 +3419,48 @@ function WeeklyReviewView() {
     </>
   );
 }
+  async function handleImportActivities() {
+  if (importFiles.length === 0) return;
+
+  const fitFile = importFiles.find((file) =>
+    file.name.toLowerCase().endsWith('.fit'),
+  );
+
+  if (!fitFile) {
+    setImportStatus('Select at least one FIT file for this first test.');
+    return;
+  }
+
+  try {
+    setImportLoading(true);
+    setImportStatus(`Reading ${fitFile.name}...`);
+
+    const arrayBuffer = await fitFile.arrayBuffer();
+
+    const parser = new FitParser({
+      mode: 'list',
+      speedUnit: 'km/h',
+      lengthUnit: 'km',
+    });
+
+    const parsed = await parser.parseAsync(arrayBuffer);
+
+    setImportStatus(
+      `Parsed successfully · ${
+        parsed.sessions?.length ?? 0
+      } session(s) · ${
+        parsed.laps?.length ?? 0
+      } lap(s) · ${
+        parsed.records?.length ?? 0
+      } records`,
+    );
+  } catch (error) {
+    console.error(error);
+    setImportStatus('FIT file could not be parsed.');
+  } finally {
+    setImportLoading(false);
+  }
+}
   function DataSourcesView() {
     return (
       <>
