@@ -223,8 +223,31 @@ function Metric({
     </div>
   );
 }
+function WorkoutShape({
+  sessionClass,
+}: {
+  sessionClass: string;
+}) {
+  const blocks =
+    sessionClass === 'intensity'
+      ? [28, 28, 82, 34, 82, 34, 82, 34, 28]
+      : sessionClass === 'race_specific'
+        ? [24, 38, 56, 70, 70, 70, 56, 38, 24]
+        : sessionClass === 'endurance'
+          ? [24, 34, 44, 50, 50, 50, 44, 34, 24]
+          : [22, 28, 32, 34, 34, 32, 28, 22];
 
-function ProgressRow({
+  return (
+    <div className="workout-shape" aria-hidden="true">
+      {blocks.map((height, index) => (
+        <span
+          key={index}
+          style={{ height: `${height}%` }}
+        />
+      ))}
+    </div>
+  );
+}function ProgressRow({
   label,
   value,
   text,
