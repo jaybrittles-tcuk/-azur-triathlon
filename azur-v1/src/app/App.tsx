@@ -2214,6 +2214,9 @@ onClick={() => {
                     {selected.completedRoute && selected.completedRoute.length > 1 && (
   <RouteMap points={selected.completedRoute} />
 )}
+      {selected.completedSeries && selected.completedSeries.length > 1 && (
+  <HeartRateChart points={selected.completedSeries} />
+)}
       <div className="completed-session-metrics">
         <div>
           <span>PLANNED</span>
