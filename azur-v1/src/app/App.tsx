@@ -816,6 +816,17 @@ return {
 
   maxHeartRate:
     metrics.maxHeartRate ?? metrics.max_heart_rate,
+  averagePaceSecPerKm:
+  metrics.averagePaceSecPerKm ?? metrics.average_pace_sec_per_km,
+
+bestPaceSecPerKm:
+  metrics.bestPaceSecPerKm ?? metrics.best_pace_sec_per_km,
+
+averageSpeedKmh:
+  metrics.averageSpeedKmh ?? metrics.average_speed_kmh,
+
+maxSpeedKmh:
+  metrics.maxSpeedKmh ?? metrics.max_speed_kmh,
 
   calories: metrics.calories,
 
