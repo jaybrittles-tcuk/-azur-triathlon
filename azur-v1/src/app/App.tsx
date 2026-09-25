@@ -1633,9 +1633,7 @@ const dayCompletedActivities = completedActivityFeed.filter(
     );
   },
 );
-const daySessions = calendarWeekSessions.filter(
-  (session) => session.dayLabel === day,
-);
+
       return (
 <div
   className={`calendar-day ${
