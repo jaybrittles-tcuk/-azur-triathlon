@@ -3825,6 +3825,66 @@ const compactRoute = routePoints.filter(
     index % routeSampleStep === 0 ||
     index === routePoints.length - 1,
 );
+    const rawRecords = parsed.records ?? [];
+
+const chartSampleStep = Math.max(
+  1,
+  Math.ceil(rawRecords.length / 300),
+);
+
+const firstRecordTime =
+  rawRecords.find((record: any) => record.timestamp)?.timestamp ?? null;
+
+const compactSeries = rawRecords
+  .filter(
+    (record: any, index: number) =>
+      index % chartSampleStep === 0 ||
+      index === rawRecords.length - 1,
+  )
+  .map((record: any) => {
+    const timestamp = record.timestamp
+      ? new Date(record.timestamp).getTime()
+      : null;
+
+    const elapsedSec =
+      timestamp && firstRecordTime
+        ? Math.max(
+            0,
+            Math.round(
+              (timestamp - new Date(firstRecordTime).getTime()) / 1000,
+            ),
+          )
+        : null;
+
+    return {
+      elapsedSec,
+      heartRate:
+        record.heart_rate != null
+          ? Number(record.heart_rate)
+          : null,
+      speedKmh:
+        record.speed != null
+          ? Number(record.speed)
+          : record.enhanced_speed != null
+            ? Number(record.enhanced_speed)
+            : null,
+      altitudeM:
+        record.altitude != null
+          ? Number(record.altitude)
+          : record.enhanced_altitude != null
+            ? Number(record.enhanced_altitude)
+            : null,
+    };
+  })
+  .filter(
+    (point: any) =>
+      point.elapsedSec != null &&
+      (
+        point.heartRate != null ||
+        point.speedKmh != null ||
+        point.altitudeM != null
+      ),
+  );
     const durationSec = Number(
   firstSession?.total_timer_time ??
   firstSession?.total_elapsed_time ??
