@@ -186,6 +186,92 @@ function HeartRateChart({
     </div>
   );
 }
+function PaceChart({
+  points,
+}: {
+  points: Array<{
+    elapsedSec: number | null;
+    speedKmh: number | null;
+  }>;
+}) {
+  const validPoints = points
+    .filter(
+      (point) =>
+        point.elapsedSec != null &&
+        point.speedKmh != null &&
+        point.speedKmh > 0,
+    )
+    .map((point) => ({
+      elapsedSec: point.elapsedSec,
+      paceSecPerKm: 3600 / (point.speedKmh ?? 1),
+    }));
+
+  if (validPoints.length < 2) {
+    return null;
+  }
+
+  const width = 600;
+  const height = 180;
+  const padding = 16;
+
+  const maxTime = Math.max(
+    ...validPoints.map((point) => point.elapsedSec ?? 0),
+  );
+
+  const paces = validPoints.map(
+    (point) => point.paceSecPerKm,
+  );
+
+  const minPace = Math.min(...paces);
+  const maxPace = Math.max(...paces);
+  const paceRange = Math.max(1, maxPace - minPace);
+
+  const chartPoints = validPoints
+    .map((point) => {
+      const x =
+        padding +
+        ((point.elapsedSec ?? 0) / maxTime) *
+          (width - padding * 2);
+
+      const y =
+        padding +
+        ((point.paceSecPerKm - minPace) / paceRange) *
+          (height - padding * 2);
+
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  const averagePace =
+    paces.reduce((total, value) => total + value, 0) /
+    paces.length;
+
+  const paceMinutes = Math.floor(averagePace / 60);
+  const paceSeconds = Math.round(averagePace % 60);
+
+  return (
+    <div className="activity-chart">
+      <div className="activity-chart-heading">
+        <span>PACE</span>
+        <strong>
+          {paceMinutes}:{String(paceSeconds).padStart(2, '0')}/km avg
+        </strong>
+      </div>
+
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label="Pace over time"
+      >
+        <polyline
+          points={chartPoints}
+          fill="none"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+    </div>
+  );
+}
 const navigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
