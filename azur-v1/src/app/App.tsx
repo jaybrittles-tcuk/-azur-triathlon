@@ -3787,7 +3787,9 @@ const { data: athlete, error: athleteError } = await supabase
 if (athleteError || !athlete) {
   throw new Error('Unable to resolve athlete profile.');
 }
-
+const activityDateKey = new Date(startTime)
+  .toISOString()
+  .slice(0, 10);
 const sourceActivityId = [
   new Date(startTime).toISOString(),
   mappedSport,
