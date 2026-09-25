@@ -2091,9 +2091,6 @@ onClick={() => {
     <div className="wide session-block completed-session-summary">
       <div className="completed-session-heading">
         <div>
-          {selected.completedRoute && selected.completedRoute.length > 1 && (
-  <RouteMap points={selected.completedRoute} />
-)}
           <span className="eyebrow">SESSION COMPLETE</span>
           <strong>Workout matched successfully</strong>
         </div>
@@ -2103,6 +2100,9 @@ onClick={() => {
 
       <div className="completed-session-metrics">
         <div>
+                    {selected.completedRoute && selected.completedRoute.length > 1 && (
+  <RouteMap points={selected.completedRoute} />
+)}
           <span>PLANNED</span>
           <strong>
             {formatDuration(selected.durationMin)}
