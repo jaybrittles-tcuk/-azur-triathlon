@@ -4206,3 +4206,14 @@ strong {
 .activity-analysis-copy {
   color: #71839a !important;
 }
+.activity-analysis-label {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.10);
+  color: #16834b;
+  font-size: 11px;
+  font-weight: 800;
+}
