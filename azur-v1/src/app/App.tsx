@@ -3821,6 +3821,7 @@ const { error: insertError } = await supabase
   .upsert(
     {
       athlete_id: athlete.id,
+      planned_session_id: matchedPlannedSessionId,
       sport: mappedSport,
       source: 'manual_fit',
       source_activity_id: sourceActivityId,
