@@ -784,6 +784,8 @@ completedSource:
   completedBySessionId.get(session.id)?.source ?? undefined,
     completedRoute:
   completedBySessionId.get(session.id)?.raw_payload?.route ?? undefined,
+    completedSeries:
+  completedBySessionId.get(session.id)?.raw_payload?.series ?? undefined,
     completedIntervals: (() => {
   const metrics =
     completedBySessionId.get(session.id)?.processed_metrics ?? {};
