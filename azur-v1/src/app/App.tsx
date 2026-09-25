@@ -397,15 +397,21 @@ const validPoints = points
 
   return (
     <div className="activity-chart pace-chart">
-      <div className="activity-chart-heading">
-        <span>PACE</span>
-        <strong>{formatPace(averagePace)}/km avg</strong>
-      </div>
+<div className="activity-chart-heading">
+  <span>PACE</span>
+</div>
 
-      <div className="activity-chart-range">
-        <span>{formatPace(minPace)}/km fastest</span>
-        <span>{formatPace(maxPace)}/km slowest</span>
-      </div>
+<div className="activity-chart-stats">
+  <div>
+    <strong>{formatPace(averagePace)}</strong>
+    <span>/km avg</span>
+  </div>
+
+  <div>
+    <strong>{formatPace(minPace)}</strong>
+    <span>/km best</span>
+  </div>
+</div>
 
       <svg
         viewBox={`0 0 ${width} ${height}`}
