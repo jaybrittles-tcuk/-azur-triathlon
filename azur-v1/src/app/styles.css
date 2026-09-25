@@ -3934,3 +3934,35 @@ nav {
 .activity-route-map .leaflet-control-attribution {
   display: none;
 }
+.activity-route-map-wrap {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  margin: 16px 0 18px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #eef3f7;
+}
+
+.activity-route-map-wrap .activity-route-map {
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.activity-route-map-wrap .activity-route-map.loaded {
+  opacity: 1;
+}
+
+.activity-route-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 500;
+  font-size: 13px;
+  font-weight: 800;
+  color: #6f8296;
+  background: #eef3f7;
+}
