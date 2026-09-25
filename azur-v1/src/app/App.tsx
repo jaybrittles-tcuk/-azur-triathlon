@@ -127,6 +127,7 @@ type Session = PlannedSession & {
   completedDurationSec?: number;
   completedDistanceM?: number;
 completedSource?: string;
+  completedRoute?: RoutePoint[];
   completedIntervals?: Array<{
   durationSec: number;
   averagePower?: number;
