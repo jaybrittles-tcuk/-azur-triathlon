@@ -4022,7 +4022,9 @@ nav {
   font-size: 11px;
   font-weight: 700;
   color: #8292a4;
-}.activity-chart-range {
+}
+
+.activity-chart-range {
   display: flex;
   align-items: center;
   justify-content: space-between;
