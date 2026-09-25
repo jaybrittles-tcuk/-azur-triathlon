@@ -296,17 +296,23 @@ function PaceChart({
     speedKmh: number | null;
   }>;
 }) {
-  const validPoints = points
-    .filter(
-      (point) =>
-        point.elapsedSec != null &&
-        point.speedKmh != null &&
-        point.speedKmh > 0,
-    )
-    .map((point) => ({
-      elapsedSec: point.elapsedSec,
-      paceSecPerKm: 3600 / (point.speedKmh ?? 1),
-    }));
+const validPoints = points
+  .filter(
+    (point) =>
+      point.elapsedSec != null &&
+      point.speedKmh != null &&
+      point.speedKmh > 0 &&
+      point.elapsedSec > 20,
+  )
+  .map((point) => ({
+    elapsedSec: point.elapsedSec,
+    paceSecPerKm: 3600 / (point.speedKmh ?? 1),
+  }))
+  .filter(
+    (point) =>
+      point.paceSecPerKm >= 180 &&
+      point.paceSecPerKm <= 420,
+  );
 
   if (validPoints.length < 2) {
     return null;
