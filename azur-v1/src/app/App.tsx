@@ -1697,6 +1697,10 @@ const dayCompletedActivities = completedActivityFeed.filter(
   (activity) => {
     if (!calendarDay) return false;
 
+    if (activity.planned_session_id) {
+      return false;
+    }
+
     const activityDate = new Date(activity.start_time);
 
     return (
@@ -1706,7 +1710,6 @@ const dayCompletedActivities = completedActivityFeed.filter(
     );
   },
 );
-
       return (
 <div
   className={`calendar-day ${
