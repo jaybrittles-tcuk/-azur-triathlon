@@ -3754,10 +3754,9 @@ raw_payload: {
   route: compactRoute,
 },
     },
-    {
-      onConflict: 'source,source_activity_id',
-      ignoreDuplicates: true,
-    },
+{
+  onConflict: 'source,source_activity_id',
+},
   );
 
 if (insertError) {
