@@ -37,6 +37,58 @@ import {
   calculateTrainingLoad,
   isTrainingLoadEligible,
 } from '../lib/calculations/trainingLoad';
+type RoutePoint = {
+  lat: number;
+  lng: number;
+};
+
+function RouteMap({ points }: { points: RoutePoint[] }) {
+  const mapRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!mapRef.current || points.length < 2) return;
+
+    const map = L.map(mapRef.current, {
+      zoomControl: false,
+      attributionControl: false,
+    });
+
+    L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+        maxZoom: 19,
+      },
+    ).addTo(map);
+
+    const latLngs = points.map(
+      (point) => [point.lat, point.lng] as [number, number],
+    );
+
+    const route = L.polyline(latLngs, {
+      weight: 4,
+    }).addTo(map);
+
+    map.fitBounds(route.getBounds(), {
+      padding: [18, 18],
+    });
+
+    return () => {
+      map.remove();
+    };
+  }, [points]);
+
+  if (points.length < 2) {
+    return null;
+  }
+
+  return (
+    <div
+      ref={mapRef}
+      className="activity-route-map"
+      aria-label="Activity route map"
+    />
+  );
+}
 const navigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
