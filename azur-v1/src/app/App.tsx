@@ -2097,12 +2097,11 @@ onClick={() => {
 
         <span className="completed-check">✓</span>
       </div>
-
-      <div className="completed-session-metrics">
-        <div>
                     {selected.completedRoute && selected.completedRoute.length > 1 && (
   <RouteMap points={selected.completedRoute} />
 )}
+      <div className="completed-session-metrics">
+        <div>
           <span>PLANNED</span>
           <strong>
             {formatDuration(selected.durationMin)}
