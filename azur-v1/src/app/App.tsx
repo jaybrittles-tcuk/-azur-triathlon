@@ -3748,10 +3748,11 @@ const { error: insertError } = await supabase
         averagePower,
       },
 
-      raw_payload: {
-        file_name: fitFile.name,
-        session: firstSession,
-      },
+raw_payload: {
+  file_name: fitFile.name,
+  session: firstSession,
+  route: compactRoute,
+},
     },
     {
       onConflict: 'source,source_activity_id',
