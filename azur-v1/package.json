@@ -12,6 +12,7 @@
   "@supabase/supabase-js": "latest",
   "@vitejs/plugin-react": "latest",
    "fit-file-parser": "^6.1.2",
+   "leaflet": "latest",
     "vite": "latest",
     "typescript": "latest",
     "react": "latest",
