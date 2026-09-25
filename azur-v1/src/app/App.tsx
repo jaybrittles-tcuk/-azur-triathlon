@@ -3790,6 +3790,25 @@ if (athleteError || !athlete) {
 const activityDateKey = new Date(startTime)
   .toISOString()
   .slice(0, 10);
+    const { data: matchingSessions, error: matchingSessionError } =
+  await supabase
+    .from('planned_session')
+    .select('id, planned_date, sport')
+    .eq('athlete_id', athlete.id)
+    .eq('planned_date', activityDateKey)
+    .eq('sport', mappedSport)
+    .eq('is_active_version', true)
+    .limit(1);
+
+if (matchingSessionError) {
+  console.error(
+    'Unable to match completed activity to planned session:',
+    matchingSessionError,
+  );
+}
+
+const matchedPlannedSessionId =
+  matchingSessions?.[0]?.id ?? null;
 const sourceActivityId = [
   new Date(startTime).toISOString(),
   mappedSport,
