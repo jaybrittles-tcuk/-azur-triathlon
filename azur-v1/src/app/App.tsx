@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import FitParser from 'fit-file-parser';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
