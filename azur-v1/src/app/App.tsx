@@ -2471,13 +2471,6 @@ onClick={() => {
     </strong>
   </div>
 
-  <div>
-    <span>ROUTE POINTS</span>
-    <strong>
-      {completedActivityFeed[selectedStravaActivity].raw_payload?.route
-        ?.length ?? 0}
-    </strong>
-  </div>
 </div>
       </aside>
     </div>
