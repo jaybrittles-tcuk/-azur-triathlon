@@ -2262,13 +2262,22 @@ onClick={() => {
 </div>
 
 <div>
-  <span>SOURCE</span>
+  <span>
+    {selected.sport === 'run'
+      ? 'MAX SPEED'
+      : 'SOURCE'}
+  </span>
+
   <strong>
-    {selected.completedSource
-      ? selected.completedSource
-          .replaceAll('_', ' ')
-          .toUpperCase()
-      : '—'}
+    {selected.sport === 'run'
+      ? selected.completedMetrics.maxSpeedKmh
+        ? `${selected.completedMetrics.maxSpeedKmh.toFixed(1)} km/h`
+        : '—'
+      : selected.completedSource
+        ? selected.completedSource
+            .replaceAll('_', ' ')
+            .toUpperCase()
+        : '—'}
   </strong>
 </div>
           </div>
