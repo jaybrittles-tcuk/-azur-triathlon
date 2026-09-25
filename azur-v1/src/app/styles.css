@@ -4072,3 +4072,16 @@ nav {
   stroke: #ef4444;
   stroke-width: 2.75;
 }
+.pace-chart {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(22, 135, 232, 0.035),
+      rgba(255, 255, 255, 1) 42%
+    );
+}
+
+.pace-chart polyline {
+  stroke: #1687e8;
+  stroke-width: 2.75;
+}
