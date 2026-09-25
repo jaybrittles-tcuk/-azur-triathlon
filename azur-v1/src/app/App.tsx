@@ -3628,8 +3628,16 @@ function WeeklyReviewView() {
     const parsed = await parser.parseAsync(arrayBuffer);
 
    const firstSession = parsed.sessions?.[0] as any;
-
-const durationSec = Number(
+const routePoints = (parsed.records ?? [])
+  .filter(
+    (record: any) =>
+      record.position_lat != null &&
+      record.position_long != null,
+  )
+  .map((record: any) => ({
+    lat: Number(record.position_lat),
+    lng: Number(record.position_long),
+  }));const durationSec = Number(
   firstSession?.total_timer_time ??
   firstSession?.total_elapsed_time ??
   0,
@@ -3730,6 +3738,9 @@ if (insertError) {
 setImportStatus(
   [
    `Activity imported successfully`,
+    routePoints.length
+  ? `${routePoints.length} GPS points`
+  : 'No GPS route found',
     `${firstSession?.sport ?? 'activity'}`,
     startTime ? `Start ${String(startTime)}` : null,
     durationSec ? `${Math.round(durationSec / 60)} min` : null,
