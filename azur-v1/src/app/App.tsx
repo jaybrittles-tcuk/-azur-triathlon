@@ -128,6 +128,12 @@ type Session = PlannedSession & {
   completedDistanceM?: number;
 completedSource?: string;
   completedRoute?: RoutePoint[];
+  completedSeries?: Array<{
+  elapsedSec: number | null;
+  heartRate: number | null;
+  speedKmh: number | null;
+  altitudeM: number | null;
+}>;
   completedIntervals?: Array<{
   durationSec: number;
   averagePower?: number;
