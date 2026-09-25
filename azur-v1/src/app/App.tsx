@@ -1708,6 +1708,50 @@ onClick={() => {
 </span>
                       </button>
                     ))}
+                    {dayCompletedActivities.map((activity) => {
+  const activityIndex = completedActivityFeed.indexOf(activity);
+
+  return (
+    <button
+      key={`${activity.source}-${activity.start_time}`}
+      className={`calendar-session completed ${activity.sport}`}
+      onClick={() => {
+        setSelectedStravaActivity(activityIndex);
+      }}
+    >
+      <div className="calendar-session-top">
+        <span>{sportName(activity.sport)}</span>
+
+        <div className="calendar-session-status">
+          <span>Completed</span>
+          <CheckCircle2 size={13} />
+        </div>
+      </div>
+
+      <strong>
+        {activity.source === 'manual_fit'
+          ? 'Garmin FIT Activity'
+          : 'Completed Activity'}
+      </strong>
+
+      <div className="calendar-session-meta">
+        <span>
+          {Math.round(activity.duration_sec / 60)} min
+        </span>
+
+        <span>
+          {(Number(activity.distance_m ?? 0) / 1000).toFixed(2)} km
+        </span>
+      </div>
+
+      <span className="calendar-session-target">
+        {activity.processed_metrics?.averageHeartRate
+          ? `${activity.processed_metrics.averageHeartRate} bpm avg`
+          : 'Garmin activity'}
+      </span>
+    </button>
+  );
+})}
                   </div>
                 </div>
               );
