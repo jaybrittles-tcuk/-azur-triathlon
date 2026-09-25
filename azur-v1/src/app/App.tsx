@@ -800,15 +800,28 @@ completedMetrics: (() => {
   const metrics =
     completedBySessionId.get(session.id)?.processed_metrics ?? {};
 
-  return {
-    averagePower: metrics.average_power,
-    normalizedPower: metrics.normalized_power,
-    averageHeartRate: metrics.average_heart_rate,
-    maxHeartRate: metrics.max_heart_rate,
-    calories: metrics.calories,
-    trainingLoad: metrics.training_load,
-    isTest: metrics.test_fixture === true,
-  };
+return {
+  averagePower:
+    metrics.averagePower ?? metrics.average_power,
+
+  normalizedPower:
+    metrics.normalizedPower ?? metrics.normalized_power,
+
+  averageHeartRate:
+    metrics.averageHeartRate ?? metrics.average_heart_rate,
+
+  maxHeartRate:
+    metrics.maxHeartRate ?? metrics.max_heart_rate,
+
+  calories: metrics.calories,
+
+  trainingLoad:
+    metrics.trainingLoad ?? metrics.training_load,
+
+  isTest:
+    metrics.is_test === true ||
+    metrics.test_fixture === true,
+};
 })(),
 
 targets: session.targets ?? {},
