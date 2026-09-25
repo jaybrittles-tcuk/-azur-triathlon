@@ -4217,3 +4217,26 @@ strong {
   font-size: 11px;
   font-weight: 800;
 }
+.activity-analysis-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(15, 127, 229, 0.06);
+}
+
+.activity-analysis-secondary span {
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  color: #6f8296;
+}
+
+.activity-analysis-secondary strong {
+  font-size: 16px;
+  font-weight: 850;
+  color: #10243a !important;
+}
