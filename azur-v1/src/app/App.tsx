@@ -1616,6 +1616,23 @@ const todaySession = weekSessions.find(
              const daySessions = calendarWeekSessions.filter(
                 (session) => session.dayLabel === day,
               );
+      const calendarDay = calendarWeekDates.find(
+  (calendarDate) => calendarDate.dayLabel === day,
+);
+
+const dayCompletedActivities = completedActivityFeed.filter(
+  (activity) => {
+    if (!calendarDay) return false;
+
+    const activityDate = new Date(activity.start_time);
+
+    return (
+      activityDate.getFullYear() === calendarDay.date.getFullYear() &&
+      activityDate.getMonth() === calendarDay.date.getMonth() &&
+      activityDate.getDate() === calendarDay.date.getDate()
+    );
+  },
+);
 const daySessions = calendarWeekSessions.filter(
   (session) => session.dayLabel === day,
 );
