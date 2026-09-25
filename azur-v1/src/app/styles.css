@@ -3997,8 +3997,32 @@ nav {
   font-weight: 800;
   color: #10243a;
 }
+.activity-chart-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 2px 0 8px;
+}
 
-.activity-chart-range {
+.activity-chart-stats > div {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.activity-chart-stats strong {
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #10243a;
+}
+
+.activity-chart-stats span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8292a4;
+}.activity-chart-range {
   display: flex;
   align-items: center;
   justify-content: space-between;
