@@ -2243,12 +2243,21 @@ onClick={() => {
       : selected.completedMetrics.trainingLoad ?? '—'}
   </strong>
 </div>
-            <div>
-  <span>CALORIES</span>
+<div>
+  <span>
+    {selected.sport === 'run'
+      ? 'AVG SPEED'
+      : 'CALORIES'}
+  </span>
+
   <strong>
-    {selected.completedMetrics.calories
-      ? `${selected.completedMetrics.calories} kcal`
-      : '—'}
+    {selected.sport === 'run'
+      ? selected.completedMetrics.averageSpeedKmh
+        ? `${selected.completedMetrics.averageSpeedKmh.toFixed(1)} km/h`
+        : '—'
+      : selected.completedMetrics.calories
+        ? `${selected.completedMetrics.calories} kcal`
+        : '—'}
   </strong>
 </div>
 
