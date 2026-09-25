@@ -2628,6 +2628,31 @@ onClick={() => {
       {selected.completedSeries && selected.completedSeries.length > 1 && (
   <PaceChart points={selected.completedSeries} />
 )}
+      {selected.completedSeries && selected.completedSeries.length > 1 && (() => {
+  const hrDrift = calculateHrDrift(selected.completedSeries);
+
+  if (hrDrift == null) {
+    return null;
+  }
+
+  return (
+    <div className="activity-analysis-card">
+      <div className="activity-analysis-heading">
+        <span>AZUR ANALYSIS</span>
+        <strong>HR DRIFT</strong>
+      </div>
+
+      <div className="activity-analysis-value">
+        {hrDrift >= 0 ? '+' : ''}
+        {hrDrift.toFixed(1)}%
+      </div>
+
+      <div className="activity-analysis-copy">
+        Cardiovascular efficiency change from the first half to the second half of the run.
+      </div>
+    </div>
+  );
+})()}
       <div className="completed-session-metrics">
         <div>
           <span>PLANNED</span>
