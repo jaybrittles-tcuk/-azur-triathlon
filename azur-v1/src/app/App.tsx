@@ -594,6 +594,46 @@ function calculateHrDrift(
     100
   );
 }
+function calculatePaceConsistency(
+  points: Array<{
+    elapsedSec: number | null;
+    speedKmh: number | null;
+  }>,
+) {
+  const paces = points
+    .filter(
+      (point) =>
+        point.elapsedSec != null &&
+        point.speedKmh != null &&
+        point.speedKmh > 0 &&
+        point.elapsedSec > 20,
+    )
+    .map((point) => 3600 / (point.speedKmh ?? 1))
+    .filter(
+      (pace) =>
+        pace >= 180 &&
+        pace <= 420,
+    );
+
+  if (paces.length < 10) {
+    return null;
+  }
+
+  const average =
+    paces.reduce((total, value) => total + value, 0) /
+    paces.length;
+
+  const variance =
+    paces.reduce(
+      (total, value) =>
+        total + Math.pow(value - average, 2),
+      0,
+    ) / paces.length;
+
+  const standardDeviation = Math.sqrt(variance);
+
+  return (standardDeviation / average) * 100;
+}
 const navigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
