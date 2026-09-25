@@ -2634,8 +2634,14 @@ onClick={() => {
   if (hrDrift == null) {
     return null;
   }
-
-  return (
+const driftLabel =
+  hrDrift < -2
+    ? 'Efficiency improved'
+    : hrDrift <= 3
+      ? 'Stable aerobic response'
+      : hrDrift <= 5
+        ? 'Mild cardiovascular drift'
+        : 'Noticeable cardiovascular drift';  return (
     <div className="activity-analysis-card">
       <div className="activity-analysis-heading">
         <span>AZUR ANALYSIS</span>
@@ -2646,8 +2652,9 @@ onClick={() => {
         {hrDrift >= 0 ? '+' : ''}
         {hrDrift.toFixed(1)}%
       </div>
-
-      <div className="activity-analysis-copy">
+<div className="activity-analysis-label">
+  {driftLabel}
+</div>      <div className="activity-analysis-copy">
         Cardiovascular efficiency change from the first half to the second half of the run.
       </div>
     </div>
