@@ -2180,14 +2180,29 @@ onClick={() => {
               </strong>
             </div>
 
-            <div>
-              <span>NORMALIZED POWER</span>
-              <strong>
-                {selected.completedMetrics.normalizedPower
-                  ? `${selected.completedMetrics.normalizedPower} W`
-                  : '—'}
-              </strong>
-            </div>
+  <div>
+  <span>
+    {selected.sport === 'run'
+      ? 'AVG PACE'
+      : 'NORMALIZED POWER'}
+  </span>
+
+  <strong>
+    {selected.sport === 'run'
+      ? selected.completedMetrics.averagePaceSecPerKm
+        ? `${Math.floor(
+            selected.completedMetrics.averagePaceSecPerKm / 60,
+          )}:${String(
+            Math.round(
+              selected.completedMetrics.averagePaceSecPerKm % 60,
+            ),
+          ).padStart(2, '0')}/km`
+        : '—'
+      : selected.completedMetrics.normalizedPower
+        ? `${selected.completedMetrics.normalizedPower} W`
+        : '—'}
+  </strong>
+</div>
 
             <div>
               <span>AVG HR</span>
