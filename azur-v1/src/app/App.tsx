@@ -236,7 +236,22 @@ function HeartRateChart({
             />
           </linearGradient>
         </defs>
+{[0.25, 0.5, 0.75].map((ratio) => {
+  const y =
+    paddingTop +
+    chartHeight * ratio;
 
+  return (
+    <line
+      key={`hr-horizontal-${ratio}`}
+      x1={paddingX}
+      x2={width - paddingX}
+      y1={y}
+      y2={y}
+      className="activity-chart-gridline horizontal"
+    />
+  );
+})}
         {timeMarkers.map((time) => {
           const x =
             paddingX +
