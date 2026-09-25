@@ -2222,12 +2222,27 @@ onClick={() => {
               </strong>
             </div>
 
-            <div>
-              <span>TRAINING LOAD</span>
-              <strong>
-                {selected.completedMetrics.trainingLoad ?? '—'}
-              </strong>
-            </div>
+<div>
+  <span>
+    {selected.sport === 'run'
+      ? 'BEST PACE'
+      : 'TRAINING LOAD'}
+  </span>
+
+  <strong>
+    {selected.sport === 'run'
+      ? selected.completedMetrics.bestPaceSecPerKm
+        ? `${Math.floor(
+            selected.completedMetrics.bestPaceSecPerKm / 60,
+          )}:${String(
+            Math.round(
+              selected.completedMetrics.bestPaceSecPerKm % 60,
+            ),
+          ).padStart(2, '0')}/km`
+        : '—'
+      : selected.completedMetrics.trainingLoad ?? '—'}
+  </strong>
+</div>
             <div>
   <span>CALORIES</span>
   <strong>
