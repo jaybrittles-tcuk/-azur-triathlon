@@ -2404,20 +2404,11 @@ onClick={() => {
           )}
         </h2>
 
-        <p>
-          {new Date(
-            completedActivityFeed[selectedStravaActivity].start_time,
-          ).toLocaleString('en-GB', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </p>
-
-        <div className="completed-activity-grid">
+<RouteMap
+  points={
+    completedActivityFeed[selectedStravaActivity].raw_payload?.route ?? []
+  }
+/>
           <div>
             <span>DURATION</span>
             <strong>
