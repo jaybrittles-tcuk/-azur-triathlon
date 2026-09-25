@@ -4074,3 +4074,6 @@ nav {
 .pace-chart polyline {
   stroke: #1687e8;
 }
+.editor-panel .completed-session-summary .activity-chart-stats strong {
+  color: #10243a !important;
+}
