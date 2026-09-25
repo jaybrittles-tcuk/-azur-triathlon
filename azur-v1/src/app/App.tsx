@@ -2694,7 +2694,14 @@ const driftLabel =
       </div>
 <div className="activity-analysis-label">
   {driftLabel}
-</div>      <div className="activity-analysis-copy">
+</div>      
+      {paceConsistency != null && (
+  <div className="activity-analysis-secondary">
+    <span>PACE CONSISTENCY</span>
+    <strong>{paceConsistency.toFixed(1)}%</strong>
+  </div>
+)}
+      <div className="activity-analysis-copy">
         Cardiovascular efficiency change from the first half to the second half of the run.
       </div>
     </div>
