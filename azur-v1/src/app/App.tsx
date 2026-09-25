@@ -3629,6 +3629,20 @@ function WeeklyReviewView() {
 
    const firstSession = parsed.sessions?.[0] as any;
 const routePoints = (parsed.records ?? [])
+  const sampleRecord = parsed.records?.find(
+  (record: any) =>
+    Object.keys(record).some((key) =>
+      key.toLowerCase().includes('position'),
+    ),
+);
+
+const samplePositionKeys = sampleRecord
+  ? Object.keys(sampleRecord)
+      .filter((key) =>
+        key.toLowerCase().includes('position'),
+      )
+      .join(', ')
+  : 'none';
   .filter(
     (record: any) =>
       record.position_lat != null &&
@@ -3741,7 +3755,7 @@ setImportStatus(
    `Activity imported successfully`,
     routePoints.length
   ? `${routePoints.length} GPS points`
-  : 'No GPS route found',
+ `No GPS route found · position fields: ${samplePositionKeys}`,
     `${firstSession?.sport ?? 'activity'}`,
     startTime ? `Start ${String(startTime)}` : null,
     durationSec ? `${Math.round(durationSec / 60)} min` : null,
