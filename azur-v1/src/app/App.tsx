@@ -3882,11 +3882,15 @@ const { error: insertError } = await supabase
       duration_sec: Math.round(durationSec),
       distance_m: Math.round(distanceKm * 1000),
 
-      processed_metrics: {
-        averageHeartRate,
-        maxHeartRate,
-        averagePower,
-      },
+processed_metrics: {
+  averageHeartRate,
+  maxHeartRate,
+  averagePower,
+  averagePaceSecPerKm,
+  bestPaceSecPerKm,
+  averageSpeedKmh,
+  maxSpeedKmh,
+},
 
 raw_payload: {
   file_name: fitFile.name,
