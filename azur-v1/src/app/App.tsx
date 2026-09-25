@@ -3753,9 +3753,9 @@ if (insertError) {
 setImportStatus(
   [
    `Activity imported successfully`,
-    routePoints.length
+routePoints.length
   ? `${routePoints.length} GPS points`
- `No GPS route found · position fields: ${samplePositionKeys}`,
+  : `No GPS route found · position fields: ${samplePositionKeys}`,
     `${firstSession?.sport ?? 'activity'}`,
     startTime ? `Start ${String(startTime)}` : null,
     durationSec ? `${Math.round(durationSec / 60)} min` : null,
