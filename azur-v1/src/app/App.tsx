@@ -313,8 +313,10 @@ function PaceChart({
   }
 
   const width = 600;
-  const height = 180;
-  const padding = 16;
+  const height = 200;
+  const paddingX = 24;
+  const paddingTop = 18;
+  const paddingBottom = 30;
 
   const maxTime = Math.max(
     ...validPoints.map((point) => point.elapsedSec ?? 0),
@@ -328,36 +330,69 @@ function PaceChart({
   const maxPace = Math.max(...paces);
   const paceRange = Math.max(1, maxPace - minPace);
 
-  const chartPoints = validPoints
-    .map((point) => {
-      const x =
-        padding +
-        ((point.elapsedSec ?? 0) / maxTime) *
-          (width - padding * 2);
+  const chartHeight =
+    height - paddingTop - paddingBottom;
 
-      const y =
-        padding +
-        ((point.paceSecPerKm - minPace) / paceRange) *
-          (height - padding * 2);
+  const chartPoints = validPoints.map((point) => {
+    const x =
+      paddingX +
+      ((point.elapsedSec ?? 0) / maxTime) *
+        (width - paddingX * 2);
 
-      return `${x},${y}`;
-    })
+    const y =
+      paddingTop +
+      ((point.paceSecPerKm - minPace) / paceRange) *
+        chartHeight;
+
+    return { x, y };
+  });
+
+  const linePoints = chartPoints
+    .map((point) => `${point.x},${point.y}`)
     .join(' ');
+
+  const areaPoints = [
+    `${paddingX},${height - paddingBottom}`,
+    ...chartPoints.map(
+      (point) => `${point.x},${point.y}`,
+    ),
+    `${width - paddingX},${height - paddingBottom}`,
+  ].join(' ');
 
   const averagePace =
     paces.reduce((total, value) => total + value, 0) /
     paces.length;
 
-  const paceMinutes = Math.floor(averagePace / 60);
-  const paceSeconds = Math.round(averagePace % 60);
+  const formatPace = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.round(seconds % 60);
+
+    return `${minutes}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const formatElapsed = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}m`;
+  };
+
+  const timeMarkers = [
+    0,
+    maxTime * 0.25,
+    maxTime * 0.5,
+    maxTime * 0.75,
+    maxTime,
+  ];
 
   return (
-   <div className="activity-chart pace-chart">
+    <div className="activity-chart pace-chart">
       <div className="activity-chart-heading">
         <span>PACE</span>
-        <strong>
-          {paceMinutes}:{String(paceSeconds).padStart(2, '0')}/km avg
-        </strong>
+        <strong>{formatPace(averagePace)}/km avg</strong>
+      </div>
+
+      <div className="activity-chart-range">
+        <span>{formatPace(minPace)}/km fastest</span>
+        <span>{formatPace(maxPace)}/km slowest</span>
       </div>
 
       <svg
@@ -365,11 +400,80 @@ function PaceChart({
         role="img"
         aria-label="Pace over time"
       >
+        <defs>
+          <linearGradient
+            id="paceFill"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+            <stop
+              offset="0%"
+              stopColor="#1687e8"
+              stopOpacity="0.22"
+            />
+            <stop
+              offset="100%"
+              stopColor="#1687e8"
+              stopOpacity="0.02"
+            />
+          </linearGradient>
+        </defs>
+
+        {timeMarkers.map((time) => {
+          const x =
+            paddingX +
+            (time / maxTime) *
+              (width - paddingX * 2);
+
+          return (
+            <line
+              key={time}
+              x1={x}
+              x2={x}
+              y1={paddingTop}
+              y2={height - paddingBottom}
+              className="activity-chart-gridline"
+            />
+          );
+        })}
+
+        <polygon
+          points={areaPoints}
+          fill="url(#paceFill)"
+        />
+
         <polyline
-          points={chartPoints}
+          points={linePoints}
           fill="none"
           vectorEffect="non-scaling-stroke"
         />
+
+        {timeMarkers.map((time) => {
+          const x =
+            paddingX +
+            (time / maxTime) *
+              (width - paddingX * 2);
+
+          return (
+            <text
+              key={`pace-label-${time}`}
+              x={x}
+              y={height - 8}
+              textAnchor={
+                time === 0
+                  ? 'start'
+                  : time === maxTime
+                    ? 'end'
+                    : 'middle'
+              }
+              className="activity-chart-time-label"
+            >
+              {formatElapsed(time)}
+            </text>
+          );
+        })}
       </svg>
     </div>
   );
