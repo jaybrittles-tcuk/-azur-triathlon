@@ -2412,6 +2412,13 @@ onClick={() => {
                 ? 'Garmin FIT'
                 : completedActivityFeed[selectedStravaActivity].source}
             </strong>
+            <div>
+  <span>ROUTE POINTS</span>
+  <strong>
+    {completedActivityFeed[selectedStravaActivity].raw_payload?.route
+      ?.length ?? 0}
+  </strong>
+</div>
           </div>
         </div>
       </aside>
