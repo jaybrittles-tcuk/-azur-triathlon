@@ -2670,8 +2670,8 @@ onClick={() => {
 )}
       {selected.completedSeries && selected.completedSeries.length > 1 && (() => {
   const hrDrift = calculateHrDrift(selected.completedSeries);
-
-  if (hrDrift == null) {
+const paceConsistency =
+  calculatePaceConsistency(selected.completedSeries);  if (hrDrift == null) {
     return null;
   }
 const driftLabel =
