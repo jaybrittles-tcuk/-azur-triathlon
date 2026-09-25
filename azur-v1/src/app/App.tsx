@@ -2303,6 +2303,9 @@ onClick={() => {
       {selected.completedSeries && selected.completedSeries.length > 1 && (
   <HeartRateChart points={selected.completedSeries} />
 )}
+      {selected.completedSeries && selected.completedSeries.length > 1 && (
+  <PaceChart points={selected.completedSeries} />
+)}
       <div className="completed-session-metrics">
         <div>
           <span>PLANNED</span>
