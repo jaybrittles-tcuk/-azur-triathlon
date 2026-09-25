@@ -160,7 +160,7 @@ function HeartRateChart({
     .join(' ');
 
   return (
-    <div className="activity-chart">
+    <div className="activity-chart heart-rate-chart">
       <div className="activity-chart-heading">
         <span>HEART RATE</span>
         <strong>
@@ -250,7 +250,7 @@ function PaceChart({
   const paceSeconds = Math.round(averagePace % 60);
 
   return (
-    <div className="activity-chart">
+   <div className="activity-chart pace-chart">
       <div className="activity-chart-heading">
         <span>PACE</span>
         <strong>
