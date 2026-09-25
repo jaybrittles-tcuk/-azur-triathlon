@@ -1616,8 +1616,10 @@ const todaySession = weekSessions.find(
              const daySessions = calendarWeekSessions.filter(
                 (session) => session.dayLabel === day,
               );
-
-return (
+const daySessions = calendarWeekSessions.filter(
+  (session) => session.dayLabel === day,
+);
+      return (
 <div
   className={`calendar-day ${
     daySessions.length === 0 ? 'empty-day' : ''
