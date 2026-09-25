@@ -4019,6 +4019,7 @@ raw_payload: {
   file_name: fitFile.name,
   session: firstSession,
   route: compactRoute,
+  series: compactSeries,
 },
     },
 {
