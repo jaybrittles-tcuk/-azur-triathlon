@@ -526,6 +526,74 @@ const validPoints = points
     </div>
   );
 }
+function calculateHrDrift(
+  points: Array<{
+    elapsedSec: number | null;
+    heartRate: number | null;
+    speedKmh: number | null;
+  }>,
+) {
+  const validPoints = points.filter(
+    (point) =>
+      point.elapsedSec != null &&
+      point.heartRate != null &&
+      point.heartRate > 0 &&
+      point.speedKmh != null &&
+      point.speedKmh > 0 &&
+      point.elapsedSec > 120,
+  );
+
+  if (validPoints.length < 10) {
+    return null;
+  }
+
+  const midpoint =
+    Math.max(
+      ...validPoints.map((point) => point.elapsedSec ?? 0),
+    ) / 2;
+
+  const firstHalf = validPoints.filter(
+    (point) => (point.elapsedSec ?? 0) <= midpoint,
+  );
+
+  const secondHalf = validPoints.filter(
+    (point) => (point.elapsedSec ?? 0) > midpoint,
+  );
+
+  const averageEfficiency = (
+    segment: typeof validPoints,
+  ) => {
+    if (!segment.length) return null;
+
+    const values = segment.map(
+      (point) =>
+        (point.speedKmh ?? 0) /
+        (point.heartRate ?? 1),
+    );
+
+    return (
+      values.reduce((total, value) => total + value, 0) /
+      values.length
+    );
+  };
+
+  const firstEfficiency = averageEfficiency(firstHalf);
+  const secondEfficiency = averageEfficiency(secondHalf);
+
+  if (
+    firstEfficiency == null ||
+    secondEfficiency == null ||
+    firstEfficiency <= 0
+  ) {
+    return null;
+  }
+
+  return (
+    ((firstEfficiency - secondEfficiency) /
+      firstEfficiency) *
+    100
+  );
+}
 const navigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
