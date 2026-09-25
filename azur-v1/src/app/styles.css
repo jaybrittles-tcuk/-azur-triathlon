@@ -4005,3 +4005,10 @@ nav {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+.heart-rate-chart polyline {
+  stroke: #ef4444;
+}
+
+.pace-chart polyline {
+  stroke: #1687e8;
+}
