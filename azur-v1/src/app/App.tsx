@@ -3637,7 +3637,8 @@ const routePoints = (parsed.records ?? [])
   .map((record: any) => ({
     lat: Number(record.position_lat),
     lng: Number(record.position_long),
-  }));const durationSec = Number(
+  }));
+    const durationSec = Number(
   firstSession?.total_timer_time ??
   firstSession?.total_elapsed_time ??
   0,
