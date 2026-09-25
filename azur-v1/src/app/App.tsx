@@ -127,8 +127,10 @@ function HeartRateChart({
   }
 
   const width = 600;
-  const height = 180;
-  const padding = 16;
+  const height = 200;
+  const paddingX = 24;
+  const paddingTop = 18;
+  const paddingBottom = 30;
 
   const maxTime = Math.max(
     ...validPoints.map((point) => point.elapsedSec ?? 0),
@@ -142,34 +144,65 @@ function HeartRateChart({
   const maxHr = Math.max(...heartRates);
   const hrRange = Math.max(1, maxHr - minHr);
 
-  const chartPoints = validPoints
-    .map((point) => {
-      const x =
-        padding +
-        ((point.elapsedSec ?? 0) / maxTime) *
-          (width - padding * 2);
+  const chartHeight =
+    height - paddingTop - paddingBottom;
 
-      const y =
-        height -
-        padding -
-        (((point.heartRate ?? minHr) - minHr) / hrRange) *
-          (height - padding * 2);
+  const chartPoints = validPoints.map((point) => {
+    const x =
+      paddingX +
+      ((point.elapsedSec ?? 0) / maxTime) *
+        (width - paddingX * 2);
 
-      return `${x},${y}`;
-    })
+    const y =
+      paddingTop +
+      (1 -
+        ((point.heartRate ?? minHr) - minHr) /
+          hrRange) *
+        chartHeight;
+
+    return { x, y };
+  });
+
+  const linePoints = chartPoints
+    .map((point) => `${point.x},${point.y}`)
     .join(' ');
+
+  const areaPoints = [
+    `${paddingX},${height - paddingBottom}`,
+    ...chartPoints.map(
+      (point) => `${point.x},${point.y}`,
+    ),
+    `${width - paddingX},${height - paddingBottom}`,
+  ].join(' ');
+
+  const averageHr = Math.round(
+    heartRates.reduce((total, value) => total + value, 0) /
+      heartRates.length,
+  );
+
+  const formatElapsed = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}m`;
+  };
+
+  const timeMarkers = [
+    0,
+    maxTime * 0.25,
+    maxTime * 0.5,
+    maxTime * 0.75,
+    maxTime,
+  ];
 
   return (
     <div className="activity-chart heart-rate-chart">
       <div className="activity-chart-heading">
         <span>HEART RATE</span>
-        <strong>
-          {Math.round(
-            heartRates.reduce((total, value) => total + value, 0) /
-              heartRates.length,
-          )}{' '}
-          bpm avg
-        </strong>
+        <strong>{averageHr} bpm avg</strong>
+      </div>
+
+      <div className="activity-chart-range">
+        <span>{Math.round(minHr)} bpm min</span>
+        <span>{Math.round(maxHr)} bpm max</span>
       </div>
 
       <svg
@@ -177,11 +210,80 @@ function HeartRateChart({
         role="img"
         aria-label="Heart rate over time"
       >
+        <defs>
+          <linearGradient
+            id="heartRateFill"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+            <stop
+              offset="0%"
+              stopColor="#ef4444"
+              stopOpacity="0.22"
+            />
+            <stop
+              offset="100%"
+              stopColor="#ef4444"
+              stopOpacity="0.02"
+            />
+          </linearGradient>
+        </defs>
+
+        {timeMarkers.map((time) => {
+          const x =
+            paddingX +
+            (time / maxTime) *
+              (width - paddingX * 2);
+
+          return (
+            <line
+              key={time}
+              x1={x}
+              x2={x}
+              y1={paddingTop}
+              y2={height - paddingBottom}
+              className="activity-chart-gridline"
+            />
+          );
+        })}
+
+        <polygon
+          points={areaPoints}
+          fill="url(#heartRateFill)"
+        />
+
         <polyline
-          points={chartPoints}
+          points={linePoints}
           fill="none"
           vectorEffect="non-scaling-stroke"
         />
+
+        {timeMarkers.map((time) => {
+          const x =
+            paddingX +
+            (time / maxTime) *
+              (width - paddingX * 2);
+
+          return (
+            <text
+              key={`label-${time}`}
+              x={x}
+              y={height - 8}
+              textAnchor={
+                time === 0
+                  ? 'start'
+                  : time === maxTime
+                    ? 'end'
+                    : 'middle'
+              }
+              className="activity-chart-time-label"
+            >
+              {formatElapsed(time)}
+            </text>
+          );
+        })}
       </svg>
     </div>
   );
