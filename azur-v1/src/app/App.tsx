@@ -108,6 +108,84 @@ function RouteMap({ points }: { points: RoutePoint[] }) {
     </div>
   );
 }
+function HeartRateChart({
+  points,
+}: {
+  points: Array<{
+    elapsedSec: number | null;
+    heartRate: number | null;
+  }>;
+}) {
+  const validPoints = points.filter(
+    (point) =>
+      point.elapsedSec != null &&
+      point.heartRate != null,
+  );
+
+  if (validPoints.length < 2) {
+    return null;
+  }
+
+  const width = 600;
+  const height = 180;
+  const padding = 16;
+
+  const maxTime = Math.max(
+    ...validPoints.map((point) => point.elapsedSec ?? 0),
+  );
+
+  const heartRates = validPoints.map(
+    (point) => point.heartRate ?? 0,
+  );
+
+  const minHr = Math.min(...heartRates);
+  const maxHr = Math.max(...heartRates);
+  const hrRange = Math.max(1, maxHr - minHr);
+
+  const chartPoints = validPoints
+    .map((point) => {
+      const x =
+        padding +
+        ((point.elapsedSec ?? 0) / maxTime) *
+          (width - padding * 2);
+
+      const y =
+        height -
+        padding -
+        (((point.heartRate ?? minHr) - minHr) / hrRange) *
+          (height - padding * 2);
+
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  return (
+    <div className="activity-chart">
+      <div className="activity-chart-heading">
+        <span>HEART RATE</span>
+        <strong>
+          {Math.round(
+            heartRates.reduce((total, value) => total + value, 0) /
+              heartRates.length,
+          )}{' '}
+          bpm avg
+        </strong>
+      </div>
+
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label="Heart rate over time"
+      >
+        <polyline
+          points={chartPoints}
+          fill="none"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+    </div>
+  );
+}
 const navigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
