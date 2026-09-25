@@ -108,84 +108,186 @@ button {
 }
 
 .brand-block h1 {
-  margin: 2px 0 0;
-  font-size: 24px;
-}
+function HeartRateChart({
+  points,
+}: {
+  points: Array<{
+    elapsedSec: number | null;
+    heartRate: number | null;
+  }>;
+}) {
+  const validPoints = points.filter(
+    (point) =>
+      point.elapsedSec != null &&
+      point.heartRate != null,
+  );
 
-.brand-kicker {
-  font-size: 9px;
-  letter-spacing: .14em;
-  font-weight: 800;
-  color: #8ea5ba;
-}
+  if (validPoints.length < 2) {
+    return null;
+  }
 
-nav {
-  display: grid;
-  gap: 5px;
-  margin-top: 24px;
-}
+  const width = 600;
+  const height = 200;
+  const paddingX = 24;
+  const paddingTop = 18;
+  const paddingBottom = 30;
 
-.nav-item {
-  color: #9fb0c1;
-  background: transparent;
-  border: 0;
-  border-radius: 14px;
-  padding: 12px 13px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  text-align: left;
-  font-weight: 650;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
+  const maxTime = Math.max(
+    ...validPoints.map((point) => point.elapsedSec ?? 0),
+  );
 
-.nav-item:hover,
-.nav-item.active {
-  color: #ffffff;
-  background: rgba(15, 127, 229, 0.16);
-}
+  const heartRates = validPoints.map(
+    (point) => point.heartRate ?? 0,
+  );
 
-.nav-item:hover {
-  transform: translateX(2px);
-}
+  const minHr = Math.min(...heartRates);
+  const maxHr = Math.max(...heartRates);
+  const hrRange = Math.max(1, maxHr - minHr);
 
-.nav-item.active {
-  background:
-    linear-gradient(
-      90deg,
-      rgba(15, 127, 229, 0.24),
-      rgba(15, 127, 229, 0.10)
-    );
-  box-shadow:
-    inset 3px 0 var(--amber),
-    0 6px 18px rgba(0, 0, 0, 0.08);
-}
+  const chartHeight =
+    height - paddingTop - paddingBottom;
 
-.sidebar-footer {
-  margin-top: auto;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 15px;
-  padding: 14px;
-  display: grid;
-  gap: 5px;
-  background: rgba(255,255,255,.025);
-}
+  const chartPoints = validPoints.map((point) => {
+    const x =
+      paddingX +
+      ((point.elapsedSec ?? 0) / maxTime) *
+        (width - paddingX * 2);
 
-.sidebar-footer small {
-  color: #8ea5ba;
-}
+    const y =
+      paddingTop +
+      (1 -
+        ((point.heartRate ?? minHr) - minHr) /
+          hrRange) *
+        chartHeight;
 
-main {
-  padding: 30px;
-  max-width: 1600px;
-  width: 100%;
-  margin: 0 auto;
-}
+    return { x, y };
+  });
 
-.topbar {
+  const linePoints = chartPoints
+    .map((point) => `${point.x},${point.y}`)
+    .join(' ');
+
+  const areaPoints = [
+    `${paddingX},${height - paddingBottom}`,
+    ...chartPoints.map(
+      (point) => `${point.x},${point.y}`,
+    ),
+    `${width - paddingX},${height - paddingBottom}`,
+  ].join(' ');
+
+  const averageHr = Math.round(
+    heartRates.reduce((total, value) => total + value, 0) /
+      heartRates.length,
+  );
+
+  const formatElapsed = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}m`;
+  };
+
+  const timeMarkers = [
+    0,
+    maxTime * 0.25,
+    maxTime * 0.5,
+    maxTime * 0.75,
+    maxTime,
+  ];
+
+  return (
+    <div className="activity-chart heart-rate-chart">
+      <div className="activity-chart-heading">
+        <span>HEART RATE</span>
+        <strong>{averageHr} bpm avg</strong>
+      </div>
+
+      <div className="activity-chart-range">
+        <span>{Math.round(minHr)} bpm min</span>
+        <span>{Math.round(maxHr)} bpm max</span>
+      </div>
+
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label="Heart rate over time"
+      >
+        <defs>
+          <linearGradient
+            id="heartRateFill"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+            <stop
+              offset="0%"
+              stopColor="#ef4444"
+              stopOpacity="0.22"
+            />
+            <stop
+              offset="100%"
+              stopColor="#ef4444"
+              stopOpacity="0.02"
+            />
+          </linearGradient>
+        </defs>
+
+        {timeMarkers.map((time) => {
+          const x =
+            paddingX +
+            (time / maxTime) *
+              (width - paddingX * 2);
+
+          return (
+            <line
+              key={time}
+              x1={x}
+              x2={x}
+              y1={paddingTop}
+              y2={height - paddingBottom}
+              className="activity-chart-gridline"
+            />
+          );
+        })}
+
+        <polygon
+          points={areaPoints}
+          fill="url(#heartRateFill)"
+        />
+
+        <polyline
+          points={linePoints}
+          fill="none"
+          vectorEffect="non-scaling-stroke"
+        />
+
+        {timeMarkers.map((time) => {
+          const x =
+            paddingX +
+            (time / maxTime) *
+              (width - paddingX * 2);
+
+          return (
+            <text
+              key={`label-${time}`}
+              x={x}
+              y={height - 8}
+              textAnchor={
+                time === 0
+                  ? 'start'
+                  : time === maxTime
+                    ? 'end'
+                    : 'middle'
+              }
+              className="activity-chart-time-label"
+            >
+              {formatElapsed(time)}
+            </text>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
