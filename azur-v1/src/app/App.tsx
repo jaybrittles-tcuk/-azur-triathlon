@@ -4125,6 +4125,7 @@ setImportStatus(
 routePoints.length
   ? `${routePoints.length} GPS points`
   : `No GPS route found · position fields: ${samplePositionKeys}`,
+    `${compactSeries.length} chart points`,
     `${firstSession?.sport ?? 'activity'}`,
     startTime ? `Start ${String(startTime)}` : null,
     durationSec ? `${Math.round(durationSec / 60)} min` : null,
