@@ -3629,7 +3629,17 @@ function WeeklyReviewView() {
 
    const firstSession = parsed.sessions?.[0] as any;
 const routePoints = (parsed.records ?? [])
-  const sampleRecord = parsed.records?.find(
+  .filter(
+    (record: any) =>
+      record.position_lat != null &&
+      record.position_long != null,
+  )
+  .map((record: any) => ({
+    lat: Number(record.position_lat),
+    lng: Number(record.position_long),
+  }));
+
+const sampleRecord = parsed.records?.find(
   (record: any) =>
     Object.keys(record).some((key) =>
       key.toLowerCase().includes('position'),
@@ -3643,15 +3653,17 @@ const samplePositionKeys = sampleRecord
       )
       .join(', ')
   : 'none';
-  .filter(
-    (record: any) =>
-      record.position_lat != null &&
-      record.position_long != null,
-  )
-  .map((record: any) => ({
-    lat: Number(record.position_lat),
-    lng: Number(record.position_long),
-  }));
+
+const routeSampleStep = Math.max(
+  1,
+  Math.ceil(routePoints.length / 250),
+);
+
+const compactRoute = routePoints.filter(
+  (_point: any, index: number) =>
+    index % routeSampleStep === 0 ||
+    index === routePoints.length - 1,
+);
     const durationSec = Number(
   firstSession?.total_timer_time ??
   firstSession?.total_elapsed_time ??
