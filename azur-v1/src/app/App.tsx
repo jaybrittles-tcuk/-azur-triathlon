@@ -3771,7 +3771,27 @@ const compactRoute = routePoints.filter(
 const distanceKm = Number(
   firstSession?.total_distance ?? 0,
 );
+const averagePaceSecPerKm =
+  distanceKm > 0 && durationSec > 0
+    ? durationSec / distanceKm
+    : null;
 
+const averageSpeedKmh =
+  firstSession?.avg_speed != null
+    ? Number(firstSession.avg_speed)
+    : distanceKm > 0 && durationSec > 0
+      ? distanceKm / (durationSec / 3600)
+      : null;
+
+const maxSpeedKmh =
+  firstSession?.max_speed != null
+    ? Number(firstSession.max_speed)
+    : null;
+
+const bestPaceSecPerKm =
+  maxSpeedKmh && maxSpeedKmh > 0
+    ? 3600 / maxSpeedKmh
+    : null;
 const averageHeartRate =
   firstSession?.avg_heart_rate ?? null;
 
