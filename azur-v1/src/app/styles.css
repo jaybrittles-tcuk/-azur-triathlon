@@ -4037,3 +4037,38 @@ nav {
 .pace-chart polyline {
   stroke: #1687e8;
 }
+.activity-chart-range {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7b8da0;
+}
+
+.activity-chart-gridline {
+  stroke: rgba(120, 143, 166, 0.16);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.activity-chart-time-label {
+  fill: #8a9bad;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.heart-rate-chart {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(239, 68, 68, 0.035),
+      rgba(255, 255, 255, 1) 42%
+    );
+}
+
+.heart-rate-chart polyline {
+  stroke: #ef4444;
+  stroke-width: 2.75;
+}
