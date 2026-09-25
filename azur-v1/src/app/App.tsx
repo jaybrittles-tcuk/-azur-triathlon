@@ -2404,68 +2404,81 @@ onClick={() => {
           )}
         </h2>
 
+<p>
+  {new Date(
+    completedActivityFeed[selectedStravaActivity].start_time,
+  ).toLocaleString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })}
+</p>
+
 <RouteMap
   points={
     completedActivityFeed[selectedStravaActivity].raw_payload?.route ?? []
   }
 />
-          <div>
-            <span>DURATION</span>
-            <strong>
-              {Math.round(
-                completedActivityFeed[selectedStravaActivity].duration_sec /
-                  60,
-              )}{' '}
-              min
-            </strong>
-          </div>
 
-          <div>
-            <span>DISTANCE</span>
-            <strong>
-              {(
-                Number(
-                  completedActivityFeed[selectedStravaActivity].distance_m ??
-                    0,
-                ) / 1000
-              ).toFixed(2)}{' '}
-              km
-            </strong>
-          </div>
+<div className="completed-activity-grid">
+  <div>
+    <span>DURATION</span>
+    <strong>
+      {Math.round(
+        completedActivityFeed[selectedStravaActivity].duration_sec / 60,
+      )}{' '}
+      min
+    </strong>
+  </div>
 
-          <div>
-            <span>AVG HR</span>
-            <strong>
-              {completedActivityFeed[selectedStravaActivity]
-                .processed_metrics?.averageHeartRate ?? '—'}
-            </strong>
-          </div>
+  <div>
+    <span>DISTANCE</span>
+    <strong>
+      {(
+        Number(
+          completedActivityFeed[selectedStravaActivity].distance_m ?? 0,
+        ) / 1000
+      ).toFixed(2)}{' '}
+      km
+    </strong>
+  </div>
 
-          <div>
-            <span>MAX HR</span>
-            <strong>
-              {completedActivityFeed[selectedStravaActivity]
-                .processed_metrics?.maxHeartRate ?? '—'}
-            </strong>
-          </div>
+  <div>
+    <span>AVG HR</span>
+    <strong>
+      {completedActivityFeed[selectedStravaActivity].processed_metrics
+        ?.averageHeartRate ?? '—'}
+    </strong>
+  </div>
 
-          <div>
-            <span>SOURCE</span>
-            <strong>
-              {completedActivityFeed[selectedStravaActivity].source ===
-              'manual_fit'
-                ? 'Garmin FIT'
-                : completedActivityFeed[selectedStravaActivity].source}
-            </strong>
-            <div>
-  <span>ROUTE POINTS</span>
-  <strong>
-    {completedActivityFeed[selectedStravaActivity].raw_payload?.route
-      ?.length ?? 0}
-  </strong>
+  <div>
+    <span>MAX HR</span>
+    <strong>
+      {completedActivityFeed[selectedStravaActivity].processed_metrics
+        ?.maxHeartRate ?? '—'}
+    </strong>
+  </div>
+
+  <div>
+    <span>SOURCE</span>
+    <strong>
+      {completedActivityFeed[selectedStravaActivity].source === 'manual_fit'
+        ? 'Garmin FIT'
+        : completedActivityFeed[selectedStravaActivity].source}
+    </strong>
+  </div>
+
+  <div>
+    <span>ROUTE POINTS</span>
+    <strong>
+      {completedActivityFeed[selectedStravaActivity].raw_payload?.route
+        ?.length ?? 0}
+    </strong>
+  </div>
 </div>
-          </div>
-        </div>
       </aside>
     </div>
   )}
