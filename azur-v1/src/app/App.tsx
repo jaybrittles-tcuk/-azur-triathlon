@@ -195,15 +195,21 @@ function HeartRateChart({
 
   return (
     <div className="activity-chart heart-rate-chart">
-      <div className="activity-chart-heading">
-        <span>HEART RATE</span>
-        <strong>{averageHr} bpm avg</strong>
-      </div>
+     <div className="activity-chart-heading">
+  <span>HEART RATE</span>
+</div>
 
-      <div className="activity-chart-range">
-        <span>{Math.round(minHr)} bpm min</span>
-        <span>{Math.round(maxHr)} bpm max</span>
-      </div>
+<div className="activity-chart-stats">
+  <div>
+    <strong>{averageHr}</strong>
+    <span>bpm avg</span>
+  </div>
+
+  <div>
+    <strong>{Math.round(maxHr)}</strong>
+    <span>bpm max</span>
+  </div>
+</div>
 
       <svg
         viewBox={`0 0 ${width} ${height}`}
