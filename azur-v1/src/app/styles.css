@@ -4169,3 +4169,40 @@ nav {
   line-height: 1.5;
   color: #71839a;
 }
+.editor-panel .completed-session-summary .activity-analysis-card {
+  display: block;
+  margin: 16px 0 18px !important;
+  padding: 18px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(22, 135, 232, 0.18) !important;
+  background: #ffffff !important;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 10px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+.editor-panel
+.completed-session-summary
+.activity-analysis-heading
+span {
+  color: #1687e8 !important;
+}
+
+.editor-panel
+.completed-session-summary
+.activity-analysis-heading
+strong {
+  color: #6f8296 !important;
+}
+
+.editor-panel
+.completed-session-summary
+.activity-analysis-value {
+  color: #10243a !important;
+}
+
+.editor-panel
+.completed-session-summary
+.activity-analysis-copy {
+  color: #71839a !important;
+}
