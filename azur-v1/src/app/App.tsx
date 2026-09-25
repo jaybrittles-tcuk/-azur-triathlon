@@ -44,21 +44,30 @@ type RoutePoint = {
 
 function RouteMap({ points }: { points: RoutePoint[] }) {
   const mapRef = useRef<HTMLDivElement | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current || points.length < 2) return;
+
+    setMapLoaded(false);
 
     const map = L.map(mapRef.current, {
       zoomControl: false,
       attributionControl: false,
     });
 
-    L.tileLayer(
+    const tiles = L.tileLayer(
       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {
         maxZoom: 19,
       },
-    ).addTo(map);
+    );
+
+    tiles.on('load', () => {
+      setMapLoaded(true);
+    });
+
+    tiles.addTo(map);
 
     const latLngs = points.map(
       (point) => [point.lat, point.lng] as [number, number],
@@ -82,11 +91,21 @@ function RouteMap({ points }: { points: RoutePoint[] }) {
   }
 
   return (
-    <div
-      ref={mapRef}
-      className="activity-route-map"
-      aria-label="Activity route map"
-    />
+    <div className="activity-route-map-wrap">
+      {!mapLoaded && (
+        <div className="activity-route-loading">
+          Loading route map…
+        </div>
+      )}
+
+      <div
+        ref={mapRef}
+        className={`activity-route-map ${
+          mapLoaded ? 'loaded' : ''
+        }`}
+        aria-label="Activity route map"
+      />
+    </div>
   );
 }
 const navigation = [
