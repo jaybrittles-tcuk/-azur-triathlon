@@ -1496,6 +1496,16 @@ if (session?.user) {
    return {
   action: 'REDUCE',
   title: 'Reduce next session demand',
+     recommendedDurationMin: Math.max(
+  20,
+  Math.round(nextPlannedSession.durationMin * 0.8),
+),
+
+adjustment:
+  `Reduce from ${nextPlannedSession.durationMin} min to ${Math.max(
+    20,
+    Math.round(nextPlannedSession.durationMin * 0.8),
+  )} min.`,
   reason:
     recoveryColor === 'red'
       ? 'Recovery signals are currently elevated, so reducing training demand is the safer progression.'
