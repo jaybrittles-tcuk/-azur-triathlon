@@ -2858,6 +2858,10 @@ const sessionVerdict =
         {formatDuration(nextPlannedSession.durationMin)}
       </small>
     </div>
+    <div className="next-session-adjustment">
+  <span>PROPOSED ADJUSTMENT</span>
+  <strong>{nextSessionRecommendation.adjustment}</strong>
+</div>
   </div>
 )}
       <div className="completed-session-metrics">
