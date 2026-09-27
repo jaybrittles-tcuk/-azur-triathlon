@@ -2901,12 +2901,13 @@ const sessionVerdict =
         ACCEPT ADJUSTMENT
       </button>
 
-      <button
-        type="button"
-        className="secondary"
-      >
-        KEEP ORIGINAL
-      </button>
+<button
+  type="button"
+  className="secondary"
+  onClick={keepOriginalNextSession}
+>
+  KEEP ORIGINAL
+</button>
     </div>
   </div>
 )}
