@@ -2867,8 +2867,7 @@ const sessionVerdict =
     <div className="next-session-recommendation-top">
       <span>ADAPTIVE COACHING</span>
       <strong>{nextSessionRecommendation.action}</strong>
-   
-
+   </div>
     <h4>{nextSessionRecommendation.title}</h4>
 <p className="next-session-reason">
   {nextSessionRecommendation.reason}
