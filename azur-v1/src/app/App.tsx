@@ -991,8 +991,8 @@ const [sessionFeedback, setSessionFeedback] = useState({
   rpe: '',
   notes: '',
 });
-
-const [sessionFeedbackSaving, setSessionFeedbackSaving] = useState(false);
+const [nextSessionDecision, setNextSessionDecision] =
+  useState<'accepted' | 'kept' | null>(null);const [sessionFeedbackSaving, setSessionFeedbackSaving] = useState(false);
 const [sessionFeedbackMessage, setSessionFeedbackMessage] = useState('');
 
 const [trainingLoad, setTrainingLoad] = useState({
