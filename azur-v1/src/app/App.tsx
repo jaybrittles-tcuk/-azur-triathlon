@@ -2862,16 +2862,19 @@ const sessionVerdict =
     </div>
   );
 })()}
-      {nextSessionRecommendation && nextPlannedSession && (
+ {nextSessionRecommendation && nextPlannedSession && (
   <div className="next-session-recommendation">
     <div className="next-session-recommendation-top">
       <span>ADAPTIVE COACHING</span>
       <strong>{nextSessionRecommendation.action}</strong>
-   </div>
+    </div>
+
     <h4>{nextSessionRecommendation.title}</h4>
-<p className="next-session-reason">
-  {nextSessionRecommendation.reason}
-</p>
+
+    <p className="next-session-reason">
+      {nextSessionRecommendation.reason}
+    </p>
+
     <div className="next-session-target">
       <span>NEXT SESSION</span>
       <strong>{nextPlannedSession.title}</strong>
@@ -2880,61 +2883,64 @@ const sessionVerdict =
         {formatDuration(nextPlannedSession.durationMin)}
       </small>
     </div>
+
     <div className="next-session-adjustment">
-  <span>PROPOSED ADJUSTMENT</span>
-  <strong>{nextSessionRecommendation.adjustment}</strong>
-</div>
-  </div>
-       <button
-    type="button"
-    onClick={acceptNextSessionAdjustment}
-  >
-    ACCEPT ADJUSTMENT
-  </button>
+      <span>PROPOSED ADJUSTMENT</span>
+      <strong>{nextSessionRecommendation.adjustment}</strong>
+    </div>
 
-  <button
-    type="button"
-    className="secondary"
-  >
-    KEEP ORIGINAL
-  </button>
-</div>
-              Math.round(selected.completedDurationSec / 60),
-            )}
-)}
-      <div className="completed-session-metrics">
-        <div>
-          <span>PLANNED</span>
-          <strong>
-            {formatDuration(selected.durationMin)}
-          </strong>
-        </div>
-
-        <div>
-          <span>COMPLETED</span>
-          <strong>
-            {formatDuration(
     <div className="next-session-actions">
-          </strong>
-        </div>
+      <button
+        type="button"
+        onClick={acceptNextSessionAdjustment}
+      >
+        ACCEPT ADJUSTMENT
+      </button>
 
-<div>
-  <span>MATCH STATUS</span>
-  <strong>
-    {selected.durationMin > 0
-      ? Math.round(
-          (selected.completedDurationSec / 60 / selected.durationMin) * 100,
-        ) >= 85
-        ? 'Matched'
-        : Math.round(
+      <button
+        type="button"
+        className="secondary"
+      >
+        KEEP ORIGINAL
+      </button>
+    </div>
+  </div>
+)}
+
+<div className="completed-session-metrics">
+  <div>
+    <span>PLANNED</span>
+    <strong>
+      {formatDuration(selected.durationMin)}
+    </strong>
+  </div>
+
+  <div>
+    <span>COMPLETED</span>
+    <strong>
+      {formatDuration(
+        Math.round(selected.completedDurationSec / 60),
+      )}
+    </strong>
+  </div>
+
+  <div>
+    <span>MATCH STATUS</span>
+    <strong>
+      {selected.durationMin > 0
+        ? Math.round(
             (selected.completedDurationSec / 60 / selected.durationMin) * 100,
-          ) >= 50
-          ? 'Partial match'
-          : 'Possible match'
-      : 'Matched'}
-  </strong>
+          ) >= 85
+          ? 'Matched'
+          : Math.round(
+              (selected.completedDurationSec / 60 / selected.durationMin) * 100,
+            ) >= 50
+            ? 'Partial match'
+            : 'Possible match'
+        : 'Matched'}
+    </strong>
+  </div>
 </div>
-</div>     
       {selected.completedMetrics && (
         <div className="completed-activity-details">
           <div className="completed-activity-title">
