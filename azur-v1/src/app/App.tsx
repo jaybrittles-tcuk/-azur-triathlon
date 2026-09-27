@@ -2909,6 +2909,13 @@ const sessionVerdict =
   KEEP ORIGINAL
 </button>
     </div>
+    {nextSessionDecision && (
+  <div className="next-session-decision">
+    {nextSessionDecision === 'accepted'
+      ? 'Adjustment accepted. The next session has been updated in your plan.'
+      : 'Original session kept. No change has been made to your plan.'}
+  </div>
+)}
   </div>
 )}
 
