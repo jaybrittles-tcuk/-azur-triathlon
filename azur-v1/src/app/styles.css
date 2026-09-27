@@ -4251,3 +4251,24 @@ strong {
   font-weight: 700;
   color: #7c8da0;
 }
+.activity-analysis-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(120, 143, 166, 0.14);
+}
+
+.activity-analysis-copy strong {
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  color: #1687e8 !important;
+}
+
+.activity-analysis-copy span {
+  font-size: 12px;
+  line-height: 1.55;
+  color: #5f7287;
+}
