@@ -2806,6 +2806,25 @@ const sessionVerdict =
     </div>
   );
 })()}
+      {nextSessionRecommendation && nextPlannedSession && (
+  <div className="next-session-recommendation">
+    <div className="next-session-recommendation-top">
+      <span>ADAPTIVE COACHING</span>
+      <strong>{nextSessionRecommendation.action}</strong>
+    </div>
+
+    <h4>{nextSessionRecommendation.title}</h4>
+
+    <div className="next-session-target">
+      <span>NEXT SESSION</span>
+      <strong>{nextPlannedSession.title}</strong>
+      <small>
+        {nextPlannedSession.dayLabel} ·{' '}
+        {formatDuration(nextPlannedSession.durationMin)}
+      </small>
+    </div>
+  </div>
+)}
       <div className="completed-session-metrics">
         <div>
           <span>PLANNED</span>
