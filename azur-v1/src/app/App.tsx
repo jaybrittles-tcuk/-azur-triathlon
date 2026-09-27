@@ -2867,21 +2867,7 @@ const sessionVerdict =
     <div className="next-session-recommendation-top">
       <span>ADAPTIVE COACHING</span>
       <strong>{nextSessionRecommendation.action}</strong>
-     <div className="next-session-actions">
-  <button
-    type="button"
-    onClick={acceptNextSessionAdjustment}
-  >
-    ACCEPT ADJUSTMENT
-  </button>
-
-  <button
-    type="button"
-    className="secondary"
-  >
-    KEEP ORIGINAL
-  </button>
-</div>    </div>
+   
 
     <h4>{nextSessionRecommendation.title}</h4>
 <p className="next-session-reason">
@@ -2913,6 +2899,21 @@ const sessionVerdict =
           <span>COMPLETED</span>
           <strong>
             {formatDuration(
+    <div className="next-session-actions">
+  <button
+    type="button"
+    onClick={acceptNextSessionAdjustment}
+  >
+    ACCEPT ADJUSTMENT
+  </button>
+
+  <button
+    type="button"
+    className="secondary"
+  >
+    KEEP ORIGINAL
+  </button>
+</div>
               Math.round(selected.completedDurationSec / 60),
             )}
           </strong>
