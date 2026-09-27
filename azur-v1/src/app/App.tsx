@@ -2752,16 +2752,19 @@ const driftLabel =
 <div>
   <span>MATCH STATUS</span>
   <strong>
-    {completionPercent == null
-      ? 'Matched'
-      : completionPercent >= 85
+    {selected.durationMin > 0
+      ? Math.round(
+          (selected.completedDurationSec / 60 / selected.durationMin) * 100,
+        ) >= 85
         ? 'Matched'
-        : completionPercent >= 50
+        : Math.round(
+            (selected.completedDurationSec / 60 / selected.durationMin) * 100,
+          ) >= 50
           ? 'Partial match'
-          : 'Possible match'}
+          : 'Possible match'
+      : 'Matched'}
   </strong>
 </div>
-      </div>
 
       {selected.completedMetrics && (
         <div className="completed-activity-details">
