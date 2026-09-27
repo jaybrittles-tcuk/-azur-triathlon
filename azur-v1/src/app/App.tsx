@@ -1921,6 +1921,7 @@ const daysToRace = primaryRace.raceDate
   );
 
   setWeekVersion((current) => current + 1);
+    setNextSessionDecision('accepted');
 }
 const now = new Date();
 
