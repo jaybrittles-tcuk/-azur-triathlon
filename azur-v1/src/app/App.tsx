@@ -1923,6 +1923,9 @@ const daysToRace = primaryRace.raceDate
   setWeekVersion((current) => current + 1);
     setNextSessionDecision('accepted');
 }
+  function keepOriginalNextSession() {
+  setNextSessionDecision('kept');
+}
 const now = new Date();
 
 const todayKey = `${now.getFullYear()}-${String(
