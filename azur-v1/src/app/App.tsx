@@ -2711,6 +2711,12 @@ const driftLabel =
 <div className="activity-analysis-label">
   {driftLabel}
 </div>      
+    {paceConsistency != null && (
+  <div className="activity-analysis-secondary">
+    <span>PACE CONSISTENCY</span>
+    <strong>{paceConsistency.toFixed(1)}%</strong>
+  </div>
+)}
 {completionPercent != null && (
   <div className="activity-analysis-secondary">
     <div>
