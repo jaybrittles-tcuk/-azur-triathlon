@@ -1429,6 +1429,17 @@ if (session?.user) {
   const selected =
     weekSessions.find((session) => session.id === selectedId) ||
     weekSessions[0];
+  const nextPlannedSession = selected
+  ? [...weekSessions]
+      .filter(
+        (session) =>
+          session.status === 'planned' &&
+          session.plannedDate > selected.plannedDate,
+      )
+      .sort((a, b) =>
+        a.plannedDate.localeCompare(b.plannedDate),
+      )[0] ?? null
+  : null;
   const selectedExecution =
   selected?.status === 'completed' &&
   selected.completedDurationSec
