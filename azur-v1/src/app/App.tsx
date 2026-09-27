@@ -1541,6 +1541,10 @@ adjustment:
 return {
   action: 'KEEP',
   title: 'Keep next session as planned',
+  recommendedDurationMin: nextPlannedSession.durationMin,
+
+adjustment:
+  `Keep the planned duration at ${nextPlannedSession.durationMin} min.`,
   reason:
     'Current execution, recovery and training load do not provide a strong reason to either reduce or progress the next session.',
 };
