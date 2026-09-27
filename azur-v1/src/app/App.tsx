@@ -2707,7 +2707,12 @@ const driftLabel =
     <strong>{paceConsistency.toFixed(1)}%</strong>
   </div>
 )}
-      <div className="activity-analysis-copy">
+      {completionPercent != null && (
+  <div className="activity-analysis-secondary">
+    <span>SESSION COMPLETION</span>
+    <strong>{completionPercent}%</strong>
+  </div>
+)}      <div className="activity-analysis-copy">
         Cardiovascular efficiency change from the first half to the second half of the run.
       </div>
     </div>
