@@ -2676,6 +2676,16 @@ onClick={() => {
         (selected.completedDurationSec / 60 / selected.durationMin) * 100,
       )
     : null;
+      const completionLabel =
+  completionPercent == null
+    ? null
+    : completionPercent >= 95
+      ? 'Session completed'
+      : completionPercent >= 75
+        ? 'Most of session completed'
+        : completionPercent >= 40
+          ? 'Partial session completed'
+          : 'Limited session completed';
 const paceConsistency =
   calculatePaceConsistency(selected.completedSeries);  if (hrDrift == null) {
     return null;
