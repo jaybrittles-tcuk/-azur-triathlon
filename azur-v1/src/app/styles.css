@@ -4340,3 +4340,9 @@ strong {
   font-weight: 700;
   color: #7c8da0;
 }
+.next-session-reason {
+  margin: -4px 0 14px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #5f7287;
+}
