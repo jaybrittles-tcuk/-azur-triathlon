@@ -2765,7 +2765,7 @@ const driftLabel =
       : 'Matched'}
   </strong>
 </div>
-
+</div>     
       {selected.completedMetrics && (
         <div className="completed-activity-details">
           <div className="completed-activity-title">
