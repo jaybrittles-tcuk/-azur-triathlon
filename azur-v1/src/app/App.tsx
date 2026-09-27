@@ -2697,7 +2697,25 @@ const driftLabel =
       ? 'Stable aerobic response'
       : hrDrift <= 5
         ? 'Mild cardiovascular drift'
-        : 'Noticeable cardiovascular drift';  return (
+        : 'Noticeable cardiovascular drift'; 
+      const paceLabel =
+  paceConsistency == null
+    ? null
+    : paceConsistency <= 3
+      ? 'very steady pacing'
+      : paceConsistency <= 6
+        ? 'consistent pacing'
+        : 'more variable pacing';
+
+const sessionVerdict =
+  `${driftLabel}. ${
+    paceLabel ? `${paceLabel}. ` : ''
+  }${
+    completionPercent != null
+      ? `${completionPercent}% of the planned session was completed.`
+      : ''
+  }`;
+      return (
     <div className="activity-analysis-card">
       <div className="activity-analysis-heading">
         <span>AZUR ANALYSIS</span>
