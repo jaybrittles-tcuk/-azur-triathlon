@@ -1473,6 +1473,50 @@ if (session?.user) {
         poorDaysLast3: recoveryContext.poorDaysLast3,
       })
     : null;
+  const nextSessionRecommendation = (() => {
+  if (!selected || !nextPlannedSession || !selected.completedDurationSec) {
+    return null;
+  }
+
+  const completionPercent =
+    selected.durationMin > 0
+      ? Math.round(
+          (selected.completedDurationSec / 60 / selected.durationMin) * 100,
+        )
+      : null;
+
+  const recoveryColor = recoveryReadiness?.color ?? null;
+  const form = trainingLoad.form;
+
+  if (
+    recoveryColor === 'red' ||
+    (completionPercent != null && completionPercent < 50) ||
+    (form != null && form < -20)
+  ) {
+    return {
+      action: 'REDUCE',
+      title: 'Reduce next session demand',
+    };
+  }
+
+  if (
+    recoveryColor === 'green' &&
+    completionPercent != null &&
+    completionPercent >= 95 &&
+    form != null &&
+    form >= -10
+  ) {
+    return {
+      action: 'PROGRESS',
+      title: 'Progression may be appropriate',
+    };
+  }
+
+  return {
+    action: 'KEEP',
+    title: 'Keep next session as planned',
+  };
+})();
   const plannedPowerRange = (() => {
   if (
     selected?.sport !== 'bike' ||
