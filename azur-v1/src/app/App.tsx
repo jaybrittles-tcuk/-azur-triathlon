@@ -2744,9 +2744,10 @@ const sessionVerdict =
     <strong>{completionPercent}%</strong>
   </div>
 )}
-    <div className="activity-analysis-copy">
-        Cardiovascular efficiency change from the first half to the second half of the run.
-      </div>
+<div className="activity-analysis-copy">
+  <strong>SESSION VERDICT</strong>
+  <span>{sessionVerdict}</span>
+</div>
     </div>
   );
 })()}
