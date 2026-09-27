@@ -1493,10 +1493,16 @@ if (session?.user) {
     (completionPercent != null && completionPercent < 50) ||
     (form != null && form < -20)
   ) {
-    return {
-      action: 'REDUCE',
-      title: 'Reduce next session demand',
-    };
+   return {
+  action: 'REDUCE',
+  title: 'Reduce next session demand',
+  reason:
+    recoveryColor === 'red'
+      ? 'Recovery signals are currently elevated, so reducing training demand is the safer progression.'
+      : completionPercent != null && completionPercent < 50
+        ? `Only ${completionPercent}% of the planned session was completed, so Azur recommends reducing the next session rather than progressing load.`
+        : 'Current training fatigue is elevated, so Azur recommends reducing the next session demand.',
+};
   }
 
   if (
