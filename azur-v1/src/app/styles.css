@@ -4369,3 +4369,13 @@ strong {
   font-weight: 800;
   color: #10243a !important;
 }
+.next-session-decision {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(34, 197, 94, 0.08);
+  color: #16834b;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 750;
+}
