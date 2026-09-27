@@ -1520,10 +1520,12 @@ return {
 };
   }
 
-  return {
-    action: 'KEEP',
-    title: 'Keep next session as planned',
-  };
+return {
+  action: 'KEEP',
+  title: 'Keep next session as planned',
+  reason:
+    'Current execution, recovery and training load do not provide a strong reason to either reduce or progress the next session.',
+};
 })();
   const plannedPowerRange = (() => {
   if (
