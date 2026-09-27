@@ -2670,6 +2670,12 @@ onClick={() => {
 )}
       {selected.completedSeries && selected.completedSeries.length > 1 && (() => {
   const hrDrift = calculateHrDrift(selected.completedSeries);
+      const completionPercent =
+  selected.durationMin > 0
+    ? Math.round(
+        (selected.completedDurationSec / 60 / selected.durationMin) * 100,
+      )
+    : null;
 const paceConsistency =
   calculatePaceConsistency(selected.completedSeries);  if (hrDrift == null) {
     return null;
