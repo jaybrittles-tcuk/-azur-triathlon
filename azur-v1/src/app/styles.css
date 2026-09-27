@@ -4346,3 +4346,26 @@ strong {
   line-height: 1.55;
   color: #5f7287;
 }
+.next-session-adjustment {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(15, 127, 229, 0.06);
+}
+
+.next-session-adjustment span {
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  color: #6f8296;
+}
+
+.next-session-adjustment strong {
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 800;
+  color: #10243a !important;
+}
