@@ -2885,21 +2885,7 @@ const sessionVerdict =
   <strong>{nextSessionRecommendation.adjustment}</strong>
 </div>
   </div>
-)}
-      <div className="completed-session-metrics">
-        <div>
-          <span>PLANNED</span>
-          <strong>
-            {formatDuration(selected.durationMin)}
-          </strong>
-        </div>
-
-        <div>
-          <span>COMPLETED</span>
-          <strong>
-            {formatDuration(
-    <div className="next-session-actions">
-  <button
+       <button
     type="button"
     onClick={acceptNextSessionAdjustment}
   >
@@ -2915,6 +2901,20 @@ const sessionVerdict =
 </div>
               Math.round(selected.completedDurationSec / 60),
             )}
+)}
+      <div className="completed-session-metrics">
+        <div>
+          <span>PLANNED</span>
+          <strong>
+            {formatDuration(selected.durationMin)}
+          </strong>
+        </div>
+
+        <div>
+          <span>COMPLETED</span>
+          <strong>
+            {formatDuration(
+    <div className="next-session-actions">
           </strong>
         </div>
 
