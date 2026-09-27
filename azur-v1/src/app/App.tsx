@@ -1512,10 +1512,12 @@ if (session?.user) {
     form != null &&
     form >= -10
   ) {
-    return {
-      action: 'PROGRESS',
-      title: 'Progression may be appropriate',
-    };
+return {
+  action: 'PROGRESS',
+  title: 'Progression may be appropriate',
+  reason:
+    'The planned session was completed, recovery is positive, and current form is supportive of a small increase in training demand.',
+};
   }
 
   return {
