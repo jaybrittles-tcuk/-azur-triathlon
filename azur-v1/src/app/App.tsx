@@ -2751,7 +2751,15 @@ const driftLabel =
 
 <div>
   <span>MATCH STATUS</span>
-  <strong>Matched</strong>
+  <strong>
+    {completionPercent == null
+      ? 'Matched'
+      : completionPercent >= 85
+        ? 'Matched'
+        : completionPercent >= 50
+          ? 'Partial match'
+          : 'Possible match'}
+  </strong>
 </div>
       </div>
 
