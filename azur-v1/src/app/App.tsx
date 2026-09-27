@@ -2827,7 +2827,9 @@ const sessionVerdict =
     </div>
 
     <h4>{nextSessionRecommendation.title}</h4>
-
+<p className="next-session-reason">
+  {nextSessionRecommendation.reason}
+</p>
     <div className="next-session-target">
       <span>NEXT SESSION</span>
       <strong>{nextPlannedSession.title}</strong>
