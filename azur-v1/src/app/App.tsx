@@ -1898,11 +1898,29 @@ const daysToRace = primaryRace.raceDate
 
     setWeekVersion((current) => current + 1);
   }
-  function acceptNextSessionAdjustment() {
+  async function acceptNextSessionAdjustment() {
   if (
     !nextPlannedSession ||
     !nextSessionRecommendation?.recommendedDurationMin
   ) {
+    return;
+  }
+
+  const recommendedDuration =
+    nextSessionRecommendation.recommendedDurationMin;
+
+  const { error } = await supabase
+    .from('planned_session')
+    .update({
+      duration_min: recommendedDuration,
+    })
+    .eq('id', nextPlannedSession.id);
+
+  if (error) {
+    console.error(
+      'Unable to save adaptive session adjustment:',
+      error,
+    );
     return;
   }
 
@@ -1911,8 +1929,7 @@ const daysToRace = primaryRace.raceDate
       session.id === nextPlannedSession.id
         ? {
             ...session,
-            durationMin:
-              nextSessionRecommendation.recommendedDurationMin,
+            durationMin: recommendedDuration,
             version: session.version + 1,
             status: 'edited',
           }
@@ -1921,7 +1938,7 @@ const daysToRace = primaryRace.raceDate
   );
 
   setWeekVersion((current) => current + 1);
-    setNextSessionDecision('accepted');
+  setNextSessionDecision('accepted');
 }
   function keepOriginalNextSession() {
   setNextSessionDecision('kept');
