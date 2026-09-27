@@ -1898,6 +1898,30 @@ const daysToRace = primaryRace.raceDate
 
     setWeekVersion((current) => current + 1);
   }
+  function acceptNextSessionAdjustment() {
+  if (
+    !nextPlannedSession ||
+    !nextSessionRecommendation?.recommendedDurationMin
+  ) {
+    return;
+  }
+
+  setWeekSessions((current) =>
+    current.map((session) =>
+      session.id === nextPlannedSession.id
+        ? {
+            ...session,
+            durationMin:
+              nextSessionRecommendation.recommendedDurationMin,
+            version: session.version + 1,
+            status: 'edited',
+          }
+        : session,
+    ),
+  );
+
+  setWeekVersion((current) => current + 1);
+}
 const now = new Date();
 
 const todayKey = `${now.getFullYear()}-${String(
