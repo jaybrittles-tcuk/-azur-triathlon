@@ -1497,19 +1497,6 @@ const matchConfidence =
     return null;
   }
 if (
-  matchConfidence === 'possible' &&
-  confirmedMatchSessionId !== selected.id
-) {
-  return {
-    action: 'CONFIRM',
-    title: 'Confirm activity match',
-    recommendedDurationMin: nextPlannedSession.durationMin,
-    adjustment:
-      'Azur will not change the next session until you confirm that this completed activity belongs to the planned workout.',
-    reason:
-      'This activity is currently only a possible match, so it is not safe to adapt your plan from it yet.',
-  };
-}  if (
   nextPlannedSession.prescription?.azur_adaptation?.status === 'accepted'
 ) {
   return {
@@ -1524,7 +1511,24 @@ if (
     reason:
       'Azur has already applied an accepted adjustment to this session, so no further change is being recommended.',
   };
-}    const completionPercent =
+}
+
+if (
+  matchConfidence === 'possible' &&
+  confirmedMatchSessionId !== selected.id
+) {
+  return {
+    action: 'CONFIRM',
+    title: 'Confirm activity match',
+    recommendedDurationMin: nextPlannedSession.durationMin,
+    adjustment:
+      'Azur will not change the next session until you confirm that this completed activity belongs to the planned workout.',
+    reason:
+      'This activity is currently only a possible match, so it is not safe to adapt your plan from it yet.',
+  };
+}
+
+const completionPercent =
     selected.durationMin > 0
       ? Math.round(
           (selected.completedDurationSec / 60 / selected.durationMin) * 100,
