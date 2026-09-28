@@ -1492,7 +1492,7 @@ if (session?.user) {
     : null;
 
 const matchConfidence =
-  selected?.completedMatchConfidence === 100
+  Number(selected?.completedMatchConfidence) === 100
     ? 'matched'
     : matchCompletionPercent == null
       ? 'matched'
