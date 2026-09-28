@@ -2270,6 +2270,12 @@ const daysToRace = primaryRace.raceDate
   if (
     !nextPlannedSession ||
     !nextSessionRecommendation?.recommendedDurationMin
+    const adaptedResult = buildAdaptedPrescription(
+  nextPlannedSession.prescription ?? {},
+  nextPlannedSession.durationMin,
+  recommendedDuration,
+  nextPlannedSession.sessionClass,
+);
   ) {
     return;
   }
@@ -2281,18 +2287,23 @@ const { error } = await supabase
   .from('planned_session')
   .update({
     duration_min: recommendedDuration,
-    prescription: {
-      ...(nextPlannedSession.prescription ?? {}),
-      azur_adaptation: {
-        status: 'accepted',
-        action: nextSessionRecommendation.action,
-        original_duration_min: nextPlannedSession.durationMin,
-        recommended_duration_min: recommendedDuration,
-        source_session_id: selected.id,
-        accepted_at: new Date().toISOString(),
-      },
-    },
-  })
+prescription: {
+  ...adaptedResult.prescription,
+
+  azur_adaptation: {
+    status: 'accepted',
+    action: nextSessionRecommendation.action,
+    original_duration_min: nextPlannedSession.durationMin,
+    recommended_duration_min: recommendedDuration,
+    source_session_id: selected.id,
+    accepted_at: new Date().toISOString(),
+
+    changes: adaptedResult.changes,
+
+    original_prescription:
+      nextPlannedSession.prescription ?? {},
+  },
+},
   .eq('id', nextPlannedSession.id);
 
   if (error) {
@@ -2312,8 +2323,9 @@ const { error } = await supabase
             durationMin: recommendedDuration,
             version: session.version + 1,
             status: 'edited',
-          prescription: {
-  ...(session.prescription ?? {}),
+prescription: {
+  ...adaptedResult.prescription,
+
   azur_adaptation: {
     status: 'accepted',
     action: nextSessionRecommendation.action,
@@ -2321,6 +2333,11 @@ const { error } = await supabase
     recommended_duration_min: recommendedDuration,
     source_session_id: selected.id,
     accepted_at: new Date().toISOString(),
+
+    changes: adaptedResult.changes,
+
+    original_prescription:
+      nextPlannedSession.prescription ?? {},
   },
 },
           }
