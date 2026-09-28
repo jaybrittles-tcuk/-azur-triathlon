@@ -2931,10 +2931,19 @@ const sessionVerdict =
       </small>
     </div>
 
-    <div className="next-session-adjustment">
-      <span>PROPOSED ADJUSTMENT</span>
-      <strong>{nextSessionRecommendation.adjustment}</strong>
-    </div>
+<div className="next-session-adjustment">
+  <span>
+    {nextPlannedSession.prescription?.azur_adaptation?.status === 'accepted'
+      ? 'APPLIED ADJUSTMENT'
+      : 'PROPOSED ADJUSTMENT'}
+  </span>
+
+  <strong>
+    {nextPlannedSession.prescription?.azur_adaptation?.status === 'accepted'
+      ? `${nextPlannedSession.prescription.azur_adaptation.original_duration_min} min → ${nextPlannedSession.prescription.azur_adaptation.recommended_duration_min} min`
+      : nextSessionRecommendation.adjustment}
+  </strong>
+</div>
 
   {nextPlannedSession.prescription?.azur_adaptation?.status === 'accepted' ? (
   <div className="next-session-decision">
