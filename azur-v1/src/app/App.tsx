@@ -2218,8 +2218,66 @@ function buildAdaptedPrescription(
       }
     }
   }
+// 4. For run intensity sessions, shorten key reps
+// before removing an entire repetition.
+if (
+  reductionNeeded > 0 &&
+  sport === 'run' &&
+  (sessionClass === 'intensity' ||
+    sessionClass === 'race_specific') &&
+  Array.isArray(adapted.main_set)
+) {
+  for (const step of adapted.main_set) {
+    if (
+      reductionNeeded <= 0 ||
+      step.reps == null ||
+      step.duration_min == null
+    ) {
+      continue;
+    }
 
-  // 4. Only remove a quality rep if supporting volume
+    const reps = Number(step.reps);
+    const currentRepDuration =
+      Number(step.duration_min);
+
+    if (
+      reps <= 1 ||
+      currentRepDuration <= 6
+    ) {
+      continue;
+    }
+
+    // Protect a minimum of 6 minutes per quality rep.
+    const maxReductionPerRep =
+      currentRepDuration - 6;
+
+    const requiredReductionPerRep =
+      Math.ceil(reductionNeeded / reps);
+
+    const reductionPerRep = Math.min(
+      maxReductionPerRep,
+      requiredReductionPerRep,
+    );
+
+    if (reductionPerRep > 0) {
+      step.duration_min =
+        currentRepDuration - reductionPerRep;
+
+      const saved =
+        reductionPerRep * reps;
+
+      reductionNeeded = Math.max(
+        0,
+        reductionNeeded - saved,
+      );
+
+      changes.push(
+        `Key run intervals shortened from ${currentRepDuration} to ${step.duration_min} min while preserving ${reps} reps`,
+      );
+    }
+  }
+}  
+  // 5. Only remove a quality rep if supporting volume
   // cannot achieve the required reduction.
   if (
     reductionNeeded > 0 &&
