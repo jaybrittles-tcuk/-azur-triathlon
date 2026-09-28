@@ -2936,29 +2936,40 @@ const sessionVerdict =
       <strong>{nextSessionRecommendation.adjustment}</strong>
     </div>
 
-    <div className="next-session-actions">
-<button
-  type="button"
-  onClick={acceptNextSessionAdjustment}
-  disabled={isSavingAdjustment}
->
-  {isSavingAdjustment ? 'SAVING...' : 'ACCEPT ADJUSTMENT'}
-</button>
-
-<button
-  type="button"
-  className="secondary"
-  onClick={keepOriginalNextSession}
->
-  KEEP ORIGINAL
-</button>
-    </div>
-    {nextSessionDecision && (
+  {nextPlannedSession.prescription?.azur_adaptation?.status === 'accepted' ? (
   <div className="next-session-decision">
-    {nextSessionDecision === 'accepted'
-      ? 'Adjustment accepted. The next session has been updated in your plan.'
-      : 'Original session kept. No change has been made to your plan.'}
+    ADJUSTMENT APPLIED ·{' '}
+    {nextPlannedSession.prescription.azur_adaptation.original_duration_min} min →{' '}
+    {nextPlannedSession.prescription.azur_adaptation.recommended_duration_min} min
   </div>
+) : (
+  <>
+    <div className="next-session-actions">
+      <button
+        type="button"
+        onClick={acceptNextSessionAdjustment}
+        disabled={isSavingAdjustment}
+      >
+        {isSavingAdjustment ? 'SAVING...' : 'ACCEPT ADJUSTMENT'}
+      </button>
+
+      <button
+        type="button"
+        className="secondary"
+        onClick={keepOriginalNextSession}
+      >
+        KEEP ORIGINAL
+      </button>
+    </div>
+
+    {nextSessionDecision && (
+      <div className="next-session-decision">
+        {nextSessionDecision === 'accepted'
+          ? 'Adjustment accepted. The next session has been updated in your plan.'
+          : 'Original session kept. No change has been made to your plan.'}
+      </div>
+    )}
+  </>
 )}
   </div>
 )}
