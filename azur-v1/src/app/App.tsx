@@ -1907,7 +1907,7 @@ const daysToRace = primaryRace.raceDate
   ) {
     return;
   }
-
+setIsSavingAdjustment(true);
   const recommendedDuration =
     nextSessionRecommendation.recommendedDurationMin;
 
@@ -1923,6 +1923,7 @@ const daysToRace = primaryRace.raceDate
       'Unable to save adaptive session adjustment:',
       error,
     );
+    setIsSavingAdjustment(false);
     return;
   }
 
@@ -1941,6 +1942,7 @@ const daysToRace = primaryRace.raceDate
 
   setWeekVersion((current) => current + 1);
   setNextSessionDecision('accepted');
+    setIsSavingAdjustment(false);
 }
   function keepOriginalNextSession() {
   setNextSessionDecision('kept');
