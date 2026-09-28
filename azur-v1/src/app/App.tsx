@@ -3040,7 +3040,16 @@ const sessionVerdict =
   </div>
 ) : (
   <>
-    <div className="next-session-actions">
+   <div className="next-session-actions">
+  {nextSessionRecommendation.action === 'CONFIRM' ? (
+    <button
+      type="button"
+      onClick={() => setConfirmedMatchSessionId(selected.id)}
+    >
+      CONFIRM ACTIVITY MATCH
+    </button>
+  ) : (
+    <>
       <button
         type="button"
         onClick={acceptNextSessionAdjustment}
@@ -3056,7 +3065,9 @@ const sessionVerdict =
       >
         KEEP ORIGINAL
       </button>
-    </div>
+    </>
+  )}
+</div>
 
     {nextSessionDecision && (
       <div className="next-session-decision">
