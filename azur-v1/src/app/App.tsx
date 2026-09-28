@@ -1435,7 +1435,7 @@ if (session?.user) {
   ? [...weekSessions]
       .filter(
         (session) =>
-          session.status === 'planned' &&
+        (session.status === 'planned' || session.status === 'edited') &&
           session.plannedDate > selected.plannedDate,
       )
       .sort((a, b) =>
