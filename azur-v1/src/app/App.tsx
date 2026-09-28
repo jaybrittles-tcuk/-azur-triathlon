@@ -1477,6 +1477,21 @@ if (session?.user) {
         poorDaysLast3: recoveryContext.poorDaysLast3,
       })
     : null;
+  const matchCompletionPercent =
+  selected?.durationMin && selected.completedDurationSec
+    ? Math.round(
+        (selected.completedDurationSec / 60 / selected.durationMin) * 100,
+      )
+    : null;
+
+const matchConfidence =
+  matchCompletionPercent == null
+    ? 'matched'
+    : matchCompletionPercent >= 85
+      ? 'matched'
+      : matchCompletionPercent >= 50
+        ? 'partial'
+        : 'possible';
   const nextSessionRecommendation = (() => {
   if (!selected || !nextPlannedSession || !selected.completedDurationSec) {
     return null;
