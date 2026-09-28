@@ -1288,12 +1288,28 @@ setTrainingLoadActivities(eligibleTrainingLoadActivities);
       .map((activity) => activity.planned_session_id)
       .filter(Boolean),
   );
-const completedBySessionId = new Map(
-  (completedActivities ?? []).map((activity) => [
+const completedBySessionId = new Map();
+
+(completedActivities ?? []).forEach((activity) => {
+  if (!activity.planned_session_id) {
+    return;
+  }
+
+  const existing = completedBySessionId.get(
     activity.planned_session_id,
-    activity,
-  ]),
-);
+  );
+
+  if (
+    !existing ||
+    Number(activity.match_confidence) === 100 ||
+    Number(existing.match_confidence) !== 100
+  ) {
+    completedBySessionId.set(
+      activity.planned_session_id,
+      activity,
+    );
+  }
+});
   console.log(
   'AZUR completed activities loaded:',
   completedActivities,
