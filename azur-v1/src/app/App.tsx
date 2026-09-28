@@ -1586,8 +1586,18 @@ adjustment:
     'The planned session was completed, recovery is positive, and current form is supportive of a small increase in training demand.',
 };
   }
-
-return {
+const keepStrategy =
+  nextPlannedSession.sessionClass === 'intensity'
+    ? nextPlannedSession.sport === 'bike'
+      ? 'Keep the key power intervals and supporting volume exactly as planned.'
+      : nextPlannedSession.sport === 'run'
+        ? 'Keep the quality reps, recoveries and overall volume as planned.'
+        : 'Keep the main quality set and supporting volume unchanged.'
+    : nextPlannedSession.sessionClass === 'race_specific'
+      ? 'Keep the race-specific work and surrounding volume unchanged.'
+      : nextPlannedSession.sessionClass === 'endurance'
+        ? 'Keep the planned aerobic duration and intensity unchanged.'
+        : 'Keep the session easy, controlled and at the planned duration.';return {
   action: 'KEEP',
   title: 'Keep next session as planned',
   recommendedDurationMin: nextPlannedSession.durationMin,
