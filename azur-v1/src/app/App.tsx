@@ -3105,17 +3105,19 @@ const sessionVerdict =
   <div>
     <span>MATCH STATUS</span>
     <strong>
-      {selected.durationMin > 0
-        ? Math.round(
-            (selected.completedDurationSec / 60 / selected.durationMin) * 100,
-          ) >= 85
-          ? 'Matched'
-          : Math.round(
-              (selected.completedDurationSec / 60 / selected.durationMin) * 100,
-            ) >= 50
-            ? 'Partial match'
-            : 'Possible match'
-        : 'Matched'}
+     {confirmedMatchSessionId === selected.id
+  ? 'Confirmed match'
+  : selected.durationMin > 0
+    ? Math.round(
+        (selected.completedDurationSec / 60 / selected.durationMin) * 100,
+      ) >= 85
+      ? 'Matched'
+      : Math.round(
+          (selected.completedDurationSec / 60 / selected.durationMin) * 100,
+        ) >= 50
+        ? 'Partial match'
+        : 'Possible match'
+    : 'Matched'}
     </strong>
   </div>
 </div>
