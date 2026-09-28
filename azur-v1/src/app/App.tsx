@@ -1911,12 +1911,23 @@ setIsSavingAdjustment(true);
   const recommendedDuration =
     nextSessionRecommendation.recommendedDurationMin;
 
-  const { error } = await supabase
-    .from('planned_session')
-    .update({
-      duration_min: recommendedDuration,
-    })
-    .eq('id', nextPlannedSession.id);
+const { error } = await supabase
+  .from('planned_session')
+  .update({
+    duration_min: recommendedDuration,
+    prescription: {
+      ...(nextPlannedSession.prescription ?? {}),
+      azur_adaptation: {
+        status: 'accepted',
+        action: nextSessionRecommendation.action,
+        original_duration_min: nextPlannedSession.durationMin,
+        recommended_duration_min: recommendedDuration,
+        source_session_id: selected.id,
+        accepted_at: new Date().toISOString(),
+      },
+    },
+  })
+  .eq('id', nextPlannedSession.id);
 
   if (error) {
     console.error(
