@@ -4433,3 +4433,20 @@ strong {
 strong {
   color: #10243a !important;
 }
+.session-detail-modal
+.next-session-recommendation-top
+strong {
+  color: #1687e8 !important;
+}
+
+.session-detail-modal
+.next-session-target
+strong {
+  color: #10243a !important;
+}
+
+.session-detail-modal
+.next-session-adjustment
+strong {
+  color: #10243a !important;
+}
