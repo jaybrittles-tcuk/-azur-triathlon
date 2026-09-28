@@ -3118,7 +3118,7 @@ const sessionVerdict =
   {nextSessionRecommendation.action === 'CONFIRM' ? (
     <button
       type="button"
-      onClick={() => setConfirmedMatchSessionId(selected.id)}
+      onClick={confirmActivityMatch}
     >
       CONFIRM ACTIVITY MATCH
     </button>
