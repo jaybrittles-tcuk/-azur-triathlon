@@ -4413,3 +4413,23 @@ strong {
   line-height: 1.45;
   font-weight: 750;
 }
+.editor-panel
+.completed-session-summary
+.next-session-recommendation-top
+strong {
+  color: #1687e8 !important;
+}
+
+.editor-panel
+.completed-session-summary
+.next-session-target
+strong {
+  color: #10243a !important;
+}
+
+.editor-panel
+.completed-session-summary
+.next-session-adjustment
+strong {
+  color: #10243a !important;
+}
