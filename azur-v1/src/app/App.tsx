@@ -2027,6 +2027,245 @@ const daysToRace = primaryRace.raceDate
 
     setWeekVersion((current) => current + 1);
   }
+  function buildAdaptedPrescription(
+  prescription: any,
+  originalDurationMin: number,
+  recommendedDurationMin: number,
+  sessionClass: string,
+) {
+  const adapted = JSON.parse(
+    JSON.stringify(prescription ?? {}),
+  );
+
+  const changes: string[] = [];
+
+  let reductionNeeded = Math.max(
+    0,
+    originalDurationMin - recommendedDurationMin,
+  );
+
+  if (reductionNeeded <= 0) {
+    return {
+      prescription: adapted,
+      changes,
+    };
+  }
+
+  // 1. Reduce cooldown first.
+  if (Array.isArray(adapted.cooldown)) {
+    for (
+      let index = adapted.cooldown.length - 1;
+      index >= 0 && reductionNeeded > 0;
+      index--
+    ) {
+      const step = adapted.cooldown[index];
+
+      if (step.duration_min == null) {
+        continue;
+      }
+
+      const currentDuration = Number(step.duration_min);
+
+      // Always preserve at least 5 minutes of cooldown.
+      const reducible = Math.max(
+        0,
+        currentDuration - 5,
+      );
+
+      const reduction = Math.min(
+        reducible,
+        reductionNeeded,
+      );
+
+      if (reduction > 0) {
+        step.duration_min =
+          currentDuration - reduction;
+
+        reductionNeeded -= reduction;
+
+        changes.push(
+          `Cooldown reduced from ${currentDuration} to ${step.duration_min} min`,
+        );
+      }
+    }
+  }
+
+  // 2. Reduce simple warm-up volume while preserving activation drills.
+  if (
+    reductionNeeded > 0 &&
+    Array.isArray(adapted.warmup)
+  ) {
+    const simpleWarmupSteps =
+      adapted.warmup.filter(
+        (step: any) =>
+          step.duration_min != null &&
+          step.reps == null,
+      );
+
+    const totalSimpleWarmup =
+      simpleWarmupSteps.reduce(
+        (total: number, step: any) =>
+          total + Number(step.duration_min),
+        0,
+      );
+
+    // Preserve at least 10 minutes of conventional warm-up.
+    let warmupReducible = Math.max(
+      0,
+      totalSimpleWarmup - 10,
+    );
+
+    for (
+      let index = adapted.warmup.length - 1;
+      index >= 0 &&
+      reductionNeeded > 0 &&
+      warmupReducible > 0;
+      index--
+    ) {
+      const step = adapted.warmup[index];
+
+      if (
+        step.duration_min == null ||
+        step.reps != null
+      ) {
+        continue;
+      }
+
+      const currentDuration =
+        Number(step.duration_min);
+
+      const reduction = Math.min(
+        currentDuration,
+        warmupReducible,
+        reductionNeeded,
+      );
+
+      if (reduction > 0) {
+        step.duration_min =
+          currentDuration - reduction;
+
+        reductionNeeded -= reduction;
+        warmupReducible -= reduction;
+
+        changes.push(
+          `Warm-up volume reduced by ${reduction} min`,
+        );
+      }
+    }
+
+    adapted.warmup = adapted.warmup.filter(
+      (step: any) =>
+        step.duration_min == null ||
+        Number(step.duration_min) > 0,
+    );
+  }
+
+  // 3. For intensity / race-specific sessions,
+  // shorten recovery before removing quality reps.
+  if (
+    reductionNeeded > 0 &&
+    (sessionClass === 'intensity' ||
+      sessionClass === 'race_specific') &&
+    Array.isArray(adapted.main_set)
+  ) {
+    for (const step of adapted.main_set) {
+      if (
+        reductionNeeded <= 0 ||
+        step.recovery_min == null ||
+        step.reps == null
+      ) {
+        continue;
+      }
+
+      const reps = Number(step.reps);
+      const recoveries = Math.max(0, reps - 1);
+
+      if (recoveries === 0) {
+        continue;
+      }
+
+      const currentRecovery =
+        Number(step.recovery_min);
+
+      // Protect at least 2 minutes recovery.
+      const maxRecoveryReduction =
+        Math.max(0, currentRecovery - 2);
+
+      const reductionPerRecovery = Math.min(
+        maxRecoveryReduction,
+        Math.ceil(
+          reductionNeeded / recoveries,
+        ),
+      );
+
+      if (reductionPerRecovery > 0) {
+        step.recovery_min =
+          currentRecovery -
+          reductionPerRecovery;
+
+        const saved =
+          reductionPerRecovery * recoveries;
+
+        reductionNeeded = Math.max(
+          0,
+          reductionNeeded - saved,
+        );
+
+        changes.push(
+          `Recovery between key reps reduced from ${currentRecovery} to ${step.recovery_min} min`,
+        );
+      }
+    }
+  }
+
+  // 4. Only remove a quality rep if supporting volume
+  // cannot achieve the required reduction.
+  if (
+    reductionNeeded > 0 &&
+    Array.isArray(adapted.main_set)
+  ) {
+    for (const step of adapted.main_set) {
+      if (
+        reductionNeeded <= 0 ||
+        step.reps == null ||
+        Number(step.reps) <= 1 ||
+        step.duration_min == null
+      ) {
+        continue;
+      }
+
+      const currentReps = Number(step.reps);
+      const repDuration =
+        Number(step.duration_min);
+
+      const originalReps = currentReps;
+
+      while (
+        reductionNeeded > 0 &&
+        Number(step.reps) > 1
+      ) {
+        step.reps =
+          Number(step.reps) - 1;
+
+        reductionNeeded = Math.max(
+          0,
+          reductionNeeded - repDuration,
+        );
+      }
+
+      if (Number(step.reps) !== originalReps) {
+        changes.push(
+          `Key set reduced from ${originalReps} to ${step.reps} reps`,
+        );
+      }
+    }
+  }
+
+  return {
+    prescription: adapted,
+    changes,
+  };
+}
   async function acceptNextSessionAdjustment() {
   if (
     !nextPlannedSession ||
