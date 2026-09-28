@@ -1258,7 +1258,7 @@ const { data: completedActivities, error: completedError } =
   await supabase
     .from('completed_activity')
     .select(
-    'planned_session_id, sport, start_time, duration_sec, distance_m, source, processed_metrics, raw_payload'
+  'id, planned_session_id, sport, start_time, duration_sec, distance_m, source, processed_metrics, raw_payload, match_confidence'
     )
     .eq('athlete_id', athlete.id)
     .order('start_time', { ascending: true });
