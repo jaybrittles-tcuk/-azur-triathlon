@@ -2305,8 +2305,203 @@ if (
     ) {
       continue;
     }
+// 6. For swim sessions, reduce supporting distance first
+// while preserving the main aerobic/quality set.
+if (
+  reductionNeeded > 0 &&
+  sport === 'swim'
+) {
+  // Convert time reduction into an approximate swim distance target.
+  // Uses 100 m per 2 minutes as a conservative default.
+  let swimDistanceReductionNeeded =
+    reductionNeeded * 50;
 
-    // Protect at least 5 minutes per key bike rep.
+  // A. Reduce cooldown distance first.
+  if (
+    swimDistanceReductionNeeded > 0 &&
+    Array.isArray(adapted.cooldown)
+  ) {
+    for (
+      let index = adapted.cooldown.length - 1;
+      index >= 0 &&
+      swimDistanceReductionNeeded > 0;
+      index--
+    ) {
+      const step = adapted.cooldown[index];
+
+      if (step.distance_m == null) {
+        continue;
+      }
+
+      const currentDistance =
+        Number(step.distance_m);
+
+      // Preserve at least 100 m cooldown.
+      const reducible = Math.max(
+        0,
+        currentDistance - 100,
+      );
+
+      const reduction = Math.min(
+        reducible,
+        swimDistanceReductionNeeded,
+      );
+
+      if (reduction > 0) {
+        step.distance_m =
+          currentDistance - reduction;
+
+        swimDistanceReductionNeeded -= reduction;
+
+        changes.push(
+          `Swim cooldown reduced from ${currentDistance} m to ${step.distance_m} m`,
+        );
+      }
+    }
+  }
+
+  // B. Reduce easy warm-up distance next,
+  // but protect drill steps.
+  if (
+    swimDistanceReductionNeeded > 0 &&
+    Array.isArray(adapted.warmup)
+  ) {
+    for (
+      let index = adapted.warmup.length - 1;
+      index >= 0 &&
+      swimDistanceReductionNeeded > 0;
+      index--
+    ) {
+      const step = adapted.warmup[index];
+
+      if (
+        step.distance_m == null ||
+        step.reps != null
+      ) {
+        continue;
+      }
+
+      const currentDistance =
+        Number(step.distance_m);
+
+      // Preserve at least 200 m easy warm-up.
+      const reducible = Math.max(
+        0,
+        currentDistance - 200,
+      );
+
+      const reduction = Math.min(
+        reducible,
+        swimDistanceReductionNeeded,
+      );
+
+      if (reduction > 0) {
+        step.distance_m =
+          currentDistance - reduction;
+
+        swimDistanceReductionNeeded -= reduction;
+
+        changes.push(
+          `Swim warm-up reduced from ${currentDistance} m to ${step.distance_m} m`,
+        );
+      }
+    }
+  }
+
+  // C. Reduce secondary main-set blocks before the first/main block.
+  if (
+    swimDistanceReductionNeeded > 0 &&
+    Array.isArray(adapted.main_set) &&
+    adapted.main_set.length > 1
+  ) {
+    for (
+      let index = adapted.main_set.length - 1;
+      index >= 1 &&
+      swimDistanceReductionNeeded > 0;
+      index--
+    ) {
+      const step = adapted.main_set[index];
+
+      if (
+        step.reps == null ||
+        step.distance_m == null
+      ) {
+        continue;
+      }
+
+      const distancePerRep =
+        Number(step.distance_m);
+
+      const originalReps =
+        Number(step.reps);
+
+      while (
+        swimDistanceReductionNeeded > 0 &&
+        Number(step.reps) > 1
+      ) {
+        step.reps =
+          Number(step.reps) - 1;
+
+        swimDistanceReductionNeeded =
+          Math.max(
+            0,
+            swimDistanceReductionNeeded -
+              distancePerRep,
+          );
+      }
+
+      if (Number(step.reps) !== originalReps) {
+        changes.push(
+          `Secondary swim set reduced from ${originalReps} to ${step.reps} reps`,
+        );
+      }
+    }
+  }
+
+  // D. Only reduce the primary main set if required.
+  if (
+    swimDistanceReductionNeeded > 0 &&
+    Array.isArray(adapted.main_set) &&
+    adapted.main_set.length > 0
+  ) {
+    const primarySet = adapted.main_set[0];
+
+    if (
+      primarySet.reps != null &&
+      primarySet.distance_m != null
+    ) {
+      const distancePerRep =
+        Number(primarySet.distance_m);
+
+      const originalReps =
+        Number(primarySet.reps);
+
+      // Preserve at least 4 reps in the primary set.
+      while (
+        swimDistanceReductionNeeded > 0 &&
+        Number(primarySet.reps) > 4
+      ) {
+        primarySet.reps =
+          Number(primarySet.reps) - 1;
+
+        swimDistanceReductionNeeded =
+          Math.max(
+            0,
+            swimDistanceReductionNeeded -
+              distancePerRep,
+          );
+      }
+
+      if (
+        Number(primarySet.reps) !== originalReps
+      ) {
+        changes.push(
+          `Primary swim set reduced from ${originalReps} to ${primarySet.reps} reps`,
+        );
+      }
+    }
+  }
+}    // Protect at least 5 minutes per key bike rep.
     const maxReductionPerRep =
       currentRepDuration - 5;
 
