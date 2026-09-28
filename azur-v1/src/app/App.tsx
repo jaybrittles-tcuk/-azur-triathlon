@@ -2027,11 +2027,12 @@ const daysToRace = primaryRace.raceDate
 
     setWeekVersion((current) => current + 1);
   }
-  function buildAdaptedPrescription(
+function buildAdaptedPrescription(
   prescription: any,
   originalDurationMin: number,
   recommendedDurationMin: number,
   sessionClass: string,
+  sport: string,
 ) {
   const adapted = JSON.parse(
     JSON.stringify(prescription ?? {}),
@@ -2275,6 +2276,7 @@ const daysToRace = primaryRace.raceDate
   nextPlannedSession.durationMin,
   recommendedDuration,
   nextPlannedSession.sessionClass,
+  nextPlannedSession.sport,
 );
   ) {
     return;
