@@ -2915,12 +2915,13 @@ const sessionVerdict =
     </div>
 
     <div className="next-session-actions">
-      <button
-        type="button"
-        onClick={acceptNextSessionAdjustment}
-      >
-        ACCEPT ADJUSTMENT
-      </button>
+<button
+  type="button"
+  onClick={acceptNextSessionAdjustment}
+  disabled={isSavingAdjustment}
+>
+  {isSavingAdjustment ? 'SAVING...' : 'ACCEPT ADJUSTMENT'}
+</button>
 
 <button
   type="button"
