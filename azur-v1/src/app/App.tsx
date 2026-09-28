@@ -1518,17 +1518,17 @@ const reductionFactor =
   ) {
    return {
   action: 'REDUCE',
-  title: 'Reduce next session demand',
-     recommendedDurationMin: Math.max(
+title: 'Reduce volume, preserve intent',
+recommendedDurationMin: Math.max(
   20,
-  Math.round(nextPlannedSession.durationMin * 0.8),
+  Math.round(nextPlannedSession.durationMin * reductionFactor),
 ),
 
 adjustment:
   `Reduce from ${nextPlannedSession.durationMin} min to ${Math.max(
     20,
-    Math.round(nextPlannedSession.durationMin * 0.8),
-  )} min.`,
+    Math.round(nextPlannedSession.durationMin * reductionFactor),
+  )} min while preserving the session purpose.`,
   reason:
     recoveryColor === 'red'
       ? 'Recovery signals are currently elevated, so reducing training demand is the safer progression.'
