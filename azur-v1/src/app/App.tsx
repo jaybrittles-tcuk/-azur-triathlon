@@ -1512,6 +1512,18 @@ const reductionFactor =
       : nextPlannedSession.sessionClass === 'race_specific'
         ? 0.85
         : 0.85;  if (
+  const adaptationStrategy =
+  nextPlannedSession.sessionClass === 'intensity'
+    ? nextPlannedSession.sport === 'bike'
+      ? 'Preserve the key power intervals and reduce surrounding volume first.'
+      : nextPlannedSession.sport === 'run'
+        ? 'Preserve the key quality reps and reduce surrounding easy running first.'
+        : 'Preserve the main quality set and reduce supporting volume first.'
+    : nextPlannedSession.sessionClass === 'race_specific'
+      ? 'Preserve the race-specific work and reduce non-essential volume around it.'
+      : nextPlannedSession.sessionClass === 'endurance'
+        ? 'Reduce total aerobic volume while keeping the intended endurance focus.'
+        : 'Reduce overall duration while keeping the session easy and controlled.';
     recoveryColor === 'red' ||
     (completionPercent != null && completionPercent < 50) ||
     (form != null && form < -20)
