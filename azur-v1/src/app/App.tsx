@@ -1294,6 +1294,15 @@ const completedBySessionId = new Map(
     activity,
   ]),
 );
+  console.log(
+  'AZUR completed activities loaded:',
+  completedActivities,
+);
+
+console.log(
+  'AZUR completed activity map:',
+  Array.from(completedBySessionId.entries()),
+);
   const liveSessions: Session[] = data.map((session) => ({
     id: session.id,
     seasonWeekId: '',
