@@ -1492,13 +1492,15 @@ if (session?.user) {
     : null;
 
 const matchConfidence =
-  matchCompletionPercent == null
+  selected?.completedMatchConfidence === 100
     ? 'matched'
-    : matchCompletionPercent >= 85
+    : matchCompletionPercent == null
       ? 'matched'
-      : matchCompletionPercent >= 50
-        ? 'partial'
-        : 'possible';
+      : matchCompletionPercent >= 85
+        ? 'matched'
+        : matchCompletionPercent >= 50
+          ? 'partial'
+          : 'possible';
   const nextSessionRecommendation = (() => {
   if (!selected || !nextPlannedSession || !selected.completedDurationSec) {
     return null;
