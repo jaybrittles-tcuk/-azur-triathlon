@@ -4379,3 +4379,34 @@ strong {
   line-height: 1.45;
   font-weight: 750;
 }
+.next-session-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.next-session-actions button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.next-session-actions button:not(.secondary) {
+  background: #1687e8;
+  color: #ffffff;
+}
+
+.next-session-actions button.secondary {
+  background: rgba(15, 127, 229, 0.08);
+  color: #1687e8;
+}
+
+.next-session-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
