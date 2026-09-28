@@ -1552,7 +1552,18 @@ adjustment:
         : 'Current training fatigue is elevated, so Azur recommends reducing the next session demand.',
 };
   }
-
+const progressionStrategy =
+  nextPlannedSession.sessionClass === 'intensity'
+    ? nextPlannedSession.sport === 'bike'
+      ? 'Preserve interval quality and only add volume if the key power work remains controlled.'
+      : nextPlannedSession.sport === 'run'
+        ? 'Preserve pace quality and progress the session cautiously through supporting volume.'
+        : 'Preserve the main quality set and progress supporting volume cautiously.'
+    : nextPlannedSession.sessionClass === 'race_specific'
+      ? 'Progress race-specific volume cautiously while protecting the quality of the key work.'
+      : nextPlannedSession.sessionClass === 'endurance'
+        ? 'Progress aerobic duration gradually while keeping the session controlled.'
+        : 'Keep the session easy and only add a small amount of duration.';
   if (
     recoveryColor === 'green' &&
     completionPercent != null &&
