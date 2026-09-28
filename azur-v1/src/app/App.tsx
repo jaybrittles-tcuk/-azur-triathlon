@@ -1946,6 +1946,17 @@ const { error } = await supabase
             durationMin: recommendedDuration,
             version: session.version + 1,
             status: 'edited',
+          prescription: {
+  ...(session.prescription ?? {}),
+  azur_adaptation: {
+    status: 'accepted',
+    action: nextSessionRecommendation.action,
+    original_duration_min: nextPlannedSession.durationMin,
+    recommended_duration_min: recommendedDuration,
+    source_session_id: selected.id,
+    accepted_at: new Date().toISOString(),
+  },
+},
           }
         : session,
     ),
