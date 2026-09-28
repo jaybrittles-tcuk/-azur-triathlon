@@ -1581,7 +1581,7 @@ return {
 adjustment:
   `Progress from ${nextPlannedSession.durationMin} min to ${Math.round(
     nextPlannedSession.durationMin * 1.1,
-  )} min.`,
+  )} min. ${progressionStrategy}`,
   reason:
     'The planned session was completed, recovery is positive, and current form is supportive of a small increase in training demand.',
 };
