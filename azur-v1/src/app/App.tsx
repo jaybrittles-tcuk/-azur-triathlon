@@ -1504,8 +1504,14 @@ if (session?.user) {
 
   const recoveryColor = recoveryReadiness?.color ?? null;
   const form = trainingLoad.form;
-
-  if (
+const reductionFactor =
+  nextPlannedSession.sessionClass === 'easy'
+    ? 0.9
+    : nextPlannedSession.sessionClass === 'intensity'
+      ? 0.8
+      : nextPlannedSession.sessionClass === 'race_specific'
+        ? 0.85
+        : 0.85;  if (
     recoveryColor === 'red' ||
     (completionPercent != null && completionPercent < 50) ||
     (form != null && form < -20)
