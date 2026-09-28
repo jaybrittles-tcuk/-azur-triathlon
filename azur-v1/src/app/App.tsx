@@ -1311,8 +1311,13 @@ completedDistanceM:
   completedBySessionId.get(session.id)?.distance_m != null
     ? Number(completedBySessionId.get(session.id)?.distance_m)
     : undefined,
-    
-completedSource:
+    completedActivityId:
+  completedBySessionId.get(session.id)?.id ?? undefined,
+
+completedMatchConfidence:
+  completedBySessionId.get(session.id)?.match_confidence != null
+    ? Number(completedBySessionId.get(session.id)?.match_confidence)
+    : undefined,completedSource:
   completedBySessionId.get(session.id)?.source ?? undefined,
     completedRoute:
   completedBySessionId.get(session.id)?.raw_payload?.route ?? undefined,
