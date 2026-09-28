@@ -1480,7 +1480,22 @@ if (session?.user) {
     return null;
   }
 
-  const completionPercent =
+  if (
+  nextPlannedSession.prescription?.azur_adaptation?.status === 'accepted'
+) {
+  return {
+    action:
+      nextPlannedSession.prescription.azur_adaptation.action ?? 'KEEP',
+    title: 'Adjustment already applied',
+    recommendedDurationMin:
+      nextPlannedSession.prescription.azur_adaptation.recommended_duration_min ??
+      nextPlannedSession.durationMin,
+    adjustment:
+      `${nextPlannedSession.prescription.azur_adaptation.original_duration_min} min → ${nextPlannedSession.prescription.azur_adaptation.recommended_duration_min} min`,
+    reason:
+      'Azur has already applied an accepted adjustment to this session, so no further change is being recommended.',
+  };
+}    const completionPercent =
     selected.durationMin > 0
       ? Math.round(
           (selected.completedDurationSec / 60 / selected.durationMin) * 100,
