@@ -2531,7 +2531,7 @@ if (
     }
   }
 }
-  // 6. Only remove a quality rep if supporting volume
+  // 7. Only remove a quality rep if supporting volume
   // cannot achieve the required reduction.
   if (
     reductionNeeded > 0 &&
