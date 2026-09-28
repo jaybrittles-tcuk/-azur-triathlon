@@ -1597,7 +1597,8 @@ const keepStrategy =
       ? 'Keep the race-specific work and surrounding volume unchanged.'
       : nextPlannedSession.sessionClass === 'endurance'
         ? 'Keep the planned aerobic duration and intensity unchanged.'
-        : 'Keep the session easy, controlled and at the planned duration.';return {
+        : 'Keep the session easy, controlled and at the planned duration.';
+    return {
   action: 'KEEP',
   title: 'Keep next session as planned',
   recommendedDurationMin: nextPlannedSession.durationMin,
