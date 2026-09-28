@@ -2277,7 +2277,66 @@ if (
     }
   }
 }  
-  // 5. Only remove a quality rep if supporting volume
+  // 5. For bike intensity sessions, shorten key reps
+// before removing an entire repetition.
+if (
+  reductionNeeded > 0 &&
+  sport === 'bike' &&
+  (sessionClass === 'intensity' ||
+    sessionClass === 'race_specific') &&
+  Array.isArray(adapted.main_set)
+) {
+  for (const step of adapted.main_set) {
+    if (
+      reductionNeeded <= 0 ||
+      step.reps == null ||
+      step.duration_min == null
+    ) {
+      continue;
+    }
+
+    const reps = Number(step.reps);
+    const currentRepDuration =
+      Number(step.duration_min);
+
+    if (
+      reps <= 1 ||
+      currentRepDuration <= 5
+    ) {
+      continue;
+    }
+
+    // Protect at least 5 minutes per key bike rep.
+    const maxReductionPerRep =
+      currentRepDuration - 5;
+
+    const requiredReductionPerRep =
+      Math.ceil(reductionNeeded / reps);
+
+    const reductionPerRep = Math.min(
+      maxReductionPerRep,
+      requiredReductionPerRep,
+    );
+
+    if (reductionPerRep > 0) {
+      step.duration_min =
+        currentRepDuration - reductionPerRep;
+
+      const saved =
+        reductionPerRep * reps;
+
+      reductionNeeded = Math.max(
+        0,
+        reductionNeeded - saved,
+      );
+
+      changes.push(
+        `Key bike intervals shortened from ${currentRepDuration} to ${step.duration_min} min while preserving ${reps} reps`,
+      );
+    }
+  }
+}
+  // 6. Only remove a quality rep if supporting volume
   // cannot achieve the required reduction.
   if (
     reductionNeeded > 0 &&
