@@ -1603,7 +1603,7 @@ const keepStrategy =
   recommendedDurationMin: nextPlannedSession.durationMin,
 
 adjustment:
-  `Keep the planned duration at ${nextPlannedSession.durationMin} min.`,
+  `Keep the planned duration at ${nextPlannedSession.durationMin} min. ${keepStrategy}`,
   reason:
     'Current execution, recovery and training load do not provide a strong reason to either reduce or progress the next session.',
 };
