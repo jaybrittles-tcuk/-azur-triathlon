@@ -2064,6 +2064,39 @@ const { error } = await supabase
   setNextSessionDecision('accepted');
     setIsSavingAdjustment(false);
 }
+  async function confirmActivityMatch() {
+  if (!selected.completedActivityId) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from('completed_activity')
+    .update({
+      match_confidence: 100,
+    })
+    .eq('id', selected.completedActivityId);
+
+  if (error) {
+    console.error(
+      'Unable to confirm activity match:',
+      error,
+    );
+    return;
+  }
+
+  setWeekSessions((current) =>
+    current.map((session) =>
+      session.id === selected.id
+        ? {
+            ...session,
+            completedMatchConfidence: 100,
+          }
+        : session,
+    ),
+  );
+
+  setConfirmedMatchSessionId(selected.id);
+}
   function keepOriginalNextSession() {
   setNextSessionDecision('kept');
 }
