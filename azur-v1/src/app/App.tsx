@@ -1496,8 +1496,20 @@ const matchConfidence =
   if (!selected || !nextPlannedSession || !selected.completedDurationSec) {
     return null;
   }
-
-  if (
+if (
+  matchConfidence === 'possible' &&
+  confirmedMatchSessionId !== selected.id
+) {
+  return {
+    action: 'CONFIRM',
+    title: 'Confirm activity match',
+    recommendedDurationMin: nextPlannedSession.durationMin,
+    adjustment:
+      'Azur will not change the next session until you confirm that this completed activity belongs to the planned workout.',
+    reason:
+      'This activity is currently only a possible match, so it is not safe to adapt your plan from it yet.',
+  };
+}  if (
   nextPlannedSession.prescription?.azur_adaptation?.status === 'accepted'
 ) {
   return {
