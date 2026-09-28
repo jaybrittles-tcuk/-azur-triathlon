@@ -1511,8 +1511,9 @@ const reductionFactor =
       ? 0.8
       : nextPlannedSession.sessionClass === 'race_specific'
         ? 0.85
-        : 0.85;  if (
-  const adaptationStrategy =
+        : 0.85;
+
+const adaptationStrategy =
   nextPlannedSession.sessionClass === 'intensity'
     ? nextPlannedSession.sport === 'bike'
       ? 'Preserve the key power intervals and reduce surrounding volume first.'
@@ -1524,10 +1525,12 @@ const reductionFactor =
       : nextPlannedSession.sessionClass === 'endurance'
         ? 'Reduce total aerobic volume while keeping the intended endurance focus.'
         : 'Reduce overall duration while keeping the session easy and controlled.';
-    recoveryColor === 'red' ||
-    (completionPercent != null && completionPercent < 50) ||
-    (form != null && form < -20)
-  ) {
+
+if (
+  recoveryColor === 'red' ||
+  (completionPercent != null && completionPercent < 50) ||
+  (form != null && form < -20)
+) {
    return {
   action: 'REDUCE',
 title: 'Reduce volume, preserve intent',
