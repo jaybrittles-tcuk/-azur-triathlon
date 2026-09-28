@@ -995,6 +995,8 @@ const [nextSessionDecision, setNextSessionDecision] =
   useState<'accepted' | 'kept' | null>(null);const [sessionFeedbackSaving, setSessionFeedbackSaving] = useState(false);
   const [isSavingAdjustment, setIsSavingAdjustment] =
   useState(false);
+  const [confirmedMatchSessionId, setConfirmedMatchSessionId] =
+  useState<string | null>(null);
 const [sessionFeedbackMessage, setSessionFeedbackMessage] = useState('');
 
 const [trainingLoad, setTrainingLoad] = useState({
