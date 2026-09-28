@@ -1543,7 +1543,7 @@ adjustment:
   `Reduce from ${nextPlannedSession.durationMin} min to ${Math.max(
     20,
     Math.round(nextPlannedSession.durationMin * reductionFactor),
-  )} min while preserving the session purpose.`,
+  )} min. ${adaptationStrategy}`,
   reason:
     recoveryColor === 'red'
       ? 'Recovery signals are currently elevated, so reducing training demand is the safer progression.'
