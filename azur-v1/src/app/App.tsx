@@ -653,6 +653,8 @@ type Session = PlannedSession & {
   completedDurationSec?: number;
   completedDistanceM?: number;
 completedSource?: string;
+  completedActivityId?: string;
+completedMatchConfidence?: number;
   completedRoute?: RoutePoint[];
   completedSeries?: Array<{
   elapsedSec: number | null;
