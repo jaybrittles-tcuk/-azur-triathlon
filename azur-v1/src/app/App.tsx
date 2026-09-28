@@ -2098,12 +2098,13 @@ const { error } = await supabase
     return;
   }
 
-  const { error } = await supabase
-    .from('completed_activity')
-    .update({
-      match_confidence: 100,
-    })
-    .eq('id', selected.completedActivityId);
+const { error } = await supabase
+  .from('completed_activity')
+  .update({
+    match_confidence: 100,
+    planned_session_id: selected.id,
+  })
+  .eq('id', selected.completedActivityId);;
 
   if (error) {
     console.error(
