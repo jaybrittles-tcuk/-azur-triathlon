@@ -1313,8 +1313,8 @@ completedDistanceM:
     : undefined,
     completedActivityId:
   completedBySessionId.get(session.id)?.id ?? undefined,
-
 completedMatchConfidence:
+  completedBySessionId.get(session.id)?.match_confidence ?? undefined,completedMatchConfidence:
   completedBySessionId.get(session.id)?.match_confidence != null
     ? Number(completedBySessionId.get(session.id)?.match_confidence)
     : undefined,completedSource:
