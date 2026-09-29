@@ -2811,7 +2811,9 @@ const recentTrainingSeconds =
       Number(activity.duration_sec ?? 0),
     0,
   );
-
+    const targetHours =
+  Number(seasonWeek.target_hours ?? 8);
+    
 const recentAverageHours =
   recentTrainingSeconds /
   3600 /
@@ -2826,8 +2828,6 @@ const plannedHours =
     targetHours,
     safeProgressionHours,
   );
-    const targetHours =
-  Number(seasonWeek.target_hours ?? 8);
 
 const phase =
   String(seasonWeek.phase ?? 'Base 1');
