@@ -3003,7 +3003,7 @@ target:
         focus: 'Aerobic durability',
         main_set: [
           {
-            duration_min: scaleMinutes(45, 30),
+            duration_min: easyRunMinutes,
             target: 'Easy aerobic',
             rpe: '3–4',
           },
