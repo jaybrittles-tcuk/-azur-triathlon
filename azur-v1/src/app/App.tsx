@@ -3074,8 +3074,19 @@ target:
       season_week_id: seasonWeek.id,
       planned_date: addDays(6),
       sport: 'run',
-      title: 'Long Aerobic Run',
-      session_class: 'endurance',
+   title:
+  phaseKey.includes('peak')
+    ? 'Race-Specific Long Run'
+    : phaseKey.includes('recovery')
+      ? 'Reduced Aerobic Run'
+      : 'Long Aerobic Run',
+
+session_class:
+  phaseKey.includes('peak')
+    ? 'race_specific'
+    : phaseKey.includes('recovery')
+      ? 'easy'
+      : 'endurance',
       priority: 1,
 duration_min: Math.round(
   scaleMinutes(70, 45) *
