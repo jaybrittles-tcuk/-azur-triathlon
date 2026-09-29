@@ -2837,7 +2837,7 @@ if (existingError) {
     date.setDate(monday.getDate() + offset);
     return toDateKey(date);
   };
-const baseTemplateMinutes = 410;
+const baseTemplateMinutes = 405;
 
 const scaleFactor =
   targetMinutes / baseTemplateMinutes;
