@@ -3116,6 +3116,10 @@ const todaySession = weekSessions.find(
 const needsCurrentWeekPlan =
   currentWeekPlannedSessions.length === 0;  
 useEffect(() => {
+  window.alert(
+    `Week trigger fired · authReady=${authReady} · authenticated=${isAuthenticated} · needsPlan=${needsCurrentWeekPlan}`,
+  );
+
   if (!authReady || !isAuthenticated) {
     return;
   }
@@ -3129,7 +3133,7 @@ useEffect(() => {
   authReady,
   isAuthenticated,
   needsCurrentWeekPlan,
-]);  
+]);
   function HomeView() {
     return (
       <>
