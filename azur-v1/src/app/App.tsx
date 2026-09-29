@@ -2992,12 +2992,51 @@ target:
       is_active_version: true,
     },
 
-    {
-      athlete_id: athlete.id,
-      season_week_id: seasonWeek.id,
-      planned_date: addDays(4),
-      sport: 'swim',
-      title: 'Aerobic Endurance Swim',
+ ...(!phaseKey.includes('recovery')
+  ? [
+      {
+        athlete_id: athlete.id,
+        season_week_id: seasonWeek.id,
+        planned_date: addDays(4),
+        sport: 'swim',
+        title: 'Aerobic Endurance Swim',
+        session_class: 'endurance',
+        priority: 2,
+        duration_min: scaleMinutes(50, 35),
+        targets: {},
+        prescription: {
+          focus: 'Aerobic swim endurance',
+          warmup: [
+            {
+              distance_m: Math.round(300 * scaleFactor),
+              target: 'Easy',
+            },
+          ],
+          main_set: [
+            {
+              reps: 10,
+              distance_m: 100,
+              target: 'Aerobic',
+              recovery_sec: 15,
+            },
+          ],
+          cooldown: [
+            {
+              distance_m: Math.round(200 * scaleFactor),
+              target: 'Easy',
+            },
+          ],
+        },
+        rationale:
+          'Build sustainable aerobic swim volume.',
+        terrain: 'Pool',
+        status: 'planned',
+        locked: false,
+        version: 1,
+        is_active_version: true,
+      },
+    ]
+  : []),
       session_class: 'endurance',
       priority: 2,
       duration_min: scaleMinutes(50, 35),
