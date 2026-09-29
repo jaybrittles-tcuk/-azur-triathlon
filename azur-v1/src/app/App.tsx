@@ -2796,8 +2796,20 @@ if (existingError) {
     date.setDate(monday.getDate() + offset);
     return toDateKey(date);
   };
+const baseTemplateMinutes = 410;
 
-  const generatedSessions = [
+const scaleFactor =
+  targetMinutes / baseTemplateMinutes;
+
+const scaleMinutes = (
+  minutes: number,
+  minimum: number,
+) =>
+  Math.max(
+    minimum,
+    Math.round(minutes * scaleFactor),
+  );
+    const generatedSessions = [
     {
       athlete_id: athlete.id,
       season_week_id: seasonWeek.id,
