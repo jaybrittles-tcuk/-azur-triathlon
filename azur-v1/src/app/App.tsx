@@ -3005,8 +3005,16 @@ const longRideMinutes =
       )
     : plannedLongRideMinutes;
 
-const longRunMinutes =
+const plannedLongRunMinutes =
   Math.round(targetMinutes * phaseConfig.longRunWeight);
+
+const longRunMinutes =
+  longestRecentRunMinutes > 0
+    ? Math.min(
+        plannedLongRunMinutes,
+        Math.round(longestRecentRunMinutes * 1.10),
+      )
+    : plannedLongRunMinutes;
     const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
 
