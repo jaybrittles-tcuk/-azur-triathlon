@@ -3096,6 +3096,21 @@ const todaySession = weekSessions.find(
 
 const needsCurrentWeekPlan =
   currentWeekPlannedSessions.length === 0;  
+useEffect(() => {
+  if (!authReady || !isAuthenticated) {
+    return;
+  }
+
+  if (!needsCurrentWeekPlan) {
+    return;
+  }
+
+  generateCurrentWeekPlan();
+}, [
+  authReady,
+  isAuthenticated,
+  needsCurrentWeekPlan,
+]);  
   function HomeView() {
     return (
       <>
