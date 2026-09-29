@@ -2861,9 +2861,16 @@ const completedTrainingWeeks =
 
 const consistencyScore =
   completedTrainingWeeks / 6;
-    const safeProgressionHours =
+const progressionMultiplier =
+  consistencyScore >= 0.8
+    ? 1.08
+    : consistencyScore >= 0.6
+      ? 1.04
+      : 1.0;
+
+const safeProgressionHours =
   weightedRecentHours > 0
-    ? weightedRecentHours * 1.08
+    ? weightedRecentHours * progressionMultiplier
     : targetHours;
 const recentThreeWeekStart = new Date(monday);
 
