@@ -2800,7 +2800,7 @@ if (seasonWeekError || !seasonWeek) {
       sport: 'swim',
       title: 'Aerobic Technique Swim',
       session_class: 'easy',
-      priority: 'secondary',
+      priority: 2,
       duration_min: 45,
       targets: {},
       prescription: {
