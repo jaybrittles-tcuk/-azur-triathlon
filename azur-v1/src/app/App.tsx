@@ -2748,7 +2748,7 @@ const { error } = await supabase
 const { data: seasonWeek, error: seasonWeekError } =
   await supabase
     .from('season_week')
-    .select('id')
+    .select('id, phase, target_hours')
     .eq('athlete_id', athlete.id)
     .eq('week_start', weekStart)
     .single();
