@@ -2754,9 +2754,7 @@ const { data: seasonWeek, error: seasonWeekError } =
     .single();
 
 if (seasonWeekError || !seasonWeek) {
-  window.alert(
-    `Season week error: ${seasonWeekError?.message ?? 'No season week found'}`,
-  );
+
   return;
 }
     const sunday = new Date(monday);
@@ -2774,9 +2772,7 @@ if (seasonWeekError || !seasonWeek) {
       .lte('planned_date', weekEnd);
 
 if (existingError) {
-  window.alert(
-    `Existing sessions error: ${existingError.message}`,
-  );
+
   return;
 }
 
@@ -3016,9 +3012,7 @@ if (existingError) {
     .insert(generatedSessions);
 
 if (insertError) {
-  window.alert(
-    `Week generation failed: ${insertError.message}`,
-  );
+
   return;
 }
 
@@ -3119,9 +3113,6 @@ const todaySession = weekSessions.find(
 const needsCurrentWeekPlan =
   currentWeekPlannedSessions.length === 0;  
 useEffect(() => {
-  window.alert(
-    `Week trigger fired · authReady=${authReady} · authenticated=${isAuthenticated} · needsPlan=${needsCurrentWeekPlan}`,
-  );
 
   if (!authReady || !isAuthenticated) {
     return;
