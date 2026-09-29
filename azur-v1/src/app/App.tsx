@@ -3035,8 +3035,8 @@ target:
         version: 1,
         is_active_version: true,
       },
-
-
+]
+: []),
     {
       athlete_id: athlete.id,
       season_week_id: seasonWeek.id,
