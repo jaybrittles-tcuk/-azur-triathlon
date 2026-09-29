@@ -2579,31 +2579,33 @@ if (
     changes,
   };
 }
-  async function acceptNextSessionAdjustment() {
+async function acceptNextSessionAdjustment() {
   if (
     !nextPlannedSession ||
     !nextSessionRecommendation?.recommendedDurationMin
-const adaptedResult = buildAdaptedPrescription(
-  nextPlannedSession.prescription ?? {},
-  nextPlannedSession.durationMin,
-  recommendedDuration,
-  nextPlannedSession.sessionClass,
-  nextPlannedSession.sport,
-);
   ) {
     return;
   }
-setIsSavingAdjustment(true);
+
+  setIsSavingAdjustment(true);
+
   const recommendedDuration =
     nextSessionRecommendation.recommendedDurationMin;
 
-const { error } = await supabase
-  .from('planned_session')
-  .update({
-    duration_min: recommendedDuration,
-prescription: {
-  ...adaptedResult.prescription,
+  const adaptedResult = buildAdaptedPrescription(
+    nextPlannedSession.prescription ?? {},
+    nextPlannedSession.durationMin,
+    recommendedDuration,
+    nextPlannedSession.sessionClass,
+    nextPlannedSession.sport,
+  );
 
+  const { error } = await supabase
+    .from('planned_session')
+    .update({
+      duration_min: recommendedDuration,
+      prescription: {
+        ...adaptedResult.prescription,
   azur_adaptation: {
     status: 'accepted',
     action: nextSessionRecommendation.action,
