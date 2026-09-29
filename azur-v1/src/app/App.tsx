@@ -3055,7 +3055,12 @@ target:
   scaleMinutes(120, 75) *
     phaseConfig.longRideFactor,
 ),
-            target: '65–75% FTP',
+            target:
+  phaseKey.includes('peak')
+    ? '75–85% FTP'
+    : phaseKey.includes('recovery')
+      ? '60–70% FTP'
+      : '65–75% FTP',
             rpe: '4–5',
           },
         ],
@@ -3101,7 +3106,12 @@ main_set: [
   scaleMinutes(70, 45) *
     phaseConfig.longRunFactor,
 ),
-            target: 'Easy aerobic',
+            target:
+  phaseKey.includes('peak')
+    ? 'Race-specific aerobic'
+    : phaseKey.includes('recovery')
+      ? 'Easy recovery'
+      : 'Easy aerobic',
             rpe: '4–5',
           },
         ],
