@@ -2828,7 +2828,7 @@ const { error } = await supabase
       sport: 'bike',
       title: 'Threshold Development',
       session_class: 'intensity',
-      priority: 'key',
+      priority: 1,
       duration_min: 75,
       targets: {},
       prescription: {
@@ -2870,7 +2870,7 @@ const { error } = await supabase
       sport: 'run',
       title: 'Easy Aerobic Run',
       session_class: 'easy',
-      priority: 'secondary',
+      priority: 2,
       duration_min: 45,
       targets: {},
       prescription: {
@@ -2898,7 +2898,7 @@ const { error } = await supabase
       sport: 'swim',
       title: 'Aerobic Endurance Swim',
       session_class: 'endurance',
-      priority: 'secondary',
+      priority: 2,
       duration_min: 50,
       targets: {},
       prescription: {
@@ -2939,7 +2939,7 @@ const { error } = await supabase
       sport: 'bike',
       title: 'Long Aerobic Ride',
       session_class: 'endurance',
-      priority: 'key',
+      priority: 1,
       duration_min: 120,
       targets: {},
       prescription: {
@@ -2967,7 +2967,7 @@ const { error } = await supabase
       sport: 'run',
       title: 'Long Aerobic Run',
       session_class: 'endurance',
-      priority: 'key',
+      priority: 1,
       duration_min: 70,
       targets: {},
       prescription: {
