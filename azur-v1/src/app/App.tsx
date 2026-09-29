@@ -2757,6 +2757,14 @@ if (seasonWeekError || !seasonWeek) {
 
   return;
 }
+    const targetHours =
+  Number(seasonWeek.target_hours ?? 8);
+
+const phase =
+  String(seasonWeek.phase ?? 'Base 1');
+
+const targetMinutes =
+  Math.round(targetHours * 60);
     const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
 
