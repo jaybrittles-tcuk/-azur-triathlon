@@ -707,8 +707,23 @@ const sessions: Session[] = [
     seasonWeekId: 'w1',
     plannedDate: '2026-09-22',
     sport: 'bike',
-    title: 'Threshold Development',
-    sessionClass: 'intensity',
+title:
+  phaseKey.includes('build')
+    ? 'Threshold Development'
+    : phaseKey.includes('peak')
+      ? 'Race-Specific Bike'
+      : phaseKey.includes('recovery')
+        ? 'Aerobic Bike'
+        : 'Strength Endurance Bike',
+
+session_class:
+  phaseKey.includes('peak')
+    ? 'race_specific'
+    : phaseKey.includes('recovery')
+      ? 'easy'
+      : phaseKey.includes('build')
+        ? 'intensity'
+        : 'endurance',
     priority: 1,
     durationMin: 100,
     targets: { power: '4 × 10 min @ 299–315 W' },
