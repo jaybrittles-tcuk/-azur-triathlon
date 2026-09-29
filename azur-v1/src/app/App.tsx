@@ -2751,9 +2751,8 @@ const { data: seasonWeek, error: seasonWeekError } =
     .single();
 
 if (seasonWeekError || !seasonWeek) {
-  console.error(
-    'Unable to resolve current season week:',
-    seasonWeekError,
+  window.alert(
+    `Season week error: ${seasonWeekError?.message ?? 'No season week found'}`,
   );
   return;
 }
@@ -2771,13 +2770,12 @@ if (seasonWeekError || !seasonWeek) {
       .gte('planned_date', weekStart)
       .lte('planned_date', weekEnd);
 
-  if (existingError) {
-    console.error(
-      'Unable to check existing week:',
-      existingError,
-    );
-    return;
-  }
+if (existingError) {
+  window.alert(
+    `Existing sessions error: ${existingError.message}`,
+  );
+  return;
+}
 
   if ((existingSessions ?? []).length > 0) {
     console.log(
@@ -3014,15 +3012,16 @@ if (seasonWeekError || !seasonWeek) {
     .from('planned_session')
     .insert(generatedSessions);
 
-  if (insertError) {
-    console.error(
-      'Unable to generate current week:',
-      insertError,
-    );
-    return;
-  }
+if (insertError) {
+  window.alert(
+    `Week generation failed: ${insertError.message}`,
+  );
+  return;
+}
 
-  await loadPlannedSessions(user.id);
+window.alert('Azur week generated successfully');
+
+await loadPlannedSessions(user.id);
 }
   function keepOriginalNextSession() {
   setNextSessionDecision('kept');
