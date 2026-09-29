@@ -2922,6 +2922,12 @@ const longestRecentRunMinutes =
 
 const recentSwimFrequency =
   recentSwimActivities.length / 6;
+    const shouldIncludeSecondSwim =
+  !phaseKey.includes('recovery') &&
+  (
+    recentSwimFrequency === 0 ||
+    recentSwimFrequency >= 1.25
+  );
 const progressionMultiplier =
   consistencyScore >= 0.8
     ? 1.08
