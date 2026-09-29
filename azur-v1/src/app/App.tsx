@@ -2909,7 +2909,14 @@ const scaleMinutes = (
 ),
       targets: {},
       prescription: {
-        focus: 'Threshold development',
+       focus:
+  phaseKey.includes('build')
+    ? 'Threshold development'
+    : phaseKey.includes('peak')
+      ? 'Race-specific bike intensity'
+      : phaseKey.includes('recovery')
+        ? 'Aerobic recovery riding'
+        : 'Strength endurance development',
         warmup: [
           {
             duration_min: scaleMinutes(15, 10),
@@ -2921,8 +2928,23 @@ const scaleMinutes = (
             reps: 4,
             duration_min: 8,
             recovery_min: 4,
-            ftp_percent: '95–100%',
-            target: 'Threshold',
+            ftp_percent:
+  phaseKey.includes('peak')
+    ? '85–92%'
+    : phaseKey.includes('recovery')
+      ? '60–70%'
+      : phaseKey.includes('build')
+        ? '95–100%'
+        : '80–90%',
+
+target:
+  phaseKey.includes('peak')
+    ? 'Race-specific'
+    : phaseKey.includes('recovery')
+      ? 'Easy aerobic'
+      : phaseKey.includes('build')
+        ? 'Threshold'
+        : 'Strength endurance',
           },
         ],
         cooldown: [
