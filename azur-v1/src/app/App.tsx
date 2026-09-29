@@ -2818,6 +2818,30 @@ const recentAverageHours =
   recentTrainingSeconds /
   3600 /
   6;
+    const recentThreeWeekStart = new Date(monday);
+
+recentThreeWeekStart.setDate(
+  recentThreeWeekStart.getDate() - 21,
+);
+
+const recentThreeWeekSeconds =
+  (recentActivities ?? [])
+    .filter(
+      (activity) =>
+        new Date(activity.start_time) >=
+        recentThreeWeekStart,
+    )
+    .reduce(
+      (total, activity) =>
+        total +
+        Number(activity.duration_sec ?? 0),
+      0,
+    );
+
+const recentThreeWeekAverageHours =
+  recentThreeWeekSeconds /
+  3600 /
+  3;
 const weightedRecentHours =
   recentThreeWeekAverageHours > 0
     ? recentAverageHours * 0.4 +
@@ -2872,30 +2896,6 @@ const safeProgressionHours =
   weightedRecentHours > 0
     ? weightedRecentHours * progressionMultiplier
     : targetHours;
-const recentThreeWeekStart = new Date(monday);
-
-recentThreeWeekStart.setDate(
-  recentThreeWeekStart.getDate() - 21,
-);
-
-const recentThreeWeekSeconds =
-  (recentActivities ?? [])
-    .filter(
-      (activity) =>
-        new Date(activity.start_time) >=
-        recentThreeWeekStart,
-    )
-    .reduce(
-      (total, activity) =>
-        total +
-        Number(activity.duration_sec ?? 0),
-      0,
-    );
-
-const recentThreeWeekAverageHours =
-  recentThreeWeekSeconds /
-  3600 /
-  3;
     const plannedHours =
   Math.min(
     targetHours,
