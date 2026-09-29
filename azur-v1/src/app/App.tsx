@@ -3071,17 +3071,13 @@ target:
       title: 'Long Aerobic Ride',
       session_class: 'endurance',
       priority: 1,
-      duration_min: Math.round(
 duration_min: longRideMinutes,
       targets: {},
       prescription: {
         focus: 'Aerobic endurance',
  main_set: [
   {
-   duration_min: Math.round(
-  scaleMinutes(120, 75) *
-    phaseConfig.longRideFactor,
-),
+duration_min: longRideMinutes,
             target:
   phaseKey.includes('peak')
     ? '75–85% FTP'
