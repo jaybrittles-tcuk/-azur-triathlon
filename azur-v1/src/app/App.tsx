@@ -3122,10 +3122,7 @@ session_class:
       ? 'easy'
       : 'endurance',
       priority: 1,
-duration_min: Math.round(
-  scaleMinutes(70, 45) *
-    phaseConfig.longRunFactor,
-),
+duration_min: longRunMinutes,
       targets: {},
       prescription: {
         focus: 'Aerobic endurance',
