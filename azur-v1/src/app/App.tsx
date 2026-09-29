@@ -3046,7 +3046,10 @@ target:
           focus: 'Aerobic swim endurance',
           warmup: [
             {
-              distance_m: Math.round(300 * scaleFactor),
+              distance_m: Math.max(
+  200,
+  Math.round(swim2Minutes * 6),
+),
               target: 'Easy',
             },
           ],
@@ -3060,7 +3063,10 @@ target:
           ],
           cooldown: [
             {
-              distance_m: Math.round(200 * scaleFactor),
+              distance_m: Math.max(
+  100,
+  Math.round(swim2Minutes * 4),
+),
               target: 'Easy',
             },
           ],
