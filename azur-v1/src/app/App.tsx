@@ -2772,6 +2772,50 @@ if (seasonWeekError || !seasonWeek) {
 
   return;
 }
+    const historyStart = new Date(monday);
+
+historyStart.setDate(
+  historyStart.getDate() - 42,
+);
+
+const { data: recentActivities, error: recentActivitiesError } =
+  await supabase
+    .from('completed_activity')
+    .select(
+      'start_time, duration_sec, sport',
+    )
+    .eq('athlete_id', athlete.id)
+    .gte(
+      'start_time',
+      historyStart.toISOString(),
+    )
+    .lt(
+      'start_time',
+      monday.toISOString(),
+    )
+    .order('start_time', {
+      ascending: true,
+    });
+
+if (recentActivitiesError) {
+  console.error(
+    'Unable to load recent training history:',
+    recentActivitiesError,
+  );
+}
+
+const recentTrainingSeconds =
+  (recentActivities ?? []).reduce(
+    (total, activity) =>
+      total +
+      Number(activity.duration_sec ?? 0),
+    0,
+  );
+
+const recentAverageHours =
+  recentTrainingSeconds /
+  3600 /
+  6;
     const targetHours =
   Number(seasonWeek.target_hours ?? 8);
 
