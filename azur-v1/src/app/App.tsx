@@ -2959,10 +2959,6 @@ const targetMinutes =
 const phaseConfig =
   phaseKey.includes('build')
     ? {
-
-const phaseConfig =
-  phaseKey.includes('build')
-    ? {
         swim1Weight: 0.10,
         bikeQualityWeight: 0.20,
         easyRunWeight: 0.10,
