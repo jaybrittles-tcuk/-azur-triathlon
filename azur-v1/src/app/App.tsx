@@ -2765,6 +2765,32 @@ const phase =
 
 const targetMinutes =
   Math.round(targetHours * 60);
+    const phaseKey = phase.toLowerCase();
+
+const phaseConfig =
+  phaseKey.includes('build')
+    ? {
+        thresholdBikeFactor: 1.05,
+        longRideFactor: 1.1,
+        longRunFactor: 1.05,
+      }
+    : phaseKey.includes('peak')
+      ? {
+          thresholdBikeFactor: 0.9,
+          longRideFactor: 0.85,
+          longRunFactor: 0.9,
+        }
+      : phaseKey.includes('recovery')
+        ? {
+            thresholdBikeFactor: 0.75,
+            longRideFactor: 0.7,
+            longRunFactor: 0.75,
+          }
+        : {
+            thresholdBikeFactor: 0.9,
+            longRideFactor: 1.0,
+            longRunFactor: 1.0,
+          };
     const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
 
