@@ -2833,7 +2833,7 @@ const phase =
   String(seasonWeek.phase ?? 'Base 1');
 
 const targetMinutes =
-  Math.round(targetHours * 60);
+  Math.round(plannedHours * 60);
     const phaseKey = phase.toLowerCase();
 
 const phaseConfig =
