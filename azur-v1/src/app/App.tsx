@@ -2583,7 +2583,7 @@ if (
   if (
     !nextPlannedSession ||
     !nextSessionRecommendation?.recommendedDurationMin
-    const adaptedResult = buildAdaptedPrescription(
+const adaptedResult = buildAdaptedPrescription(
   nextPlannedSession.prescription ?? {},
   nextPlannedSession.durationMin,
   recommendedDuration,
