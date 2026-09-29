@@ -2905,7 +2905,7 @@ const scaleMinutes = (
       title: 'Easy Aerobic Run',
       session_class: 'easy',
       priority: 2,
-     duration_min: scaleMinutes(45, 30)
+     duration_min: scaleMinutes(45, 30),
       targets: {},
       prescription: {
         focus: 'Aerobic durability',
@@ -2934,7 +2934,7 @@ const scaleMinutes = (
       title: 'Aerobic Endurance Swim',
       session_class: 'endurance',
       priority: 2,
-      duration_min: 50,
+      duration_min: scaleMinutes(50, 35),
       targets: {},
       prescription: {
         focus: 'Aerobic swim endurance',
@@ -2976,7 +2976,7 @@ const scaleMinutes = (
       title: 'Long Aerobic Ride',
       session_class: 'endurance',
       priority: 1,
-      duration_min: 120,
+      duration_min: scaleMinutes(120, 75),
       targets: {},
       prescription: {
         focus: 'Aerobic endurance',
@@ -3005,7 +3005,7 @@ const scaleMinutes = (
       title: 'Long Aerobic Run',
       session_class: 'endurance',
       priority: 1,
-      duration_min: 70,
+      duration_min: scaleMinutes(70, 45),
       targets: {},
       prescription: {
         focus: 'Aerobic endurance',
