@@ -2816,6 +2816,16 @@ const recentAverageHours =
   recentTrainingSeconds /
   3600 /
   6;
+    const safeProgressionHours =
+  recentAverageHours > 0
+    ? recentAverageHours * 1.08
+    : targetHours;
+
+const plannedHours =
+  Math.min(
+    targetHours,
+    safeProgressionHours,
+  );
     const targetHours =
   Number(seasonWeek.target_hours ?? 8);
 
