@@ -2818,7 +2818,7 @@ const scaleMinutes = (
       title: 'Aerobic Technique Swim',
       session_class: 'easy',
       priority: 2,
-      duration_min: 45,
+    duration_min: scaleMinutes(45, 30),
       targets: {},
       prescription: {
         focus: 'Technique quality and aerobic conditioning',
@@ -2862,7 +2862,7 @@ const scaleMinutes = (
       title: 'Threshold Development',
       session_class: 'intensity',
       priority: 1,
-      duration_min: 75,
+      duration_min: scaleMinutes(75, 50),
       targets: {},
       prescription: {
         focus: 'Threshold development',
@@ -2905,7 +2905,7 @@ const scaleMinutes = (
       title: 'Easy Aerobic Run',
       session_class: 'easy',
       priority: 2,
-      duration_min: 45,
+     duration_min: scaleMinutes(45, 30)
       targets: {},
       prescription: {
         focus: 'Aerobic durability',
