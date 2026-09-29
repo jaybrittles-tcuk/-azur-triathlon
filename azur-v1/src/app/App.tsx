@@ -2911,7 +2911,7 @@ const scaleMinutes = (
         focus: 'Aerobic durability',
         main_set: [
           {
-            duration_min: 45,
+            duration_min: scaleMinutes(45, 30),
             target: 'Easy aerobic',
             rpe: '3–4',
           },
@@ -2982,7 +2982,7 @@ const scaleMinutes = (
         focus: 'Aerobic endurance',
         main_set: [
           {
-            duration_min: 120,
+            duration_min: scaleMinutes(120, 75),
             target: '65–75% FTP',
             rpe: '4–5',
           },
@@ -3011,7 +3011,7 @@ const scaleMinutes = (
         focus: 'Aerobic endurance',
         main_set: [
           {
-            duration_min: 70,
+            duration_min: scaleMinutes(70, 45),
             target: 'Easy aerobic',
             rpe: '4–5',
           },
