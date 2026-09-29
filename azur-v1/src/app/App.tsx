@@ -3041,7 +3041,10 @@ const scaleMinutes = (
       session_class: 'endurance',
       priority: 1,
       duration_min: Math.round(
+  duration_min: Math.round(
   scaleMinutes(70, 45) *
+    phaseConfig.longRunFactor,
+),
     phaseConfig.longRunFactor,
 ),
       targets: {},
@@ -3049,7 +3052,10 @@ const scaleMinutes = (
         focus: 'Aerobic endurance',
 main_set: [
   {
-    duration_min: scaleMinutes(70, 45),
+   duration_min: Math.round(
+  scaleMinutes(70, 45) *
+    phaseConfig.longRunFactor,
+),
             target: 'Easy aerobic',
             rpe: '4–5',
           },
