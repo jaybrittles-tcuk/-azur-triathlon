@@ -2616,9 +2616,10 @@ async function acceptNextSessionAdjustment() {
 
     changes: adaptedResult.changes,
 
-    original_prescription:
+       original_prescription:
       nextPlannedSession.prescription ?? {},
   },
+},
 })
 .eq('id', nextPlannedSession.id);
 
