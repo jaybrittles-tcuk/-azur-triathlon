@@ -2868,7 +2868,7 @@ const scaleMinutes = (
         focus: 'Threshold development',
         warmup: [
           {
-            duration_min: 15,
+            duration_min: scaleMinutes(15, 10),
             target: 'Easy aerobic',
           },
         ],
@@ -2883,7 +2883,7 @@ const scaleMinutes = (
         ],
         cooldown: [
           {
-            duration_min: 10,
+            duration_min: scaleMinutes(10, 5),
             target: 'Easy',
           },
         ],
