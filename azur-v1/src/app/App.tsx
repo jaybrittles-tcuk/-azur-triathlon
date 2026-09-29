@@ -2795,6 +2795,7 @@ if (seasonWeekError || !seasonWeek) {
   const generatedSessions = [
     {
       athlete_id: athlete.id,
+      season_week_id: seasonWeek.id,
       planned_date: addDays(0),
       sport: 'swim',
       title: 'Aerobic Technique Swim',
@@ -2838,6 +2839,7 @@ if (seasonWeekError || !seasonWeek) {
 
     {
       athlete_id: athlete.id,
+      season_week_id: seasonWeek.id,
       planned_date: addDays(1),
       sport: 'bike',
       title: 'Threshold Development',
@@ -2880,6 +2882,7 @@ if (seasonWeekError || !seasonWeek) {
 
     {
       athlete_id: athlete.id,
+      season_week_id: seasonWeek.id,
       planned_date: addDays(2),
       sport: 'run',
       title: 'Easy Aerobic Run',
@@ -2908,6 +2911,7 @@ if (seasonWeekError || !seasonWeek) {
 
     {
       athlete_id: athlete.id,
+      season_week_id: seasonWeek.id,
       planned_date: addDays(4),
       sport: 'swim',
       title: 'Aerobic Endurance Swim',
@@ -2949,6 +2953,7 @@ if (seasonWeekError || !seasonWeek) {
 
     {
       athlete_id: athlete.id,
+      season_week_id: seasonWeek.id,
       planned_date: addDays(5),
       sport: 'bike',
       title: 'Long Aerobic Ride',
@@ -2977,6 +2982,7 @@ if (seasonWeekError || !seasonWeek) {
 
     {
       athlete_id: athlete.id,
+      season_week_id: seasonWeek.id,
       planned_date: addDays(6),
       sport: 'run',
       title: 'Long Aerobic Run',
