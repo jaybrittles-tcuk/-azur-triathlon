@@ -3005,13 +3005,19 @@ const scaleMinutes = (
       title: 'Long Aerobic Ride',
       session_class: 'endurance',
       priority: 1,
-      duration_min: scaleMinutes(120, 75),
+      duration_min: Math.round(
+  scaleMinutes(120, 75) *
+    phaseConfig.longRideFactor,
+),
       targets: {},
       prescription: {
         focus: 'Aerobic endurance',
  main_set: [
   {
-    duration_min: scaleMinutes(120, 75),
+   duration_min: Math.round(
+  scaleMinutes(120, 75) *
+    phaseConfig.longRideFactor,
+),
             target: '65–75% FTP',
             rpe: '4–5',
           },
@@ -3034,7 +3040,10 @@ const scaleMinutes = (
       title: 'Long Aerobic Run',
       session_class: 'endurance',
       priority: 1,
-      duration_min: scaleMinutes(70, 45),
+      duration_min: Math.round(
+  scaleMinutes(70, 45) *
+    phaseConfig.longRunFactor,
+),
       targets: {},
       prescription: {
         focus: 'Aerobic endurance',
