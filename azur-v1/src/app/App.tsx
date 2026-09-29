@@ -2619,8 +2619,8 @@ async function acceptNextSessionAdjustment() {
     original_prescription:
       nextPlannedSession.prescription ?? {},
   },
-},
-  .eq('id', nextPlannedSession.id);
+})
+.eq('id', nextPlannedSession.id);
 
   if (error) {
     console.error(
