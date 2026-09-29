@@ -2785,26 +2785,38 @@ const targetMinutes =
 const phaseConfig =
   phaseKey.includes('build')
     ? {
-        thresholdBikeFactor: 1.05,
-        longRideFactor: 1.1,
-        longRunFactor: 1.05,
+        swim1Weight: 0.10,
+        bikeQualityWeight: 0.20,
+        easyRunWeight: 0.10,
+        swim2Weight: 0.10,
+        longRideWeight: 0.32,
+        longRunWeight: 0.18,
       }
     : phaseKey.includes('peak')
       ? {
-          thresholdBikeFactor: 0.9,
-          longRideFactor: 0.85,
-          longRunFactor: 0.9,
+          swim1Weight: 0.10,
+          bikeQualityWeight: 0.18,
+          easyRunWeight: 0.10,
+          swim2Weight: 0.10,
+          longRideWeight: 0.34,
+          longRunWeight: 0.18,
         }
       : phaseKey.includes('recovery')
         ? {
-            thresholdBikeFactor: 0.75,
-            longRideFactor: 0.7,
-            longRunFactor: 0.75,
+            swim1Weight: 0.13,
+            bikeQualityWeight: 0.17,
+            easyRunWeight: 0.14,
+            swim2Weight: 0,
+            longRideWeight: 0.34,
+            longRunWeight: 0.22,
           }
         : {
-            thresholdBikeFactor: 0.9,
-            longRideFactor: 1.0,
-            longRunFactor: 1.0,
+            swim1Weight: 0.11,
+            bikeQualityWeight: 0.19,
+            easyRunWeight: 0.11,
+            swim2Weight: 0.12,
+            longRideWeight: 0.30,
+            longRunWeight: 0.17,
           };
     const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
