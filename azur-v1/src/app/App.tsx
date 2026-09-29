@@ -2742,8 +2742,22 @@ const { error } = await supabase
     ).padStart(2, '0')}`;
 
   const weekStart = toDateKey(monday);
+const { data: seasonWeek, error: seasonWeekError } =
+  await supabase
+    .from('season_week')
+    .select('id')
+    .eq('athlete_id', athlete.id)
+    .eq('week_start', weekStart)
+    .single();
 
-  const sunday = new Date(monday);
+if (seasonWeekError || !seasonWeek) {
+  console.error(
+    'Unable to resolve current season week:',
+    seasonWeekError,
+  );
+  return;
+}
+    const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
 
   const weekEnd = toDateKey(sunday);
