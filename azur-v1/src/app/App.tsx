@@ -2994,8 +2994,16 @@ const easyRunMinutes =
 const swim2Minutes =
   Math.round(targetMinutes * phaseConfig.swim2Weight);
 
-const longRideMinutes =
+const plannedLongRideMinutes =
   Math.round(targetMinutes * phaseConfig.longRideWeight);
+
+const longRideMinutes =
+  longestRecentRideMinutes > 0
+    ? Math.min(
+        plannedLongRideMinutes,
+        Math.round(longestRecentRideMinutes * 1.12),
+      )
+    : plannedLongRideMinutes;
 
 const longRunMinutes =
   Math.round(targetMinutes * phaseConfig.longRunWeight);
