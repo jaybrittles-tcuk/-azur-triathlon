@@ -2997,7 +2997,7 @@ target:
       title: 'Easy Aerobic Run',
       session_class: 'easy',
       priority: 2,
-     duration_min: scaleMinutes(45, 30),
+     duration_min: easyRunMinutes,
       targets: {},
       prescription: {
         focus: 'Aerobic durability',
