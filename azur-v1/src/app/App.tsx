@@ -2888,7 +2888,7 @@ const scaleMinutes = (
       title: 'Aerobic Technique Swim',
       session_class: 'easy',
       priority: 2,
-    duration_min: scaleMinutes(45, 30),
+   duration_min: swim1Minutes,
       targets: {},
       prescription: {
         focus: 'Technique quality and aerobic conditioning',
