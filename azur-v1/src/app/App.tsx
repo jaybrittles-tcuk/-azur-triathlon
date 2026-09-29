@@ -2780,7 +2780,16 @@ const calendarWeekDates = useMemo(() => {
 
 const todaySession = weekSessions.find(
   (session) => session.plannedDate === todayKey,
-);function HomeView() {
+);
+  const currentWeekPlannedSessions = calendarWeekSessions.filter(
+  (session) =>
+    session.status === 'planned' ||
+    session.status === 'edited',
+);
+
+const needsCurrentWeekPlan =
+  currentWeekPlannedSessions.length === 0;  
+  function HomeView() {
     return (
       <>
         <section className="mobile-home-hero">
