@@ -2922,12 +2922,19 @@ const longestRecentRunMinutes =
 
 const recentSwimFrequency =
   recentSwimActivities.length / 6;
-    const shouldIncludeSecondSwim =
+
+const phase =
+  String(seasonWeek.phase ?? 'Base 1');
+
+const phaseKey = phase.toLowerCase();
+
+const shouldIncludeSecondSwim =
   !phaseKey.includes('recovery') &&
   (
     recentSwimFrequency === 0 ||
     recentSwimFrequency >= 1.25
   );
+
 const progressionMultiplier =
   consistencyScore >= 0.8
     ? 1.08
@@ -2939,18 +2946,19 @@ const safeProgressionHours =
   weightedRecentHours > 0
     ? weightedRecentHours * progressionMultiplier
     : targetHours;
-    const plannedHours =
+
+const plannedHours =
   Math.min(
     targetHours,
     safeProgressionHours,
   );
 
-const phase =
-  String(seasonWeek.phase ?? 'Base 1');
-
 const targetMinutes =
   Math.round(plannedHours * 60);
-    const phaseKey = phase.toLowerCase();
+
+const phaseConfig =
+  phaseKey.includes('build')
+    ? {
 
 const phaseConfig =
   phaseKey.includes('build')
@@ -3216,7 +3224,7 @@ target:
       is_active_version: true,
     },
 
- ...(!phaseKey.includes('recovery')
+...(shouldIncludeSecondSwim
   ? [
       {
         athlete_id: athlete.id,
