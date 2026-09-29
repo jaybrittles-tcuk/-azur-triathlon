@@ -2818,6 +2818,23 @@ const phaseConfig =
             longRideWeight: 0.30,
             longRunWeight: 0.17,
           };
+    const swim1Minutes =
+  Math.round(targetMinutes * phaseConfig.swim1Weight);
+
+const bikeQualityMinutes =
+  Math.round(targetMinutes * phaseConfig.bikeQualityWeight);
+
+const easyRunMinutes =
+  Math.round(targetMinutes * phaseConfig.easyRunWeight);
+
+const swim2Minutes =
+  Math.round(targetMinutes * phaseConfig.swim2Weight);
+
+const longRideMinutes =
+  Math.round(targetMinutes * phaseConfig.longRideWeight);
+
+const longRunMinutes =
+  Math.round(targetMinutes * phaseConfig.longRunWeight);
     const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
 
