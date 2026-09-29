@@ -3040,7 +3040,6 @@ const scaleMinutes = (
       title: 'Long Aerobic Run',
       session_class: 'endurance',
       priority: 1,
-      duration_min: Math.round(
 duration_min: Math.round(
   scaleMinutes(70, 45) *
     phaseConfig.longRunFactor,
