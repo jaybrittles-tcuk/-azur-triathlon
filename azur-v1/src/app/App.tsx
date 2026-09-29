@@ -2885,6 +2885,43 @@ const completedTrainingWeeks =
 
 const consistencyScore =
   completedTrainingWeeks / 6;
+    const recentBikeActivities =
+  (recentActivities ?? []).filter(
+    (activity) => activity.sport === 'bike',
+  );
+
+const recentRunActivities =
+  (recentActivities ?? []).filter(
+    (activity) => activity.sport === 'run',
+  );
+
+const recentSwimActivities =
+  (recentActivities ?? []).filter(
+    (activity) => activity.sport === 'swim',
+  );
+
+const longestRecentRideMinutes =
+  recentBikeActivities.reduce(
+    (longest, activity) =>
+      Math.max(
+        longest,
+        Number(activity.duration_sec ?? 0) / 60,
+      ),
+    0,
+  );
+
+const longestRecentRunMinutes =
+  recentRunActivities.reduce(
+    (longest, activity) =>
+      Math.max(
+        longest,
+        Number(activity.duration_sec ?? 0) / 60,
+      ),
+    0,
+  );
+
+const recentSwimFrequency =
+  recentSwimActivities.length / 6;
 const progressionMultiplier =
   consistencyScore >= 0.8
     ? 1.08
