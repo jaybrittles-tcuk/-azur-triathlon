@@ -2980,9 +2980,9 @@ const scaleMinutes = (
       targets: {},
       prescription: {
         focus: 'Aerobic endurance',
-        main_set: [
-          {
-            duration_min: scaleMinutes(120, 75),
+ main_set: [
+  {
+    duration_min: scaleMinutes(120, 75),
             target: '65–75% FTP',
             rpe: '4–5',
           },
@@ -3009,9 +3009,9 @@ const scaleMinutes = (
       targets: {},
       prescription: {
         focus: 'Aerobic endurance',
-        main_set: [
-          {
-            duration_min: scaleMinutes(70, 45),
+main_set: [
+  {
+    duration_min: scaleMinutes(70, 45),
             target: 'Easy aerobic',
             rpe: '4–5',
           },
