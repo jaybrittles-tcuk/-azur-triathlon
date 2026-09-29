@@ -2895,7 +2895,10 @@ const scaleMinutes = (
         warmup: [
           {
             target: 'Easy',
-            distance_m: Math.round(300 * scaleFactor),
+            distance_m: Math.max(
+  200,
+  Math.round(swim1Minutes * 6),
+),
             notes: 'Relaxed freestyle',
           },
         ],
@@ -2911,7 +2914,10 @@ const scaleMinutes = (
         cooldown: [
           {
             target: 'Easy',
-            distance_m: Math.round(200 * scaleFactor),
+            distance_m: Math.max(
+  100,
+  Math.round(swim1Minutes * 4),
+),
           },
         ],
       },
