@@ -2823,8 +2823,45 @@ const weightedRecentHours =
     ? recentAverageHours * 0.4 +
       recentThreeWeekAverageHours * 0.6
     : recentAverageHours;
+const weeklyBuckets = new Map<string, number>();
 
-const safeProgressionHours =
+(recentActivities ?? []).forEach((activity) => {
+  const activityDate = new Date(activity.start_time);
+
+  const weekMonday = new Date(
+    activityDate.getFullYear(),
+    activityDate.getMonth(),
+    activityDate.getDate(),
+  );
+
+  const offset =
+    (weekMonday.getDay() + 6) % 7;
+
+  weekMonday.setDate(
+    weekMonday.getDate() - offset,
+  );
+
+  const weekKey = toDateKey(weekMonday);
+
+  weeklyBuckets.set(
+    weekKey,
+    (weeklyBuckets.get(weekKey) ?? 0) +
+      Number(activity.duration_sec ?? 0),
+  );
+});
+
+const completedTrainingWeeks =
+  Array.from(weeklyBuckets.values()).filter(
+    (seconds) =>
+      seconds >=
+      recentAverageHours *
+        3600 *
+        0.7,
+  ).length;
+
+const consistencyScore =
+  completedTrainingWeeks / 6;
+    const safeProgressionHours =
   weightedRecentHours > 0
     ? weightedRecentHours * 1.08
     : targetHours;
