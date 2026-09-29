@@ -2888,7 +2888,10 @@ const scaleMinutes = (
       title: 'Threshold Development',
       session_class: 'intensity',
       priority: 1,
-      duration_min: scaleMinutes(75, 50),
+      duration_min: Math.round(
+  scaleMinutes(75, 50) *
+    phaseConfig.thresholdBikeFactor,
+),
       targets: {},
       prescription: {
         focus: 'Threshold development',
