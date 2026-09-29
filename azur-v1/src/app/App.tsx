@@ -2697,6 +2697,313 @@ const { error } = await supabase
 
   setConfirmedMatchSessionId(selected.id);
 }
+  async function generateCurrentWeekPlan() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return;
+  }
+
+  const { data: athlete, error: athleteError } = await supabase
+    .from('athlete_profile')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (athleteError || !athlete) {
+    console.error(
+      'Unable to resolve athlete for week generation:',
+      athleteError,
+    );
+    return;
+  }
+
+  const now = new Date();
+
+  const monday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
+
+  const daysFromMonday = (monday.getDay() + 6) % 7;
+
+  monday.setDate(
+    monday.getDate() - daysFromMonday,
+  );
+
+  const toDateKey = (date: Date) =>
+    `${date.getFullYear()}-${String(
+      date.getMonth() + 1,
+    ).padStart(2, '0')}-${String(
+      date.getDate(),
+    ).padStart(2, '0')}`;
+
+  const weekStart = toDateKey(monday);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  const weekEnd = toDateKey(sunday);
+
+  const { data: existingSessions, error: existingError } =
+    await supabase
+      .from('planned_session')
+      .select('id')
+      .eq('athlete_id', athlete.id)
+      .eq('is_active_version', true)
+      .gte('planned_date', weekStart)
+      .lte('planned_date', weekEnd);
+
+  if (existingError) {
+    console.error(
+      'Unable to check existing week:',
+      existingError,
+    );
+    return;
+  }
+
+  if ((existingSessions ?? []).length > 0) {
+    console.log(
+      'Azur week generation skipped: sessions already exist.',
+    );
+    return;
+  }
+
+  const addDays = (offset: number) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + offset);
+    return toDateKey(date);
+  };
+
+  const generatedSessions = [
+    {
+      athlete_id: athlete.id,
+      planned_date: addDays(0),
+      sport: 'swim',
+      title: 'Aerobic Technique Swim',
+      session_class: 'easy',
+      priority: 'secondary',
+      duration_min: 45,
+      targets: {},
+      prescription: {
+        focus: 'Technique quality and aerobic conditioning',
+        warmup: [
+          {
+            target: 'Easy',
+            distance_m: 300,
+            notes: 'Relaxed freestyle',
+          },
+        ],
+        main_set: [
+          {
+            reps: 8,
+            distance_m: 100,
+            target: 'Aerobic',
+            recovery_sec: 20,
+            notes: 'Smooth and controlled',
+          },
+        ],
+        cooldown: [
+          {
+            target: 'Easy',
+            distance_m: 200,
+          },
+        ],
+      },
+      rationale:
+        'Low-cost aerobic work with a technical focus.',
+      terrain: 'Pool',
+      status: 'planned',
+      locked: false,
+      version: 1,
+      is_active_version: true,
+    },
+
+    {
+      athlete_id: athlete.id,
+      planned_date: addDays(1),
+      sport: 'bike',
+      title: 'Threshold Development',
+      session_class: 'intensity',
+      priority: 'key',
+      duration_min: 75,
+      targets: {},
+      prescription: {
+        focus: 'Threshold development',
+        warmup: [
+          {
+            duration_min: 15,
+            target: 'Easy aerobic',
+          },
+        ],
+        main_set: [
+          {
+            reps: 4,
+            duration_min: 8,
+            recovery_min: 4,
+            ftp_percent: '95–100%',
+            target: 'Threshold',
+          },
+        ],
+        cooldown: [
+          {
+            duration_min: 10,
+            target: 'Easy',
+          },
+        ],
+      },
+      rationale:
+        'Develop sustainable threshold power.',
+      terrain: 'Indoor or flat road',
+      status: 'planned',
+      locked: false,
+      version: 1,
+      is_active_version: true,
+    },
+
+    {
+      athlete_id: athlete.id,
+      planned_date: addDays(2),
+      sport: 'run',
+      title: 'Easy Aerobic Run',
+      session_class: 'easy',
+      priority: 'secondary',
+      duration_min: 45,
+      targets: {},
+      prescription: {
+        focus: 'Aerobic durability',
+        main_set: [
+          {
+            duration_min: 45,
+            target: 'Easy aerobic',
+            rpe: '3–4',
+          },
+        ],
+      },
+      rationale:
+        'Build aerobic durability without excessive fatigue.',
+      terrain: 'Flat',
+      status: 'planned',
+      locked: false,
+      version: 1,
+      is_active_version: true,
+    },
+
+    {
+      athlete_id: athlete.id,
+      planned_date: addDays(4),
+      sport: 'swim',
+      title: 'Aerobic Endurance Swim',
+      session_class: 'endurance',
+      priority: 'secondary',
+      duration_min: 50,
+      targets: {},
+      prescription: {
+        focus: 'Aerobic swim endurance',
+        warmup: [
+          {
+            distance_m: 300,
+            target: 'Easy',
+          },
+        ],
+        main_set: [
+          {
+            reps: 10,
+            distance_m: 100,
+            target: 'Aerobic',
+            recovery_sec: 15,
+          },
+        ],
+        cooldown: [
+          {
+            distance_m: 200,
+            target: 'Easy',
+          },
+        ],
+      },
+      rationale:
+        'Build sustainable aerobic swim volume.',
+      terrain: 'Pool',
+      status: 'planned',
+      locked: false,
+      version: 1,
+      is_active_version: true,
+    },
+
+    {
+      athlete_id: athlete.id,
+      planned_date: addDays(5),
+      sport: 'bike',
+      title: 'Long Aerobic Ride',
+      session_class: 'endurance',
+      priority: 'key',
+      duration_min: 120,
+      targets: {},
+      prescription: {
+        focus: 'Aerobic endurance',
+        main_set: [
+          {
+            duration_min: 120,
+            target: '65–75% FTP',
+            rpe: '4–5',
+          },
+        ],
+      },
+      rationale:
+        'Develop long-course aerobic durability.',
+      terrain: 'Road',
+      status: 'planned',
+      locked: false,
+      version: 1,
+      is_active_version: true,
+    },
+
+    {
+      athlete_id: athlete.id,
+      planned_date: addDays(6),
+      sport: 'run',
+      title: 'Long Aerobic Run',
+      session_class: 'endurance',
+      priority: 'key',
+      duration_min: 70,
+      targets: {},
+      prescription: {
+        focus: 'Aerobic endurance',
+        main_set: [
+          {
+            duration_min: 70,
+            target: 'Easy aerobic',
+            rpe: '4–5',
+          },
+        ],
+      },
+      rationale:
+        'Build durable run endurance at controlled intensity.',
+      terrain: 'Mixed',
+      status: 'planned',
+      locked: false,
+      version: 1,
+      is_active_version: true,
+    },
+  ];
+
+  const { error: insertError } = await supabase
+    .from('planned_session')
+    .insert(generatedSessions);
+
+  if (insertError) {
+    console.error(
+      'Unable to generate current week:',
+      insertError,
+    );
+    return;
+  }
+
+  await loadPlannedSessions(user.id);
+}
   function keepOriginalNextSession() {
   setNextSessionDecision('kept');
 }
