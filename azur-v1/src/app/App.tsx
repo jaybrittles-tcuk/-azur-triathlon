@@ -2945,7 +2945,10 @@ duration_min: bikeQualityMinutes,
         : 'Strength endurance development',
         warmup: [
           {
-            duration_min: scaleMinutes(15, 10),
+           duration_min: Math.max(
+  10,
+  Math.round(bikeQualityMinutes * 0.2),
+),
             target: 'Easy aerobic',
           },
         ],
@@ -2975,7 +2978,10 @@ target:
         ],
         cooldown: [
           {
-            duration_min: scaleMinutes(10, 5),
+           duration_min: Math.max(
+  5,
+  Math.round(bikeQualityMinutes * 0.15),
+),
             target: 'Easy',
           },
         ],
