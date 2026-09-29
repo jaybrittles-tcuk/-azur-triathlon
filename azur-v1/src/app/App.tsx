@@ -3072,9 +3072,7 @@ target:
       session_class: 'endurance',
       priority: 1,
       duration_min: Math.round(
-  duration_min: longRideMinutes,
-    phaseConfig.longRideFactor,
-),
+duration_min: longRideMinutes,
       targets: {},
       prescription: {
         focus: 'Aerobic endurance',
