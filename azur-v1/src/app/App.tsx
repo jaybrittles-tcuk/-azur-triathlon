@@ -2825,7 +2825,7 @@ const scaleMinutes = (
         warmup: [
           {
             target: 'Easy',
-            distance_m: 300,
+            distance_m: Math.round(300 * scaleFactor),
             notes: 'Relaxed freestyle',
           },
         ],
@@ -2841,7 +2841,7 @@ const scaleMinutes = (
         cooldown: [
           {
             target: 'Easy',
-            distance_m: 200,
+            distance_m: Math.round(200 * scaleFactor),
           },
         ],
       },
