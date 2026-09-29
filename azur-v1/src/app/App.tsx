@@ -3072,7 +3072,7 @@ target:
       session_class: 'endurance',
       priority: 1,
       duration_min: Math.round(
-  scaleMinutes(120, 75) *
+  duration_min: longRideMinutes,
     phaseConfig.longRideFactor,
 ),
       targets: {},
