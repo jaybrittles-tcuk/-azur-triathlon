@@ -3122,19 +3122,16 @@ duration_min: longRunMinutes,
         focus: 'Aerobic endurance',
 main_set: [
   {
-   duration_min: Math.round(
-  scaleMinutes(70, 45) *
-    phaseConfig.longRunFactor,
-),
-            target:
-  phaseKey.includes('peak')
-    ? 'Race-specific aerobic'
-    : phaseKey.includes('recovery')
-      ? 'Easy recovery'
-      : 'Easy aerobic',
-            rpe: '4–5',
-          },
-        ],
+    duration_min: longRunMinutes,
+    target:
+      phaseKey.includes('peak')
+        ? 'Race-specific aerobic'
+        : phaseKey.includes('recovery')
+          ? 'Easy recovery'
+          : 'Easy aerobic',
+    rpe: '4–5',
+  },
+],
       },
       rationale:
         'Build durable run endurance at controlled intensity.',
