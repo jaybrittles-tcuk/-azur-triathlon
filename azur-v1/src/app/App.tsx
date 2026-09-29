@@ -3028,7 +3028,7 @@ target:
         title: 'Aerobic Endurance Swim',
         session_class: 'endurance',
         priority: 2,
-        duration_min: scaleMinutes(50, 35),
+        duration_min: swim2Minutes,
         targets: {},
         prescription: {
           focus: 'Aerobic swim endurance',
