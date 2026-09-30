@@ -2886,10 +2886,12 @@ const recentThreeWeekAverageHours =
   3600 /
   3;
 const weightedRecentHours =
-  recentThreeWeekAverageHours > 0
-    ? recentAverageHours * 0.4 +
-      recentThreeWeekAverageHours * 0.6
-    : recentAverageHours;
+  !hasSufficientHistory && savedBaseline
+    ? Number(savedBaseline.weekly_hours)
+    : recentThreeWeekAverageHours > 0
+      ? recentAverageHours * 0.4 +
+        recentThreeWeekAverageHours * 0.6
+      : recentAverageHours;
 const weeklyBuckets = new Map<string, number>();
 
 (recentActivities ?? []).forEach((activity) => {
