@@ -2808,8 +2808,20 @@ if (recentActivitiesError) {
     recentActivitiesError,
   );
 }
+const hasSufficientHistory =
+  !recentActivitiesError &&
+  (recentActivities?.length ?? 0) >= 12;
 
-const recentTrainingSeconds =
+if (!hasSufficientHistory) {
+  console.warn(
+    'AZUR: Insufficient training history. ' +
+    'An athlete-confirmed baseline is required ' +
+    'before automatic plan generation.',
+  );
+
+  return;
+}
+    const recentTrainingSeconds =
   (recentActivities ?? []).reduce(
     (total, activity) =>
       total +
