@@ -2950,8 +2950,9 @@ const phase =
   String(seasonWeek.phase ?? 'Base 1');
 
 const phaseKey = phase.toLowerCase();
-
-const shouldIncludeSecondSwim =
+const shouldIncludeEasyRun =
+  recommendedSessionCount >= 5;
+    const shouldIncludeSecondSwim =
   !phaseKey.includes('recovery') &&
   recommendedSessionCount >= 6 &&
   (
