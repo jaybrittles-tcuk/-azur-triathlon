@@ -2946,27 +2946,33 @@ const recentSwimActivities =
   );
 
 const longestRecentRideMinutes =
-  recentBikeActivities.reduce(
-    (longest, activity) =>
-      Math.max(
-        longest,
-        Number(activity.duration_sec ?? 0) / 60,
-      ),
-    0,
-  );
+  !hasSufficientHistory && savedBaseline
+    ? Number(savedBaseline.longest_ride_minutes)
+    : recentBikeActivities.reduce(
+        (longest, activity) =>
+          Math.max(
+            longest,
+            Number(activity.duration_sec ?? 0) / 60,
+          ),
+        0,
+      );
 
 const longestRecentRunMinutes =
-  recentRunActivities.reduce(
-    (longest, activity) =>
-      Math.max(
-        longest,
-        Number(activity.duration_sec ?? 0) / 60,
-      ),
-    0,
-  );
+  !hasSufficientHistory && savedBaseline
+    ? Number(savedBaseline.longest_run_minutes)
+    : recentRunActivities.reduce(
+        (longest, activity) =>
+          Math.max(
+            longest,
+            Number(activity.duration_sec ?? 0) / 60,
+          ),
+        0,
+      );
 
 const recentSwimFrequency =
-  recentSwimActivities.length / 6;
+  !hasSufficientHistory && savedBaseline
+    ? Number(savedBaseline.swims_per_week)
+    : recentSwimActivities.length / 6;
 
 const recentBikeFrequency =
   recentBikeActivities.length / 6;
@@ -2975,11 +2981,13 @@ const recentRunFrequency =
   recentRunActivities.length / 6;
 
 const recentTotalFrequency =
-  (
-    recentBikeActivities.length +
-    recentRunActivities.length +
-    recentSwimActivities.length
-  ) / 6;
+  !hasSufficientHistory && savedBaseline
+    ? Number(savedBaseline.sessions_per_week)
+    : (
+        recentBikeActivities.length +
+        recentRunActivities.length +
+        recentSwimActivities.length
+      ) / 6;
 
 const recommendedSessionCount =
   recentTotalFrequency > 0
@@ -3006,11 +3014,13 @@ const shouldIncludeEasyRun =
   );
 
 const progressionMultiplier =
-  consistencyScore >= 0.8
-    ? 1.08
-    : consistencyScore >= 0.6
-      ? 1.04
-      : 1.0;
+  !hasSufficientHistory
+    ? 1.0
+    : consistencyScore >= 0.8
+      ? 1.08
+      : consistencyScore >= 0.6
+        ? 1.04
+        : 1.0;
 
 const safeProgressionHours =
   weightedRecentHours > 0
