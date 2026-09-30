@@ -3423,8 +3423,41 @@ main_set: [
       is_active_version: true,
     },
   ];
+const generatedTotalMinutes =
+  generatedSessions.reduce(
+    (total, session) =>
+      total + session.duration_min,
+    0,
+  );
 
-// Preview mode must exit before any database insertion.
+console.log('AZUR PLAN VALIDATION', {
+  phase,
+  targetHours,
+  plannedHours,
+  recommendedSessionCount,
+  actualSessionCount: generatedSessions.length,
+  plannedMinutes: targetMinutes,
+  generatedMinutes: generatedTotalMinutes,
+  differenceMinutes:
+    targetMinutes - generatedTotalMinutes,
+  longestRecentRideMinutes,
+  longestRecentRunMinutes,
+  longRideMinutes,
+  longRunMinutes,
+  recentSwimFrequency,
+  recentBikeFrequency,
+  recentRunFrequency,
+});
+
+console.table(
+  generatedSessions.map((session) => ({
+    day: session.planned_date,
+    sport: session.sport,
+    session: session.title,
+    duration: session.duration_min,
+  })),
+);
+    // Preview mode must exit before any database insertion.
 if (previewOnly) {
   console.log(
     'AZUR PLAN PREVIEW — nothing saved',
