@@ -2808,6 +2808,27 @@ if (recentActivitiesError) {
     recentActivitiesError,
   );
 }
+    const {
+  data: savedBaseline,
+  error: baselineError,
+} = await supabase
+  .from('athlete_training_baseline')
+  .select(
+    'weekly_hours, sessions_per_week, swims_per_week, longest_ride_minutes, longest_run_minutes',
+  )
+  .eq('athlete_id', athlete.id)
+  .maybeSingle();
+
+if (baselineError) {
+  console.error(
+    'Unable to load athlete training baseline:',
+    baselineError,
+  );
+  return;
+}
+
+const hasConfirmedBaseline =
+  savedBaseline !== null;
 const hasSufficientHistory =
   !recentActivitiesError &&
   (recentActivities?.length ?? 0) >= 12;
