@@ -3933,12 +3933,7 @@ const [athleteBaseline, setAthleteBaseline] =
   </div>
     <button
   type="button"
-  onClick={() => {
-    console.log(
-      'AZUR ATHLETE BASELINE',
-      athleteBaseline,
-    );
-  }}
+onClick={() => void saveTrainingBaseline()}
   style={{
     marginTop: '24px',
     width: '100%',
