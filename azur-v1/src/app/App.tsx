@@ -3644,7 +3644,26 @@ useEffect(() => {
   useState(false);
   const [planPreview, setPlanPreview] =
   useState<any[] | null>(null);
+const previewTotalMinutes =
+  (planPreview ?? []).reduce(
+    (total, session) =>
+      total + session.duration_min,
+    0,
+  );
 
+const previewSportMinutes = {
+  swim: (planPreview ?? [])
+    .filter((session) => session.sport === 'swim')
+    .reduce((total, session) => total + session.duration_min, 0),
+
+  bike: (planPreview ?? [])
+    .filter((session) => session.sport === 'bike')
+    .reduce((total, session) => total + session.duration_min, 0),
+
+  run: (planPreview ?? [])
+    .filter((session) => session.sport === 'run')
+    .reduce((total, session) => total + session.duration_min, 0),
+};
 const [athleteBaseline, setAthleteBaseline] =
   useState({
     weeklyHours: '',
