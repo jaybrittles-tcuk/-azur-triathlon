@@ -3700,6 +3700,40 @@ const [athleteBaseline, setAthleteBaseline] =
       borderRadius: '12px',
     }}
   >
+    <style>{`
+  .azur-baseline-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-weight: 600;
+    color: #17324D;
+  }
+
+  .azur-baseline-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #CBD8E5;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #FFFFFF;
+    color: #17324D;
+  }
+
+  .azur-baseline-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  @media (max-width: 650px) {
+    .azur-baseline-fields {
+      grid-template-columns: 1fr;
+    }
+  }
+`}
+    </style>
     <h3>Your Training Baseline</h3>
 
     <p>
