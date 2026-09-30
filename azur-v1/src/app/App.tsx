@@ -3510,7 +3510,16 @@ console.table(
     // Preview mode must exit before any database insertion.
 if (previewOnly) {
   setPlanPreview(generatedSessions);
-
+setPlanPreviewInsights({
+  phase,
+  targetHours,
+  plannedHours,
+  recommendedSessionCount,
+  historySource:
+    hasSufficientHistory
+      ? 'recorded'
+      : 'confirmed',
+});  
   console.log(
     'AZUR PLAN PREVIEW — nothing saved',
     generatedSessions,
