@@ -2813,11 +2813,16 @@ const hasSufficientHistory =
   (recentActivities?.length ?? 0) >= 12;
 
 if (!hasSufficientHistory) {
-  console.warn(
-    'AZUR: Insufficient training history. ' +
-    'An athlete-confirmed baseline is required ' +
-    'before automatic plan generation.',
-  );
+  const message =
+    'Azur needs more historical training data ' +
+    'or an athlete-confirmed starting baseline ' +
+    'before generating a training plan.';
+
+  console.warn(message);
+
+  if (previewOnly) {
+    window.alert(message);
+  }
 
   return;
 }
