@@ -3020,7 +3020,9 @@ const phaseConfig =
     const activeWeightTotal =
   phaseConfig.swim1Weight +
   phaseConfig.bikeQualityWeight +
-  phaseConfig.easyRunWeight +
+  (shouldIncludeEasyRun
+  ? phaseConfig.easyRunWeight
+  : 0) +
   (shouldIncludeSecondSwim
     ? phaseConfig.swim2Weight
     : 0) +
