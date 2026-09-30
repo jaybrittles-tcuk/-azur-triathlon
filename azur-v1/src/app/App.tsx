@@ -2718,6 +2718,9 @@ const { error } = await supabase
   async function generateCurrentWeekPlan(
   previewOnly = false,
 ) {
+    console.log('AZUR PREVIEW STARTED', {
+  previewOnly,
+});
   const {
     data: { user },
   } = await supabase.auth.getUser();
