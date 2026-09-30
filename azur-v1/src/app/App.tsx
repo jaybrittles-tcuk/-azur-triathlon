@@ -3252,11 +3252,13 @@ target:
       is_active_version: true,
     },
 
-    {
-      athlete_id: athlete.id,
-      season_week_id: seasonWeek.id,
-      planned_date: addDays(2),
-      sport: 'run',
+ ...(shouldIncludeEasyRun
+  ? [
+      {
+        athlete_id: athlete.id,
+        season_week_id: seasonWeek.id,
+        planned_date: addDays(2),
+        sport: 'run',
       title: 'Easy Aerobic Run',
       session_class: 'easy',
       priority: 2,
