@@ -3644,6 +3644,14 @@ useEffect(() => {
   useState(false);
   const [planPreview, setPlanPreview] =
   useState<any[] | null>(null);
+  const [planPreviewInsights, setPlanPreviewInsights] =
+  useState<{
+    phase: string;
+    targetHours: number;
+    plannedHours: number;
+    recommendedSessionCount: number;
+    historySource: 'confirmed' | 'recorded';
+  } | null>(null);
 const previewTotalMinutes =
   (planPreview ?? []).reduce(
     (total, session) =>
