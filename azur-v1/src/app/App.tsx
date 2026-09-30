@@ -3690,7 +3690,58 @@ const [athleteBaseline, setAthleteBaseline] =
   </button>
 </div>
 </div>
+{showBaselineForm && (
+  <div
+    style={{
+      padding: '20px',
+      marginBottom: '20px',
+      background: '#FFFFFF',
+      border: '1px solid #DCE5EE',
+      borderRadius: '12px',
+    }}
+  >
+    <h3>Your Training Baseline</h3>
 
+    <p>
+      Tell Azur about your current training so we can
+      build a realistic starting plan.
+    </p>
+
+    <label>
+      Current weekly training hours
+      <input
+        type="number"
+        min="0"
+        step="0.5"
+        value={athleteBaseline.weeklyHours}
+        onChange={(e) =>
+          setAthleteBaseline((current) => ({
+            ...current,
+            weeklyHours: e.target.value,
+          }))
+        }
+        placeholder="e.g. 8"
+      />
+    </label>
+
+    <label>
+      Current sessions per week
+      <input
+        type="number"
+        min="0"
+        max="21"
+        value={athleteBaseline.sessionsPerWeek}
+        onChange={(e) =>
+          setAthleteBaseline((current) => ({
+            ...current,
+            sessionsPerWeek: e.target.value,
+          }))
+        }
+        placeholder="e.g. 6"
+      />
+    </label>
+  </div>
+)}
 <section className="hero-grid">
     <div
   className={`readiness-panel ${
