@@ -3015,6 +3015,18 @@ const phaseConfig =
             longRideWeight: 0.30,
             longRunWeight: 0.17,
           };
+    const activeWeightTotal =
+  phaseConfig.swim1Weight +
+  phaseConfig.bikeQualityWeight +
+  phaseConfig.easyRunWeight +
+  (shouldIncludeSecondSwim
+    ? phaseConfig.swim2Weight
+    : 0) +
+  phaseConfig.longRideWeight +
+  phaseConfig.longRunWeight;
+
+const adjustedWeight = (weight: number) =>
+  weight / activeWeightTotal;
     const swim1Minutes =
   Math.round(targetMinutes * phaseConfig.swim1Weight);
 
