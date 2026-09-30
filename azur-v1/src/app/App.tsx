@@ -1891,6 +1891,21 @@ useEffect(() => {
   async function loadSessionFeedback() {
     if (!selected?.id) return;
 
+    // Only query Supabase for real database session IDs.
+    const isValidSessionId =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+        selected.id,
+      );
+
+    if (!isValidSessionId) {
+      setSessionFeedback({
+        rpe: '',
+        notes: '',
+      });
+      setSessionFeedbackMessage('');
+      return;
+    }
+
     setSessionFeedbackMessage('');
 
     const { data, error } = await supabase
