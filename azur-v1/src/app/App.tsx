@@ -2921,14 +2921,22 @@ const longestRecentRunMinutes =
   );
 
 const recentSwimFrequency =
-  const recentBikeFrequency =
+  recentSwimActivities.length / 6;
+
+const recentBikeFrequency =
   recentBikeActivities.length / 6;
 
 const recentRunFrequency =
   recentRunActivities.length / 6;
 
 const recentTotalFrequency =
-  const recommendedSessionCount =
+  (
+    recentBikeActivities.length +
+    recentRunActivities.length +
+    recentSwimActivities.length
+  ) / 6;
+
+const recommendedSessionCount =
   recentTotalFrequency > 0
     ? Math.min(
         6,
@@ -2938,13 +2946,6 @@ const recentTotalFrequency =
         ),
       )
     : 6;
-  (
-    recentBikeActivities.length +
-    recentRunActivities.length +
-    recentSwimActivities.length
-  ) / 6;
-  recentSwimActivities.length / 6;
-
 const phase =
   String(seasonWeek.phase ?? 'Base 1');
 
