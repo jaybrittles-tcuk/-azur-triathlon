@@ -4149,6 +4149,60 @@ onClick={() => void saveTrainingBaseline()}
     ))}
   </div>
 </div>
+    {planPreviewInsights && (
+  <div
+    style={{
+      padding: '20px',
+      marginBottom: '24px',
+      borderLeft: '4px solid #1673AE',
+      background: '#F5F9FC',
+      borderRadius: '10px',
+    }}
+  >
+    <h4 style={{
+      color: '#17324D',
+      marginTop: 0,
+    }}>
+      Why Azur Selected This Plan
+    </h4>
+
+    <p style={{ color: '#52677B', lineHeight: 1.6 }}>
+      Your current training baseline is{' '}
+      <strong>
+        {planPreviewInsights.plannedHours.toFixed(1)}
+        {' '}hours per week
+      </strong>.
+      {' '}Your longer-term training target is{' '}
+      <strong>
+        {planPreviewInsights.targetHours} hours
+      </strong>.
+    </p>
+
+    <p style={{ color: '#52677B', lineHeight: 1.6 }}>
+      Azur has proposed{' '}
+      <strong>
+        {planPreviewInsights.recommendedSessionCount}
+        {' '}sessions
+      </strong>
+      {' '}during your{' '}
+      <strong>{planPreviewInsights.phase}</strong>
+      {' '}phase, using your{' '}
+      {planPreviewInsights.historySource === 'confirmed'
+        ? 'athlete-confirmed training baseline'
+        : 'recent recorded training history'}.
+    </p>
+
+    <p style={{
+      color: '#52677B',
+      lineHeight: 1.6,
+      marginBottom: 0,
+    }}>
+      This is a starting proposal. Future progression
+      will be informed by completed training, recovery
+      and your upcoming race requirements.
+    </p>
+  </div>
+)}
     <div style={{ display: 'grid', gap: '12px' }}>
       {planPreview.map((session, index) => (
         <div
