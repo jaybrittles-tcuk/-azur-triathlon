@@ -3615,6 +3615,80 @@ const [athleteBaseline, setAthleteBaseline] =
     longestRideMinutes: '',
     longestRunMinutes: '',
   });
+  async function saveTrainingBaseline() {
+  const weeklyHours = Number(athleteBaseline.weeklyHours);
+  const sessions = Number(athleteBaseline.sessionsPerWeek);
+  const swims = Number(athleteBaseline.swimsPerWeek);
+  const longestRide = Number(athleteBaseline.longestRideMinutes);
+  const longestRun = Number(athleteBaseline.longestRunMinutes);
+
+  if (
+    !athleteBaseline.weeklyHours ||
+    !athleteBaseline.sessionsPerWeek ||
+    athleteBaseline.swimsPerWeek === '' ||
+    athleteBaseline.longestRideMinutes === '' ||
+    athleteBaseline.longestRunMinutes === '' ||
+    weeklyHours <= 0 ||
+    weeklyHours > 40 ||
+    !Number.isInteger(sessions) ||
+    sessions < 1 ||
+    sessions > 21 ||
+    !Number.isInteger(swims) ||
+    swims < 0 ||
+    swims > sessions ||
+    !Number.isInteger(longestRide) ||
+    longestRide < 0 ||
+    !Number.isInteger(longestRun) ||
+    longestRun < 0
+  ) {
+    window.alert('Please enter valid values in all five fields.');
+    return;
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    window.alert('Please sign in before saving.');
+    return;
+  }
+
+  const { data: athlete, error: athleteError } =
+    await supabase
+      .from('athlete_profile')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+  if (athleteError || !athlete) {
+    window.alert('Unable to find your athlete profile.');
+    return;
+  }
+
+  const { error } = await supabase
+    .from('athlete_training_baseline')
+    .upsert(
+      {
+        athlete_id: athlete.id,
+        weekly_hours: weeklyHours,
+        sessions_per_week: sessions,
+        swims_per_week: swims,
+        longest_ride_minutes: longestRide,
+        longest_run_minutes: longestRun,
+        confirmed_at: new Date().toISOString(),
+      },
+      { onConflict: 'athlete_id' },
+    );
+
+  if (error) {
+    console.error('Unable to save training baseline:', error);
+    window.alert('Unable to save your baseline. Please try again.');
+    return;
+  }
+
+  window.alert('Training baseline saved successfully.');
+}
   function HomeView() {
     return (
       <>
