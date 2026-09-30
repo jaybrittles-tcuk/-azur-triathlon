@@ -3604,6 +3604,17 @@ useEffect(() => {
   isAuthenticated,
   needsCurrentWeekPlan,
 ]);
+  const [showBaselineForm, setShowBaselineForm] =
+  useState(false);
+
+const [athleteBaseline, setAthleteBaseline] =
+  useState({
+    weeklyHours: '',
+    sessionsPerWeek: '',
+    swimsPerWeek: '',
+    longestRideMinutes: '',
+    longestRunMinutes: '',
+  });
   function HomeView() {
     return (
       <>
