@@ -3663,6 +3663,13 @@ const [athleteBaseline, setAthleteBaseline] =
     longestRunMinutes: String(data.longest_run_minutes),
   });
 }
+  useEffect(() => {
+  if (!authReady || !isAuthenticated) {
+    return;
+  }
+
+  void loadTrainingBaseline();
+}, [authReady, isAuthenticated]);
   async function saveTrainingBaseline() {
   const weeklyHours = Number(athleteBaseline.weeklyHours);
   const sessions = Number(athleteBaseline.sessionsPerWeek);
