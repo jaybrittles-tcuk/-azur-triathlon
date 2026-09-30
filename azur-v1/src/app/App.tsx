@@ -2921,6 +2921,18 @@ const longestRecentRunMinutes =
   );
 
 const recentSwimFrequency =
+  const recentBikeFrequency =
+  recentBikeActivities.length / 6;
+
+const recentRunFrequency =
+  recentRunActivities.length / 6;
+
+const recentTotalFrequency =
+  (
+    recentBikeActivities.length +
+    recentRunActivities.length +
+    recentSwimActivities.length
+  ) / 6;
   recentSwimActivities.length / 6;
 
 const phase =
