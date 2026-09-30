@@ -3027,8 +3027,11 @@ const phaseConfig =
 
 const adjustedWeight = (weight: number) =>
   weight / activeWeightTotal;
-    const swim1Minutes =
-  Math.round(targetMinutes * phaseConfig.swim1Weight);
+const swim1Minutes =
+  Math.round(
+    targetMinutes *
+      adjustedWeight(phaseConfig.swim1Weight),
+  );
 
 const bikeQualityMinutes =
   Math.round(targetMinutes * phaseConfig.bikeQualityWeight);
