@@ -3034,7 +3034,10 @@ const swim1Minutes =
   );
 
 const bikeQualityMinutes =
-  Math.round(targetMinutes * phaseConfig.bikeQualityWeight);
+  Math.round(
+    targetMinutes *
+      adjustedWeight(phaseConfig.bikeQualityWeight),
+  );
 
 const easyRunMinutes =
   Math.round(targetMinutes * phaseConfig.easyRunWeight);
