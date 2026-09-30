@@ -3702,6 +3702,29 @@ const [athleteBaseline, setAthleteBaseline] =
     }}
   >
   <style>{`
+  .azur-baseline-form {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.azur-baseline-form h3 {
+  display: block !important;
+  color: #17324D !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  margin: 0 0 12px !important;
+  height: auto !important;
+}
+
+.azur-baseline-form p {
+  display: block !important;
+  color: #52677B !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  height: auto !important;
+}
   .azur-baseline-form .azur-baseline-fields {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr));
