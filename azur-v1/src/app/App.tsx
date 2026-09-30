@@ -2952,6 +2952,7 @@ const phaseKey = phase.toLowerCase();
 
 const shouldIncludeSecondSwim =
   !phaseKey.includes('recovery') &&
+  recommendedSessionCount >= 6 &&
   (
     recentSwimFrequency === 0 ||
     recentSwimFrequency >= 1.25
