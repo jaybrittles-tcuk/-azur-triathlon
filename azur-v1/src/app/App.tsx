@@ -6393,43 +6393,7 @@ const sourceActivityId = [
   Math.round(durationSec),
   Math.round(distanceKm * 1000),
 ].join('-');
-const generatedTotalMinutes =
-  generatedSessions.reduce(
-    (total, session) =>
-      total + session.duration_min,
-    0,
-  );
-
-console.log('AZUR PLAN VALIDATION', {
-  phase,
-  targetHours,
-  plannedHours,
-  recommendedSessionCount,
-  actualSessionCount: generatedSessions.length,
-  plannedMinutes: targetMinutes,
-  generatedMinutes: generatedTotalMinutes,
-  differenceMinutes:
-    targetMinutes - generatedTotalMinutes,
-  longestRecentRideMinutes,
-  longestRecentRunMinutes,
-  longRideMinutes,
-  longRunMinutes,
-  recentSwimFrequency,
-  recentBikeFrequency,
-  recentRunFrequency,
-});
-
-console.table(
-  generatedSessions.map((session) => ({
-    day: session.planned_date,
-    sport: session.sport,
-    session: session.title,
-    duration: session.duration_min,
-  })),
-);
-
-  return;
-}
+    
     const { error: insertError } = await supabase
   .from('completed_activity')
   .upsert(
