@@ -3740,8 +3740,8 @@ const [athleteBaseline, setAthleteBaseline] =
       Tell Azur about your current training so we can
       build a realistic starting plan.
     </p>
-
-    <label>
+<div className="azur-baseline-fields">
+  <label>
       Current weekly training hours
       <input
         type="number"
@@ -3822,6 +3822,7 @@ const [athleteBaseline, setAthleteBaseline] =
     placeholder="e.g. 90"
   />
 </label>
+  </div>
   </div>
 )}
 <section className="hero-grid">
