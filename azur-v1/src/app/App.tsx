@@ -3107,12 +3107,15 @@ if (existingError) {
   return;
 }
 
-  if ((existingSessions ?? []).length > 0) {
-    console.log(
-      'Azur week generation skipped: sessions already exist.',
-    );
-    return;
-  }
+if (
+  !previewOnly &&
+  (existingSessions ?? []).length > 0
+) {
+  console.log(
+    'Azur week generation skipped: sessions already exist.',
+  );
+  return;
+}
 
   const addDays = (offset: number) => {
     const date = new Date(monday);
