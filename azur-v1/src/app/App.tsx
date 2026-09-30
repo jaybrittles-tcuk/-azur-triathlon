@@ -3068,7 +3068,10 @@ const longRideMinutes =
     : plannedLongRideMinutes;
 
 const plannedLongRunMinutes =
-  Math.round(targetMinutes * phaseConfig.longRunWeight);
+  Math.round(
+    targetMinutes *
+      adjustedWeight(phaseConfig.longRunWeight),
+  );
 
 const longRunMinutes =
   longestRecentRunMinutes > 0
