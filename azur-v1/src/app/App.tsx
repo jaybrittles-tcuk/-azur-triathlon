@@ -3424,9 +3424,18 @@ main_set: [
     },
   ];
 
-  const { error: insertError } = await supabase
-    .from('planned_session')
-    .insert(generatedSessions);
+// Preview mode must exit before any database insertion.
+if (previewOnly) {
+  console.log(
+    'AZUR PLAN PREVIEW — nothing saved',
+    generatedSessions,
+  );
+  return;
+}
+
+const { error: insertError } = await supabase
+  .from('planned_session')
+  .insert(generatedSessions);
 
 if (insertError) {
 
@@ -6418,11 +6427,7 @@ console.table(
     duration: session.duration_min,
   })),
 );
-    if (previewOnly) {
-  console.log(
-    'AZUR PLAN PREVIEW — nothing saved',
-    generatedSessions,
-  );
+
   return;
 }
     const { error: insertError } = await supabase
