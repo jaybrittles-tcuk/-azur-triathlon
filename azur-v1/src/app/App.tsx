@@ -3857,6 +3857,29 @@ const [athleteBaseline, setAthleteBaseline] =
   />
 </label>
   </div>
+    <button
+  type="button"
+  onClick={() => {
+    console.log(
+      'AZUR ATHLETE BASELINE',
+      athleteBaseline,
+    );
+  }}
+  style={{
+    marginTop: '24px',
+    width: '100%',
+    padding: '14px 20px',
+    borderRadius: '10px',
+    border: 'none',
+    background: '#153E63',
+    color: '#FFFFFF',
+    fontSize: '16px',
+    fontWeight: 600,
+    cursor: 'pointer',
+  }}
+>
+  Save Training Baseline
+</button>
   </div>
 )}
 <section className="hero-grid">
