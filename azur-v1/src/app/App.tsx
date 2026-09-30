@@ -3668,6 +3668,27 @@ const [athleteBaseline, setAthleteBaseline] =
   >
     Preview Adaptive Training Plan
   </button>
+  <div style={{ margin: '12px 0' }}>
+  <button
+    type="button"
+    onClick={() =>
+      setShowBaselineForm((current) => !current)
+    }
+    style={{
+      padding: '12px 20px',
+      borderRadius: '10px',
+      background: '#FFFFFF',
+      color: '#153E63',
+      border: '1px solid #153E63',
+      fontWeight: 600,
+      cursor: 'pointer',
+    }}
+  >
+    {showBaselineForm
+      ? 'Close Training Baseline'
+      : 'Set Training Baseline'}
+  </button>
+</div>
 </div>
 
 <section className="hero-grid">
