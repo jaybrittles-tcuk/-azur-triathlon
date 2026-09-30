@@ -3639,6 +3639,8 @@ useEffect(() => {
 ]);
   const [showBaselineForm, setShowBaselineForm] =
   useState(false);
+  const [planPreview, setPlanPreview] =
+  useState<any[] | null>(null);
 
 const [athleteBaseline, setAthleteBaseline] =
   useState({
