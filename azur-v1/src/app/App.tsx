@@ -3700,40 +3700,50 @@ const [athleteBaseline, setAthleteBaseline] =
       borderRadius: '12px',
     }}
   >
-    <style>{`
-  .azur-baseline-form label {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-weight: 600;
-    color: #17324D;
+  <style>{`
+  .azur-baseline-form .azur-baseline-fields {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+    align-items: start;
   }
 
-  .azur-baseline-form input {
+  .azur-baseline-form .azur-baseline-fields > label {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
     width: 100%;
+    min-width: 0;
+    height: auto !important;
+    color: #17324D !important;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .azur-baseline-form .azur-baseline-fields input {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0;
+    height: 48px !important;
     box-sizing: border-box;
     padding: 12px 14px;
     border: 1px solid #CBD8E5;
     border-radius: 8px;
+    background: #FFFFFF !important;
+    color: #17324D !important;
     font-size: 16px;
-    background: #FFFFFF;
-    color: #17324D;
-  }
-
-  .azur-baseline-fields {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-    margin-top: 24px;
   }
 
   @media (max-width: 650px) {
-    .azur-baseline-fields {
-      grid-template-columns: 1fr;
+    .azur-baseline-form .azur-baseline-fields {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
     }
   }
-`}
-    </style>
+`}</style>
     <h3>Your Training Baseline</h3>
 
     <p>
