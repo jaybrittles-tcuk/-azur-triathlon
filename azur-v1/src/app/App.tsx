@@ -3188,6 +3188,38 @@ const scaleMinutes = (
     minimum,
     Math.round(minutes * scaleFactor),
   );
+    const bikeWarmupMinutes = Math.max(
+  10,
+  Math.round(bikeQualityMinutes * 0.2),
+);
+
+const bikeIntervalReps = 4;
+const bikeRecoveryMinutes = 4;
+
+const bikeNominalCooldownMinutes = Math.max(
+  5,
+  Math.round(bikeQualityMinutes * 0.15),
+);
+
+const bikeIntervalMinutes = Math.max(
+  6,
+  Math.round(
+    (
+      bikeQualityMinutes -
+      bikeWarmupMinutes -
+      bikeNominalCooldownMinutes -
+      bikeRecoveryMinutes * (bikeIntervalReps - 1)
+    ) / bikeIntervalReps,
+  ),
+);
+
+const bikeCooldownMinutes = Math.max(
+  5,
+  bikeQualityMinutes -
+    bikeWarmupMinutes -
+    bikeIntervalMinutes * bikeIntervalReps -
+    bikeRecoveryMinutes * (bikeIntervalReps - 1),
+);
     const generatedSessions = [
     {
       athlete_id: athlete.id,
