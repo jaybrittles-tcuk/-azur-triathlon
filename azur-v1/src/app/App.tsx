@@ -3292,18 +3292,15 @@ duration_min: bikeQualityMinutes,
         : 'Strength endurance development',
         warmup: [
           {
-           duration_min: Math.max(
-  10,
-  Math.round(bikeQualityMinutes * 0.2),
-),
+duration_min: bikeWarmupMinutes,
             target: 'Easy aerobic',
           },
         ],
         main_set: [
           {
-            reps: 4,
-            duration_min: 8,
-            recovery_min: 4,
+reps: bikeIntervalReps,
+duration_min: bikeIntervalMinutes,
+recovery_min: bikeRecoveryMinutes,
             ftp_percent:
   phaseKey.includes('peak')
     ? '85–92%'
@@ -3325,10 +3322,7 @@ target:
         ],
         cooldown: [
           {
-           duration_min: Math.max(
-  5,
-  Math.round(bikeQualityMinutes * 0.15),
-),
+duration_min: bikeCooldownMinutes,
             target: 'Easy',
           },
         ],
