@@ -2928,6 +2928,16 @@ const recentRunFrequency =
   recentRunActivities.length / 6;
 
 const recentTotalFrequency =
+  const recommendedSessionCount =
+  recentTotalFrequency > 0
+    ? Math.min(
+        6,
+        Math.max(
+          3,
+          Math.ceil(recentTotalFrequency + 0.5),
+        ),
+      )
+    : 6;
   (
     recentBikeActivities.length +
     recentRunActivities.length +
