@@ -2715,7 +2715,9 @@ const { error } = await supabase
 
   setConfirmedMatchSessionId(selected.id);
 }
-  async function generateCurrentWeekPlan() {
+  async function generateCurrentWeekPlan(
+  previewOnly = false,
+) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -6392,6 +6394,13 @@ console.table(
     duration: session.duration_min,
   })),
 );
+    if (previewOnly) {
+  console.log(
+    'AZUR PLAN PREVIEW — nothing saved',
+    generatedSessions,
+  );
+  return;
+}
     const { error: insertError } = await supabase
   .from('completed_activity')
   .upsert(
