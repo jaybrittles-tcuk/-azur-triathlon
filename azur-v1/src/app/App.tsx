@@ -3509,10 +3509,13 @@ console.table(
 );
     // Preview mode must exit before any database insertion.
 if (previewOnly) {
+  setPlanPreview(generatedSessions);
+
   console.log(
     'AZUR PLAN PREVIEW — nothing saved',
     generatedSessions,
   );
+
   return;
 }
 
