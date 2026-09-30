@@ -4044,6 +4044,75 @@ onClick={() => void saveTrainingBaseline()}
 </button>
   </div>
 )}
+        {planPreview && (
+  <section
+    style={{
+      background: '#FFFFFF',
+      border: '1px solid #DCE5EE',
+      borderRadius: '12px',
+      padding: '24px',
+      marginBottom: '24px',
+    }}
+  >
+    <h3 style={{ color: '#17324D', marginTop: 0 }}>
+      Your Proposed Training Week
+    </h3>
+
+    <p style={{ color: '#52677B' }}>
+      Based on your current training and the upcoming
+      phase of your training plan.
+    </p>
+
+    <div style={{ display: 'grid', gap: '12px' }}>
+      {planPreview.map((session, index) => (
+        <div
+          key={index}
+          style={{
+            padding: '16px',
+            border: '1px solid #DCE5EE',
+            borderRadius: '10px',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '13px',
+              color: '#52677B',
+            }}
+          >
+            {new Date(
+              `${session.planned_date}T12:00:00`,
+            ).toLocaleDateString('en-GB', {
+              weekday: 'long',
+            })}
+          </div>
+
+          <strong style={{ color: '#17324D' }}>
+            {session.title}
+          </strong>
+
+          <div style={{ marginTop: '6px' }}>
+            {session.sport.toUpperCase()} ·{' '}
+            {session.duration_min} minutes
+          </div>
+
+          <p
+            style={{
+              color: '#52677B',
+              marginBottom: 0,
+            }}
+          >
+            {session.rationale}
+          </p>
+        </div>
+      ))}
+    </div>
+
+    <p style={{ marginTop: '20px', color: '#52677B' }}>
+      Preview only — your existing training plan
+      remains unchanged.
+    </p>
+  </section>
+)}
 <section className="hero-grid">
     <div
   className={`readiness-panel ${
