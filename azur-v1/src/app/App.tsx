@@ -3579,7 +3579,25 @@ useEffect(() => {
     </div>
   </div>
 </section>
-        <section className="hero-grid">
+
+<div style={{ margin: '16px 0' }}>
+  <button
+    type="button"
+    onClick={() => void generateCurrentWeekPlan(true)}
+    style={{
+      padding: '12px 20px',
+      borderRadius: '10px',
+      background: '#153E63',
+      color: '#FFFFFF',
+      fontWeight: 600,
+      cursor: 'pointer',
+    }}
+  >
+    Preview Adaptive Training Plan
+  </button>
+</div>
+
+<section className="hero-grid">
     <div
   className={`readiness-panel ${
     recoveryReadiness?.color ?? ''
