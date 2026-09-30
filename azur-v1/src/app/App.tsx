@@ -2833,7 +2833,7 @@ const hasSufficientHistory =
   !recentActivitiesError &&
   (recentActivities?.length ?? 0) >= 12;
 
-if (!hasSufficientHistory) {
+if (!hasSufficientHistory && !hasConfirmedBaseline) {
   const message =
     'Azur needs more historical training data ' +
     'or an athlete-confirmed starting baseline ' +
