@@ -3740,6 +3740,54 @@ const [athleteBaseline, setAthleteBaseline] =
         placeholder="e.g. 6"
       />
     </label>
+    <label>
+  Current swims per week
+  <input
+    type="number"
+    min="0"
+    max="7"
+    value={athleteBaseline.swimsPerWeek}
+    onChange={(e) =>
+      setAthleteBaseline((current) => ({
+        ...current,
+        swimsPerWeek: e.target.value,
+      }))
+    }
+    placeholder="e.g. 2"
+  />
+</label>
+
+<label>
+  Longest recent ride (minutes)
+  <input
+    type="number"
+    min="0"
+    value={athleteBaseline.longestRideMinutes}
+    onChange={(e) =>
+      setAthleteBaseline((current) => ({
+        ...current,
+        longestRideMinutes: e.target.value,
+      }))
+    }
+    placeholder="e.g. 150"
+  />
+</label>
+
+<label>
+  Longest recent run (minutes)
+  <input
+    type="number"
+    min="0"
+    value={athleteBaseline.longestRunMinutes}
+    onChange={(e) =>
+      setAthleteBaseline((current) => ({
+        ...current,
+        longestRunMinutes: e.target.value,
+      }))
+    }
+    placeholder="e.g. 90"
+  />
+</label>
   </div>
 )}
 <section className="hero-grid">
