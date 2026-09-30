@@ -4081,7 +4081,57 @@ onClick={() => void saveTrainingBaseline()}
       Based on your current training and the upcoming
       phase of your training plan.
     </p>
+<div
+  style={{
+    background: '#F0F6FB',
+    borderRadius: '12px',
+    padding: '20px',
+    margin: '20px 0',
+    color: '#17324D',
+  }}
+>
+  <div
+    style={{
+      fontSize: '14px',
+      fontWeight: 600,
+      marginBottom: '8px',
+    }}
+  >
+    TOTAL WEEKLY TRAINING
+  </div>
 
+  <div
+    style={{
+      fontSize: '32px',
+      fontWeight: 800,
+      marginBottom: '20px',
+    }}
+  >
+    {(previewTotalMinutes / 60).toFixed(1)} hours
+  </div>
+
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+      gap: '12px',
+      fontSize: '13px',
+    }}
+  >
+    {(['swim', 'bike', 'run'] as const).map((sport) => (
+      <div key={sport}>
+        <div style={{ fontWeight: 700 }}>
+          {sport.toUpperCase()}
+        </div>
+
+        <div style={{ marginTop: '6px' }}>
+          {Math.floor(previewSportMinutes[sport] / 60)}h{' '}
+          {previewSportMinutes[sport] % 60}m
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
     <div style={{ display: 'grid', gap: '12px' }}>
       {planPreview.map((session, index) => (
         <div
