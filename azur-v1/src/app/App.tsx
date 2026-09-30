@@ -3692,6 +3692,7 @@ const [athleteBaseline, setAthleteBaseline] =
 </div>
 {showBaselineForm && (
   <div
+    className="azur-baseline-form"
     style={{
       padding: '20px',
       marginBottom: '20px',
