@@ -4090,10 +4090,22 @@ onClick={() => void saveTrainingBaseline()}
             {session.title}
           </strong>
 
-          <div style={{ marginTop: '6px' }}>
-            {session.sport.toUpperCase()} ·{' '}
-            {session.duration_min} minutes
-          </div>
+     <div
+  style={{
+    display: 'block',
+    marginTop: '10px',
+    marginBottom: '12px',
+    color: '#1673AE',
+    fontSize: '15px',
+    fontWeight: 700,
+    lineHeight: 1.5,
+    height: 'auto',
+    visibility: 'visible',
+  }}
+>
+  {session.sport.toUpperCase()} ·{' '}
+  {session.duration_min} MIN
+</div>
 
           <p
             style={{
