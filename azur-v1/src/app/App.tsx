@@ -3054,7 +3054,10 @@ const swim2Minutes =
     : 0;
 
 const plannedLongRideMinutes =
-  Math.round(targetMinutes * phaseConfig.longRideWeight);
+  Math.round(
+    targetMinutes *
+      adjustedWeight(phaseConfig.longRideWeight),
+  );
 
 const longRideMinutes =
   longestRecentRideMinutes > 0
