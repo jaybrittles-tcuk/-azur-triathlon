@@ -3044,10 +3044,12 @@ const bikeQualityMinutes =
   );
 
 const easyRunMinutes =
-  Math.round(
-    targetMinutes *
-      adjustedWeight(phaseConfig.easyRunWeight),
-  );
+  shouldIncludeEasyRun
+    ? Math.round(
+        targetMinutes *
+          adjustedWeight(phaseConfig.easyRunWeight),
+      )
+    : 0;
 
 const swim2Minutes =
   shouldIncludeSecondSwim
