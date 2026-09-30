@@ -3280,8 +3280,10 @@ target:
       status: 'planned',
       locked: false,
       version: 1,
-      is_active_version: true,
-    },
+ is_active_version: true,
+      },
+    ]
+  : []),
 
 ...(shouldIncludeSecondSwim
   ? [
