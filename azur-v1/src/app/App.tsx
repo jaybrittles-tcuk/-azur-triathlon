@@ -3615,6 +3615,54 @@ const [athleteBaseline, setAthleteBaseline] =
     longestRideMinutes: '',
     longestRunMinutes: '',
   });
+  async function loadTrainingBaseline() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return;
+
+  const { data: athlete, error: athleteError } =
+    await supabase
+      .from('athlete_profile')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+  if (athleteError || !athlete) {
+    console.error(
+      'Unable to load athlete profile:',
+      athleteError,
+    );
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('athlete_training_baseline')
+    .select(
+      'weekly_hours, sessions_per_week, swims_per_week, longest_ride_minutes, longest_run_minutes',
+    )
+    .eq('athlete_id', athlete.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      'Unable to load training baseline:',
+      error,
+    );
+    return;
+  }
+
+  if (!data) return;
+
+  setAthleteBaseline({
+    weeklyHours: String(data.weekly_hours),
+    sessionsPerWeek: String(data.sessions_per_week),
+    swimsPerWeek: String(data.swims_per_week),
+    longestRideMinutes: String(data.longest_ride_minutes),
+    longestRunMinutes: String(data.longest_run_minutes),
+  });
+}
   async function saveTrainingBaseline() {
   const weeklyHours = Number(athleteBaseline.weeklyHours);
   const sessions = Number(athleteBaseline.sessionsPerWeek);
