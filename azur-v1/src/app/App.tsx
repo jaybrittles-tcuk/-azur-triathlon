@@ -3637,21 +3637,59 @@ session_class:
       priority: 1,
 duration_min: longRunMinutes,
       targets: {},
-      prescription: {
-        focus: 'Aerobic endurance',
-main_set: [
-  {
-    duration_min: longRunMinutes,
-    target:
-      phaseKey.includes('peak')
-        ? 'Race-specific aerobic'
+prescription: {
+  focus:
+    phaseKey.includes('peak')
+      ? 'Race-specific endurance'
+      : phaseKey.includes('build')
+        ? 'Aerobic endurance with race-specific work'
         : phaseKey.includes('recovery')
+          ? 'Reduced aerobic endurance'
+          : 'Aerobic endurance',
+
+  warmup: [
+    {
+      duration_min: longRunWarmupMinutes,
+      target: 'Easy aerobic',
+      rpe: '2–3',
+    },
+  ],
+
+  main_set: [
+    {
+      duration_min: longRunSteadyMinutes,
+      target:
+        phaseKey.includes('recovery')
           ? 'Easy recovery'
           : 'Easy aerobic',
-    rpe: '4–5',
-  },
-],
-      },
+      rpe: '4–5',
+    },
+
+    ...(longRunSpecificMinutes > 0
+      ? [
+          {
+            duration_min: longRunSpecificMinutes,
+            target:
+              phaseKey.includes('peak')
+                ? 'Race-specific aerobic'
+                : 'Steady / race-specific aerobic',
+            rpe:
+              phaseKey.includes('peak')
+                ? '6–7'
+                : '5–6',
+          },
+        ]
+      : []),
+  ],
+
+  cooldown: [
+    {
+      duration_min: longRunCooldownMinutes,
+      target: 'Easy recovery',
+      rpe: '2–3',
+    },
+  ],
+},
       rationale:
         'Build durable run endurance at controlled intensity.',
       terrain: 'Mixed',
