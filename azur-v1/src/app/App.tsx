@@ -4254,19 +4254,36 @@ return (
         />
       ))}
     </div>
-        {structureParts.length > 0 && (
-      <div
+{structureParts.length > 0 && (
+  <div
+    style={{
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '6px',
+      marginTop: '10px',
+    }}
+  >
+    {structureParts.map((part, index) => (
+      <span
+        key={`${part}-${index}`}
         style={{
-          marginTop: '8px',
-          color: '#6B7F91',
-          fontSize: '12px',
-          fontWeight: 600,
-          lineHeight: 1.5,
+          display: 'inline-flex',
+          alignItems: 'center',
+          padding: '5px 8px',
+          borderRadius: '999px',
+          background: '#F1F5F8',
+          color: '#52677B',
+          fontSize: '11px',
+          fontWeight: 700,
+          lineHeight: 1.2,
+          whiteSpace: 'nowrap',
         }}
       >
-        {structureParts.join(' · ')}
-      </div>
-    )}
+        {part}
+      </span>
+    ))}
+  </div>
+)}
   </>
 );
 }
