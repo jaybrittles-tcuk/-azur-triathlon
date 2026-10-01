@@ -4067,8 +4067,48 @@ const [athleteBaseline, setAthleteBaseline] =
     value: number;
     intensity: number;
   }[] = [];
+const structureParts: string[] = [];
 
-  const addBlock = (
+(prescription.warmup ?? []).forEach((item: any) => {
+  if (item?.duration_min) {
+    structureParts.push(`WU ${item.duration_min}'`);
+  } else if (item?.distance_m) {
+    structureParts.push(`WU ${item.distance_m}m`);
+  }
+});
+
+(prescription.main_set ?? []).forEach((item: any) => {
+  const reps = Number(item?.reps ?? 1);
+
+  if (item?.duration_min) {
+    structureParts.push(
+      reps > 1
+        ? `${reps} × ${item.duration_min}'`
+        : `${item.duration_min}' steady`,
+    );
+  } else if (item?.distance_m) {
+    structureParts.push(
+      reps > 1
+        ? `${reps} × ${item.distance_m}m`
+        : `${item.distance_m}m`,
+    );
+  }
+
+  if (item?.recovery_min) {
+    structureParts.push(`REC ${item.recovery_min}'`);
+  } else if (item?.recovery_sec) {
+    structureParts.push(`REC ${item.recovery_sec}"`);
+  }
+});
+
+(prescription.cooldown ?? []).forEach((item: any) => {
+  if (item?.duration_min) {
+    structureParts.push(`CD ${item.duration_min}'`);
+  } else if (item?.distance_m) {
+    structureParts.push(`CD ${item.distance_m}m`);
+  }
+});
+    const addBlock = (
     label: string,
     item: any,
     intensity: number,
