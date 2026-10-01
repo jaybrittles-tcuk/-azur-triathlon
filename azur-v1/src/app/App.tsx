@@ -4728,7 +4728,29 @@ onClick={() => void saveTrainingBaseline()}
   {session.sport.toUpperCase()} ·{' '}
   {session.duration_min} MIN
 </div>
-<SessionVisual session={session} />      
+<SessionVisual session={session} />   
+          <button
+  type="button"
+  onClick={() =>
+    setExpandedPreviewSession((current) =>
+      current === index ? null : index,
+    )
+  }
+  style={{
+    marginTop: '12px',
+    padding: 0,
+    border: 'none',
+    background: 'transparent',
+    color: '#1673AE',
+    fontSize: '13px',
+    fontWeight: 700,
+    cursor: 'pointer',
+  }}
+>
+  {expandedPreviewSession === index
+    ? 'Hide session details'
+    : 'View full session'}
+</button>
           <p
             style={{
               color: '#52677B',
