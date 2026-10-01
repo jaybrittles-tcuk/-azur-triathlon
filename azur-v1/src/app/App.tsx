@@ -3406,8 +3406,23 @@ distance_m: 200,
       season_week_id: seasonWeek.id,
       planned_date: addDays(1),
       sport: 'bike',
-      title: 'Threshold Development',
-      session_class: 'intensity',
+title:
+  phaseKey.includes('build')
+    ? 'Threshold Development'
+    : phaseKey.includes('peak')
+      ? 'Race-Specific Bike'
+      : phaseKey.includes('recovery')
+        ? 'Aerobic Recovery Ride'
+        : 'Strength Endurance Bike',
+
+session_class:
+  phaseKey.includes('peak')
+    ? 'race_specific'
+    : phaseKey.includes('recovery')
+      ? 'easy'
+      : phaseKey.includes('build')
+        ? 'intensity'
+        : 'endurance',
       priority: 1,
 duration_min: bikeQualityMinutes,
       targets: {},
