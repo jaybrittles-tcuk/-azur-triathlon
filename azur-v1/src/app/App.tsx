@@ -3329,6 +3329,33 @@ const longRideSpecificMinutes =
     ? longRideMainMinutes -
       longRideSteadyMinutes
     : 0;
+    const longRunWarmupMinutes = Math.max(
+  8,
+  Math.round(longRunMinutes * 0.1),
+);
+
+const longRunCooldownMinutes = Math.max(
+  5,
+  Math.round(longRunMinutes * 0.08),
+);
+
+const longRunMainMinutes =
+  longRunMinutes -
+  longRunWarmupMinutes -
+  longRunCooldownMinutes;
+
+const longRunSteadyMinutes =
+  phaseKey.includes('build') ||
+  phaseKey.includes('peak')
+    ? Math.round(longRunMainMinutes * 0.7)
+    : longRunMainMinutes;
+
+const longRunSpecificMinutes =
+  phaseKey.includes('build') ||
+  phaseKey.includes('peak')
+    ? longRunMainMinutes -
+      longRunSteadyMinutes
+    : 0;
     const generatedSessions = [
     {
       athlete_id: athlete.id,
