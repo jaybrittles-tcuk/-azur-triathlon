@@ -3280,17 +3280,14 @@ const swim1MainReps =
         warmup: [
           {
             target: 'Easy',
-            distance_m: Math.max(
-  200,
-  Math.round(swim1Minutes * 6),
-),
+distance_m: swim1WarmupDistance,
             notes: 'Relaxed freestyle',
           },
         ],
         main_set: [
           {
-            reps: 8,
-            distance_m: 100,
+ reps: swim1MainReps,
+distance_m: 200,
             target: 'Aerobic',
             recovery_sec: 20,
             notes: 'Smooth and controlled',
@@ -3299,10 +3296,7 @@ const swim1MainReps =
         cooldown: [
           {
             target: 'Easy',
-            distance_m: Math.max(
-  100,
-  Math.round(swim1Minutes * 4),
-),
+           distance_m: swim1CooldownDistance,
           },
         ],
       },
