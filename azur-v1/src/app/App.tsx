@@ -4160,11 +4160,23 @@ const [athleteBaseline, setAthleteBaseline] =
             )}%`,
             borderRadius: '4px 4px 2px 2px',
             background:
-              block.intensity >= 0.8
-                ? '#F3B33D'
-                : block.intensity >= 0.5
-                  ? '#49A6DF'
-                  : '#B7D8ED',
+  session.sport === 'bike'
+    ? block.intensity >= 0.8
+      ? '#F4B43C'
+      : block.intensity >= 0.5
+        ? '#E8C46A'
+        : '#F4E4B5'
+    : session.sport === 'run'
+      ? block.intensity >= 0.8
+        ? '#35A96B'
+        : block.intensity >= 0.5
+          ? '#63BE86'
+          : '#B8E0C8'
+      : block.intensity >= 0.8
+        ? '#208FD0'
+        : block.intensity >= 0.5
+          ? '#49A6DF'
+          : '#B7D8ED',
           }}
         />
       ))}
