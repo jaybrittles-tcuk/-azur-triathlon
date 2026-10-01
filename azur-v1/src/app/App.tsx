@@ -4269,7 +4269,6 @@ return (
     )}
   </>
 );
-  );
 }
   function HomeView() {
     return (
