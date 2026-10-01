@@ -4079,20 +4079,7 @@ const [athleteBaseline, setAthleteBaseline] =
 
   window.alert('Training baseline saved successfully.');
 }
-  function SessionVisual({
-  session,
-}: {
-  session: any;
-}) {
-  const prescription = session?.prescription ?? {};
-
-  const blocks: {
-    label: string;
-    value: number;
-    intensity: number;
-  }[] = [];
-const structureParts: string[] = [];
-const formatMainSetDetail = (item: any) => {
+  const formatMainSetDetail = (item: any) => {
   const parts: string[] = [];
 
   const reps = Number(item?.reps ?? 1);
@@ -4148,6 +4135,20 @@ const formatMainSetDetail = (item: any) => {
   }
 
   return parts.join(' · ');
+  function SessionVisual({
+  session,
+}: {
+  session: any;
+}) {
+  const prescription = session?.prescription ?? {};
+
+  const blocks: {
+    label: string;
+    value: number;
+    intensity: number;
+  }[] = [];
+const structureParts: string[] = [];
+
 };
     (prescription.warmup ?? []).forEach((item: any) => {
   if (item?.duration_min) {
