@@ -4055,6 +4055,122 @@ const [athleteBaseline, setAthleteBaseline] =
 
   window.alert('Training baseline saved successfully.');
 }
+  function SessionVisual({
+  session,
+}: {
+  session: any;
+}) {
+  const prescription = session?.prescription ?? {};
+
+  const blocks: {
+    label: string;
+    value: number;
+    intensity: number;
+  }[] = [];
+
+  const addBlock = (
+    label: string,
+    item: any,
+    intensity: number,
+  ) => {
+    const value =
+      Number(item?.duration_min ?? 0) ||
+      Number(item?.distance_m ?? 0) / 100;
+
+    if (value > 0) {
+      blocks.push({
+        label,
+        value,
+        intensity,
+      });
+    }
+  };
+
+  (prescription.warmup ?? []).forEach(
+    (item: any) =>
+      addBlock('Warm-up', item, 0.35),
+  );
+
+  (prescription.main_set ?? []).forEach(
+    (item: any) => {
+      const reps = Number(item?.reps ?? 1);
+
+      for (let i = 0; i < reps; i += 1) {
+        addBlock(
+          'Work',
+          item,
+          session.session_class === 'intensity' ||
+          session.session_class === 'race_specific'
+            ? 0.9
+            : 0.6,
+        );
+
+        if (
+          item?.recovery_min ||
+          item?.recovery_sec
+        ) {
+          blocks.push({
+            label: 'Recovery',
+            value:
+              Number(item.recovery_min ?? 0) ||
+              Number(item.recovery_sec ?? 0) / 60,
+            intensity: 0.25,
+          });
+        }
+      }
+    },
+  );
+
+  (prescription.cooldown ?? []).forEach(
+    (item: any) =>
+      addBlock('Cooldown', item, 0.3),
+  );
+
+  if (blocks.length === 0) {
+    return null;
+  }
+
+  const totalValue = blocks.reduce(
+    (total, block) => total + block.value,
+    0,
+  );
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: '3px',
+        height: '72px',
+        marginTop: '16px',
+        marginBottom: '8px',
+      }}
+    >
+      {blocks.map((block, index) => (
+        <div
+          key={`${block.label}-${index}`}
+          title={block.label}
+          style={{
+            flexGrow: block.value / totalValue,
+            flexBasis: 0,
+            minWidth: '4px',
+            height: `${Math.max(
+              20,
+              block.intensity * 100,
+            )}%`,
+            borderRadius: '4px 4px 2px 2px',
+            background:
+              block.intensity >= 0.8
+                ? '#F3B33D'
+                : block.intensity >= 0.5
+                  ? '#49A6DF'
+                  : '#B7D8ED',
+          }}
+        />
+      ))}
+    </div>
+  );
+}
   function HomeView() {
     return (
       <>
