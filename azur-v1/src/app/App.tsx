@@ -3559,6 +3559,17 @@ const { error: insertError } = await supabase
   .insert(generatedSessions);
 
 if (insertError) {
+  if (insertError.code === '23505') {
+    console.warn(
+      'Azur week generation skipped: matching active sessions already exist.',
+    );
+    return;
+  }
+
+  console.error(
+    'Unable to generate training week:',
+    insertError,
+  );
 
   return;
 }
