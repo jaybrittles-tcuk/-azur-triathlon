@@ -4207,7 +4207,8 @@ const structureParts: string[] = [];
     0,
   );
 
-  return (
+return (
+  <>
     <div
       style={{
         display: 'flex',
@@ -4253,6 +4254,21 @@ const structureParts: string[] = [];
         />
       ))}
     </div>
+        {structureParts.length > 0 && (
+      <div
+        style={{
+          marginTop: '8px',
+          color: '#6B7F91',
+          fontSize: '12px',
+          fontWeight: 600,
+          lineHeight: 1.5,
+        }}
+      >
+        {structureParts.join(' · ')}
+      </div>
+    )}
+  </>
+);
   );
 }
   function HomeView() {
