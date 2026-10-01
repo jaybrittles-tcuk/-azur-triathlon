@@ -3461,7 +3461,6 @@ duration_min: bikeCooldownMinutes,
           focus: 'Aerobic swim endurance',
           warmup: [
             {
-              distance_m: Math.max(
 distance_m: swim2WarmupDistance,
               target: 'Easy',
             },
