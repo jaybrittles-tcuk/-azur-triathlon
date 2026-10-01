@@ -4079,7 +4079,10 @@ const [athleteBaseline, setAthleteBaseline] =
 
   window.alert('Training baseline saved successfully.');
 }
-  const formatMainSetDetail = (item: any) => {
+ const formatMainSetDetail = (
+  item: any,
+  sport: string,
+) => {
   const parts: string[] = [];
 
   const reps = Number(item?.reps ?? 1);
@@ -4098,7 +4101,7 @@ const [athleteBaseline, setAthleteBaseline] =
     );
   }
 
-  if (session.sport === 'bike') {
+  if (sport === 'bike') {
     if (item?.ftp_percent) {
       parts.push(`${item.ftp_percent} FTP`);
     }
@@ -4108,7 +4111,7 @@ const [athleteBaseline, setAthleteBaseline] =
     }
   }
 
-  if (session.sport === 'run') {
+  if (sport === 'run') {
     if (item?.target) {
       parts.push(item.target);
     }
@@ -4118,7 +4121,7 @@ const [athleteBaseline, setAthleteBaseline] =
     }
   }
 
-  if (session.sport === 'swim') {
+  if (sport === 'swim') {
     if (item?.target) {
       parts.push(item.target);
     }
@@ -4903,7 +4906,7 @@ onClick={() => void saveTrainingBaseline()}
   (item: any, itemIndex: number) => (
     <div key={itemIndex}>
       <strong>Main set:</strong>{' '}
-      {formatMainSetDetail(item)}
+      {formatMainSetDetail(item, session.sport)}
     </div>
   ),
 )}
