@@ -3302,6 +3302,33 @@ const swim2MainReps =
     5,
     Math.round(swim2MainDistance / 200),
   );
+    const longRideWarmupMinutes = Math.max(
+  10,
+  Math.round(longRideMinutes * 0.1),
+);
+
+const longRideCooldownMinutes = Math.max(
+  10,
+  Math.round(longRideMinutes * 0.1),
+);
+
+const longRideMainMinutes =
+  longRideMinutes -
+  longRideWarmupMinutes -
+  longRideCooldownMinutes;
+
+const longRideSteadyMinutes =
+  phaseKey.includes('build') ||
+  phaseKey.includes('peak')
+    ? Math.round(longRideMainMinutes * 0.6)
+    : longRideMainMinutes;
+
+const longRideSpecificMinutes =
+  phaseKey.includes('build') ||
+  phaseKey.includes('peak')
+    ? longRideMainMinutes -
+      longRideSteadyMinutes
+    : 0;
     const generatedSessions = [
     {
       athlete_id: athlete.id,
