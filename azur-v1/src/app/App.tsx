@@ -4599,7 +4599,7 @@ onClick={() => void saveTrainingBaseline()}
   {session.sport.toUpperCase()} ·{' '}
   {session.duration_min} MIN
 </div>
-
+<SessionVisual session={session} />      
           <p
             style={{
               color: '#52677B',
