@@ -4092,8 +4092,64 @@ const [athleteBaseline, setAthleteBaseline] =
     intensity: number;
   }[] = [];
 const structureParts: string[] = [];
+const formatMainSetDetail = (item: any) => {
+  const parts: string[] = [];
 
-(prescription.warmup ?? []).forEach((item: any) => {
+  const reps = Number(item?.reps ?? 1);
+
+  if (item?.duration_min) {
+    parts.push(
+      reps > 1
+        ? `${reps} × ${item.duration_min} min`
+        : `${item.duration_min} min`,
+    );
+  } else if (item?.distance_m) {
+    parts.push(
+      reps > 1
+        ? `${reps} × ${item.distance_m} m`
+        : `${item.distance_m} m`,
+    );
+  }
+
+  if (session.sport === 'bike') {
+    if (item?.ftp_percent) {
+      parts.push(`${item.ftp_percent} FTP`);
+    }
+
+    if (item?.target) {
+      parts.push(item.target);
+    }
+  }
+
+  if (session.sport === 'run') {
+    if (item?.target) {
+      parts.push(item.target);
+    }
+
+    if (item?.rpe) {
+      parts.push(`RPE ${item.rpe}`);
+    }
+  }
+
+  if (session.sport === 'swim') {
+    if (item?.target) {
+      parts.push(item.target);
+    }
+
+    if (item?.pace) {
+      parts.push(item.pace);
+    }
+  }
+
+  if (item?.recovery_min) {
+    parts.push(`${item.recovery_min} min recovery`);
+  } else if (item?.recovery_sec) {
+    parts.push(`${item.recovery_sec}s recovery`);
+  }
+
+  return parts.join(' · ');
+};
+    (prescription.warmup ?? []).forEach((item: any) => {
   if (item?.duration_min) {
     structureParts.push(`WU ${item.duration_min}'`);
   } else if (item?.distance_m) {
