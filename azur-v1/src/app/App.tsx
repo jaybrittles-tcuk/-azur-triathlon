@@ -4789,6 +4789,37 @@ onClick={() => void saveTrainingBaseline()}
         lineHeight: 1.5,
       }}
     >
+      {(session.prescription?.warmup ?? []).length > 0 && (
+  <div>
+    <strong>Warm-up</strong>
+
+    {(session.prescription?.warmup ?? []).map(
+      (item: any, itemIndex: number) => (
+        <div key={`warmup-${itemIndex}`}>
+          {item.duration_min
+            ? `${item.duration_min} min`
+            : item.distance_m
+              ? `${item.distance_m} m`
+              : 'Warm-up'}
+
+          {item.target && (
+            <>
+              {' · '}
+              {item.target}
+            </>
+          )}
+
+          {item.rpe && (
+            <>
+              {' · RPE '}
+              {item.rpe}
+            </>
+          )}
+        </div>
+      ),
+    )}
+  </div>
+)}
       {session.prescription?.focus && (
         <div>
           <strong>Focus:</strong>{' '}
@@ -4847,6 +4878,37 @@ onClick={() => void saveTrainingBaseline()}
           </div>
         ),
       )}
+      {(session.prescription?.cooldown ?? []).length > 0 && (
+  <div>
+    <strong>Cooldown</strong>
+
+    {(session.prescription?.cooldown ?? []).map(
+      (item: any, itemIndex: number) => (
+        <div key={`cooldown-${itemIndex}`}>
+          {item.duration_min
+            ? `${item.duration_min} min`
+            : item.distance_m
+              ? `${item.distance_m} m`
+              : 'Cooldown'}
+
+          {item.target && (
+            <>
+              {' · '}
+              {item.target}
+            </>
+          )}
+
+          {item.rpe && (
+            <>
+              {' · RPE '}
+              {item.rpe}
+            </>
+          )}
+        </div>
+      ),
+    )}
+  </div>
+)}
     </div>
   </div>
 )}
