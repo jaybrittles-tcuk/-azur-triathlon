@@ -3220,6 +3220,50 @@ const bikeCooldownMinutes = Math.max(
     bikeIntervalMinutes * bikeIntervalReps -
     bikeRecoveryMinutes * (bikeIntervalReps - 1),
 );
+    const swimThresholdSecPer100 =
+  athleteProfile.swimThreshold ?? 100;
+
+const aerobicSwimPaceSecPer100 =
+  swimThresholdSecPer100 * 1.08;
+
+const swim1TargetDistance =
+  Math.round(
+    (
+      (swim1Minutes * 60) /
+      aerobicSwimPaceSecPer100 *
+      100
+    ) / 50,
+  ) * 50;
+
+const swim1WarmupDistance =
+  Math.max(
+    300,
+    Math.round(
+      (swim1TargetDistance * 0.2) / 50,
+    ) * 50,
+  );
+
+const swim1CooldownDistance =
+  Math.max(
+    200,
+    Math.round(
+      (swim1TargetDistance * 0.1) / 50,
+    ) * 50,
+  );
+
+const swim1MainDistance =
+  Math.max(
+    800,
+    swim1TargetDistance -
+      swim1WarmupDistance -
+      swim1CooldownDistance,
+  );
+
+const swim1MainReps =
+  Math.max(
+    4,
+    Math.round(swim1MainDistance / 200),
+  );
     const generatedSessions = [
     {
       athlete_id: athlete.id,
