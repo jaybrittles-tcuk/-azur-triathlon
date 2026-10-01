@@ -707,8 +707,23 @@ const sessions: Session[] = [
     seasonWeekId: 'w1',
     plannedDate: '2026-09-22',
     sport: 'bike',
-title: 'Threshold Development',
-sessionClass: 'intensity',
+title:
+  phaseKey.includes('build')
+    ? 'Threshold Development'
+    : phaseKey.includes('peak')
+      ? 'Race-Specific Bike'
+      : phaseKey.includes('recovery')
+        ? 'Aerobic Recovery Ride'
+        : 'Strength Endurance Bike',
+
+session_class:
+  phaseKey.includes('peak')
+    ? 'race_specific'
+    : phaseKey.includes('recovery')
+      ? 'easy'
+      : phaseKey.includes('build')
+        ? 'intensity'
+        : 'endurance',
     priority: 1,
     durationMin: 100,
     targets: { power: '4 × 10 min @ 299–315 W' },
@@ -3457,8 +3472,14 @@ duration_min: bikeCooldownMinutes,
           },
         ],
       },
-      rationale:
-        'Develop sustainable threshold power.',
+  rationale:
+  phaseKey.includes('build')
+    ? 'Develop sustainable threshold power and raise aerobic cycling capacity.'
+    : phaseKey.includes('peak')
+      ? 'Rehearse race-specific power while maintaining controlled fatigue.'
+      : phaseKey.includes('recovery')
+        ? 'Maintain aerobic movement while reducing overall training stress.'
+        : 'Build muscular endurance and aerobic strength before progressing toward threshold work.',
       terrain: 'Indoor or flat road',
       status: 'planned',
       locked: false,
