@@ -3889,6 +3889,8 @@ useEffect(() => {
   const [showBaselineForm, setShowBaselineForm] =
   useState(false);
   const [planPreview, setPlanPreview] =
+    const [expandedPreviewSession, setExpandedPreviewSession] =
+  useState<number | null>(null);
   useState<any[] | null>(null);
   const [planPreviewInsights, setPlanPreviewInsights] =
   useState<{
