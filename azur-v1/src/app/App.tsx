@@ -3888,10 +3888,11 @@ useEffect(() => {
 ]);
   const [showBaselineForm, setShowBaselineForm] =
   useState(false);
-  const [planPreview, setPlanPreview] =
-    const [expandedPreviewSession, setExpandedPreviewSession] =
-  useState<number | null>(null);
+const [planPreview, setPlanPreview] =
   useState<any[] | null>(null);
+
+const [expandedPreviewSession, setExpandedPreviewSession] =
+  useState<number | null>(null);
   const [planPreviewInsights, setPlanPreviewInsights] =
   useState<{
     phase: string;
