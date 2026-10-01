@@ -3527,21 +3527,59 @@ distance_m: swim2CooldownDistance,
       priority: 1,
 duration_min: longRideMinutes,
       targets: {},
-      prescription: {
-        focus: 'Aerobic endurance',
- main_set: [
-  {
-duration_min: longRideMinutes,
+prescription: {
+  focus:
+    phaseKey.includes('peak')
+      ? 'Race-specific endurance'
+      : phaseKey.includes('build')
+        ? 'Aerobic endurance with race-specific work'
+        : phaseKey.includes('recovery')
+          ? 'Reduced aerobic endurance'
+          : 'Aerobic endurance',
+
+  warmup: [
+    {
+      duration_min: longRideWarmupMinutes,
+      target: '55–65% FTP',
+      rpe: '2–3',
+    },
+  ],
+
+  main_set: [
+    {
+      duration_min: longRideSteadyMinutes,
+      target:
+        phaseKey.includes('recovery')
+          ? '60–70% FTP'
+          : '65–75% FTP',
+      rpe: '4–5',
+    },
+
+    ...(longRideSpecificMinutes > 0
+      ? [
+          {
+            duration_min: longRideSpecificMinutes,
             target:
-  phaseKey.includes('peak')
-    ? '75–85% FTP'
-    : phaseKey.includes('recovery')
-      ? '60–70% FTP'
-      : '65–75% FTP',
-            rpe: '4–5',
+              phaseKey.includes('peak')
+                ? '75–85% FTP'
+                : '70–80% FTP',
+            rpe:
+              phaseKey.includes('peak')
+                ? '6–7'
+                : '5–6',
           },
-        ],
-      },
+        ]
+      : []),
+  ],
+
+  cooldown: [
+    {
+      duration_min: longRideCooldownMinutes,
+      target: '<65% FTP',
+      rpe: '2–3',
+    },
+  ],
+},
       rationale:
         'Develop long-course aerobic durability.',
       terrain: 'Road',
