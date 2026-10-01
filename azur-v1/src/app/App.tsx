@@ -4137,8 +4137,10 @@ const [athleteBaseline, setAthleteBaseline] =
     parts.push(`${item.recovery_sec}s recovery`);
   }
 
-  return parts.join(' · ');
-  function SessionVisual({
+return parts.join(' · ');
+};
+
+function SessionVisual({
   session,
 }: {
   session: any;
@@ -4152,8 +4154,7 @@ const [athleteBaseline, setAthleteBaseline] =
   }[] = [];
 const structureParts: string[] = [];
 
-};
-    (prescription.warmup ?? []).forEach((item: any) => {
+(prescription.warmup ?? []).forEach((item: any) => {
   if (item?.duration_min) {
     structureParts.push(`WU ${item.duration_min}'`);
   } else if (item?.distance_m) {
