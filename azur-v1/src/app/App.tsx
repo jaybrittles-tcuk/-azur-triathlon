@@ -4091,35 +4091,67 @@ const [athleteBaseline, setAthleteBaseline] =
       addBlock('Warm-up', item, 0.35),
   );
 
-  (prescription.main_set ?? []).forEach(
-    (item: any) => {
-      const reps = Number(item?.reps ?? 1);
+(prescription.main_set ?? []).forEach(
+  (item: any) => {
+    const reps = Number(item?.reps ?? 1);
 
-      for (let i = 0; i < reps; i += 1) {
-        addBlock(
-          'Work',
-          item,
-          session.session_class === 'intensity' ||
-          session.session_class === 'race_specific'
-            ? 0.9
-            : 0.6,
-        );
+    const isSteadyEndurance =
+      reps === 1 &&
+      !item?.recovery_min &&
+      !item?.recovery_sec &&
+      (
+        session.session_class === 'easy' ||
+        session.session_class === 'endurance'
+      );
 
-        if (
-          item?.recovery_min ||
-          item?.recovery_sec
-        ) {
-          blocks.push({
-            label: 'Recovery',
-            value:
-              Number(item.recovery_min ?? 0) ||
-              Number(item.recovery_sec ?? 0) / 60,
-            intensity: 0.25,
-          });
-        }
+    if (isSteadyEndurance) {
+      const totalValue =
+        Number(item?.duration_min ?? 0) ||
+        Number(item?.distance_m ?? 0) / 100;
+
+      const visualBlocks = 6;
+
+      for (let i = 0; i < visualBlocks; i += 1) {
+        blocks.push({
+          label: 'Steady',
+          value: totalValue / visualBlocks,
+          intensity:
+            i === 0 || i === visualBlocks - 1
+              ? 0.48
+              : i === 2 || i === 3
+                ? 0.62
+                : 0.56,
+        });
       }
-    },
-  );
+
+      return;
+    }
+
+    for (let i = 0; i < reps; i += 1) {
+      addBlock(
+        'Work',
+        item,
+        session.session_class === 'intensity' ||
+        session.session_class === 'race_specific'
+          ? 0.9
+          : 0.6,
+      );
+
+      if (
+        item?.recovery_min ||
+        item?.recovery_sec
+      ) {
+        blocks.push({
+          label: 'Recovery',
+          value:
+            Number(item.recovery_min ?? 0) ||
+            Number(item.recovery_sec ?? 0) / 60,
+          intensity: 0.25,
+        });
+      }
+    }
+  },
+);
 
   (prescription.cooldown ?? []).forEach(
     (item: any) =>
