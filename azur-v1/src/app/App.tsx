@@ -3264,6 +3264,44 @@ const swim1MainReps =
     4,
     Math.round(swim1MainDistance / 200),
   );
+    const swim2TargetDistance =
+  Math.round(
+    (
+      (swim2Minutes * 60) /
+      aerobicSwimPaceSecPer100 *
+      100
+    ) / 50,
+  ) * 50;
+
+const swim2WarmupDistance =
+  Math.max(
+    300,
+    Math.round(
+      (swim2TargetDistance * 0.15) / 50,
+    ) * 50,
+  );
+
+const swim2CooldownDistance =
+  Math.max(
+    200,
+    Math.round(
+      (swim2TargetDistance * 0.1) / 50,
+    ) * 50,
+  );
+
+const swim2MainDistance =
+  Math.max(
+    1000,
+    swim2TargetDistance -
+      swim2WarmupDistance -
+      swim2CooldownDistance,
+  );
+
+const swim2MainReps =
+  Math.max(
+    5,
+    Math.round(swim2MainDistance / 200),
+  );
     const generatedSessions = [
     {
       athlete_id: athlete.id,
@@ -3424,26 +3462,21 @@ duration_min: bikeCooldownMinutes,
           warmup: [
             {
               distance_m: Math.max(
-  200,
-  Math.round(swim2Minutes * 6),
-),
+distance_m: swim2WarmupDistance,
               target: 'Easy',
             },
           ],
           main_set: [
             {
-              reps: 10,
-              distance_m: 100,
+reps: swim2MainReps,
+distance_m: 200,
               target: 'Aerobic',
               recovery_sec: 15,
             },
           ],
           cooldown: [
             {
-              distance_m: Math.max(
-  100,
-  Math.round(swim2Minutes * 4),
-),
+distance_m: swim2CooldownDistance,
               target: 'Easy',
             },
           ],
