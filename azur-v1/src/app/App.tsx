@@ -4751,6 +4751,98 @@ onClick={() => void saveTrainingBaseline()}
     ? 'Hide session details'
     : 'View full session'}
 </button>
+          {expandedPreviewSession === index && (
+  <div
+    style={{
+      marginTop: '14px',
+      padding: '16px',
+      borderRadius: '10px',
+      background: '#F8FBFD',
+      border: '1px solid #E2EBF2',
+      color: '#17324D',
+    }}
+  >
+    <div
+      style={{
+        fontSize: '12px',
+        fontWeight: 800,
+        letterSpacing: '0.04em',
+        color: '#6B7F91',
+        marginBottom: '10px',
+      }}
+    >
+      SESSION DETAILS
+    </div>
+
+    <div
+      style={{
+        display: 'grid',
+        gap: '10px',
+        fontSize: '13px',
+        lineHeight: 1.5,
+      }}
+    >
+      {session.prescription?.focus && (
+        <div>
+          <strong>Focus:</strong>{' '}
+          {session.prescription.focus}
+        </div>
+      )}
+
+      {(session.prescription?.main_set ?? []).map(
+        (item: any, itemIndex: number) => (
+          <div key={itemIndex}>
+            <strong>
+              {item.reps && item.reps > 1
+                ? `${item.reps} × `
+                : ''}
+              {item.duration_min
+                ? `${item.duration_min} min`
+                : item.distance_m
+                  ? `${item.distance_m} m`
+                  : 'Main set'}
+            </strong>
+
+            {item.target && (
+              <>
+                {' · '}
+                {item.target}
+              </>
+            )}
+
+            {item.rpe && (
+              <>
+                {' · RPE '}
+                {item.rpe}
+              </>
+            )}
+
+            {item.ftp_percent && (
+              <>
+                {' · '}
+                {item.ftp_percent} FTP
+              </>
+            )}
+
+            {item.recovery_min && (
+              <>
+                {' · '}
+                {item.recovery_min} min recovery
+              </>
+            )}
+
+            {item.recovery_sec && (
+              <>
+                {' · '}
+                {item.recovery_sec}s recovery
+              </>
+            )}
+          </div>
+        ),
+      )}
+    </div>
+  </div>
+)}
           <p
             style={{
               color: '#52677B',
