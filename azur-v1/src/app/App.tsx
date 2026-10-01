@@ -4271,8 +4271,19 @@ return (
           alignItems: 'center',
           padding: '5px 8px',
           borderRadius: '999px',
-          background: '#F1F5F8',
-          color: '#52677B',
+       background:
+  session.sport === 'bike'
+    ? '#FFF7E2'
+    : session.sport === 'run'
+      ? '#EEF8F1'
+      : '#EEF7FC',
+
+color:
+  session.sport === 'bike'
+    ? '#9A6A00'
+    : session.sport === 'run'
+      ? '#2E7D4F'
+      : '#1673AE',
           fontSize: '11px',
           fontWeight: 700,
           lineHeight: 1.2,
