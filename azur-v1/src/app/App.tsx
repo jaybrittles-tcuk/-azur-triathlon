@@ -4898,57 +4898,14 @@ onClick={() => void saveTrainingBaseline()}
         </div>
       )}
 
-      {(session.prescription?.main_set ?? []).map(
-        (item: any, itemIndex: number) => (
-          <div key={itemIndex}>
-            <strong>
-              {item.reps && item.reps > 1
-                ? `${item.reps} × `
-                : ''}
-              {item.duration_min
-                ? `${item.duration_min} min`
-                : item.distance_m
-                  ? `${item.distance_m} m`
-                  : 'Main set'}
-            </strong>
-
-            {item.target && (
-              <>
-                {' · '}
-                {item.target}
-              </>
-            )}
-
-            {item.rpe && (
-              <>
-                {' · RPE '}
-                {item.rpe}
-              </>
-            )}
-
-            {item.ftp_percent && (
-              <>
-                {' · '}
-                {item.ftp_percent} FTP
-              </>
-            )}
-
-            {item.recovery_min && (
-              <>
-                {' · '}
-                {item.recovery_min} min recovery
-              </>
-            )}
-
-            {item.recovery_sec && (
-              <>
-                {' · '}
-                {item.recovery_sec}s recovery
-              </>
-            )}
-          </div>
-        ),
-      )}
+{(session.prescription?.main_set ?? []).map(
+  (item: any, itemIndex: number) => (
+    <div key={itemIndex}>
+      <strong>Main set:</strong>{' '}
+      {formatMainSetDetail(item)}
+    </div>
+  ),
+)}
       {(session.prescription?.cooldown ?? []).length > 0 && (
   <div>
     <strong>Cooldown</strong>
