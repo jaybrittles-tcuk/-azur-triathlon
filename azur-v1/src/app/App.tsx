@@ -8743,7 +8743,8 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     );
   }
 
-  return (
+return (
+  <>
     <div className="app-shell">
       <style>{`
   .mobile-bottom-nav {
@@ -9028,17 +9029,17 @@ style={
         {activeNav === 'Data Sources' && <DataSourcesView />}
         {activeNav === 'Strava Feed' && <StravaFeedView />}
       </main>
-      <nav
-  className="mobile-bottom-nav"
+    </div>
+
+    <nav
+      className="mobile-bottom-nav"
   style={{
   position: 'fixed',
-left: '50%',
-right: 'auto',
-bottom: 0,
-width: '100vw',
-maxWidth: '100vw',
+left: 0,
+right: 0,
+width: '100%',
 margin: 0,
-transform: 'translateX(-50%)',
+transform: 'none',
     boxSizing: 'border-box',
 left: 0,
 right: 0,
@@ -9100,6 +9101,6 @@ color: isActive
     );
   })}
 </nav>
-    </div>
-  );
+  </>
+);
 }
