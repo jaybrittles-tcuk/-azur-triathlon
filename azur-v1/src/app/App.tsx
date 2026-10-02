@@ -9070,31 +9070,32 @@ backdropFilter: 'blur(18px)',
         key={label}
         type="button"
         onClick={() => setActiveNav(targetNav)}
-        style={{
-flex: 1,
-minWidth: 0,
-padding: '5px 7px',
-borderRadius: '12px',
-background: isActive
-  ? '#EEF6FB'
-  : 'transparent',
-
-boxShadow: isActive
-  ? 'inset 0 0 0 1px rgba(10,53,86,0.06)'
-  : 'none',
-
-color: isActive
-  ? '#0A3556'
-  : '#8192A2',
       style={{
   flex: 1,
   minWidth: 0,
   padding: '5px 7px',
   border: 'none',
   borderRadius: '12px',
-          gap: '4px',
-          cursor: 'pointer',
-        }}
+
+  background: isActive
+    ? '#EEF6FB'
+    : 'transparent',
+
+  boxShadow: isActive
+    ? 'inset 0 0 0 1px rgba(10,53,86,0.06)'
+    : 'none',
+
+  color: isActive
+    ? '#0A3556'
+    : '#8192A2',
+
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '4px',
+  cursor: 'pointer',
+}}
       >
         <Icon size={19} />
 
