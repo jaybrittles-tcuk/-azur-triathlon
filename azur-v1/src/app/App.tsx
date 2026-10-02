@@ -4400,45 +4400,95 @@ function HomeView() {
     marginBottom: '16px',
   }}
 >
+<section
+  className="mobile-home-hero"
+  style={{
+    marginBottom: '14px',
+  }}
+>
   <div
     className="race-hero-card"
     style={{
-      minHeight: '190px',
-      padding: '22px',
-      borderRadius: '18px',
+      minHeight: '210px',
+      padding: '22px 20px',
+      position: 'relative',
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'flex-end',
+      borderRadius: '0 0 18px 18px',
+      border: 'none',
+      boxShadow: 'none',
       backgroundImage:
-        "linear-gradient(180deg, rgba(5,18,31,0.18) 0%, rgba(5,18,31,0.88) 78%, rgba(5,18,31,0.96) 100%), url('/race-images/roth.jpg')",
+        "linear-gradient(180deg, rgba(6,19,33,0.30) 0%, rgba(6,19,33,0.12) 38%, rgba(6,19,33,0.70) 72%, #061321 100%), url('/race-images/roth.jpg')",
       backgroundSize: 'cover',
       backgroundPosition: 'center',
-      boxShadow: '0 8px 26px rgba(9, 32, 53, 0.10)',
     }}
   >
-    <div>
+    <button
+      type="button"
+      onClick={() => setActiveNav('Profile')}
+      style={{
+        position: 'absolute',
+        top: '18px',
+        right: '18px',
+        width: '46px',
+        height: '46px',
+        padding: 0,
+        borderRadius: '50%',
+        border: '2px solid rgba(255,255,255,0.95)',
+        background: '#0A3556',
+        boxShadow: '0 0 0 2px rgba(32,143,208,0.85)',
+        overflow: 'hidden',
+        cursor: 'pointer',
+      }}
+    >
+      {avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt={`${athleteName} profile`}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
+        />
+      ) : (
+        <User
+          size={20}
+          color="#FFFFFF"
+        />
+      )}
+    </button>
+
+    <div
+      style={{
+        position: 'relative',
+        zIndex: 1,
+      }}
+    >
       <div
         style={{
           marginBottom: '5px',
-          color: 'rgba(255,255,255,0.78)',
-          fontSize: '12px',
+          color: 'rgba(255,255,255,0.72)',
+          fontSize: '11px',
           fontWeight: 700,
-          letterSpacing: '0.08em',
+          letterSpacing: '0.10em',
           textTransform: 'uppercase',
         }}
       >
-        Good morning, Jay
+        Welcome back
       </div>
 
       <h1
         style={{
           margin: 0,
           color: '#FFFFFF',
-          fontSize: '26px',
+          fontSize: '28px',
           fontWeight: 700,
-          lineHeight: 1.15,
-          letterSpacing: '-0.02em',
+          lineHeight: 1.1,
+          letterSpacing: '-0.025em',
         }}
       >
         {primaryRace.name || 'Primary Race'}
@@ -4451,7 +4501,7 @@ function HomeView() {
           alignItems: 'center',
           flexWrap: 'wrap',
           gap: '7px',
-          color: 'rgba(255,255,255,0.90)',
+          color: 'rgba(255,255,255,0.86)',
           fontSize: '14px',
           fontWeight: 500,
         }}
@@ -4460,11 +4510,7 @@ function HomeView() {
           {planPreviewInsights?.phase || 'Base 1'}
         </span>
 
-        <span
-          style={{
-            opacity: 0.45,
-          }}
-        >
+        <span style={{ opacity: 0.4 }}>
           •
         </span>
 
