@@ -9023,7 +9023,7 @@ style={
   </div>
 </div>
         </header>
-
+{activeNav === 'Home' && HomeView()}
 {activeNav === 'Chat' && (
   <section
     style={{
