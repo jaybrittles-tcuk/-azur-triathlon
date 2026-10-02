@@ -5230,67 +5230,117 @@ onClick={() => void saveTrainingBaseline()}
     </p>
   </section>
 )}
-<section className="hero-grid">
-    <div
-  className={`readiness-panel ${
-    recoveryReadiness?.color ?? ''
-  }`}
+<section
+  style={{
+    marginBottom: '14px',
+    padding: '14px 16px',
+    background: '#FFFFFF',
+    border: '1px solid #E1E8EF',
+    borderRadius: '14px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+  }}
 >
-  <span className="eyebrow light">
-    DAILY READINESS
-  </span>
+  <div
+    style={{
+      width: '42px',
+      height: '42px',
+      flexShrink: 0,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background:
+        recoveryReadiness?.color === 'green'
+          ? '#EAF7EF'
+          : recoveryReadiness?.color === 'amber'
+            ? '#FFF6DF'
+            : recoveryReadiness?.color === 'red'
+              ? '#FDECEC'
+              : '#F1F5F8',
+    }}
+  >
+    <div
+      style={{
+        width: '12px',
+        height: '12px',
+        borderRadius: '50%',
+        background:
+          recoveryReadiness?.color === 'green'
+            ? '#35A96B'
+            : recoveryReadiness?.color === 'amber'
+              ? '#E7A528'
+              : recoveryReadiness?.color === 'red'
+                ? '#D85A5A'
+                : '#A8B5C1',
+      }}
+    />
+  </div>
 
-  <strong>
-    {recoveryReadiness
-      ? recoveryReadiness.color.toUpperCase()
-      : '—'}
-  </strong>
+  <div style={{ flex: 1 }}>
+    <div
+      style={{
+        color: '#708396',
+        fontSize: '11px',
+        fontWeight: 700,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+      }}
+    >
+      Daily Readiness
+    </div>
 
-  <p>
-    {recoveryReadiness
-      ? recoveryReadiness.implication === 'proceed_as_planned'
-        ? 'Recovery signals support proceeding with the planned training.'
-        : recoveryReadiness.implication === 'hold_or_trim_cost'
-          ? 'Recovery signals suggest holding or slightly reducing training cost today.'
-          : 'Recovery signals suggest reducing training stress today.'
-      : 'Add recovery data to generate today’s readiness guidance.'}
-  </p>
-</div>
+    <div
+      style={{
+        marginTop: '3px',
+        color: '#17324D',
+        fontSize: '15px',
+        fontWeight: 700,
+      }}
+    >
+      {recoveryReadiness
+        ? recoveryReadiness.color === 'green'
+          ? 'Good to go'
+          : recoveryReadiness.color === 'amber'
+            ? 'Proceed with care'
+            : 'Recovery priority'
+        : 'Readiness unavailable'}
+    </div>
 
-          <Metric
-            label="RACE READINESS"
-            value="62%"
-            hint="+2 points this week"
-          />
+    <div
+      style={{
+        marginTop: '2px',
+        color: '#65798B',
+        fontSize: '13px',
+        lineHeight: 1.4,
+      }}
+    >
+      {recoveryReadiness
+        ? recoveryReadiness.implication === 'proceed_as_planned'
+          ? 'Recovery supports your planned training today.'
+          : recoveryReadiness.implication === 'hold_or_trim_cost'
+            ? 'Consider slightly reducing training load today.'
+            : 'Reduce training stress and prioritise recovery.'
+        : 'Add recovery data to generate today’s guidance.'}
+    </div>
+  </div>
 
- <Metric
-  label="FITNESS"
-  value={
-    trainingLoad.fitness != null
-      ? String(trainingLoad.fitness)
-      : '—'
-  }
-  hint={
-    trainingLoad.fitness != null
-      ? 'Long-term load'
-      : 'Building history'
-  }
-/>
-
-<Metric
-  label="FORM"
-  value={
-    trainingLoad.form != null
-      ? String(trainingLoad.form)
-      : '—'
-  }
-  hint={
-    trainingLoad.form != null
-      ? 'Fitness minus fatigue'
-      : 'Building history'
-  }
-/>
-        </section>
+  <button
+    type="button"
+    onClick={() => setActiveNav('Recovery')}
+    style={{
+      padding: 0,
+      border: 'none',
+      background: 'transparent',
+      color: '#1673AE',
+      fontSize: '20px',
+      cursor: 'pointer',
+    }}
+  >
+    ›
+  </button>
+</section>
 
 <section className="panel today-training-card">
   <div className="today-training-heading">
