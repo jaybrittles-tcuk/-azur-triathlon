@@ -8868,7 +8868,7 @@ style={
     : undefined
 }
 >
-          {activeNav !== 'Home' && (
+         {activeNav !== 'Home' && activeNav !== 'Chat' && (
   <div>
     <span className="eyebrow">
       {activeNav === 'Strava Feed'
@@ -8900,7 +8900,7 @@ style={
 >
   {activeNav === 'Home' && HomeView()}
   
-{activeNav !== 'Home' && (
+{activeNav !== 'Home' && activeNav !== 'Chat' && (
   <div className="race-countdown">
     <span className="eyebrow">
       DAYS TO{' '}
