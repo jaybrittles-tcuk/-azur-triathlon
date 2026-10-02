@@ -8848,6 +8848,17 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
         </header>
 
         {activeNav === 'Home' && HomeView()}
+        {activeNav === 'Chat' && (
+  <section
+    style={{
+      padding: '24px',
+      color: '#17324D',
+    }}
+  >
+    <h2>Ask Azur</h2>
+    <p>Your coaching chat is coming next.</p>
+  </section>
+)}
         {activeNav === 'Calendar' && CalendarView()}
         {activeNav === 'Performance' && <PerformanceView />}
         {activeNav === 'Recovery' && <RecoveryView />}
