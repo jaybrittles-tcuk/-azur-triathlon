@@ -4833,20 +4833,18 @@ onClick={() => void saveTrainingBaseline()}
             borderRadius: '10px',
           }}
         >
-          <div
-            style={{
-              fontSize: '13px',
-              color: '#52677B',
-            }}
-          >
-            {new Date(
-              `${session.planned_date}T12:00:00`,
-            ).toLocaleDateString('en-GB', {
-              weekday: 'long',
-                </div>
-    );
+<div
+  style={{
+    fontSize: '13px',
+    color: '#52677B',
+  }}
+>
+  {new Date(
+    `${session.planned_date}T12:00:00`,
+  ).toLocaleDateString('en-GB', {
+    weekday: 'long',
   })}
-
+</div>
           <strong style={{ color: '#17324D' }}>
             {session.title}
           </strong>
