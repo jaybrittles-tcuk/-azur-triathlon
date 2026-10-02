@@ -8706,18 +8706,13 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
       <main>
         <header
   className="topbar"
-  style={
-    activeNav === 'Home'
-      ? {
-          minHeight: '0',
-          padding: '10px 0 14px',
-          marginBottom: '8px',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          borderBottom: 'none',
-        }
-      : undefined
-  }
+style={
+  activeNav === 'Home'
+    ? {
+        display: 'none',
+      }
+    : undefined
+}
 >
           {activeNav !== 'Home' && (
   <div>
