@@ -9071,7 +9071,8 @@ backdropFilter: 'blur(18px)',
         type="button"
         onClick={() => setActiveNav(targetNav)}
         style={{
-minWidth: '56px',
+flex: 1,
+minWidth: 0,
 padding: '5px 7px',
 borderRadius: '12px',
 background: isActive
@@ -9085,9 +9086,12 @@ boxShadow: isActive
 color: isActive
   ? '#0A3556'
   : '#8192A2',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+      style={{
+  flex: 1,
+  minWidth: 0,
+  padding: '5px 7px',
+  border: 'none',
+  borderRadius: '12px',
           gap: '4px',
           cursor: 'pointer',
         }}
