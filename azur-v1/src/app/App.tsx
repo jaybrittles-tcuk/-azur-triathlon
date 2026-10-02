@@ -8487,6 +8487,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 )}
 
 <div className="topbar-actions">
+{activeNav !== 'Home' && (
   <div className="race-countdown">
     <span className="eyebrow">
       DAYS TO{' '}
@@ -8497,6 +8498,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 
     <strong>{daysToRace}</strong>
   </div>
+)}
 
   <div className="account-menu">
     <button
