@@ -4416,11 +4416,11 @@ function HomeView() {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'flex-end',
-      borderRadius: '0 0 18px 18px',
+      borderRadius: '0 0 16px 16px',
       border: 'none',
       boxShadow: 'none',
-      backgroundImage:
-        "linear-gradient(180deg, rgba(6,19,33,0.30) 0%, rgba(6,19,33,0.12) 38%, rgba(6,19,33,0.70) 72%, #061321 100%), url('/race-images/roth.jpg')",
+     backgroundImage:
+  "linear-gradient(180deg, #061321 0%, rgba(6,19,33,0.18) 18%, rgba(6,19,33,0.10) 42%, rgba(6,19,33,0.72) 78%, #061321 100%), url('/race-images/roth.jpg')",
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}
@@ -4730,7 +4730,15 @@ padding: '11px 16px',
   >
     <button
       type="button"
-      onClick={() => void generateCurrentWeekPlan(true)}
+      onClick={() => {
+  if (planPreview) {
+    setPlanPreview(null);
+    setPlanPreviewInsights(null);
+    setExpandedPreviewSession(null);
+  } else {
+    void generateCurrentWeekPlan(true);
+  }
+}}
       style={{
         padding: '8px 10px',
         borderRadius: '8px',
@@ -4742,7 +4750,7 @@ padding: '11px 16px',
         cursor: 'pointer',
       }}
     >
-      Preview
+      {planPreview ? 'Close' : 'Preview'}
     </button>
 
     <button
@@ -8825,7 +8833,15 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 </div>
       </aside>
 
-      <main>
+      <main
+  style={
+    activeNav === 'Home'
+      ? {
+          paddingTop: 0,
+        }
+      : undefined
+  }
+>
         <header
   className="topbar"
 style={
@@ -9015,14 +9031,22 @@ style={
       <nav
   className="mobile-bottom-nav"
   style={{
-    position: 'fixed',
+  position: 'fixed',
+left: '50%',
+right: 'auto',
+bottom: 0,
+width: '100vw',
+maxWidth: '100vw',
+margin: 0,
+transform: 'translateX(-50%)',
+    boxSizing: 'border-box',
 left: 0,
 right: 0,
 bottom: 0,
 padding: '7px 8px calc(7px + env(safe-area-inset-bottom))',
 background: 'rgba(255,255,255,0.96)',
 border: '1px solid rgba(12,48,76,0.10)',
-borderRadius: '18px 18px 0 0',
+borderRadius: '14px 14px 0 0',
 boxShadow: '0 -6px 24px rgba(4, 18, 31, 0.10)',
 backdropFilter: 'blur(18px)',
   }}
