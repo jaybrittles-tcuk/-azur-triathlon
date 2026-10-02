@@ -4403,12 +4403,6 @@ function HomeView() {
 <section
   className="mobile-home-hero"
   style={{
-    marginBottom: '16px',
-  }}
->
-<section
-  className="mobile-home-hero"
-  style={{
     marginBottom: '14px',
   }}
 >
