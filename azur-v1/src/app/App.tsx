@@ -8615,6 +8615,32 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 
   return (
     <div className="app-shell">
+      <style>{`
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  @media (max-width: 900px) {
+    .sidebar {
+      display: none !important;
+    }
+
+    .mobile-bottom-nav {
+      display: flex !important;
+    }
+
+    .app-shell {
+      display: block !important;
+      width: 100% !important;
+    }
+
+    .app-shell > main {
+      width: 100% !important;
+      margin-left: 0 !important;
+      padding-bottom: 110px !important;
+    }
+  }
+`}</style>
       <aside className="sidebar">
         <div className="brand-block">
           <img
