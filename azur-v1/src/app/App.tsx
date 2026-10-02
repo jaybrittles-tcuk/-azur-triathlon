@@ -8736,7 +8736,14 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   </div>
 )}
 
-  <div className="account-menu">
+  <div
+  className="account-menu"
+  style={
+    activeNav === 'Home'
+      ? { display: 'none' }
+      : undefined
+  }
+>
  <button
   className="account-button"
   onClick={() => setAccountOpen((current) => !current)}
