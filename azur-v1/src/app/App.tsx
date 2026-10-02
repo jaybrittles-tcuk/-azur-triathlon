@@ -4386,37 +4386,84 @@ color:
   function HomeView() {
     return (
       <>
-        <section className="mobile-home-hero">
-          <div
-            className="race-hero-card"
+<section
+  className="mobile-home-hero"
+  style={{
+    marginBottom: '16px',
+  }}
+>
+  <div
+    className="race-hero-card"
     style={{
+      minHeight: '190px',
+      padding: '22px',
+      borderRadius: '18px',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-end',
       backgroundImage:
-        "linear-gradient(180deg, rgba(4,15,28,0.10) 0%, rgba(4,15,28,0.92) 100%), url('/race-images/roth.jpg')",
+        "linear-gradient(180deg, rgba(5,18,31,0.18) 0%, rgba(5,18,31,0.88) 78%, rgba(5,18,31,0.96) 100%), url('/race-images/roth.jpg')",
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      boxShadow: '0 8px 26px rgba(9, 32, 53, 0.10)',
     }}
   >
-    <div className="race-hero-top">
-      <span className="race-current-dot" />
-      <span>CURRENT · A RACE</span>
-    </div>
-
-    <div className="race-hero-content">
-      <div className="race-countdown-number">
-        {daysToRace}
-        <span> days</span>
+    <div>
+      <div
+        style={{
+          marginBottom: '5px',
+          color: 'rgba(255,255,255,0.78)',
+          fontSize: '12px',
+          fontWeight: 700,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+        }}
+      >
+        Good morning, Jay
       </div>
 
-      <p>until</p>
+      <h1
+        style={{
+          margin: 0,
+          color: '#FFFFFF',
+          fontSize: '26px',
+          fontWeight: 700,
+          lineHeight: 1.15,
+          letterSpacing: '-0.02em',
+        }}
+      >
+        {primaryRace.name || 'Primary Race'}
+      </h1>
 
-   <h2>{primaryRace.name || 'Primary race'}</h2>
-<div className="race-hero-meta">
-  <span>
-    {weekSessions.length} sessions planned
-  </span>
+      <div
+        style={{
+          marginTop: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '7px',
+          color: 'rgba(255,255,255,0.90)',
+          fontSize: '14px',
+          fontWeight: 500,
+        }}
+      >
+        <span>
+          {planPreviewInsights?.phase || 'Base 1'}
+        </span>
 
-  <span>
-    {totalHours.toFixed(1)}h this week
-  </span>
-</div>
+        <span
+          style={{
+            opacity: 0.45,
+          }}
+        >
+          •
+        </span>
+
+        <span>
+          {daysToRace} days to race day
+        </span>
+      </div>
     </div>
   </div>
 </section>
@@ -4769,7 +4816,15 @@ onClick={() => void saveTrainingBaseline()}
   </div>
 )}
     <div style={{ display: 'grid', gap: '12px' }}>
-      {planPreview.map((session, index) => (
+     {planPreview.map((session, index) => {
+  const detailAccent =
+    session.sport === 'bike'
+      ? '#B77B00'
+      : session.sport === 'run'
+        ? '#2F8A57'
+        : '#1673AE';
+
+  return (
         <div
           key={index}
           style={{
@@ -4788,8 +4843,9 @@ onClick={() => void saveTrainingBaseline()}
               `${session.planned_date}T12:00:00`,
             ).toLocaleDateString('en-GB', {
               weekday: 'long',
-            })}
-          </div>
+                </div>
+    );
+  })}
 
           <strong style={{ color: '#17324D' }}>
             {session.title}
