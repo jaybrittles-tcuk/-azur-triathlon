@@ -4572,8 +4572,12 @@ function HomeView() {
             textTransform: 'uppercase',
           }}
         >
-          {todaySession.sport} ·{' '}
-          {todaySession.duration_min} min
+      {todaySession.sport} ·{' '}
+{todaySession.duration_min ??
+  todaySession.durationMin ??
+  todaySession.duration_minutes ??
+  0}{' '}
+min
         </div>
       </div>
     </div>
