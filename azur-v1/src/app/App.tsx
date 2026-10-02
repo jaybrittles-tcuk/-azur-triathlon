@@ -8898,6 +8898,8 @@ style={
       : undefined
   }
 >
+  {activeNav === 'Home' && HomeView()}
+  
 {activeNav !== 'Home' && (
   <div className="race-countdown">
     <span className="eyebrow">
