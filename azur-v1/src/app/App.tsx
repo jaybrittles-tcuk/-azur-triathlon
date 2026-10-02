@@ -4430,10 +4430,10 @@ function HomeView() {
       onClick={() => setActiveNav('Profile')}
       style={{
         position: 'absolute',
-        top: '18px',
-        right: '18px',
-        width: '46px',
-        height: '46px',
+        top: '16px',
+right: '16px',
+        width: '58px',
+height: '58px',
         padding: 0,
         borderRadius: '50%',
         border: '2px solid rgba(255,255,255,0.95)',
@@ -4448,11 +4448,13 @@ function HomeView() {
           src={avatarUrl}
           alt={`${athleteName} profile`}
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
-          }}
+  width: '100%',
+  height: '100%',
+  objectFit: 'contain',
+  objectPosition: 'center',
+  display: 'block',
+  background: '#071524',
+}}
         />
       ) : (
         <User
@@ -9014,14 +9016,14 @@ style={
   className="mobile-bottom-nav"
   style={{
     position: 'fixed',
-left: '10px',
-right: '10px',
-bottom: '8px',
+left: 0,
+right: 0,
+bottom: 0,
 padding: '7px 8px calc(7px + env(safe-area-inset-bottom))',
 background: 'rgba(255,255,255,0.96)',
 border: '1px solid rgba(12,48,76,0.10)',
-borderRadius: '18px',
-boxShadow: '0 8px 28px rgba(4, 18, 31, 0.14)',
+borderRadius: '18px 18px 0 0',
+boxShadow: '0 -6px 24px rgba(4, 18, 31, 0.10)',
 backdropFilter: 'blur(18px)',
   }}
 >
