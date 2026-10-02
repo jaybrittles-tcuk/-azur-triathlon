@@ -3917,8 +3917,23 @@ useEffect(() => {
   useState(false);
 const [planPreview, setPlanPreview] =
   useState<any[] | null>(null);
+const [chatMessage, setChatMessage] = useState('');
 
-const [expandedPreviewSession, setExpandedPreviewSession] =
+const [chatMessages, setChatMessages] = useState<
+  Array<{
+    id: number;
+    role: 'user' | 'assistant';
+    text: string;
+  }>
+>([
+  {
+    id: 1,
+    role: 'assistant',
+    text:
+      'Hi. I can help with your training, recovery, pacing, race preparation and your current Azur plan.',
+  },
+]);
+  const [expandedPreviewSession, setExpandedPreviewSession] =
   useState<number | null>(null);
   const [planPreviewInsights, setPlanPreviewInsights] =
   useState<{
