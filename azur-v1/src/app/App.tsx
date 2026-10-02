@@ -8899,19 +8899,15 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   className="mobile-bottom-nav"
   style={{
     position: 'fixed',
-    left: '12px',
-    right: '12px',
-    bottom: '12px',
-    zIndex: 100,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    padding: '8px 8px calc(8px + env(safe-area-inset-bottom))',
-    background: 'rgba(7, 21, 36, 0.96)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: '20px',
-    boxShadow: '0 14px 40px rgba(4, 18, 31, 0.22)',
-    backdropFilter: 'blur(16px)',
+left: '10px',
+right: '10px',
+bottom: '8px',
+padding: '7px 8px calc(7px + env(safe-area-inset-bottom))',
+background: 'rgba(255,255,255,0.96)',
+border: '1px solid rgba(12,48,76,0.10)',
+borderRadius: '18px',
+boxShadow: '0 8px 28px rgba(4, 18, 31, 0.14)',
+backdropFilter: 'blur(18px)',
   }}
 >
   {mobileNavigation.map(([Icon, label]) => {
@@ -8933,16 +8929,15 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
         type="button"
         onClick={() => setActiveNav(targetNav)}
         style={{
-          minWidth: '58px',
-          padding: '7px 8px',
-          border: 'none',
-          borderRadius: '14px',
-          background: isActive
-            ? 'rgba(32, 143, 208, 0.18)'
-            : 'transparent',
-          color: isActive
-            ? '#FFFFFF'
-            : 'rgba(255,255,255,0.58)',
+minWidth: '56px',
+padding: '6px 7px',
+borderRadius: '12px',
+background: isActive
+  ? '#EAF4FB'
+  : 'transparent',
+color: isActive
+  ? '#0A3556'
+  : '#8192A2',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -8950,7 +8945,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
           cursor: 'pointer',
         }}
       >
-        <Icon size={20} />
+        <Icon size={19} />
 
         <span
           style={{
