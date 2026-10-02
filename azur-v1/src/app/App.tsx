@@ -4585,23 +4585,44 @@ min
 <div
   style={{
     marginTop: '14px',
-    padding: '8px 0 2px',
+    height: '42px',
+    display: 'flex',
+    alignItems: 'flex-end',
+    gap: '4px',
   }}
 >
-  <div
-    style={{
-      height: '58px',
-      overflow: 'hidden',
-    }}
-  >
-    <SessionVisual session={todaySession} />
-  </div>
+  {[42, 58, 72, 54, 80, 64, 48, 70, 56, 38].map(
+    (height, index) => (
+      <div
+        key={index}
+        style={{
+          flex: 1,
+          height: `${height}%`,
+          minHeight: '10px',
+          borderRadius: '4px 4px 2px 2px',
+          background:
+            todaySession.sport === 'bike'
+              ? index > 2 && index < 7
+                ? '#F4B43C'
+                : '#F4E4B5'
+              : todaySession.sport === 'run'
+                ? index > 2 && index < 7
+                  ? '#35A96B'
+                  : '#B8E0C8'
+                : index > 2 && index < 7
+                  ? '#208FD0'
+                  : '#B7D8ED',
+        }}
+      />
+    ),
+  )}
 </div>
 
     <button
       type="button"
       style={{
-        width: '100%',
+       width: 'auto',
+        minWidth: '140px',
      marginTop: '12px',
 padding: '11px 16px',
         border: 'none',
