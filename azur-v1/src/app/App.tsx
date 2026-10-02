@@ -4479,10 +4479,10 @@ function HomeView() {
   <section
     style={{
       marginBottom: '14px',
-      padding: '18px',
+     padding: '16px',
       background: '#FFFFFF',
       border: '1px solid #E1E8EF',
-      borderRadius: '16px',
+      borderRadius: '14px',
     }}
   >
     <div
@@ -4582,16 +4582,28 @@ min
       </div>
     </div>
 
-    <div style={{ marginTop: '16px' }}>
-      <SessionVisual session={todaySession} />
-    </div>
+<div
+  style={{
+    marginTop: '14px',
+    padding: '8px 0 2px',
+  }}
+>
+  <div
+    style={{
+      height: '58px',
+      overflow: 'hidden',
+    }}
+  >
+    <SessionVisual session={todaySession} />
+  </div>
+</div>
 
     <button
       type="button"
       style={{
         width: '100%',
-        marginTop: '16px',
-        padding: '12px 16px',
+     marginTop: '12px',
+padding: '11px 16px',
         border: 'none',
         borderRadius: '10px',
         background: '#0A3556',
