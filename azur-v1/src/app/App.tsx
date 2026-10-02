@@ -9022,14 +9022,6 @@ style={
 </div>
         </header>
 
-        {activeNav === 'Home' && HomeView()}
-        {activeNav === 'Chat' && (
-  <section
-    style={{
-      padding: '24px',
-      color: '#17324D',
-    }}
-  >
 {activeNav === 'Chat' && (
   <section
     style={{
