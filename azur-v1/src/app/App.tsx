@@ -5341,91 +5341,131 @@ onClick={() => void saveTrainingBaseline()}
     ›
   </button>
 </section>
-
-<section className="panel today-training-card">
-  <div className="today-training-heading">
+<section
+  style={{
+    marginBottom: '14px',
+    padding: '16px',
+    background: '#FFFFFF',
+    border: '1px solid #E1E8EF',
+    borderRadius: '14px',
+  }}
+>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '12px',
+      marginBottom: '14px',
+    }}
+  >
     <div>
-      <span className="eyebrow">TODAY</span>
-      <h3>
-        {now.toLocaleDateString('en-GB', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-        })}
-      </h3>
+      <div
+        style={{
+          color: '#708396',
+          fontSize: '11px',
+          fontWeight: 700,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+        }}
+      >
+        This Week
+      </div>
+
+      <div
+        style={{
+          marginTop: '3px',
+          color: '#17324D',
+          fontSize: '18px',
+          fontWeight: 700,
+        }}
+      >
+        {weekSessions.length} sessions · {totalHours.toFixed(1)}h planned
+      </div>
     </div>
 
-    <button onClick={() => setActiveNav('Calendar')}>
-      View calendar
+    <button
+      type="button"
+      onClick={() => setActiveNav('Calendar')}
+      style={{
+        padding: 0,
+        border: 'none',
+        background: 'transparent',
+        color: '#1673AE',
+        fontSize: '13px',
+        fontWeight: 700,
+        cursor: 'pointer',
+      }}
+    >
+      View plan →
     </button>
   </div>
 
-  {todaySession ? (
-    <div
-      className={`today-workout ${todaySession.sport}`}
-      onClick={() => {
-        setSelectedId(todaySession.id);
-        setActiveNav('Calendar');
-      }}
-    >
-      <div className="today-workout-top">
-        <span className="today-sport">
-          {sportName(todaySession.sport)}
-        </span>
-
-        <span className="today-priority">
-          P{todaySession.priority}
-        </span>
-      </div>
-
-      <h2>{todaySession.title}</h2>
-
-      <p className="today-target">
-        {Object.values(todaySession.targets)[0]?.toString()}
-      </p>
-
-      <div className="today-workout-stats">
-<div>
-  <span>
-    {todaySession.status === 'completed'
-      ? 'PLANNED / DONE'
-      : 'DURATION'}
-  </span>
-
-  <strong>
-    {todaySession.status === 'completed' &&
-    todaySession.completedDurationSec
-      ? `${formatDuration(todaySession.durationMin)} / ${formatDuration(
-          Math.round(todaySession.completedDurationSec / 60),
-        )}`
-      : formatDuration(todaySession.durationMin)}
-  </strong>
-</div>
-
-        <div>
-          <span>SESSION</span>
-          <strong>{todaySession.sessionClass}</strong>
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      gap: '10px',
+    }}
+  >
+    {[
+      {
+        label: 'Swim',
+        value: weekSessions.filter(
+          (session: any) => session.sport === 'swim',
+        ).length,
+        color: '#208FD0',
+        background: '#EEF7FC',
+      },
+      {
+        label: 'Bike',
+        value: weekSessions.filter(
+          (session: any) => session.sport === 'bike',
+        ).length,
+        color: '#B77B00',
+        background: '#FFF7E2',
+      },
+      {
+        label: 'Run',
+        value: weekSessions.filter(
+          (session: any) => session.sport === 'run',
+        ).length,
+        color: '#2F8A57',
+        background: '#EEF8F1',
+      },
+    ].map((item) => (
+      <div
+        key={item.label}
+        style={{
+          padding: '10px',
+          borderRadius: '10px',
+          background: item.background,
+        }}
+      >
+        <div
+          style={{
+            color: item.color,
+            fontSize: '18px',
+            fontWeight: 700,
+          }}
+        >
+          {item.value}
         </div>
 
-        <div>
-          <span>STATUS</span>
-          <strong>{todaySession.status}</strong>
+        <div
+          style={{
+            marginTop: '2px',
+            color: '#65798B',
+            fontSize: '12px',
+            fontWeight: 600,
+          }}
+        >
+          {item.label}
         </div>
       </div>
-
-      <div className="today-workout-cta">
-        View workout
-        <span>→</span>
-      </div>
-    </div>
-  ) : (
-    <div className="today-rest">
-      <strong>Recovery day</strong>
-      <p>No structured training is planned for today.</p>
-    </div>
-  )}
-</section>
-
+    ))}
+  </div>
+</section>        
         <section className="coach-insight-card">
           <div className="coach-insight-top">
             <span className="coach-insight-label">
