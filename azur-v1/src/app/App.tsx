@@ -4638,42 +4638,84 @@ padding: '11px 16px',
     </button>
   </section>
 )}
-        <div style={{ margin: '16px 0' }}>
-  <button
-    type="button"
-    onClick={() => void generateCurrentWeekPlan(true)}
+<div
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '12px',
+    margin: '14px 0 18px',
+    padding: '12px 14px',
+    background: '#F7FAFC',
+    border: '1px solid #E3EAF0',
+    borderRadius: '12px',
+  }}
+>
+  <div>
+    <div
+      style={{
+        color: '#17324D',
+        fontSize: '13px',
+        fontWeight: 700,
+      }}
+    >
+      Plan settings
+    </div>
+
+    <div
+      style={{
+        marginTop: '2px',
+        color: '#718394',
+        fontSize: '12px',
+      }}
+    >
+      Review your adaptive plan or update your baseline.
+    </div>
+  </div>
+
+  <div
     style={{
-      padding: '12px 20px',
-      borderRadius: '10px',
-      background: '#153E63',
-      color: '#FFFFFF',
-      fontWeight: 600,
-      cursor: 'pointer',
+      display: 'flex',
+      gap: '8px',
+      flexShrink: 0,
     }}
   >
-    Preview Adaptive Training Plan
-  </button>
-  <div style={{ margin: '12px 0' }}>
-  <button
-    type="button"
-    onClick={() =>
-      setShowBaselineForm((current) => !current)
-    }
-    style={{
-      padding: '12px 20px',
-      borderRadius: '10px',
-      background: '#FFFFFF',
-      color: '#153E63',
-      border: '1px solid #153E63',
-      fontWeight: 600,
-      cursor: 'pointer',
-    }}
-  >
-    {showBaselineForm
-      ? 'Close Training Baseline'
-      : 'Set Training Baseline'}
-  </button>
-</div>
+    <button
+      type="button"
+      onClick={() => void generateCurrentWeekPlan(true)}
+      style={{
+        padding: '8px 10px',
+        borderRadius: '8px',
+        border: '1px solid #CBD8E5',
+        background: '#FFFFFF',
+        color: '#17324D',
+        fontSize: '12px',
+        fontWeight: 700,
+        cursor: 'pointer',
+      }}
+    >
+      Preview
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setShowBaselineForm((current) => !current)
+      }
+      style={{
+        padding: '8px 10px',
+        borderRadius: '8px',
+        border: 'none',
+        background: '#0A3556',
+        color: '#FFFFFF',
+        fontSize: '12px',
+        fontWeight: 700,
+        cursor: 'pointer',
+      }}
+    >
+      {showBaselineForm ? 'Close' : 'Baseline'}
+    </button>
+  </div>
 </div>
 {showBaselineForm && (
   <div
