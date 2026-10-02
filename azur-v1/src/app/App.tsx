@@ -8861,7 +8861,7 @@ return (
         <header
   className="topbar"
 style={
-  activeNav === 'Home'
+  activeNav === 'Home' || activeNav === 'Chat'
     ? {
         display: 'none',
       }
@@ -9043,21 +9043,28 @@ style={
         gap: '12px',
       }}
     >
-      <div
-        style={{
-          width: '42px',
-          height: '42px',
-          borderRadius: '50%',
-          background: '#0A3556',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 800,
-          fontSize: '13px',
-        }}
-      >
-        AZ
-      </div>
+     <div
+  style={{
+    width: '42px',
+    height: '42px',
+    borderRadius: '50%',
+    overflow: 'hidden',
+    background: '#FFFFFF',
+    border: '1px solid rgba(255,255,255,0.18)',
+    flexShrink: 0,
+  }}
+>
+  <img
+    src="/brand/azur-logo.png"
+    alt="Azur"
+    style={{
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain',
+      display: 'block',
+    }}
+  />
+</div>
 
       <div>
         <div
