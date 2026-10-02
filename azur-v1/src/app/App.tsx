@@ -8601,11 +8601,42 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 )}
 
   <div className="account-menu">
-    <button
-      className="account-button"
-      onClick={() => setAccountOpen((current) => !current)}
-    >
-<div className="account-avatar">
+ <button
+  className="account-button"
+  onClick={() => setAccountOpen((current) => !current)}
+  style={
+    activeNav === 'Home'
+      ? {
+          padding: 0,
+          width: '44px',
+          height: '44px',
+          minWidth: '44px',
+          borderRadius: '50%',
+          background: 'transparent',
+          border: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }
+      : undefined
+  }
+>
+<div
+  className="account-avatar"
+  style={
+    activeNav === 'Home'
+      ? {
+          width: '44px',
+          height: '44px',
+          minWidth: '44px',
+          borderRadius: '50%',
+          overflow: 'hidden',
+          border: '2px solid #FFFFFF',
+          boxShadow: '0 0 0 2px #208FD0',
+        }
+      : undefined
+  }
+>
   {avatarUrl ? (
     <img
       src={avatarUrl}
@@ -8616,7 +8647,14 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   )}
 </div>
 
-      <div className="account-copy">
+     <div
+  className="account-copy"
+  style={
+    activeNav === 'Home'
+      ? { display: 'none' }
+      : undefined
+  }
+>
         <strong>{athleteName}</strong>
         <small>Athlete</small>
       </div>
