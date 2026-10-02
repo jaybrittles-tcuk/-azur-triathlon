@@ -5008,7 +5008,8 @@ onClick={() => void saveTrainingBaseline()}
             {session.rationale}
           </p>
         </div>
-      ))}
+     );
+})}
     </div>
 
     <p style={{ marginTop: '20px', color: '#52677B' }}>
