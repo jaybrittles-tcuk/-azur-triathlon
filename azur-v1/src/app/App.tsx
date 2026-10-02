@@ -9030,8 +9030,257 @@ style={
       color: '#17324D',
     }}
   >
-    <h2>Ask Azur</h2>
-    <p>Your coaching chat is coming next.</p>
+{activeNav === 'Chat' && (
+  <section
+    style={{
+      minHeight: 'calc(100vh - 90px)',
+      padding: 0,
+      paddingBottom: '88px',
+      background: '#F5F8FB',
+    }}
+  >
+    <div
+      style={{
+        padding: '18px 18px 16px',
+        background: '#071524',
+        color: '#FFFFFF',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      }}
+    >
+      <div
+        style={{
+          width: '42px',
+          height: '42px',
+          borderRadius: '50%',
+          background: '#0A3556',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 800,
+          fontSize: '13px',
+        }}
+      >
+        AZ
+      </div>
+
+      <div>
+        <div
+          style={{
+            fontSize: '17px',
+            fontWeight: 700,
+          }}
+        >
+          Ask Azur
+        </div>
+
+        <div
+          style={{
+            marginTop: '2px',
+            fontSize: '11px',
+            color: '#5FD08A',
+            fontWeight: 700,
+          }}
+        >
+          ● Online
+        </div>
+      </div>
+    </div>
+
+    <div
+      style={{
+        padding: '18px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+      }}
+    >
+      {chatMessages.map((message) => (
+        <div
+          key={message.id}
+          style={{
+            display: 'flex',
+            justifyContent:
+              message.role === 'user'
+                ? 'flex-end'
+                : 'flex-start',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '82%',
+              padding: '11px 13px',
+              borderRadius:
+                message.role === 'user'
+                  ? '16px 16px 4px 16px'
+                  : '16px 16px 16px 4px',
+              background:
+                message.role === 'user'
+                  ? '#0A3556'
+                  : '#FFFFFF',
+              color:
+                message.role === 'user'
+                  ? '#FFFFFF'
+                  : '#17324D',
+              border:
+                message.role === 'user'
+                  ? 'none'
+                  : '1px solid #E2EAF0',
+              fontSize: '14px',
+              lineHeight: 1.5,
+            }}
+          >
+            {message.text}
+          </div>
+        </div>
+      ))}
+
+      {chatMessages.length === 1 && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '8px',
+            marginTop: '4px',
+          }}
+        >
+          {[
+            "Why has today's session changed?",
+            "How should I fuel Saturday's ride?",
+            "Can I move tomorrow's run?",
+            'Explain my training load',
+          ].map((question) => (
+            <button
+              key={question}
+              type="button"
+              onClick={() => setChatMessage(question)}
+              style={{
+                padding: '8px 10px',
+                borderRadius: '18px',
+                border: '1px solid #CFE0EC',
+                background: '#FFFFFF',
+                color: '#1673AE',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              {question}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <div
+      style={{
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        bottom: '72px',
+        padding: '10px 12px',
+        background: 'rgba(255,255,255,0.96)',
+        borderTop: '1px solid #E1E8EF',
+        backdropFilter: 'blur(14px)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          maxWidth: '900px',
+          margin: '0 auto',
+        }}
+      >
+        <input
+          value={chatMessage}
+          onChange={(event) =>
+            setChatMessage(event.target.value)
+          }
+          onKeyDown={(event) => {
+            if (
+              event.key === 'Enter' &&
+              chatMessage.trim()
+            ) {
+              const message = chatMessage.trim();
+
+              setChatMessages((current) => [
+                ...current,
+                {
+                  id: Date.now(),
+                  role: 'user',
+                  text: message,
+                },
+                {
+                  id: Date.now() + 1,
+                  role: 'assistant',
+                  text:
+                    'I have your question. The next step is connecting this chat to your Azur training data so I can answer using your actual plan and recovery context.',
+                },
+              ]);
+
+              setChatMessage('');
+            }
+          }}
+          placeholder="Ask Azur..."
+          style={{
+            flex: 1,
+            height: '44px',
+            padding: '0 14px',
+            borderRadius: '22px',
+            border: '1px solid #D8E3EB',
+            background: '#F7FAFC',
+            color: '#17324D',
+            fontSize: '14px',
+            outline: 'none',
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() => {
+            const message = chatMessage.trim();
+
+            if (!message) {
+              return;
+            }
+
+            setChatMessages((current) => [
+              ...current,
+              {
+                id: Date.now(),
+                role: 'user',
+                text: message,
+              },
+              {
+                id: Date.now() + 1,
+                role: 'assistant',
+                text:
+                  'I have your question. The next step is connecting this chat to your Azur training data so I can answer using your actual plan and recovery context.',
+              },
+            ]);
+
+            setChatMessage('');
+          }}
+          style={{
+            width: '44px',
+            height: '44px',
+            flexShrink: 0,
+            borderRadius: '50%',
+            border: 'none',
+            background: '#1673AE',
+            color: '#FFFFFF',
+            fontSize: '18px',
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          ↑
+        </button>
+      </div>
+    </div>
   </section>
 )}
         {activeNav === 'Calendar' && CalendarView()}
