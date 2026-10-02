@@ -8479,7 +8479,21 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
       </aside>
 
       <main>
-        <header className="topbar">
+        <header
+  className="topbar"
+  style={
+    activeNav === 'Home'
+      ? {
+          minHeight: '0',
+          padding: '10px 0 14px',
+          marginBottom: '8px',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          borderBottom: 'none',
+        }
+      : undefined
+  }
+>
           {activeNav !== 'Home' && (
   <div>
     <span className="eyebrow">
@@ -8498,7 +8512,18 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   </div>
 )}
 
-<div className="topbar-actions">
+<div
+  className="topbar-actions"
+  style={
+    activeNav === 'Home'
+      ? {
+          width: '100%',
+          justifyContent: 'flex-end',
+          marginLeft: 'auto',
+        }
+      : undefined
+  }
+>
 {activeNav !== 'Home' && (
   <div className="race-countdown">
     <span className="eyebrow">
