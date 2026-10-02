@@ -4383,8 +4383,16 @@ color:
   </>
 );
 }
-  function HomeView() {
-    return (
+function HomeView() {
+  const todayDate = new Date().toISOString().slice(0, 10);
+
+  const todaySession =
+    weekSessions.find(
+      (session: any) =>
+        session.planned_date === todayDate,
+    ) ?? weekSessions[0];
+
+  return (
       <>
 <section
   className="mobile-home-hero"
@@ -4467,8 +4475,133 @@ color:
     </div>
   </div>
 </section>
+{todaySession && (
+  <section
+    style={{
+      marginBottom: '14px',
+      padding: '18px',
+      background: '#FFFFFF',
+      border: '1px solid #E1E8EF',
+      borderRadius: '16px',
+    }}
+  >
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: '14px',
+      }}
+    >
+      <span
+        style={{
+          color: '#6B7F91',
+          fontSize: '11px',
+          fontWeight: 700,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+        }}
+      >
+        Today&apos;s Session
+      </span>
 
-<div style={{ margin: '16px 0' }}>
+      <span
+        style={{
+          padding: '5px 9px',
+          borderRadius: '20px',
+          background: '#EEF8F1',
+          color: '#2F8A57',
+          fontSize: '11px',
+          fontWeight: 700,
+        }}
+      >
+        Today
+      </span>
+    </div>
+
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      }}
+    >
+      <div
+        style={{
+          width: '42px',
+          height: '42px',
+          flexShrink: 0,
+          borderRadius: '50%',
+          background:
+            todaySession.sport === 'bike'
+              ? '#FFF4D8'
+              : todaySession.sport === 'run'
+                ? '#EAF7EF'
+                : '#EAF5FC',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '18px',
+        }}
+      >
+        {todaySession.sport === 'bike'
+          ? '🚴'
+          : todaySession.sport === 'run'
+            ? '🏃'
+            : '🏊'}
+      </div>
+
+      <div>
+        <div
+          style={{
+            color: '#17324D',
+            fontSize: '18px',
+            fontWeight: 700,
+            lineHeight: 1.25,
+          }}
+        >
+          {todaySession.title}
+        </div>
+
+        <div
+          style={{
+            marginTop: '4px',
+            color: '#1673AE',
+            fontSize: '13px',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+          }}
+        >
+          {todaySession.sport} ·{' '}
+          {todaySession.duration_min} min
+        </div>
+      </div>
+    </div>
+
+    <div style={{ marginTop: '16px' }}>
+      <SessionVisual session={todaySession} />
+    </div>
+
+    <button
+      type="button"
+      style={{
+        width: '100%',
+        marginTop: '16px',
+        padding: '12px 16px',
+        border: 'none',
+        borderRadius: '10px',
+        background: '#0A3556',
+        color: '#FFFFFF',
+        fontSize: '14px',
+        fontWeight: 700,
+        cursor: 'pointer',
+      }}
+    >
+      View session →
+    </button>
+  </section>
+)}
+        <div style={{ margin: '16px 0' }}>
   <button
     type="button"
     onClick={() => void generateCurrentWeekPlan(true)}
