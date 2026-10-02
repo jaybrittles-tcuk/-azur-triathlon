@@ -5512,59 +5512,179 @@ onClick={() => void saveTrainingBaseline()}
     ))}
   </div>
 </section>        
-        <section className="coach-insight-card">
-          <div className="coach-insight-top">
-            <span className="coach-insight-label">
-              AZUR COACH INSIGHT
-            </span>
+       <section
+  style={{
+    marginBottom: '16px',
+    padding: '18px',
+    background: '#F7FAFC',
+    border: '1px solid #E2EAF0',
+    borderRadius: '14px',
+  }}
+>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '12px',
+      marginBottom: '12px',
+    }}
+  >
+    <span
+      style={{
+        color: '#1673AE',
+        fontSize: '11px',
+        fontWeight: 800,
+        letterSpacing: '0.09em',
+        textTransform: 'uppercase',
+      }}
+    >
+      Azur Coach Insight
+    </span>
 
-            <span className="coach-insight-status">
-              ON TRACK
-            </span>
-          </div>
+    <span
+      style={{
+        padding: '4px 8px',
+        borderRadius: '20px',
+        background: '#EAF7EF',
+        color: '#2F8A57',
+        fontSize: '10px',
+        fontWeight: 800,
+        letterSpacing: '0.05em',
+        textTransform: 'uppercase',
+      }}
+    >
+      On track
+    </span>
+  </div>
 
-<h3>Why today matters</h3>
+  <h3
+    style={{
+      margin: 0,
+      color: '#17324D',
+      fontSize: '19px',
+      fontWeight: 700,
+    }}
+  >
+    Why today matters
+  </h3>
 
-<p>
-  {todaySession
-    ? todaySession.rationale ||
-      `Today's ${sportName(
-        todaySession.sport,
-      ).toLowerCase()} session supports your current training focus.`
-    : 'Today is a recovery day. Recovery supports adaptation from recent training.'}
-</p>
-
-          <div className="coach-insight-focus">
-<div>
-  <span>FOCUS</span>
-  <strong>
+  <p
+    style={{
+      margin: '8px 0 14px',
+      color: '#607487',
+      fontSize: '14px',
+      lineHeight: 1.55,
+    }}
+  >
     {todaySession
-      ? todaySession.sessionClass
-      : 'Recovery'}
-  </strong>
-</div>
+      ? todaySession.rationale ||
+        `Today's ${sportName(
+          todaySession.sport,
+        ).toLowerCase()} session supports your current training focus.`
+      : 'Today is a recovery day. Recovery supports adaptation from recent training.'}
+  </p>
 
-<div>
-  <span>LONG-TERM BENEFIT</span>
-  <strong>
-    {todaySession
-      ? todaySession.sport === 'bike'
-        ? 'Bike durability'
-        : todaySession.sport === 'run'
-          ? 'Run durability'
-          : todaySession.sport === 'swim'
-            ? 'Swim efficiency'
-            : 'Training adaptation'
-      : 'Recovery and adaptation'}
-  </strong>
-</div>
-          </div>
+  <div
+    style={{
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '10px',
+      marginBottom: '14px',
+    }}
+  >
+    <div
+      style={{
+        padding: '10px 12px',
+        borderRadius: '10px',
+        background: '#FFFFFF',
+        border: '1px solid #E5ECF2',
+      }}
+    >
+      <div
+        style={{
+          color: '#8293A2',
+          fontSize: '10px',
+          fontWeight: 800,
+          letterSpacing: '0.07em',
+          textTransform: 'uppercase',
+        }}
+      >
+        Focus
+      </div>
 
-          <button onClick={() => setActiveNav('Weekly Review')}>
-            View coaching rationale
-            <span>→</span>
-          </button>
-        </section>
+      <div
+        style={{
+          marginTop: '4px',
+          color: '#17324D',
+          fontSize: '14px',
+          fontWeight: 700,
+          textTransform: 'capitalize',
+        }}
+      >
+        {todaySession
+          ? todaySession.sessionClass
+          : 'Recovery'}
+      </div>
+    </div>
+
+    <div
+      style={{
+        padding: '10px 12px',
+        borderRadius: '10px',
+        background: '#FFFFFF',
+        border: '1px solid #E5ECF2',
+      }}
+    >
+      <div
+        style={{
+          color: '#8293A2',
+          fontSize: '10px',
+          fontWeight: 800,
+          letterSpacing: '0.07em',
+          textTransform: 'uppercase',
+        }}
+      >
+        Long-term benefit
+      </div>
+
+      <div
+        style={{
+          marginTop: '4px',
+          color: '#17324D',
+          fontSize: '14px',
+          fontWeight: 700,
+        }}
+      >
+        {todaySession
+          ? todaySession.sport === 'bike'
+            ? 'Bike durability'
+            : todaySession.sport === 'run'
+              ? 'Run durability'
+              : todaySession.sport === 'swim'
+                ? 'Swim efficiency'
+                : 'Training adaptation'
+          : 'Recovery and adaptation'}
+      </div>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    onClick={() => setActiveNav('Weekly Review')}
+    style={{
+      padding: 0,
+      border: 'none',
+      background: 'transparent',
+      color: '#1673AE',
+      fontSize: '13px',
+      fontWeight: 700,
+      cursor: 'pointer',
+    }}
+  >
+    View coaching rationale →
+  </button>
+</section>
       </>
     );
   }
