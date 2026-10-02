@@ -8468,25 +8468,23 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 
       <main>
         <header className="topbar">
-          <div>
- <span className="eyebrow">
-  {activeNav === 'Strava Feed'
-    ? 'INTEGRATIONS'
-    : 'WEEK 1 · BASE 1'}
-</span>
+          {activeNav !== 'Home' && (
+  <div>
+    <span className="eyebrow">
+      {activeNav === 'Strava Feed'
+        ? 'INTEGRATIONS'
+        : 'WEEK 1 · BASE 1'}
+    </span>
 
-<h2>
-  {activeNav === 'Home'
-    ? `Good morning, ${athleteName}.`
-    : activeNav}
-</h2>
+    <h2>{activeNav}</h2>
 
-          <p>
-  {activeNav === 'Strava Feed'
-    ? 'Recent activities and sync status'
-    : 'Aerobic consistency + durability'}
-</p>
-          </div>
+    <p>
+      {activeNav === 'Strava Feed'
+        ? 'Recent activities and sync status'
+        : 'Aerobic consistency + durability'}
+    </p>
+  </div>
+)}
 
 <div className="topbar-actions">
   <div className="race-countdown">
