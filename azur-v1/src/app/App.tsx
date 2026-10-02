@@ -645,7 +645,13 @@ const navigation = [
   [Database, 'Data Sources'],
   [RefreshCw, 'Strava Feed'],
 ] as const;
-
+const mobileNavigation = [
+  [Home, 'Home'],
+  [CalendarDays, 'Calendar'],
+  [Activity, 'Chat'],
+  [TrendingUp, 'Performance'],
+  [Gauge, 'More'],
+] as const;
 type Session = PlannedSession & {
   dayLabel: string;
   accent: string;
@@ -8858,6 +8864,75 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
         {activeNav === 'Data Sources' && <DataSourcesView />}
         {activeNav === 'Strava Feed' && <StravaFeedView />}
       </main>
+      <nav
+  className="mobile-bottom-nav"
+  style={{
+    position: 'fixed',
+    left: '12px',
+    right: '12px',
+    bottom: '12px',
+    zIndex: 100,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    padding: '8px 8px calc(8px + env(safe-area-inset-bottom))',
+    background: 'rgba(7, 21, 36, 0.96)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: '20px',
+    boxShadow: '0 14px 40px rgba(4, 18, 31, 0.22)',
+    backdropFilter: 'blur(16px)',
+  }}
+>
+  {mobileNavigation.map(([Icon, label]) => {
+    const targetNav =
+      label === 'More'
+        ? 'Profile'
+        : label;
+
+    const isActive =
+      activeNav === targetNav ||
+      (label === 'More' &&
+        !['Home', 'Calendar', 'Chat', 'Performance'].includes(
+          activeNav,
+        ));
+
+    return (
+      <button
+        key={label}
+        type="button"
+        onClick={() => setActiveNav(targetNav)}
+        style={{
+          minWidth: '58px',
+          padding: '7px 8px',
+          border: 'none',
+          borderRadius: '14px',
+          background: isActive
+            ? 'rgba(32, 143, 208, 0.18)'
+            : 'transparent',
+          color: isActive
+            ? '#FFFFFF'
+            : 'rgba(255,255,255,0.58)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '4px',
+          cursor: 'pointer',
+        }}
+      >
+        <Icon size={20} />
+
+        <span
+          style={{
+            fontSize: '10px',
+            fontWeight: isActive ? 700 : 600,
+          }}
+        >
+          {label}
+        </span>
+      </button>
+    );
+  })}
+</nav>
     </div>
   );
 }
