@@ -9044,7 +9044,7 @@ transform: 'none',
 left: 0,
 right: 0,
 bottom: 0,
-padding: '7px 8px calc(7px + env(safe-area-inset-bottom))',
+padding: '5px 8px calc(5px + env(safe-area-inset-bottom))',
 background: 'rgba(255,255,255,0.96)',
 border: '1px solid rgba(12,48,76,0.10)',
 borderRadius: '14px 14px 0 0',
@@ -9072,11 +9072,16 @@ backdropFilter: 'blur(18px)',
         onClick={() => setActiveNav(targetNav)}
         style={{
 minWidth: '56px',
-padding: '6px 7px',
+padding: '5px 7px',
 borderRadius: '12px',
 background: isActive
-  ? '#EAF4FB'
+  ? '#EEF6FB'
   : 'transparent',
+
+boxShadow: isActive
+  ? 'inset 0 0 0 1px rgba(10,53,86,0.06)'
+  : 'none',
+
 color: isActive
   ? '#0A3556'
   : '#8192A2',
