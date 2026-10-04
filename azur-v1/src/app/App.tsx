@@ -652,6 +652,36 @@ const mobileNavigation = [
   [TrendingUp, 'Performance'],
   [Gauge, 'More'],
 ] as const;
+type AzurWorkoutStep =
+  | {
+      type: 'warmup' | 'work' | 'recovery' | 'cooldown';
+      durationMin?: number;
+      distanceM?: number;
+      targetType?: 'ftp' | 'rpe' | 'pace' | 'swim_pace' | 'hr';
+      targetLow?: number;
+      targetHigh?: number;
+      targetText?: string;
+    }
+  | {
+      type: 'repeat';
+      reps: number;
+      steps: AzurWorkoutStep[];
+    };
+
+type AzurWorkout = {
+  sport: 'swim' | 'bike' | 'run' | 'brick';
+  title: string;
+  durationMin: number;
+  sessionClass:
+    | 'easy'
+    | 'endurance'
+    | 'intensity'
+    | 'race_specific'
+    | 'recovery';
+  purpose: string;
+  rationale: string;
+  steps: AzurWorkoutStep[];
+};
 type Session = PlannedSession & {
   dayLabel: string;
   accent: string;
