@@ -3864,6 +3864,53 @@ prescription: {
       is_active_version: true,
     },
   ];
+    const calculateAzurWorkoutDuration = (
+  steps: AzurWorkoutStep[],
+): number =>
+  steps.reduce((total, step) => {
+    if (step.type === 'repeat') {
+      return (
+        total +
+        step.reps *
+          calculateAzurWorkoutDuration(step.steps)
+      );
+    }
+
+    return total + (step.durationMin ?? 0);
+  }, 0);
+
+const canonicalBikeSession = generatedSessions.find(
+  (session: any) =>
+    session.sport === 'bike' &&
+    session.azurWorkout,
+);
+
+if (canonicalBikeSession?.azurWorkout) {
+  const structuredMinutes =
+    calculateAzurWorkoutDuration(
+      canonicalBikeSession.azurWorkout.steps,
+    );
+
+  console.log('AZUR WORKOUT VALIDATION', {
+    title: canonicalBikeSession.azurWorkout.title,
+    plannedMinutes:
+      canonicalBikeSession.azurWorkout.durationMin,
+    structuredMinutes,
+    valid:
+      structuredMinutes ===
+      canonicalBikeSession.azurWorkout.durationMin,
+  });
+
+  if (
+    structuredMinutes !==
+    canonicalBikeSession.azurWorkout.durationMin
+  ) {
+    console.warn(
+      'Azur workout duration mismatch',
+      canonicalBikeSession.azurWorkout,
+    );
+  }
+}
 const generatedTotalMinutes =
   generatedSessions.reduce(
     (total, session) =>
