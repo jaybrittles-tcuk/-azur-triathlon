@@ -3657,7 +3657,6 @@ duration_min: bikeCooldownMinutes,
       targetHigh: 60,
       targetText: 'Easy',
     },
-  ],
 },
   rationale:
   phaseKey.includes('build')
