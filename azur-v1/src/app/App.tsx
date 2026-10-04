@@ -663,12 +663,10 @@ type AzurWorkoutStep =
       targetText?: string;
     }
   | {
-{
-  type: 'repeat';
-  reps: number;
-  work: AzurWorkoutStep;
-  recovery?: AzurWorkoutStep;
-}
+      type: 'repeat';
+      reps: number;
+      work: AzurWorkoutStep;
+      recovery?: AzurWorkoutStep;
     };
 
 type AzurWorkout = {
