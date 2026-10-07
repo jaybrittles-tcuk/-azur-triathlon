@@ -3560,6 +3560,7 @@ duration_min: bikeCooldownMinutes,
     },
 
    {
+{
   type: 'repeat',
   reps: bikeIntervalReps,
 
@@ -3605,53 +3606,6 @@ duration_min: bikeCooldownMinutes,
     targetText: 'Easy recovery',
   },
 },
-        {
-          type: 'work',
-          durationMin: bikeIntervalMinutes,
-          targetType: 'ftp',
-
-          targetLow:
-            phaseKey.includes('peak')
-              ? 85
-              : phaseKey.includes('recovery')
-                ? 60
-                : phaseKey.includes('build')
-                  ? 95
-                  : 80,
-
-          targetHigh:
-            phaseKey.includes('peak')
-              ? 92
-              : phaseKey.includes('recovery')
-                ? 70
-                : phaseKey.includes('build')
-                  ? 100
-                  : 90,
-
-          targetText:
-            phaseKey.includes('peak')
-              ? 'Race-specific'
-              : phaseKey.includes('recovery')
-                ? 'Easy aerobic'
-                : phaseKey.includes('build')
-                  ? 'Threshold'
-                  : 'Strength endurance',
-        },
-
-},
-
-recovery: {
-  type: 'recovery',
-  durationMin: bikeRecoveryMinutes,
-  targetType: 'ftp',
-  targetLow: 45,
-  targetHigh: 60,
-  targetText: 'Easy recovery',
-},
-},
-
-{
-  type: 'cooldown',
   durationMin: bikeCooldownMinutes,
   targetType: 'ftp',
   targetLow: 50,
