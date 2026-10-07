@@ -3646,7 +3646,6 @@ duration_min: bikeCooldownMinutes,
           targetHigh: 60,
           targetText: 'Easy recovery',
         },
-      ],
     },
 
     {
