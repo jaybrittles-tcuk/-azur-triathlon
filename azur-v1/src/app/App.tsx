@@ -3509,8 +3509,9 @@ duration_min: bikeCooldownMinutes,
           },
         ],
       },
-      azurWorkout: {
+azurWorkout: {
   sport: 'bike',
+
   title:
     phaseKey.includes('build')
       ? 'Threshold Development'
@@ -3559,60 +3560,62 @@ duration_min: bikeCooldownMinutes,
       targetText: 'Easy aerobic',
     },
 
-   {
-{
-  type: 'repeat',
-  reps: bikeIntervalReps,
+    {
+      type: 'repeat',
+      reps: bikeIntervalReps,
 
-  work: {
-    type: 'work',
-    durationMin: bikeIntervalMinutes,
-    targetType: 'ftp',
+      work: {
+        type: 'work',
+        durationMin: bikeIntervalMinutes,
+        targetType: 'ftp',
 
-    targetLow:
-      phaseKey.includes('peak')
-        ? 85
-        : phaseKey.includes('recovery')
-          ? 60
-          : phaseKey.includes('build')
-            ? 95
-            : 80,
+        targetLow:
+          phaseKey.includes('peak')
+            ? 85
+            : phaseKey.includes('recovery')
+              ? 60
+              : phaseKey.includes('build')
+                ? 95
+                : 80,
 
-    targetHigh:
-      phaseKey.includes('peak')
-        ? 92
-        : phaseKey.includes('recovery')
-          ? 70
-          : phaseKey.includes('build')
-            ? 100
-            : 90,
+        targetHigh:
+          phaseKey.includes('peak')
+            ? 92
+            : phaseKey.includes('recovery')
+              ? 70
+              : phaseKey.includes('build')
+                ? 100
+                : 90,
 
-    targetText:
-      phaseKey.includes('peak')
-        ? 'Race-specific'
-        : phaseKey.includes('recovery')
-          ? 'Easy aerobic'
-          : phaseKey.includes('build')
-            ? 'Threshold'
-            : 'Strength endurance',
-  },
+        targetText:
+          phaseKey.includes('peak')
+            ? 'Race-specific'
+            : phaseKey.includes('recovery')
+              ? 'Easy aerobic'
+              : phaseKey.includes('build')
+                ? 'Threshold'
+                : 'Strength endurance',
+      },
 
-  recovery: {
-    type: 'recovery',
-    durationMin: bikeRecoveryMinutes,
-    targetType: 'ftp',
-    targetLow: 45,
-    targetHigh: 60,
-    targetText: 'Easy recovery',
-  },
-},
-  durationMin: bikeCooldownMinutes,
-  targetType: 'ftp',
-  targetLow: 50,
-  targetHigh: 60,
-  targetText: 'Easy',
-},
-],
+      recovery: {
+        type: 'recovery',
+        durationMin: bikeRecoveryMinutes,
+        targetType: 'ftp',
+        targetLow: 45,
+        targetHigh: 60,
+        targetText: 'Easy recovery',
+      },
+    },
+
+    {
+      type: 'cooldown',
+      durationMin: bikeCooldownMinutes,
+      targetType: 'ftp',
+      targetLow: 50,
+      targetHigh: 60,
+      targetText: 'Easy',
+    },
+  ],
 },
 rationale:
   phaseKey.includes('build')
