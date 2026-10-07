@@ -3638,26 +3638,29 @@ duration_min: bikeCooldownMinutes,
                   : 'Strength endurance',
         },
 
-        {
-          type: 'recovery',
-          durationMin: bikeRecoveryMinutes,
-          targetType: 'ftp',
-          targetLow: 45,
-          targetHigh: 60,
-          targetText: 'Easy recovery',
-        },
-    },
-
-    {
-      type: 'cooldown',
-      durationMin: bikeCooldownMinutes,
-      targetType: 'ftp',
-      targetLow: 50,
-      targetHigh: 60,
-      targetText: 'Easy',
-    },
 },
-  rationale:
+
+recovery: {
+  type: 'recovery',
+  durationMin: bikeRecoveryMinutes,
+  targetType: 'ftp',
+  targetLow: 45,
+  targetHigh: 60,
+  targetText: 'Easy recovery',
+},
+},
+
+{
+  type: 'cooldown',
+  durationMin: bikeCooldownMinutes,
+  targetType: 'ftp',
+  targetLow: 50,
+  targetHigh: 60,
+  targetText: 'Easy',
+},
+],
+},
+rationale:
   phaseKey.includes('build')
     ? 'Develop sustainable threshold power and raise aerobic cycling capacity.'
     : phaseKey.includes('peak')
