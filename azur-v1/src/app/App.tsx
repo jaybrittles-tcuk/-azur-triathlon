@@ -3865,29 +3865,26 @@ prescription: {
       is_active_version: true,
     },
   ];
-    const calculateAzurWorkoutDuration = (
+const calculateAzurWorkoutDuration = (
   steps: AzurWorkoutStep[],
 ): number =>
   steps.reduce((total, step) => {
     if (step.type === 'repeat') {
-  const workMinutes =
-    calculateAzurWorkoutDuration([step.work]);
+      const workMinutes =
+        calculateAzurWorkoutDuration([step.work]);
 
-  const recoveryMinutes =
-    step.recovery
-      ? calculateAzurWorkoutDuration([step.recovery])
-      : 0;
+      const recoveryMinutes =
+        step.recovery
+          ? calculateAzurWorkoutDuration([
+              step.recovery,
+            ])
+          : 0;
 
-  return (
-    total +
-    step.reps * workMinutes +
-    Math.max(0, step.reps - 1) * recoveryMinutes
-  );
-}
       return (
         total +
-        step.reps *
-          calculateAzurWorkoutDuration(step.steps)
+        step.reps * workMinutes +
+        Math.max(0, step.reps - 1) *
+          recoveryMinutes
       );
     }
 
