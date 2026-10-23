@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import FitParser from 'fit-file-parser';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import PrivacyPolicy from './PrivacyPolicy';
 import {
   Activity,
   AlertTriangle,
