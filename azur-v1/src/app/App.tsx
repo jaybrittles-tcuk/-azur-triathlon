@@ -9103,8 +9103,10 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
       </div>
     );
   }
-
-return (
+if (window.location.pathname === '/privacy') {
+  return <PrivacyPolicy />;
+}
+  return (
   <>
     <div className="app-shell">
       <style>{`
