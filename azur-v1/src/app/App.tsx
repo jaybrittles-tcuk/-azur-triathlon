@@ -9032,6 +9032,10 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   setSessionFeedbackSaving(false);
   setSessionFeedbackMessage('Feedback saved.');
 }
+  if (window.location.pathname === '/privacy') {
+  return <PrivacyPolicy />;
+}
+  
   if (!authReady) {
     return (
       <div className="login-screen">
@@ -9103,9 +9107,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
       </div>
     );
   }
-if (window.location.pathname === '/privacy') {
-  return <PrivacyPolicy />;
-}
+
   return (
   <>
     <div className="app-shell">
