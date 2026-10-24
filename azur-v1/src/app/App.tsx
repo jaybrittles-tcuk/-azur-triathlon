@@ -7253,7 +7253,9 @@ const sessionVerdict =
 
   <div className="session-block-item">
     <strong>
-      {Object.values(selected.targets)[0]?.toString() || ''}
+      {selected.prescription?.focus ||
+        Object.values(selected.targets)[0]?.toString() ||
+        'Session-specific training focus'}
     </strong>
   </div>
 </div>
