@@ -1017,8 +1017,8 @@ function parsePaceInput(value: string) {
   },
 });
   const [activeNav, setActiveNav] = useState('Home');
-  const [weekSessions, setWeekSessions] = useState<Session[]>(sessions);
-  const [selectedId, setSelectedId] = useState('tue-bike');
+  const [weekSessions, setWeekSessions] = useState<Session[]>([]);
+  const [selectedId, setSelectedId] = useState('');
   const [sessionDetailOpen, setSessionDetailOpen] = useState(false);
   const [calendarWeekOffset, setCalendarWeekOffset] = useState(0);
   const [selectedStravaActivity, setSelectedStravaActivity] =
@@ -1366,9 +1366,11 @@ async function loadPlannedSessions(userId: string) {
     return;
   }
 
-  if (!data || data.length === 0) {
-    return;
-  }
+if (!data || data.length === 0) {
+  setWeekSessions([]);
+  setSelectedId('');
+  return;
+}
 
 const { data: completedActivities, error: completedError } =
   await supabase
