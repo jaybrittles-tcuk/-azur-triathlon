@@ -7154,13 +7154,6 @@ const sessionVerdict =
   </p>
 </div>
 
-<p>
-  {selectedExecution.duration >= 95
-    ? 'Planned training time was completed. This supports the intended session load without adding unnecessary volume.'
-    : selectedExecution.duration >= 85
-      ? 'Most of the planned training time was completed. The session still contributed meaningfully to the intended training load.'
-      : 'Completed training time was below plan. Azur will consider this alongside recovery, athlete feedback and upcoming sessions.'}
-</p>
     </div>
    
     {intervalPowerAnalysis && (
