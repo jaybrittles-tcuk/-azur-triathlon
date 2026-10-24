@@ -46,7 +46,6 @@ export default async function handler(req: any, res: any) {
   }
 
   // Garmin requires a fast 200 response.
-  res.status(200).json({ received: true });
 
   try {
     const activities = Array.isArray(req.body?.activities)
@@ -144,4 +143,5 @@ export default async function handler(req: any, res: any) {
   } catch (error) {
     console.error('Garmin activity webhook error:', error);
   }
+  return res.status(200).json({ received: true });
 }
