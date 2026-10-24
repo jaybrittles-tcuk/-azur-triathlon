@@ -7152,8 +7152,6 @@ const sessionVerdict =
             ? 'Most of the planned training time was completed. The session still contributed meaningfully to the intended training load.'
             : 'Completed training time was below plan. Azur will consider this alongside recovery, athlete feedback and upcoming sessions.'}
   </p>
-</div>
-
     </div>
    
     {intervalPowerAnalysis && (
