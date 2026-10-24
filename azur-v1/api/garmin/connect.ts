@@ -30,7 +30,6 @@ export default async function handler(req: any, res: any) {
 
   const userToken = authorization.slice(7);
 
-  // Verify the logged-in Supabase user.
   const userResponse = await fetch(
     `${supabaseUrl}/auth/v1/user`,
     {
@@ -55,7 +54,6 @@ export default async function handler(req: any, res: any) {
     });
   }
 
-  // Find the athlete profile belonging to this user.
   const athleteResponse = await fetch(
     `${supabaseUrl}/rest/v1/athlete_profile?user_id=eq.${encodeURIComponent(
       user.id,
@@ -63,7 +61,7 @@ export default async function handler(req: any, res: any) {
     {
       headers: {
         apikey: serviceKey,
-        Authorization: `Bearer ${userToken}`,
+        Authorization: `Bearer ${serviceKey}`,
       },
     },
   );
@@ -92,28 +90,49 @@ export default async function handler(req: any, res: any) {
     .update(codeVerifier)
     .digest('base64url');
 
-  const nonce = crypto
-    .randomBytes(24)
+  const state = crypto
+    .randomBytes(32)
     .toString('base64url');
 
-  const statePayload = `${athleteId}.${nonce}`;
+  const expiresAt = new Date(
+    Date.now() + 10 * 60 * 1000,
+  ).toISOString();
 
-  const stateSignature = crypto
-    .createHmac('sha256', serviceKey)
-    .update(statePayload)
-    .digest('base64url');
+  const stateResponse = await fetch(
+    `${supabaseUrl}/rest/v1/garmin_oauth_state`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({
+        athlete_id: athleteId,
+        state,
+        code_verifier: codeVerifier,
+        expires_at: expiresAt,
+      }),
+    },
+  );
 
-  const state = Buffer.from(
-    `${statePayload}.${stateSignature}`,
-  ).toString('base64url');
+  if (!stateResponse.ok) {
+    const errorText = await stateResponse.text();
+
+    console.error(
+      'Unable to save Garmin OAuth state:',
+      stateResponse.status,
+      errorText,
+    );
+
+    return res.status(500).json({
+      error: 'Unable to prepare Garmin connection.',
+    });
+  }
 
   const redirectUri =
     'https://azur-triathlon.vercel.app/api/garmin/callback';
-
-  res.setHeader('Set-Cookie', [
-    `garmin_code_verifier=${codeVerifier}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`,
-    `garmin_oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`,
-  ]);
 
   const authorizationUrl = new URL(
     'https://connect.garmin.com/oauth2Confirm',
