@@ -47,10 +47,18 @@ export default async function handler(req: any, res: any) {
 
   // Garmin requires a fast 200 response.
 
-  try {
-    const activities = Array.isArray(req.body?.activities)
-      ? req.body.activities
-      : [];
+try {
+  console.log('GARMIN WEBHOOK DEBUG', {
+    bodyKeys: Object.keys(req.body ?? {}),
+    activityCount: Array.isArray(req.body?.activities)
+      ? req.body.activities.length
+      : 0,
+    firstActivityType: req.body?.activities?.[0]?.activityType ?? null,
+  });
+
+  const activities = Array.isArray(req.body?.activities)
+    ? req.body.activities
+    : [];
 
     for (const activity of activities) {
       const sport = mapGarminSport(activity.activityType);
