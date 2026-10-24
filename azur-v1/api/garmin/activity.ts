@@ -103,7 +103,68 @@ export default async function handler(req: any, res: any) {
       const startTime = new Date(
         Number(activity.startTimeInSeconds) * 1000,
       ).toISOString();
+const activityDate = startTime.slice(0, 10);
 
+let matchedPlannedSessionId: string | null = null;
+let matchConfidence: number | null = null;
+
+const plannedResponse = await fetch(
+  `${supabaseUrl}/rest/v1/planned_session?athlete_id=eq.${athleteId}&sport=eq.${sport}&planned_date=eq.${activityDate}&is_active_version=eq.true&select=id,duration_min`,
+  {
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+    },
+  },
+);
+
+if (plannedResponse.ok) {
+  const plannedSessions = await plannedResponse.json();
+
+  if (plannedSessions.length > 0) {
+    const actualMinutes =
+      Number(activity.durationInSeconds ?? 0) / 60;
+
+    let bestMatch: any = null;
+    let bestDifference = Infinity;
+
+    for (const session of plannedSessions) {
+      const plannedMinutes = Number(
+        session.duration_min ?? 0,
+      );
+
+      if (!plannedMinutes) {
+        continue;
+      }
+
+      const difference = Math.abs(
+        actualMinutes - plannedMinutes,
+      );
+
+      if (difference < bestDifference) {
+        bestDifference = difference;
+        bestMatch = session;
+      }
+    }
+
+    if (bestMatch) {
+      const plannedMinutes = Number(
+        bestMatch.duration_min,
+      );
+
+      const differencePercent =
+        bestDifference / plannedMinutes;
+
+      const confidence = Math.max(
+        0,
+        Math.round(100 - differencePercent * 100),
+      );
+
+      matchedPlannedSessionId = bestMatch.id;
+      matchConfidence = confidence;
+    }
+  }
+}      
       const activityResponse = await fetch(
         `${supabaseUrl}/rest/v1/completed_activity?on_conflict=source,source_activity_id`,
         {
@@ -116,7 +177,8 @@ export default async function handler(req: any, res: any) {
           },
           body: JSON.stringify({
             athlete_id: athleteId,
-            planned_session_id: null,
+           planned_session_id: matchedPlannedSessionId,
+            match_confidence: matchConfidence,
             sport,
             source: 'garmin',
             source_activity_id: sourceActivityId,
