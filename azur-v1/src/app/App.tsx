@@ -2879,17 +2879,62 @@ const { error } = await supabase
     ).padStart(2, '0')}`;
 
   const weekStart = toDateKey(monday);
-const { data: seasonWeek, error: seasonWeekError } =
+let { data: seasonWeek, error: seasonWeekError } =
   await supabase
     .from('season_week')
     .select('id, phase, target_hours')
     .eq('athlete_id', athlete.id)
     .eq('week_start', weekStart)
-    .single();
+    .maybeSingle();
 
-if (seasonWeekError || !seasonWeek) {
-
+if (seasonWeekError) {
+  console.error(
+    'Unable to load season week:',
+    seasonWeekError,
+  );
   return;
+}
+
+if (!seasonWeek) {
+  const { data: previousWeek, error: previousWeekError } =
+    await supabase
+      .from('season_week')
+      .select('phase, target_hours')
+      .eq('athlete_id', athlete.id)
+      .lt('week_start', weekStart)
+      .order('week_start', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+  if (previousWeekError) {
+    console.error(
+      'Unable to load previous season week:',
+      previousWeekError,
+    );
+    return;
+  }
+
+  const { data: createdWeek, error: createWeekError } =
+    await supabase
+      .from('season_week')
+      .insert({
+        athlete_id: athlete.id,
+        week_start: weekStart,
+        phase: previousWeek?.phase ?? 'Base 1',
+        target_hours: previousWeek?.target_hours ?? 8,
+      })
+      .select('id, phase, target_hours')
+      .single();
+
+  if (createWeekError || !createdWeek) {
+    console.error(
+      'Unable to create current season week:',
+      createWeekError,
+    );
+    return;
+  }
+
+  seasonWeek = createdWeek;
 }
     const historyStart = new Date(monday);
 
