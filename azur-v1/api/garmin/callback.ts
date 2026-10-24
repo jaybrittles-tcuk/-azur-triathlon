@@ -1,24 +1,3 @@
-import crypto from 'crypto';
-
-function getCookie(
-  cookieHeader: string | undefined,
-  name: string,
-) {
-  if (!cookieHeader) return null;
-
-  const cookies = cookieHeader.split(';');
-
-  for (const cookie of cookies) {
-    const [key, ...valueParts] = cookie.trim().split('=');
-
-    if (key === name) {
-      return decodeURIComponent(valueParts.join('='));
-    }
-  }
-
-  return null;
-}
-
 export default async function handler(req: any, res: any) {
   const code =
     typeof req.query.code === 'string'
@@ -30,49 +9,83 @@ export default async function handler(req: any, res: any) {
       ? req.query.state
       : null;
 
-  const codeVerifier = getCookie(
-    req.headers.cookie,
-    'garmin_code_verifier',
-  );
-
-  const expectedState = getCookie(
-    req.headers.cookie,
-    'garmin_oauth_state',
-  );
-
   if (!code || !returnedState) {
     return res.status(400).json({
       error: 'Missing Garmin authorization code or state.',
     });
   }
 
+  const clientId = process.env.GARMIN_CLIENT_ID;
+  const clientSecret = process.env.GARMIN_CLIENT_SECRET;
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
   if (
-    !expectedState ||
-    !crypto.timingSafeEqual(
-      Buffer.from(returnedState),
-      Buffer.from(expectedState),
-    )
+    !clientId ||
+    !clientSecret ||
+    !supabaseUrl ||
+    !serviceKey
   ) {
+    return res.status(500).json({
+      error: 'Server configuration is incomplete.',
+    });
+  }
+
+  // 1. Find the server-side OAuth state.
+  const stateResponse = await fetch(
+    `${supabaseUrl}/rest/v1/garmin_oauth_state?state=eq.${encodeURIComponent(
+      returnedState,
+    )}&select=id,athlete_id,code_verifier,expires_at&limit=1`,
+    {
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+      },
+    },
+  );
+
+  if (!stateResponse.ok) {
+    return res.status(500).json({
+      error: 'Unable to validate Garmin OAuth state.',
+    });
+  }
+
+  const stateRows = await stateResponse.json();
+  const savedState = stateRows?.[0];
+
+  if (!savedState) {
     return res.status(400).json({
       error: 'Garmin OAuth state validation failed.',
     });
   }
 
-  if (!codeVerifier) {
+  if (
+    new Date(savedState.expires_at).getTime() <
+    Date.now()
+  ) {
     return res.status(400).json({
-      error: 'Garmin PKCE verifier was not found.',
+      error: 'Garmin OAuth request has expired.',
     });
   }
 
-  const clientId = process.env.GARMIN_CLIENT_ID;
-  const clientSecret = process.env.GARMIN_CLIENT_SECRET;
+  const athleteId = savedState.athlete_id;
+  const codeVerifier = savedState.code_verifier;
 
-  if (!clientId || !clientSecret) {
-    return res.status(500).json({
-      error: 'Garmin credentials are not configured.',
-    });
-  }
+  // 2. Delete the temporary state so it cannot be reused.
+  await fetch(
+    `${supabaseUrl}/rest/v1/garmin_oauth_state?id=eq.${encodeURIComponent(
+      savedState.id,
+    )}`,
+    {
+      method: 'DELETE',
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+      },
+    },
+  );
 
+  // 3. Exchange Garmin authorization code for tokens.
   const redirectUri =
     'https://azur-triathlon.vercel.app/api/garmin/callback';
 
@@ -114,6 +127,7 @@ export default async function handler(req: any, res: any) {
 
   const tokens = await tokenResponse.json();
 
+  // 4. Fetch persistent Garmin User ID.
   const userResponse = await fetch(
     'https://apis.garmin.com/partner-gateway/rest/user/id',
     {
@@ -131,39 +145,54 @@ export default async function handler(req: any, res: any) {
 
   const garminUser = await userResponse.json();
 
-  const permissionResponse = await fetch(
-    'https://apis.garmin.com/partner-gateway/rest/user/permissions',
+  // 5. Calculate access-token expiry.
+  const accessExpiresAt = new Date(
+    Date.now() +
+      Number(tokens.expires_in ?? 86400) * 1000,
+  ).toISOString();
+
+  // 6. Save/update the Garmin connection.
+  const integrationResponse = await fetch(
+    `${supabaseUrl}/rest/v1/athlete_integration?on_conflict=athlete_id,provider`,
     {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${tokens.access_token}`,
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal',
       },
+      body: JSON.stringify({
+        athlete_id: athleteId,
+        provider: 'garmin',
+        provider_athlete_id: garminUser.userId,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        token_expires_at: accessExpiresAt,
+        scopes: tokens.scope ?? null,
+        connected_at: new Date().toISOString(),
+      }),
     },
   );
 
-  const permissions = permissionResponse.ok
-    ? await permissionResponse.json()
-    : null;
+  if (!integrationResponse.ok) {
+    const errorText = await integrationResponse.text();
 
-  res.setHeader('Set-Cookie', [
-    `garmin_access_token=${encodeURIComponent(
-      tokens.access_token,
-    )}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${
-      tokens.expires_in ?? 86400
-    }`,
+    console.error(
+      'Unable to save Garmin integration:',
+      integrationResponse.status,
+      errorText,
+    );
 
-    `garmin_refresh_token=${encodeURIComponent(
-      tokens.refresh_token,
-    )}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${
-      tokens.refresh_token_expires_in ?? 7775998
-    }`,
+    return res.status(500).json({
+      error:
+        'Garmin connected, but Azur could not save the connection.',
+    });
+  }
 
-    'garmin_code_verifier=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0',
-    'garmin_oauth_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0',
-  ]);
-
-  return res.status(200).json({
-    connected: true,
-    garminUserId: garminUser.userId,
-    permissions,
-  });
+  // 7. Return to Azur.
+  return res.redirect(
+    302,
+    'https://azur-triathlon.vercel.app/?garmin=connected',
+  );
 }
