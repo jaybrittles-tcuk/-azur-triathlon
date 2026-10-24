@@ -6404,13 +6404,17 @@ const dayCompletedActivities = completedActivityFeed.filter(
                     {daySessions.map((session) => (
                       <button
                         key={session.id}
-                        className={`calendar-session ${
-                          session.accent
-                        } ${
-                          selected.id === session.id
-                            ? 'selected'
-                            : ''
-                        }`}
+className={`calendar-session ${
+  session.accent
+} ${
+  session.status === 'completed'
+    ? 'completed'
+    : ''
+} ${
+  selected.id === session.id
+    ? 'selected'
+    : ''
+}`}
 onClick={() => {
   setSelectedId(session.id);
   setSessionDetailOpen(true);
@@ -6419,11 +6423,19 @@ onClick={() => {
 <div className="calendar-session-top">
   <span>{sportName(session.sport)}</span>
 
-  <div className="calendar-session-status">
-    <span>{session.status}</span>
+<div className="calendar-session-status">
+  <span>
+    {session.status === 'completed'
+      ? 'Completed'
+      : session.status}
+  </span>
 
-    {session.locked && <Lock size={13} />}
-  </div>
+  {session.status === 'completed' ? (
+    <CheckCircle2 size={13} />
+  ) : (
+    session.locked && <Lock size={13} />
+  )}
+</div>
 </div>
 
                         <strong>{session.title}</strong>
