@@ -7131,13 +7131,28 @@ const sessionVerdict =
   <div className="wide session-block session-analysis-card">
     <span className="eyebrow">AZUR SESSION ANALYSIS</span>
 
-    <div className="session-analysis-row">
-      <div>
-        <span>DURATION ADHERENCE</span>
-        <strong>
-          {Math.round(selectedExecution.duration)}%
-        </strong>
-      </div>
+<div className="session-analysis-row">
+  <div>
+    <span>DURATION COMPLETION</span>
+    <strong>
+      {matchCompletionPercent != null
+        ? `${matchCompletionPercent}%`
+        : '—'}
+    </strong>
+  </div>
+
+  <p>
+    {matchCompletionPercent == null
+      ? 'Completed duration is not available.'
+      : matchCompletionPercent >= 105
+        ? 'You completed slightly more than the planned training duration. The session delivered the intended aerobic volume.'
+        : matchCompletionPercent >= 95
+          ? 'Planned training time was completed. The session delivered the intended training volume.'
+          : matchCompletionPercent >= 85
+            ? 'Most of the planned training time was completed. The session still contributed meaningfully to the intended training load.'
+            : 'Completed training time was below plan. Azur will consider this alongside recovery, athlete feedback and upcoming sessions.'}
+  </p>
+</div>
 
 <p>
   {selectedExecution.duration >= 95
