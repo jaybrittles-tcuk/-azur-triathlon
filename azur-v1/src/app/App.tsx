@@ -1038,8 +1038,9 @@ const [nextSessionDecision, setNextSessionDecision] =
   const [confirmedMatchSessionId, setConfirmedMatchSessionId] =
   useState<string | null>(null);
 const [sessionFeedbackMessage, setSessionFeedbackMessage] = useState('');
-
-const [trainingLoad, setTrainingLoad] = useState({
+const [garminConnected, setGarminConnected] = useState(false);
+  
+  const [trainingLoad, setTrainingLoad] = useState({
   fitness: null as number | null,
   fatigue: null as number | null,
   form: null as number | null,
@@ -1201,6 +1202,45 @@ console.log('Azur latest combined training load:', latestLoad);
   const [decision, setDecision] = useState<
     'pending' | 'accepted' | 'rejected'
   >('pending');
+  async function loadGarminConnection() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    setGarminConnected(false);
+    return;
+  }
+
+  const { data: athlete, error: athleteError } = await supabase
+    .from('athlete_profile')
+    .select('id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (athleteError || !athlete) {
+    setGarminConnected(false);
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from('athlete_integration')
+    .select('provider')
+    .eq('athlete_id', athlete.id)
+    .eq('provider', 'garmin')
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      'Unable to load Garmin connection:',
+      error,
+    );
+    setGarminConnected(false);
+    return;
+  }
+
+  setGarminConnected(Boolean(data));
+}
   async function connectGarmin() {
   const {
     data: { session },
@@ -4136,7 +4176,7 @@ useEffect(() => {
   if (!authReady || !isAuthenticated) {
     return;
   }
-
+void loadGarminConnection();
   if (!needsCurrentWeekPlan) {
     return;
   }
@@ -5151,19 +5191,23 @@ padding: '11px 16px',
     </button>
 <button
   type="button"
-  onClick={connectGarmin}
+  onClick={() => {
+    if (!garminConnected) {
+      void connectGarmin();
+    }
+  }}
   style={{
     padding: '8px 10px',
     borderRadius: '8px',
     border: '1px solid #CBD8E5',
-    background: '#FFFFFF',
-    color: '#17324D',
+    background: garminConnected ? '#EEF7F1' : '#FFFFFF',
+    color: garminConnected ? '#2E6B45' : '#17324D',
     fontSize: '12px',
     fontWeight: 700,
-    cursor: 'pointer',
+    cursor: garminConnected ? 'default' : 'pointer',
   }}
 >
-  Connect Garmin
+  {garminConnected ? 'Garmin Connected ✓' : 'Connect Garmin'}
 </button>
     <button
       type="button"
