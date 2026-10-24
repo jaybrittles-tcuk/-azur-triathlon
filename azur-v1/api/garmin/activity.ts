@@ -10,13 +10,14 @@ function mapGarminSport(activityType: string) {
     return 'run';
   }
 
-  if (
-    type.includes('CYCL') ||
-    type.includes('BIKE') ||
-    type === 'VIRTUAL_RIDE'
-  ) {
-    return 'bike';
-  }
+if (
+  type.includes('CYCL') ||
+  type.includes('BIKE') ||
+  type.includes('BIKING') ||
+  type === 'VIRTUAL_RIDE'
+) {
+  return 'bike';
+}
 
   if (
     type.includes('SWIM') ||
