@@ -4878,13 +4878,10 @@ color:
   );
 };
 function HomeView() {
-  const todayDate = new Date().toISOString().slice(0, 10);
-
-  const todaySession =
-    weekSessions.find(
-      (session: any) =>
-        session.planned_date === todayDate,
-    ) ?? weekSessions[0];
+const todaySession = weekSessions.find(
+  (session: any) =>
+    session.plannedDate === todayKey,
+);
 
   return (
       <>
