@@ -4100,9 +4100,13 @@ setPlanPreviewInsights({
   return;
 }
 
+const sessionsToSave = generatedSessions.map(
+  ({ azurWorkout, ...session }: any) => session,
+);
+
 const { error: insertError } = await supabase
   .from('planned_session')
-  .insert(generatedSessions);
+  .insert(sessionsToSave);
 
 if (insertError) {
   if (insertError.code === '23505') {
