@@ -59,10 +59,18 @@ try {
   const activities = Array.isArray(req.body?.activities)
     ? req.body.activities
     : [];
-
-    for (const activity of activities) {
+console.log(
+  'GARMIN ACTIVITY TYPE:',
+  activities?.[0]?.activityType,
+);
+  for (const activity of activities) {
       const sport = mapGarminSport(activity.activityType);
-
+console.log(
+  'GARMIN SPORT MAP:',
+  activity.activityType,
+  '=>',
+  sport,
+);
       if (!sport) {
         continue;
       }
