@@ -1201,6 +1201,42 @@ console.log('Azur latest combined training load:', latestLoad);
   const [decision, setDecision] = useState<
     'pending' | 'accepted' | 'rejected'
   >('pending');
+  async function connectGarmin() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    window.alert('Please sign in to Azur first.');
+    return;
+  }
+
+  const response = await fetch('/api/garmin/connect', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error('Garmin connection failed:', data);
+    window.alert(
+      data?.error ?? 'Unable to start Garmin connection.',
+    );
+    return;
+  }
+
+  if (!data?.authorizationUrl) {
+    window.alert('Garmin authorization URL was not returned.');
+    return;
+  }
+
+  window.location.href = data.authorizationUrl;
+}
 async function loadAthleteProfile(userId: string) {
   const { data, error } = await supabase
     .from('athlete_profile')
@@ -5113,7 +5149,22 @@ padding: '11px 16px',
     >
       {planPreview ? 'Close' : 'Preview'}
     </button>
-
+<button
+  type="button"
+  onClick={connectGarmin}
+  style={{
+    padding: '8px 10px',
+    borderRadius: '8px',
+    border: '1px solid #CBD8E5',
+    background: '#FFFFFF',
+    color: '#17324D',
+    fontSize: '12px',
+    fontWeight: 700,
+    cursor: 'pointer',
+  }}
+>
+  Connect Garmin
+</button>
     <button
       type="button"
       onClick={() =>
