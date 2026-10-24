@@ -6440,13 +6440,33 @@ onClick={() => {
 
                         <strong>{session.title}</strong>
 <WorkoutShape sessionClass={session.sessionClass} />
- <div className="calendar-session-meta">
-  <span>{formatDuration(session.durationMin)}</span>
-  <span>Priority {session.priority}</span>
+<div className="calendar-session-meta">
+  <span>
+    {session.status === 'completed' &&
+    session.completedDurationSec
+      ? `Actual ${formatDuration(
+          Math.round(session.completedDurationSec / 60),
+        )}`
+      : formatDuration(session.durationMin)}
+  </span>
+
+  <span>
+    {session.status === 'completed' &&
+    session.completedMatchConfidence != null
+      ? `${Math.round(
+          session.completedMatchConfidence,
+        )}% match`
+      : `Priority ${session.priority}`}
+  </span>
 </div>
 
 <span className="calendar-session-target">
-  {Object.values(session.targets)[0]?.toString()}
+  {session.status === 'completed' &&
+  session.completedSource === 'garmin'
+    ? `Garmin · Planned ${formatDuration(
+        session.durationMin,
+      )}`
+    : Object.values(session.targets)[0]?.toString()}
 </span>
                       </button>
                     ))}
