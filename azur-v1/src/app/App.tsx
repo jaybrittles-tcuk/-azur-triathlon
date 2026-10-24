@@ -5780,7 +5780,24 @@ onClick={() => void saveTrainingBaseline()}
      );
 })}
     </div>
-
+<button
+  type="button"
+  onClick={() => void generateCurrentWeekPlan(false)}
+  style={{
+    marginTop: '20px',
+    width: '100%',
+    padding: '14px 18px',
+    borderRadius: '10px',
+    border: 'none',
+    background: '#0A3556',
+    color: '#FFFFFF',
+    fontSize: '15px',
+    fontWeight: 800,
+    cursor: 'pointer',
+  }}
+>
+  Use This Plan
+</button>    
     <p style={{ marginTop: '20px', color: '#52677B' }}>
       Preview only — your existing training plan
       remains unchanged.
