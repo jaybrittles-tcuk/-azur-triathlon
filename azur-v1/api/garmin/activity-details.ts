@@ -5,6 +5,15 @@ export default async function handler(req: any, res: any) {
     });
   }
 
+  const supabaseUrl = process.env.VITE_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    return res.status(500).json({
+      error: 'Server configuration is incomplete.',
+    });
+  }
+
   try {
     const activityDetails = Array.isArray(
       req.body?.activityDetails,
@@ -28,23 +37,153 @@ export default async function handler(req: any, res: any) {
       )
         ? activityDetails[0].samples.length
         : 0,
-      firstSample:
-        activityDetails?.[0]?.samples?.[0] ?? null,
-      manual:
-  activityDetails?.[0]?.summary?.manual ??
-  activityDetails?.[0]?.manual ??
-  null,
-
-deviceName:
-  activityDetails?.[0]?.summary?.deviceName ??
-  activityDetails?.[0]?.deviceName ??
-  null,
-
-summaryKeys:
-  Object.keys(
-    activityDetails?.[0]?.summary ?? {},
-  ),
     });
+
+    for (const detail of activityDetails) {
+      const summary = detail.summary ?? {};
+      const samples = Array.isArray(detail.samples)
+        ? detail.samples
+        : [];
+
+      const sourceActivityId = String(
+        detail.activityId ??
+          summary.activityId ??
+          '',
+      );
+
+      if (!sourceActivityId) {
+        continue;
+      }
+
+      const route = samples
+        .filter(
+          (sample: any) =>
+            sample.latitudeInDegree != null &&
+            sample.longitudeInDegree != null,
+        )
+        .map((sample: any) => ({
+          lat: Number(sample.latitudeInDegree),
+          lng: Number(sample.longitudeInDegree),
+        }));
+
+      const series = samples.map((sample: any) => ({
+        elapsedSec:
+          sample.timerDurationInSeconds != null
+            ? Number(sample.timerDurationInSeconds)
+            : sample.startTimeInSeconds != null &&
+                summary.startTimeInSeconds != null
+              ? Number(sample.startTimeInSeconds) -
+                Number(summary.startTimeInSeconds)
+              : null,
+
+        heartRate:
+          sample.heartRate != null
+            ? Number(sample.heartRate)
+            : null,
+
+        speedKmh:
+          sample.speedMetersPerSecond != null
+            ? Number(sample.speedMetersPerSecond) * 3.6
+            : null,
+
+        altitudeM:
+          sample.elevationInMeters != null
+            ? Number(sample.elevationInMeters)
+            : null,
+      }));
+
+      const processedMetrics = {
+        averageHeartRate:
+          summary.averageHeartRateInBeatsPerMinute ??
+          null,
+
+        maxHeartRate:
+          summary.maxHeartRateInBeatsPerMinute ??
+          null,
+
+        averagePaceSecPerKm:
+          summary.averagePaceInMinutesPerKilometer != null
+            ? Number(
+                summary.averagePaceInMinutesPerKilometer,
+              ) * 60
+            : null,
+
+        bestPaceSecPerKm:
+          summary.maxPaceInMinutesPerKilometer != null
+            ? Number(
+                summary.maxPaceInMinutesPerKilometer,
+              ) * 60
+            : null,
+
+        averageSpeedKmh:
+          summary.averageSpeedInMetersPerSecond != null
+            ? Number(
+                summary.averageSpeedInMetersPerSecond,
+              ) * 3.6
+            : null,
+
+        maxSpeedKmh:
+          summary.maxSpeedInMetersPerSecond != null
+            ? Number(
+                summary.maxSpeedInMetersPerSecond,
+              ) * 3.6
+            : null,
+
+        calories:
+          summary.activeKilocalories ?? null,
+
+        averageRunCadence:
+          summary.averageRunCadenceInStepsPerMinute ??
+          null,
+
+        maxRunCadence:
+          summary.maxRunCadenceInStepsPerMinute ??
+          null,
+
+        averageBikeCadence:
+          summary.averageBikeCadenceInRoundsPerMinute ??
+          null,
+
+        maxBikeCadence:
+          summary.maxBikeCadenceInRoundsPerMinute ??
+          null,
+      };
+
+      const updateResponse = await fetch(
+        `${supabaseUrl}/rest/v1/completed_activity?source=eq.garmin&source_activity_id=eq.${encodeURIComponent(
+          sourceActivityId,
+        )}`,
+        {
+          method: 'PATCH',
+          headers: {
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({
+            raw_payload: {
+              detail,
+              route,
+              series,
+            },
+            processed_metrics: processedMetrics,
+          }),
+        },
+      );
+
+      if (!updateResponse.ok) {
+        console.error(
+          'Unable to enrich Garmin activity:',
+          await updateResponse.text(),
+        );
+      } else {
+        console.log(
+          'GARMIN ACTIVITY ENRICHED:',
+          sourceActivityId,
+        );
+      }
+    }
   } catch (error) {
     console.error(
       'Garmin Activity Details webhook error:',
