@@ -6981,14 +6981,14 @@ const sessionVerdict =
     </strong>
   </div>
 
-  <div>
-    <span>COMPLETED</span>
-    <strong>
-      {formatDuration(
-        Math.round(selected.completedDurationSec / 60),
-      )}
-    </strong>
-  </div>
+<div>
+  <span>COMPLETED</span>
+  <strong>
+    {formatCompletedDuration(
+      selected.completedDurationSec,
+    )}
+  </strong>
+</div>
 
   <div>
     <span>MATCH STATUS</span>
@@ -7023,9 +7023,11 @@ const sessionVerdict =
             <div>
               <span>DISTANCE</span>
               <strong>
-                {selected.completedDistanceM
-                  ? `${(selected.completedDistanceM / 1000).toFixed(1)} km`
-                  : '—'}
+{selected.completedDistanceM != null
+  ? formatCompletedDistance(
+      selected.completedDistanceM,
+    )
+  : '—'}
               </strong>
             </div>
 
