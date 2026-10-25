@@ -5131,7 +5131,7 @@ height: '58px',
         }}
       >
         <span>
-          {planPreviewInsights?.phase || 'Base 1'}
+        {currentMacrocycleWeek?.phase || 'Base 1'}
         </span>
 
         <span style={{ opacity: 0.4 }}>
@@ -5141,6 +5141,9 @@ height: '58px',
         <span>
           {daysToRace} days to race day
         </span>
+        <span style={{ opacity: 0.7 }}>
+  • {currentMacrocycleWeek?.weeksToRace ?? 0} weeks to race
+</span>
       </div>
     </div>
   </div>
