@@ -4107,25 +4107,31 @@ prescription: {
       season_week_id: seasonWeek.id,
       planned_date: addDays(6),
       sport: 'run',
-   title:
-  phaseKey.includes('peak')
-    ? 'Race-Specific Long Run'
-    : phaseKey.includes('recovery')
-      ? 'Reduced Aerobic Run'
-      : 'Long Aerobic Run',
+title:
+  isRaceWeek
+    ? 'Race Week Run Activation'
+    : isRaceSpecific || phaseKey.includes('peak')
+      ? 'Race-Specific Long Run'
+      : phaseKey.includes('recovery')
+        ? 'Reduced Aerobic Run'
+        : 'Long Aerobic Run',
 
 session_class:
-  phaseKey.includes('peak')
-    ? 'race_specific'
-    : phaseKey.includes('recovery')
-      ? 'easy'
-      : 'endurance',
+  isRaceWeek
+    ? 'easy'
+    : isRaceSpecific || phaseKey.includes('peak')
+      ? 'race_specific'
+      : phaseKey.includes('recovery')
+        ? 'easy'
+        : 'endurance',
       priority: 1,
 duration_min: longRunMinutes,
       targets: {},
 prescription: {
-  focus:
-    phaseKey.includes('peak')
+focus:
+  isRaceWeek
+    ? 'Short race-week run activation with relaxed race-effort strides'
+    : isRaceSpecific || phaseKey.includes('peak')
       ? 'Race-specific endurance'
       : phaseKey.includes('build')
         ? 'Aerobic endurance with race-specific work'
