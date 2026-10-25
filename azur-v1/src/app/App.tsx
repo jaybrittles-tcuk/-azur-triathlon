@@ -3456,12 +3456,14 @@ const plannedLongRideMinutes =
   );
 
 const longRideMinutes =
-  longestRecentRideMinutes > 0
-    ? Math.min(
-        plannedLongRideMinutes,
-        Math.round(longestRecentRideMinutes * 1.12),
-      )
-    : plannedLongRideMinutes;
+  isRaceWeek
+    ? Math.min(60, plannedLongRideMinutes)
+    : longestRecentRideMinutes > 0
+      ? Math.min(
+          plannedLongRideMinutes,
+          Math.round(longestRecentRideMinutes * 1.12),
+        )
+      : plannedLongRideMinutes;
 
 const plannedLongRunMinutes =
   Math.round(
