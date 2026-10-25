@@ -4545,11 +4545,15 @@ const macrocycleWithHours = useMemo(() => {
       onConflict: 'athlete_id,week_start',
     });
 
-  if (error) {
-    console.error('Unable to save season roadmap:', error);
-    window.alert('Unable to save your season roadmap.');
-    return;
-  }
+if (error) {
+  console.error('Unable to save season roadmap:', error);
+
+  window.alert(
+    `Unable to save your season roadmap.\n\n${error.message}`,
+  );
+
+  return;
+}
 
   window.alert(
     `${seasonWeeks.length} season weeks saved successfully.`,
