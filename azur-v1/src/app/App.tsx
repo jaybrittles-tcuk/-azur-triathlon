@@ -4436,9 +4436,13 @@ const [athleteBaseline, setAthleteBaseline] =
     longestRideMinutes: '',
     longestRunMinutes: '',
   });
-  const macrocycleWithHours = useMemo(() => {
+const macrocycleWithHours = useMemo(() => {
   const baselineHours =
     Number(athleteBaseline.weeklyHours) || 8;
+
+  const maxWeeklyHours =
+    Number(athleteBaseline.maxWeeklyHours) ||
+    baselineHours;
 
   return macrocycle.map((week, index) => {
     const progress =
@@ -4446,64 +4450,54 @@ const [athleteBaseline, setAthleteBaseline] =
         ? index / (macrocycle.length - 1)
         : 0;
 
-    let phaseMultiplier = 1;
+    let targetHours =
+      baselineHours +
+      (maxWeeklyHours - baselineHours) * progress;
 
-    switch (week.phase) {
-      case 'Foundation':
-        phaseMultiplier = 0.9;
-        break;
-
-      case 'Base':
-        phaseMultiplier = 1.0 + progress * 0.15;
-        break;
-
-      case 'Build':
-        phaseMultiplier = 1.1 + progress * 0.2;
-        break;
-
-      case 'Race Specific':
-        phaseMultiplier = 1.2 + progress * 0.25;
-        break;
-
-      case 'Peak':
-        phaseMultiplier = 1.25;
-        break;
-
-      case 'Taper':
-        phaseMultiplier =
-          week.weeksToRace === 2 ? 0.85 : 0.65;
-        break;
-
-      case 'Race':
-        phaseMultiplier = 0.45;
-        break;
+    if (week.phase === 'Foundation') {
+      targetHours = baselineHours * 0.9;
     }
 
-const isRecoveryWeek =
-  index > 0 &&
-  index % 4 === 3 &&
-  ['Base', 'Build', 'Race Specific'].includes(
-    week.phase,
-  );
+    if (week.phase === 'Peak') {
+      targetHours = maxWeeklyHours;
+    }
 
-const adjustedMultiplier = isRecoveryWeek
-  ? phaseMultiplier * 0.8
-  : phaseMultiplier;
+    if (week.phase === 'Taper') {
+      targetHours =
+        week.weeksToRace === 2
+          ? maxWeeklyHours * 0.75
+          : maxWeeklyHours * 0.5;
+    }
 
-const targetHours = Math.max(
-  3,
-  Math.round(
-    baselineHours * adjustedMultiplier * 2,
-  ) / 2,
-);
+    if (week.phase === 'Race') {
+      targetHours = maxWeeklyHours * 0.35;
+    }
 
-return {
-  ...week,
-  targetHours,
-  isRecoveryWeek,
-};
+    const isRecoveryWeek =
+      index > 0 &&
+      index % 4 === 3 &&
+      ['Base', 'Build', 'Race Specific'].includes(
+        week.phase,
+      );
+
+    if (isRecoveryWeek) {
+      targetHours *= 0.8;
+    }
+
+    targetHours =
+      Math.round(targetHours * 2) / 2;
+
+    return {
+      ...week,
+      targetHours,
+      isRecoveryWeek,
+    };
   });
-}, [macrocycle, athleteBaseline.weeklyHours]);
+}, [
+  macrocycle,
+  athleteBaseline.weeklyHours,
+  athleteBaseline.maxWeeklyHours,
+]);
   async function loadTrainingBaseline() {
   const {
     data: { user },
