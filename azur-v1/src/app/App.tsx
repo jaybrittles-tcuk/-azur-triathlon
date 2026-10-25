@@ -989,9 +989,11 @@ function buildMacrocycle(raceDate: string): MacrocycleWeek[] {
   const daysFromMonday =
     (startMonday.getDay() + 6) % 7;
 
-  startMonday.setDate(
-    startMonday.getDate() - daysFromMonday,
-  );
+monday.setDate(
+  monday.getDate() -
+    daysFromMonday +
+    (previewOnly ? previewWeekOffset * 7 : 0),
+);
 
   const race = new Date(`${raceDate}T12:00:00`);
 
