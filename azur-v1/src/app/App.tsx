@@ -5580,31 +5580,55 @@ padding: '11px 16px',
       borderRadius: '14px',
     }}
   >
+   <div
+  style={{
+    marginBottom: '14px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '12px',
+  }}
+>
+  <div>
     <div
       style={{
-        marginBottom: '14px',
+        color: '#17324D',
+        fontSize: '14px',
+        fontWeight: 800,
       }}
     >
-      <div
-        style={{
-          color: '#17324D',
-          fontSize: '14px',
-          fontWeight: 800,
-        }}
-      >
-        Season Roadmap
-      </div>
-
-      <div
-        style={{
-          marginTop: '4px',
-          color: '#718394',
-          fontSize: '12px',
-        }}
-      >
-        {primaryRace.name} · {macrocycle.length} weeks
-      </div>
+      Season Roadmap
     </div>
+
+    <div
+      style={{
+        marginTop: '4px',
+        color: '#718394',
+        fontSize: '12px',
+      }}
+    >
+      {primaryRace.name} · {macrocycle.length} weeks
+    </div>
+  </div>
+
+  <button
+    type="button"
+    onClick={() => void saveSeasonRoadmap()}
+    style={{
+      padding: '8px 12px',
+      borderRadius: '8px',
+      border: 'none',
+      background: '#0A3556',
+      color: '#FFFFFF',
+      fontSize: '12px',
+      fontWeight: 700,
+      cursor: 'pointer',
+      flexShrink: 0,
+    }}
+  >
+    Save Season
+  </button>
+</div>
 
     <div
       style={{
