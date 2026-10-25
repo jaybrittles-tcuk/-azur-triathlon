@@ -3345,8 +3345,17 @@ const targetMinutes =
   Math.round(plannedHours * 60);
 
 const phaseConfig =
-  isTaper
+  isRaceWeek
     ? {
+        swim1Weight: 0.18,
+        bikeQualityWeight: 0.18,
+        easyRunWeight: 0.14,
+        swim2Weight: 0.10,
+        longRideWeight: 0.22,
+        longRunWeight: 0.18,
+      }
+    : isTaper
+      ? {
         swim1Weight: 0.13,
         bikeQualityWeight: 0.18,
         easyRunWeight: 0.12,
