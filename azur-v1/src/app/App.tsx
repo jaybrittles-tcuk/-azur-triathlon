@@ -2251,7 +2251,22 @@ const daysToRace = primaryRace.raceDate
       ),
     )
   : 0;
+const macrocycle = useMemo(
+  () => buildMacrocycle(primaryRace.raceDate),
+  [primaryRace.raceDate],
+);
 
+const currentMacrocycleWeek =
+  macrocycle.length > 0
+    ? macrocycle[0]
+    : null;
+
+console.log('AZUR MACROCYCLE', {
+  race: primaryRace.name,
+  raceDate: primaryRace.raceDate,
+  totalWeeks: macrocycle.length,
+  currentWeek: currentMacrocycleWeek,
+});
   const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
   function toggleLock() {
