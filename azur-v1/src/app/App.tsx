@@ -4500,6 +4500,61 @@ const macrocycleWithHours = useMemo(() => {
   athleteBaseline.weeklyHours,
   athleteBaseline.maxWeeklyHours,
 ]);
+  async function saveSeasonRoadmap() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    window.alert('Please sign in before saving your season.');
+    return;
+  }
+
+  const { data: athlete, error: athleteError } =
+    await supabase
+      .from('athlete_profile')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+  if (athleteError || !athlete) {
+    window.alert('Unable to find your athlete profile.');
+    return;
+  }
+
+  if (!primaryRace.id) {
+    window.alert('Unable to identify your A race.');
+    return;
+  }
+
+  const seasonWeeks = macrocycleWithHours.map((week) => ({
+    athlete_id: athlete.id,
+    week_start: week.weekStart,
+    phase: week.isRecoveryWeek
+      ? `${week.phase} Recovery`
+      : week.phase,
+    race_focus_id: primaryRace.id,
+    target_hours: week.targetHours,
+    benchmark_week: false,
+    locked: false,
+  }));
+
+  const { error } = await supabase
+    .from('season_week')
+    .upsert(seasonWeeks, {
+      onConflict: 'athlete_id,week_start',
+    });
+
+  if (error) {
+    console.error('Unable to save season roadmap:', error);
+    window.alert('Unable to save your season roadmap.');
+    return;
+  }
+
+  window.alert(
+    `${seasonWeeks.length} season weeks saved successfully.`,
+  );
+}
   async function loadTrainingBaseline() {
   const {
     data: { user },
