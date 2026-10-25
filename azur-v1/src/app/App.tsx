@@ -3626,17 +3626,22 @@ const longRideMainMinutes =
   longRideCooldownMinutes;
 
 const longRideSteadyMinutes =
-  phaseKey.includes('build') ||
-  phaseKey.includes('peak')
-    ? Math.round(longRideMainMinutes * 0.6)
-    : longRideMainMinutes;
+  isRaceSpecific
+    ? Math.round(longRideMainMinutes * 0.4)
+    : phaseKey.includes('build') ||
+        phaseKey.includes('peak')
+      ? Math.round(longRideMainMinutes * 0.6)
+      : longRideMainMinutes;
 
 const longRideSpecificMinutes =
-  phaseKey.includes('build') ||
-  phaseKey.includes('peak')
+  isRaceSpecific
     ? longRideMainMinutes -
       longRideSteadyMinutes
-    : 0;
+    : phaseKey.includes('build') ||
+        phaseKey.includes('peak')
+      ? longRideMainMinutes -
+        longRideSteadyMinutes
+      : 0;
     const longRunWarmupMinutes = Math.max(
   8,
   Math.round(longRunMinutes * 0.1),
