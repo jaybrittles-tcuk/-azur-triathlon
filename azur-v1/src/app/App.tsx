@@ -5537,7 +5537,7 @@ padding: '11px 16px',
         gap: '8px',
       }}
     >
-      {macrocycle.map((week) => (
+      {macrocycleWithHours.map((week) => (
         <div
           key={week.weekStart}
           style={{
@@ -5568,7 +5568,7 @@ padding: '11px 16px',
                 fontSize: '11px',
               }}
             >
-              {week.weeksToRace} weeks to race
+              {week.weeksToRace} weeks to race · {week.targetHours}h target
             </div>
           </div>
 
