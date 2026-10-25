@@ -943,6 +943,22 @@ function formatDuration(minutes: number) {
   return `${hours}h ${remainder ? `${remainder}m` : ''}`.trim();
 }
 
+function formatCompletedDuration(seconds: number) {
+  if (seconds < 60) {
+    return `${Math.round(seconds)} sec`;
+  }
+
+  return formatDuration(Math.round(seconds / 60));
+}
+
+function formatCompletedDistance(distanceM: number) {
+  if (distanceM < 1000) {
+    return `${Math.round(distanceM)} m`;
+  }
+
+  return `${(distanceM / 1000).toFixed(1)} km`;
+}
+
 function sportName(sport: Sport) {
   return sport.charAt(0).toUpperCase() + sport.slice(1);
 }
