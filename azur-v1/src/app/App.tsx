@@ -1126,7 +1126,8 @@ function parsePaceInput(value: string) {
   weight: null as number | null,
   targetWeight: null as number | null,
 });
-  const [primaryRace, setPrimaryRace] = useState({
+const [primaryRace, setPrimaryRace] = useState({
+  id: '',
   name: '',
   raceDate: '',
   priority: '',
@@ -1441,7 +1442,7 @@ async function loadPrimaryRace(userId: string) {
 
   const { data, error } = await supabase
     .from('race')
-    .select('name, race_date, priority, location, target_splits')
+    .select('id, name, race_date, priority, location, target_splits')
     .eq('athlete_id', athlete.id)
     .eq('priority', 'A')
     .order('race_date', { ascending: true })
@@ -1454,6 +1455,7 @@ async function loadPrimaryRace(userId: string) {
   }
 
   setPrimaryRace({
+    id: data.id,
     name: data.name,
     raceDate: data.race_date,
     priority: data.priority,
