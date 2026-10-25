@@ -4496,10 +4496,11 @@ const targetHours = Math.max(
   ) / 2,
 );
 
-    return {
-      ...week,
-      targetHours,
-    };
+return {
+  ...week,
+  targetHours,
+  isRecoveryWeek,
+};
   });
 }, [macrocycle, athleteBaseline.weeklyHours]);
   async function loadTrainingBaseline() {
