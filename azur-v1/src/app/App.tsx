@@ -3111,9 +3111,9 @@ if (recentActivitiesError) {
   error: baselineError,
 } = await supabase
   .from('athlete_training_baseline')
-  .select(
-    'weekly_hours, sessions_per_week, swims_per_week, longest_ride_minutes, longest_run_minutes',
-  )
+.select(
+  'weekly_hours, max_weekly_hours, sessions_per_week, swims_per_week, longest_ride_minutes, longest_run_minutes',
+)
   .eq('athlete_id', athlete.id)
   .maybeSingle();
 
@@ -4538,13 +4538,16 @@ const macrocycleWithHours = useMemo(() => {
 
   if (!data) return;
 
-  setAthleteBaseline({
-    weeklyHours: String(data.weekly_hours),
-    sessionsPerWeek: String(data.sessions_per_week),
-    swimsPerWeek: String(data.swims_per_week),
-    longestRideMinutes: String(data.longest_ride_minutes),
-    longestRunMinutes: String(data.longest_run_minutes),
-  });
+setAthleteBaseline({
+  weeklyHours: String(data.weekly_hours),
+  maxWeeklyHours: String(
+    data.max_weekly_hours ?? data.weekly_hours,
+  ),
+  sessionsPerWeek: String(data.sessions_per_week),
+  swimsPerWeek: String(data.swims_per_week),
+  longestRideMinutes: String(data.longest_ride_minutes),
+  longestRunMinutes: String(data.longest_run_minutes),
+});
 }
   useEffect(() => {
   if (!authReady || !isAuthenticated) {
@@ -4555,6 +4558,8 @@ const macrocycleWithHours = useMemo(() => {
 }, [authReady, isAuthenticated]);
   async function saveTrainingBaseline() {
   const weeklyHours = Number(athleteBaseline.weeklyHours);
+    const maxWeeklyHours =
+  Number(athleteBaseline.maxWeeklyHours);
   const sessions = Number(athleteBaseline.sessionsPerWeek);
   const swims = Number(athleteBaseline.swimsPerWeek);
   const longestRide = Number(athleteBaseline.longestRideMinutes);
@@ -4610,6 +4615,7 @@ const macrocycleWithHours = useMemo(() => {
       {
         athlete_id: athlete.id,
         weekly_hours: weeklyHours,
+        max_weekly_hours: maxWeeklyHours,
         sessions_per_week: sessions,
         swims_per_week: swims,
         longest_ride_minutes: longestRide,
