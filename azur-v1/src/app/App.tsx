@@ -4573,6 +4573,9 @@ setAthleteBaseline({
     athleteBaseline.longestRunMinutes === '' ||
     weeklyHours <= 0 ||
     weeklyHours > 40 ||
+    !athleteBaseline.maxWeeklyHours ||
+maxWeeklyHours < weeklyHours ||
+maxWeeklyHours > 40 ||
     !Number.isInteger(sessions) ||
     sessions < 1 ||
     sessions > 21 ||
@@ -4584,7 +4587,9 @@ setAthleteBaseline({
     !Number.isInteger(longestRun) ||
     longestRun < 0
   ) {
-    window.alert('Please enter valid values in all five fields.');
+    window.alert(
+  'Please enter valid values. Maximum weekly hours must be at least your current weekly hours.',
+);
     return;
   }
 
