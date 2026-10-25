@@ -149,40 +149,75 @@ export default async function handler(req: any, res: any) {
           null,
       };
 
-      const updateResponse = await fetch(
-        `${supabaseUrl}/rest/v1/completed_activity?source=eq.garmin&source_activity_id=eq.${encodeURIComponent(
-          sourceActivityId,
-        )}`,
-        {
-          method: 'PATCH',
-          headers: {
-            apikey: serviceKey,
-            Authorization: `Bearer ${serviceKey}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=minimal',
-          },
-          body: JSON.stringify({
-            raw_payload: {
-              detail,
-              route,
-              series,
-            },
-            processed_metrics: processedMetrics,
-          }),
-        },
-      );
+let enriched = false;
 
-      if (!updateResponse.ok) {
-        console.error(
-          'Unable to enrich Garmin activity:',
-          await updateResponse.text(),
-        );
-      } else {
-        console.log(
-          'GARMIN ACTIVITY ENRICHED:',
-          sourceActivityId,
-        );
-      }
+for (let attempt = 1; attempt <= 3; attempt += 1) {
+  const updateResponse = await fetch(
+    `${supabaseUrl}/rest/v1/completed_activity?source=eq.garmin&source_activity_id=eq.${encodeURIComponent(
+      sourceActivityId,
+    )}`,
+    {
+      method: 'PATCH',
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      },
+      body: JSON.stringify({
+        duration_sec:
+          summary.durationInSeconds != null
+            ? Number(summary.durationInSeconds)
+            : undefined,
+
+        distance_m:
+          summary.distanceInMeters != null
+            ? Number(summary.distanceInMeters)
+            : undefined,
+
+        raw_payload: {
+          detail,
+          route,
+          series,
+        },
+
+        processed_metrics: processedMetrics,
+      }),
+    },
+  );
+
+  if (!updateResponse.ok) {
+    console.error(
+      'Unable to enrich Garmin activity:',
+      await updateResponse.text(),
+    );
+    break;
+  }
+
+  const updatedRows = await updateResponse.json();
+
+  if (Array.isArray(updatedRows) && updatedRows.length > 0) {
+    enriched = true;
+
+    console.log(
+      'GARMIN ACTIVITY ENRICHED:',
+      sourceActivityId,
+    );
+
+    break;
+  }
+
+  await new Promise((resolve) =>
+    setTimeout(resolve, 1000),
+  );
+}
+
+if (!enriched) {
+  console.warn(
+    'Garmin activity details arrived before summary row:',
+    sourceActivityId,
+  );
+}
     }
   } catch (error) {
     console.error(
