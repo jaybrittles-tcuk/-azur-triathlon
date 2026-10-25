@@ -4435,6 +4435,62 @@ const [athleteBaseline, setAthleteBaseline] =
     longestRideMinutes: '',
     longestRunMinutes: '',
   });
+  const macrocycleWithHours = useMemo(() => {
+  const baselineHours =
+    Number(athleteBaseline.weeklyHours) || 8;
+
+  return macrocycle.map((week, index) => {
+    const progress =
+      macrocycle.length > 1
+        ? index / (macrocycle.length - 1)
+        : 0;
+
+    let phaseMultiplier = 1;
+
+    switch (week.phase) {
+      case 'Foundation':
+        phaseMultiplier = 0.9;
+        break;
+
+      case 'Base':
+        phaseMultiplier = 1.0 + progress * 0.15;
+        break;
+
+      case 'Build':
+        phaseMultiplier = 1.1 + progress * 0.2;
+        break;
+
+      case 'Race Specific':
+        phaseMultiplier = 1.2 + progress * 0.25;
+        break;
+
+      case 'Peak':
+        phaseMultiplier = 1.25;
+        break;
+
+      case 'Taper':
+        phaseMultiplier =
+          week.weeksToRace === 2 ? 0.85 : 0.65;
+        break;
+
+      case 'Race':
+        phaseMultiplier = 0.45;
+        break;
+    }
+
+    const targetHours = Math.max(
+      3,
+      Math.round(
+        baselineHours * phaseMultiplier * 2,
+      ) / 2,
+    );
+
+    return {
+      ...week,
+      targetHours,
+    };
+  });
+}, [macrocycle, athleteBaseline.weeklyHours]);
   async function loadTrainingBaseline() {
   const {
     data: { user },
