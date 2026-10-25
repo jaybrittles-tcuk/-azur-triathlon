@@ -3303,6 +3303,14 @@ const phase =
   String(seasonWeek.phase ?? 'Base 1');
 
 const phaseKey = phase.toLowerCase();
+    const isRaceSpecific =
+  phaseKey.includes('race specific');
+
+const isTaper =
+  phaseKey.includes('taper');
+
+const isRaceWeek =
+  phaseKey === 'race';
 const shouldIncludeEasyRun =
   recommendedSessionCount >= 5;
     const shouldIncludeSecondSwim =
