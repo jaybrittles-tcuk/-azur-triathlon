@@ -3741,12 +3741,6 @@ focus:
   isRaceSpecific
     ? 'Sustained race-power development'
     : phaseKey.includes('build')
-      ? 'Threshold development'
-      : phaseKey.includes('peak')
-        ? 'Race-specific bike intensity'
-        : phaseKey.includes('recovery')
-          ? 'Aerobic recovery riding'
-          : 'Strength endurance development',
     ? 'Threshold development'
     : phaseKey.includes('peak')
       ? 'Race-specific bike intensity'
