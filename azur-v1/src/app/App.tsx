@@ -958,7 +958,113 @@ function formatCompletedDistance(distanceM: number) {
 
   return `${(distanceM / 1000).toFixed(1)} km`;
 }
+type MacrocyclePhase =
+  | 'Foundation'
+  | 'Base'
+  | 'Build'
+  | 'Race Specific'
+  | 'Peak'
+  | 'Taper'
+  | 'Race';
 
+type MacrocycleWeek = {
+  weekStart: string;
+  weeksToRace: number;
+  phase: MacrocyclePhase;
+};
+
+function buildMacrocycle(raceDate: string): MacrocycleWeek[] {
+  if (!raceDate) {
+    return [];
+  }
+
+  const today = new Date();
+
+  const startMonday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate(),
+  );
+
+  const daysFromMonday =
+    (startMonday.getDay() + 6) % 7;
+
+  startMonday.setDate(
+    startMonday.getDate() - daysFromMonday,
+  );
+
+  const race = new Date(`${raceDate}T12:00:00`);
+
+  const raceMonday = new Date(
+    race.getFullYear(),
+    race.getMonth(),
+    race.getDate(),
+  );
+
+  const raceDaysFromMonday =
+    (raceMonday.getDay() + 6) % 7;
+
+  raceMonday.setDate(
+    raceMonday.getDate() - raceDaysFromMonday,
+  );
+
+  const millisecondsPerWeek =
+    7 * 24 * 60 * 60 * 1000;
+
+  const totalWeeks = Math.max(
+    1,
+    Math.round(
+      (raceMonday.getTime() -
+        startMonday.getTime()) /
+        millisecondsPerWeek,
+    ) + 1,
+  );
+
+  const formatDate = (date: Date) =>
+    `${date.getFullYear()}-${String(
+      date.getMonth() + 1,
+    ).padStart(2, '0')}-${String(
+      date.getDate(),
+    ).padStart(2, '0')}`;
+
+  return Array.from(
+    { length: totalWeeks },
+    (_, index) => {
+      const weekStart = new Date(startMonday);
+
+      weekStart.setDate(
+        startMonday.getDate() + index * 7,
+      );
+
+      const weeksToRace =
+        totalWeeks - 1 - index;
+
+      let phase: MacrocyclePhase;
+
+      if (weeksToRace === 0) {
+        phase = 'Race';
+      } else if (weeksToRace <= 2) {
+        phase = 'Taper';
+      } else if (weeksToRace <= 5) {
+        phase = 'Peak';
+      } else if (weeksToRace <= 12) {
+        phase = 'Race Specific';
+      } else if (weeksToRace <= 24) {
+        phase = 'Build';
+      } else if (weeksToRace <= 36) {
+        phase = 'Base';
+      } else {
+        phase = 'Foundation';
+      }
+
+      return {
+        weekStart: formatDate(weekStart),
+        weeksToRace,
+        phase,
+      };
+    },
+  );
+}
 function sportName(sport: Sport) {
   return sport.charAt(0).toUpperCase() + sport.slice(1);
 }
