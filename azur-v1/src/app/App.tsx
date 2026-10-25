@@ -4379,6 +4379,8 @@ void loadGarminConnection();
   useState(false);
 const [planPreview, setPlanPreview] =
   useState<any[] | null>(null);
+  const [showMacrocyclePreview, setShowMacrocyclePreview] =
+  useState(false);
 const [chatMessage, setChatMessage] = useState('');
 
 const [chatMessages, setChatMessages] = useState<
