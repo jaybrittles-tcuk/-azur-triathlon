@@ -5379,6 +5379,26 @@ padding: '11px 16px',
     >
       {planPreview ? 'Close' : 'Preview'}
     </button>
+    <button
+  type="button"
+  onClick={() =>
+    setShowMacrocyclePreview((current) => !current)
+  }
+  style={{
+    padding: '8px 10px',
+    borderRadius: '8px',
+    border: '1px solid #CBD8E5',
+    background: showMacrocyclePreview
+      ? '#EAF4FD'
+      : '#FFFFFF',
+    color: '#17324D',
+    fontSize: '12px',
+    fontWeight: 700,
+    cursor: 'pointer',
+  }}
+>
+  {showMacrocyclePreview ? 'Close Season' : 'Season'}
+</button>
 <button
   type="button"
   onClick={() => {
