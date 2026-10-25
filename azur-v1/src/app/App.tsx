@@ -3345,41 +3345,59 @@ const targetMinutes =
   Math.round(plannedHours * 60);
 
 const phaseConfig =
-  phaseKey.includes('build')
+  isTaper
     ? {
-        swim1Weight: 0.10,
-        bikeQualityWeight: 0.20,
-        easyRunWeight: 0.10,
+        swim1Weight: 0.13,
+        bikeQualityWeight: 0.18,
+        easyRunWeight: 0.12,
         swim2Weight: 0.10,
-        longRideWeight: 0.32,
-        longRunWeight: 0.18,
+        longRideWeight: 0.27,
+        longRunWeight: 0.20,
       }
-    : phaseKey.includes('peak')
+    : isRaceSpecific
       ? {
           swim1Weight: 0.10,
           bikeQualityWeight: 0.18,
           easyRunWeight: 0.10,
           swim2Weight: 0.10,
-          longRideWeight: 0.34,
-          longRunWeight: 0.18,
+          longRideWeight: 0.35,
+          longRunWeight: 0.17,
         }
-      : phaseKey.includes('recovery')
+      : phaseKey.includes('build')
         ? {
-            swim1Weight: 0.13,
-            bikeQualityWeight: 0.17,
-            easyRunWeight: 0.14,
-            swim2Weight: 0,
-            longRideWeight: 0.34,
-            longRunWeight: 0.22,
+            swim1Weight: 0.10,
+            bikeQualityWeight: 0.20,
+            easyRunWeight: 0.10,
+            swim2Weight: 0.10,
+            longRideWeight: 0.32,
+            longRunWeight: 0.18,
           }
-        : {
-            swim1Weight: 0.11,
-            bikeQualityWeight: 0.19,
-            easyRunWeight: 0.11,
-            swim2Weight: 0.12,
-            longRideWeight: 0.30,
-            longRunWeight: 0.17,
-          };
+        : phaseKey.includes('peak')
+          ? {
+              swim1Weight: 0.10,
+              bikeQualityWeight: 0.18,
+              easyRunWeight: 0.10,
+              swim2Weight: 0.10,
+              longRideWeight: 0.34,
+              longRunWeight: 0.18,
+            }
+          : phaseKey.includes('recovery')
+            ? {
+                swim1Weight: 0.13,
+                bikeQualityWeight: 0.17,
+                easyRunWeight: 0.14,
+                swim2Weight: 0,
+                longRideWeight: 0.34,
+                longRunWeight: 0.22,
+              }
+            : {
+                swim1Weight: 0.11,
+                bikeQualityWeight: 0.19,
+                easyRunWeight: 0.11,
+                swim2Weight: 0.12,
+                longRideWeight: 0.30,
+                longRunWeight: 0.17,
+              };
     const activeWeightTotal =
   phaseConfig.swim1Weight +
   phaseConfig.bikeQualityWeight +
