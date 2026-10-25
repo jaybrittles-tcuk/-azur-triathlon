@@ -3422,10 +3422,18 @@ const phaseConfig =
 const adjustedWeight = (weight: number) =>
   weight / activeWeightTotal;
 const swim1Minutes =
-  Math.round(
-    targetMinutes *
-      adjustedWeight(phaseConfig.swim1Weight),
-  );
+  isRaceWeek
+    ? Math.min(
+        35,
+        Math.round(
+          targetMinutes *
+            adjustedWeight(phaseConfig.swim1Weight),
+        ),
+      )
+    : Math.round(
+        targetMinutes *
+          adjustedWeight(phaseConfig.swim1Weight),
+      );
 
 const bikeQualityMinutes =
   Math.round(
@@ -3443,10 +3451,18 @@ const easyRunMinutes =
 
 const swim2Minutes =
   shouldIncludeSecondSwim
-    ? Math.round(
-        targetMinutes *
-          adjustedWeight(phaseConfig.swim2Weight),
-      )
+    ? isRaceWeek
+      ? Math.min(
+          25,
+          Math.round(
+            targetMinutes *
+              adjustedWeight(phaseConfig.swim2Weight),
+          ),
+        )
+      : Math.round(
+          targetMinutes *
+            adjustedWeight(phaseConfig.swim2Weight),
+        )
     : 0;
 
 const plannedLongRideMinutes =
