@@ -5594,7 +5594,9 @@ padding: '11px 16px',
               fontWeight: 800,
             }}
           >
-            {week.phase}
+           {week.isRecoveryWeek
+  ? `${week.phase} · Recovery`
+  : week.phase}
           </div>
         </div>
       ))}
