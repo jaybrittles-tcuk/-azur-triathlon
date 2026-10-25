@@ -4478,12 +4478,23 @@ const [athleteBaseline, setAthleteBaseline] =
         break;
     }
 
-    const targetHours = Math.max(
-      3,
-      Math.round(
-        baselineHours * phaseMultiplier * 2,
-      ) / 2,
-    );
+const isRecoveryWeek =
+  index > 0 &&
+  index % 4 === 3 &&
+  ['Base', 'Build', 'Race Specific'].includes(
+    week.phase,
+  );
+
+const adjustedMultiplier = isRecoveryWeek
+  ? phaseMultiplier * 0.8
+  : phaseMultiplier;
+
+const targetHours = Math.max(
+  3,
+  Math.round(
+    baselineHours * adjustedMultiplier * 2,
+  ) / 2,
+);
 
     return {
       ...week,
