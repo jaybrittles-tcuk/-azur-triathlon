@@ -3715,16 +3715,18 @@ distance_m: 200,
       planned_date: addDays(1),
       sport: 'bike',
 title:
-  phaseKey.includes('build')
-    ? 'Threshold Development'
-    : phaseKey.includes('peak')
-      ? 'Race-Specific Bike'
-      : phaseKey.includes('recovery')
-        ? 'Aerobic Recovery Ride'
-        : 'Strength Endurance Bike',
+  isRaceSpecific
+    ? 'Race-Specific Bike'
+    : phaseKey.includes('build')
+      ? 'Threshold Development'
+      : phaseKey.includes('peak')
+        ? 'Race-Specific Bike'
+        : phaseKey.includes('recovery')
+          ? 'Aerobic Recovery Ride'
+          : 'Strength Endurance Bike',
 
 session_class:
-  phaseKey.includes('peak')
+  isRaceSpecific || phaseKey.includes('peak')
     ? 'race_specific'
     : phaseKey.includes('recovery')
       ? 'easy'
@@ -3735,8 +3737,16 @@ session_class:
 duration_min: bikeQualityMinutes,
       targets: {},
       prescription: {
-       focus:
-  phaseKey.includes('build')
+focus:
+  isRaceSpecific
+    ? 'Sustained race-power development'
+    : phaseKey.includes('build')
+      ? 'Threshold development'
+      : phaseKey.includes('peak')
+        ? 'Race-specific bike intensity'
+        : phaseKey.includes('recovery')
+          ? 'Aerobic recovery riding'
+          : 'Strength endurance development',
     ? 'Threshold development'
     : phaseKey.includes('peak')
       ? 'Race-specific bike intensity'
