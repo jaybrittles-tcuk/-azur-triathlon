@@ -3470,12 +3470,14 @@ const plannedLongRunMinutes =
   );
 
 const longRunMinutes =
-  longestRecentRunMinutes > 0
-    ? Math.min(
-        plannedLongRunMinutes,
-        Math.round(longestRecentRunMinutes * 1.10),
-      )
-    : plannedLongRunMinutes;
+  isRaceWeek
+    ? Math.min(30, plannedLongRunMinutes)
+    : longestRecentRunMinutes > 0
+      ? Math.min(
+          plannedLongRunMinutes,
+          Math.round(longestRecentRunMinutes * 1.10),
+        )
+      : plannedLongRunMinutes;
     const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
 
