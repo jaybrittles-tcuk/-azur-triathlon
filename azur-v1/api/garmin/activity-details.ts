@@ -91,8 +91,29 @@ export default async function handler(req: any, res: any) {
             ? Number(sample.elevationInMeters)
             : null,
       }));
+const powerSamples = samples
+  .map((sample: any) =>
+    sample.powerInWatts != null
+      ? Number(sample.powerInWatts)
+      : null,
+  )
+  .filter(
+    (value: number | null): value is number =>
+      value != null && value > 0,
+  );
 
+const averagePower =
+  powerSamples.length > 0
+    ? Math.round(
+        powerSamples.reduce(
+          (sum: number, value: number) => sum + value,
+          0,
+        ) / powerSamples.length,
+      )
+    : null;
       const processedMetrics = {
+        averagePower,
+        
         averageHeartRate:
           summary.averageHeartRateInBeatsPerMinute ??
           null,
