@@ -30,6 +30,20 @@ export default async function handler(req: any, res: any) {
         : 0,
       firstSample:
         activityDetails?.[0]?.samples?.[0] ?? null,
+      manual:
+  activityDetails?.[0]?.summary?.manual ??
+  activityDetails?.[0]?.manual ??
+  null,
+
+deviceName:
+  activityDetails?.[0]?.summary?.deviceName ??
+  activityDetails?.[0]?.deviceName ??
+  null,
+
+summaryKeys:
+  Object.keys(
+    activityDetails?.[0]?.summary ?? {},
+  ),
     });
   } catch (error) {
     console.error(
