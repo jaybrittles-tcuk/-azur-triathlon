@@ -5705,7 +5705,22 @@ padding: '11px 16px',
         placeholder="e.g. 8"
       />
     </label>
-
+<label>
+  Maximum weekly training hours
+  <input
+    type="number"
+    min="0"
+    step="0.5"
+    value={athleteBaseline.maxWeeklyHours}
+    onChange={(e) =>
+      setAthleteBaseline((current) => ({
+        ...current,
+        maxWeeklyHours: e.target.value,
+      }))
+    }
+    placeholder="e.g. 14"
+  />
+</label>
     <label>
       Current sessions per week
       <input
