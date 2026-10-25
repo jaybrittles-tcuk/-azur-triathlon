@@ -5439,6 +5439,100 @@ padding: '11px 16px',
     </button>
   </div>
 </div>
+{showMacrocyclePreview && (
+  <div
+    style={{
+      marginBottom: '18px',
+      padding: '16px',
+      background: '#FFFFFF',
+      border: '1px solid #DCE5EE',
+      borderRadius: '14px',
+    }}
+  >
+    <div
+      style={{
+        marginBottom: '14px',
+      }}
+    >
+      <div
+        style={{
+          color: '#17324D',
+          fontSize: '14px',
+          fontWeight: 800,
+        }}
+      >
+        Season Roadmap
+      </div>
+
+      <div
+        style={{
+          marginTop: '4px',
+          color: '#718394',
+          fontSize: '12px',
+        }}
+      >
+        {primaryRace.name} · {macrocycle.length} weeks
+      </div>
+    </div>
+
+    <div
+      style={{
+        display: 'grid',
+        gap: '8px',
+      }}
+    >
+      {macrocycle.map((week) => (
+        <div
+          key={week.weekStart}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            borderRadius: '10px',
+            background: '#F7FAFC',
+            border: '1px solid #E3EAF0',
+          }}
+        >
+          <div>
+            <div
+              style={{
+                color: '#17324D',
+                fontSize: '12px',
+                fontWeight: 700,
+              }}
+            >
+              {week.weekStart}
+            </div>
+
+            <div
+              style={{
+                marginTop: '2px',
+                color: '#718394',
+                fontSize: '11px',
+              }}
+            >
+              {week.weeksToRace} weeks to race
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: '5px 8px',
+              borderRadius: '20px',
+              background: '#EAF4FD',
+              color: '#1877C9',
+              fontSize: '11px',
+              fontWeight: 800,
+            }}
+          >
+            {week.phase}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 {showBaselineForm && (
   <div
     className="azur-baseline-form"
