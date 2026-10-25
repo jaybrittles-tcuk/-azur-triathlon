@@ -4430,6 +4430,7 @@ const previewSportMinutes = {
 const [athleteBaseline, setAthleteBaseline] =
   useState({
     weeklyHours: '',
+    maxWeeklyHours: '',
     sessionsPerWeek: '',
     swimsPerWeek: '',
     longestRideMinutes: '',
