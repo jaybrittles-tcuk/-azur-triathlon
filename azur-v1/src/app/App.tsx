@@ -3752,38 +3752,46 @@ distance_m: 200,
       planned_date: addDays(1),
       sport: 'bike',
 title:
-  isRaceSpecific
-    ? 'Race-Specific Bike'
-    : phaseKey.includes('build')
-      ? 'Threshold Development'
-      : phaseKey.includes('peak')
-        ? 'Race-Specific Bike'
-        : phaseKey.includes('recovery')
-          ? 'Aerobic Recovery Ride'
-          : 'Strength Endurance Bike',
+  isRaceWeek
+    ? 'Race Week Bike Activation'
+    : isRaceSpecific
+      ? 'Race-Specific Bike'
+      : phaseKey.includes('build')
+        ? 'Threshold Development'
+        : phaseKey.includes('peak')
+          ? 'Race-Specific Bike'
+          : phaseKey.includes('recovery')
+            ? 'Aerobic Recovery Ride'
+            : 'Strength Endurance Bike',
 
 session_class:
-  isRaceSpecific || phaseKey.includes('peak')
-    ? 'race_specific'
-    : phaseKey.includes('recovery')
-      ? 'easy'
-      : phaseKey.includes('build')
-        ? 'intensity'
-        : 'endurance',
-      priority: 1,
-duration_min: bikeQualityMinutes,
-      targets: {},
-      prescription: {
-focus:
-  isRaceSpecific
-    ? 'Sustained race-power development'
-    : phaseKey.includes('build')
-    ? 'Threshold development'
-    : phaseKey.includes('peak')
-      ? 'Race-specific bike intensity'
+  isRaceWeek
+    ? 'easy'
+    : isRaceSpecific || phaseKey.includes('peak')
+      ? 'race_specific'
       : phaseKey.includes('recovery')
-        ? 'Aerobic recovery riding'
-        : 'Strength endurance development',
+        ? 'easy'
+        : phaseKey.includes('build')
+          ? 'intensity'
+          : 'endurance',
+
+priority: 1,
+duration_min: bikeQualityMinutes,
+targets: {},
+
+prescription: {
+focus:
+  isRaceWeek
+    ? 'Short race-week activation with controlled race-effort touches'
+    : isRaceSpecific
+      ? 'Sustained race-power development'
+      : phaseKey.includes('build')
+        ? 'Threshold development'
+        : phaseKey.includes('peak')
+          ? 'Race-specific bike intensity'
+          : phaseKey.includes('recovery')
+            ? 'Aerobic recovery riding'
+            : 'Strength endurance development',
         warmup: [
           {
 duration_min: bikeWarmupMinutes,
