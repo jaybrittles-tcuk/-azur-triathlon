@@ -4237,42 +4237,54 @@ focus:
           ? 'Reduced aerobic endurance'
           : 'Aerobic endurance',
 
-  warmup: [
-    {
-      duration_min: longRunWarmupMinutes,
-      target: 'Easy aerobic',
-      rpe: '2–3',
-    },
-  ],
+warmup: isRaceWeek
+  ? []
+  : [
+      {
+        duration_min: longRunWarmupMinutes,
+        target: 'Easy aerobic',
+        rpe: '2–3',
+      },
+    ],
 
-  main_set: [
-    {
-      duration_min: longRunSteadyMinutes,
-      target:
-        phaseKey.includes('recovery')
-          ? 'Easy recovery'
-          : 'Easy aerobic',
-      rpe: '4–5',
-    },
+main_set: isRaceWeek
+  ? []
+  : [
+      {
+        duration_min: longRunSteadyMinutes,
+        target:
+          phaseKey.includes('recovery')
+            ? 'Easy recovery'
+            : 'Easy aerobic',
+        rpe: '4–5',
+      },
 
-    ...(longRunSpecificMinutes > 0
-      ? [
-          {
-            duration_min: longRunSpecificMinutes,
-            target:
-              phaseKey.includes('peak')
-                ? 'Race-specific aerobic'
-                : 'Steady / race-specific aerobic',
-            rpe:
-              phaseKey.includes('peak')
-                ? '6–7'
-                : '5–6',
-          },
-        ]
-      : []),
-  ],
+      ...(longRunSpecificMinutes > 0
+        ? [
+            {
+              duration_min: longRunSpecificMinutes,
+              target:
+                phaseKey.includes('peak')
+                  ? 'Race-specific aerobic'
+                  : 'Steady / race-specific aerobic',
+              rpe:
+                phaseKey.includes('peak')
+                  ? '6–7'
+                  : '5–6',
+            },
+          ]
+        : []),
+    ],
 
-  cooldown: [
+cooldown: isRaceWeek
+  ? []
+  : [
+      {
+        duration_min: longRunCooldownMinutes,
+        target: 'Easy recovery',
+        rpe: '2–3',
+      },
+    ],
     {
       duration_min: longRunCooldownMinutes,
       target: 'Easy recovery',
