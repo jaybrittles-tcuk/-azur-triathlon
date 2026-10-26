@@ -3501,12 +3501,12 @@ const swim1Minutes =
         35,
         Math.round(
           targetMinutes *
-            adjustedWeight(phaseConfig.swim1Weight),
+           adjustedWeight(weightedPhaseConfig.swim1Weight)
         ),
       )
     : Math.round(
         targetMinutes *
-          adjustedWeight(phaseConfig.swim1Weight),
+         adjustedWeight(weightedPhaseConfig.swim1Weight)
       );
 
 const bikeQualityMinutes =
@@ -3515,7 +3515,7 @@ const bikeQualityMinutes =
         50,
         Math.round(
           targetMinutes *
-            adjustedWeight(phaseConfig.bikeQualityWeight),
+           adjustedWeight(weightedPhaseConfig.bikeQualityWeight)
         ),
       )
     : isTaper
@@ -3523,7 +3523,7 @@ const bikeQualityMinutes =
           75,
           Math.round(
             targetMinutes *
-              adjustedWeight(phaseConfig.bikeQualityWeight),
+            adjustedWeight(weightedPhaseConfig.bikeQualityWeight)
           ),
         )
       : Math.round(
@@ -3578,7 +3578,7 @@ const longRideMinutes =
 const plannedLongRunMinutes =
   Math.round(
     targetMinutes *
-      adjustedWeight(phaseConfig.longRunWeight),
+      adjustedWeight(weightedPhaseConfig.longRunWeight)
   );
 
 const longRunMinutes =
