@@ -3782,18 +3782,20 @@ distance_m: 200,
 title:
   isRaceWeek
     ? 'Race Week Bike Activation'
-    : isRaceSpecific
-      ? 'Race-Specific Bike'
-      : phaseKey.includes('build')
-        ? 'Threshold Development'
-        : phaseKey.includes('peak')
-          ? 'Race-Specific Bike'
-          : phaseKey.includes('recovery')
-            ? 'Aerobic Recovery Ride'
-            : 'Strength Endurance Bike',
+    : isTaper
+      ? 'Taper Bike Activation'
+      : isRaceSpecific
+        ? 'Race-Specific Bike'
+        : phaseKey.includes('build')
+          ? 'Threshold Development'
+          : phaseKey.includes('peak')
+            ? 'Race-Specific Bike'
+            : phaseKey.includes('recovery')
+              ? 'Aerobic Recovery Ride'
+              : 'Strength Endurance Bike',
 
 session_class:
-  isRaceWeek
+  isRaceWeek || isTaper
     ? 'easy'
     : isRaceSpecific || phaseKey.includes('peak')
       ? 'race_specific'
@@ -3811,15 +3813,17 @@ prescription: {
 focus:
   isRaceWeek
     ? 'Short race-week activation with controlled race-effort touches'
-    : isRaceSpecific
-      ? 'Sustained race-power development'
-      : phaseKey.includes('build')
-        ? 'Threshold development'
-        : phaseKey.includes('peak')
-          ? 'Race-specific bike intensity'
-          : phaseKey.includes('recovery')
-            ? 'Aerobic recovery riding'
-            : 'Strength endurance development',
+    : isTaper
+      ? 'Maintain race-specific sharpness while reducing fatigue'
+      : isRaceSpecific
+        ? 'Sustained race-power development'
+        : phaseKey.includes('build')
+          ? 'Threshold development'
+          : phaseKey.includes('peak')
+            ? 'Race-specific bike intensity'
+            : phaseKey.includes('recovery')
+              ? 'Aerobic recovery riding'
+              : 'Strength endurance development',
         warmup: [
           {
 duration_min: bikeWarmupMinutes,
