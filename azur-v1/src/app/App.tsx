@@ -3514,11 +3514,16 @@ const plannedLongRunMinutes =
 const longRunMinutes =
   isRaceWeek
     ? Math.min(30, plannedLongRunMinutes)
-    : previewOnly && previewWeekOffset > 0
-      ? plannedLongRunMinutes
-      : longestRecentRunMinutes > 0
-        ? Math.min(
-            plannedLongRunMinutes,
+    : isTaper
+      ? Math.min(75, plannedLongRunMinutes)
+      : previewOnly && previewWeekOffset > 0
+        ? plannedLongRunMinutes
+        : longestRecentRunMinutes > 0
+          ? Math.min(
+              plannedLongRunMinutes,
+              Math.round(longestRecentRunMinutes * 1.10),
+            )
+          : plannedLongRunMinutes;
             Math.round(longestRecentRunMinutes * 1.10),
           )
         : plannedLongRunMinutes;
