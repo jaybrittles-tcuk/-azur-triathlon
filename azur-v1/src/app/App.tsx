@@ -3008,9 +3008,11 @@ const { error } = await supabase
 
   const daysFromMonday = (monday.getDay() + 6) % 7;
 
-  monday.setDate(
-    monday.getDate() - daysFromMonday,
-  );
+monday.setDate(
+  monday.getDate() -
+    daysFromMonday +
+    (previewOnly ? previewWeekOffset * 7 : 0),
+);
 
   const toDateKey = (date: Date) =>
     `${date.getFullYear()}-${String(
