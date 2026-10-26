@@ -4063,14 +4063,30 @@ distance_m: swim2CooldownDistance,
       season_week_id: seasonWeek.id,
       planned_date: addDays(5),
       sport: 'bike',
-      title: 'Long Aerobic Ride',
-      session_class: 'endurance',
+title:
+  isRaceSpecific
+    ? 'Race-Specific Long Ride'
+    : phaseKey.includes('peak')
+      ? 'Race-Specific Long Ride'
+      : phaseKey.includes('recovery')
+        ? 'Reduced Aerobic Ride'
+        : 'Long Aerobic Ride',
+
+session_class:
+  isRaceSpecific || phaseKey.includes('peak')
+    ? 'race_specific'
+    : phaseKey.includes('recovery')
+      ? 'easy'
+      : 'endurance',
       priority: 1,
 duration_min: longRideMinutes,
       targets: {},
 prescription: {
   focus:
-    phaseKey.includes('peak')
+focus:
+  isRaceSpecific
+    ? 'Sustained race-power endurance and long-course durability'
+    : phaseKey.includes('peak')
       ? 'Race-specific endurance'
       : phaseKey.includes('build')
         ? 'Aerobic endurance with race-specific work'
@@ -4121,8 +4137,10 @@ prescription: {
     },
   ],
 },
-      rationale:
-        'Develop long-course aerobic durability.',
+rationale:
+  isRaceSpecific
+    ? 'Build sustained race-power durability while maintaining aerobic control across a long-course ride.'
+    : 'Develop long-course aerobic durability.',
       terrain: 'Road',
       status: 'planned',
       locked: false,
