@@ -3860,8 +3860,10 @@ duration_min: bikeCooldownMinutes,
 azurWorkout: {
   sport: 'bike',
 
-  title:
-    phaseKey.includes('build')
+title:
+  isRaceSpecific
+    ? 'Race-Specific Bike'
+    : phaseKey.includes('build')
       ? 'Threshold Development'
       : phaseKey.includes('peak')
         ? 'Race-Specific Bike'
@@ -3871,17 +3873,19 @@ azurWorkout: {
 
   durationMin: bikeQualityMinutes,
 
-  sessionClass:
-    phaseKey.includes('peak')
-      ? 'race_specific'
-      : phaseKey.includes('recovery')
-        ? 'easy'
-        : phaseKey.includes('build')
-          ? 'intensity'
-          : 'endurance',
+ sessionClass:
+  isRaceSpecific || phaseKey.includes('peak')
+    ? 'race_specific'
+    : phaseKey.includes('recovery')
+      ? 'easy'
+      : phaseKey.includes('build')
+        ? 'intensity'
+        : 'endurance',
 
-  purpose:
-    phaseKey.includes('build')
+purpose:
+  isRaceSpecific
+    ? 'Develop sustained race-power durability'
+    : phaseKey.includes('build')
       ? 'Develop sustainable threshold power'
       : phaseKey.includes('peak')
         ? 'Develop race-specific bike durability'
@@ -3889,15 +3893,16 @@ azurWorkout: {
           ? 'Maintain aerobic movement with low training cost'
           : 'Build muscular endurance and aerobic strength',
 
-  rationale:
-    phaseKey.includes('build')
+rationale:
+  isRaceSpecific
+    ? 'Develop sustained race-power durability and controlled long-course intensity.'
+    : phaseKey.includes('build')
       ? 'Develop sustainable threshold power and raise aerobic cycling capacity.'
       : phaseKey.includes('peak')
         ? 'Rehearse race-specific power while maintaining controlled fatigue.'
         : phaseKey.includes('recovery')
           ? 'Maintain aerobic movement while reducing overall training stress.'
           : 'Build muscular endurance and aerobic strength before progressing toward threshold work.',
-
   steps: [
     {
       type: 'warmup',
