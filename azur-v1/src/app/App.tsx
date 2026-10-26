@@ -5962,7 +5962,8 @@ padding: '11px 16px',
     line-height: 1.5;
   }
 
-  .azur-baseline-form .azur-baseline-fields input {
+  .azur-baseline-form .azur-baseline-fields input,
+.azur-baseline-form .azur-baseline-fields select {
     display: block !important;
     width: 100% !important;
     min-width: 0;
