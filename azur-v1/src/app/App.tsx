@@ -4131,16 +4131,18 @@ session_class:
 duration_min: longRideMinutes,
       targets: {},
 prescription: {
-  focus:
-  isRaceSpecific
-    ? 'Sustained race-power endurance and long-course durability'
-    : phaseKey.includes('peak')
-      ? 'Race-specific endurance'
-      : phaseKey.includes('build')
-        ? 'Aerobic endurance with race-specific work'
-        : phaseKey.includes('recovery')
-          ? 'Reduced aerobic endurance'
-          : 'Aerobic endurance',
+focus:
+  isRaceWeek
+    ? 'Race-eve activation with short controlled race-effort touches'
+    : isRaceSpecific
+      ? 'Sustained race-power endurance and long-course durability'
+      : phaseKey.includes('peak')
+        ? 'Race-specific endurance'
+        : phaseKey.includes('build')
+          ? 'Aerobic endurance with race-specific work'
+          : phaseKey.includes('recovery')
+            ? 'Reduced aerobic endurance'
+            : 'Aerobic endurance',
 
   warmup: [
     {
