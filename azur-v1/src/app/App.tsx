@@ -3572,7 +3572,12 @@ const scaleMinutes = (
   Math.round(bikeQualityMinutes * 0.2),
 );
 
-const bikeIntervalReps = 4;
+const bikeIntervalReps =
+  isRaceWeek
+    ? 3
+    : isTaper
+      ? 3
+      : 4;
 const bikeRecoveryMinutes = 4;
 
 const bikeNominalCooldownMinutes = Math.max(
