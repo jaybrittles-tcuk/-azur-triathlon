@@ -6071,10 +6071,42 @@ onClick={() => void saveTrainingBaseline()}
   </div>
 </div>
 
-    <p style={{ color: '#52677B' }}>
-      Based on your current training and the upcoming
-      phase of your training plan.
-    </p>
+<div
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginTop: '10px',
+    marginBottom: '8px',
+  }}
+>
+  <span
+    style={{
+      padding: '5px 9px',
+      borderRadius: '20px',
+      background: '#EAF4FD',
+      color: '#1877C9',
+      fontSize: '11px',
+      fontWeight: 800,
+    }}
+  >
+    {planPreviewInsights?.phase || 'Base'}
+  </span>
+
+  <span
+    style={{
+      color: '#718394',
+      fontSize: '12px',
+    }}
+  >
+    Week +{previewWeekOffset}
+  </span>
+</div>
+
+<p style={{ color: '#52677B' }}>
+  Based on your current training and the upcoming
+  phase of your training plan.
+</p>
 <div
   style={{
     background: '#F0F6FB',
