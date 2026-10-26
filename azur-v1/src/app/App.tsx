@@ -6500,17 +6500,21 @@ Your confirmed training baseline is{' '}
 <button
   type="button"
   onClick={() => void generateCurrentWeekPlan(false)}
+  disabled={previewWeekOffset > 0}
   style={{
     marginTop: '20px',
     width: '100%',
     padding: '14px 18px',
     borderRadius: '10px',
     border: 'none',
-    background: '#0A3556',
-    color: '#FFFFFF',
+   background:
+  previewWeekOffset > 0 ? '#D7E0E8' : '#0A3556',
+color:
+  previewWeekOffset > 0 ? '#7E8D9A' : '#FFFFFF',
     fontSize: '15px',
     fontWeight: 800,
-    cursor: 'pointer',
+   cursor:
+  previewWeekOffset > 0 ? 'not-allowed' : 'pointer',
   }}
 >
   Use This Plan
