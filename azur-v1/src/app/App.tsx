@@ -4642,6 +4642,8 @@ const [athleteBaseline, setAthleteBaseline] =
     swimsPerWeek: '',
     longestRideMinutes: '',
     longestRunMinutes: '',
+    strongestSport: '',
+    developmentSport: '',
   });
 const macrocycleWithHours = useMemo(() => {
   const baselineHours =
