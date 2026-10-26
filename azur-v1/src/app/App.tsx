@@ -3535,7 +3535,7 @@ const easyRunMinutes =
   shouldIncludeEasyRun
     ? Math.round(
         targetMinutes *
-          adjustedWeight(phaseConfig.easyRunWeight),
+          adjustedWeight(weightedPhaseConfig.easyRunWeight)
       )
     : 0;
 
@@ -3546,19 +3546,19 @@ const swim2Minutes =
           25,
           Math.round(
             targetMinutes *
-              adjustedWeight(phaseConfig.swim2Weight),
+              adjustedWeight(weightedPhaseConfig.swim2Weight)
           ),
         )
       : Math.round(
           targetMinutes *
-            adjustedWeight(phaseConfig.swim2Weight),
+           adjustedWeight(weightedPhaseConfig.swim2Weight)
         )
     : 0;
 
 const plannedLongRideMinutes =
   Math.round(
     targetMinutes *
-      adjustedWeight(phaseConfig.longRideWeight),
+      adjustedWeight(weightedPhaseConfig.longRideWeight)
   );
 
 const longRideMinutes =
