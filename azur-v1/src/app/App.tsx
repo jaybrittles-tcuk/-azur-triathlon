@@ -4188,9 +4188,11 @@ focus:
   ],
 },
 rationale:
-  isRaceSpecific
-    ? 'Build sustained race-power durability while maintaining aerobic control across a long-course ride.'
-    : 'Develop long-course aerobic durability.',
+  isRaceWeek
+    ? 'Keep the legs responsive with a short race-eve activation while avoiding unnecessary fatigue.'
+    : isRaceSpecific
+      ? 'Build sustained race-power durability while maintaining aerobic control across a long-course ride.'
+      : 'Develop long-course aerobic durability.',
       terrain: 'Road',
       status: 'planned',
       locked: false,
