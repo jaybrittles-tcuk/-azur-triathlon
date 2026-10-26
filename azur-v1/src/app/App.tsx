@@ -6582,7 +6582,13 @@ onClick={() => void saveTrainingBaseline()}
           fontWeight: 700,
         }}
       >
-        {weekSessions.length} sessions · {totalHours.toFixed(1)}h planned
+{calendarWeekSessions.length} sessions ·{' '}
+{(
+  calendarWeekSessions.reduce(
+    (total, session) => total + session.durationMin,
+    0,
+  ) / 60
+).toFixed(1)}h planned
       </div>
     </div>
 
@@ -6613,7 +6619,7 @@ onClick={() => void saveTrainingBaseline()}
     {[
       {
         label: 'Swim',
-        value: weekSessions.filter(
+        value:calendarWeekSessions.filter(
           (session: any) => session.sport === 'swim',
         ).length,
         color: '#208FD0',
@@ -6621,7 +6627,7 @@ onClick={() => void saveTrainingBaseline()}
       },
       {
         label: 'Bike',
-        value: weekSessions.filter(
+        value:calendarWeekSessions.filter(
           (session: any) => session.sport === 'bike',
         ).length,
         color: '#B77B00',
@@ -6629,7 +6635,7 @@ onClick={() => void saveTrainingBaseline()}
       },
       {
         label: 'Run',
-        value: weekSessions.filter(
+         value:calendarWeekSessions.filter(
           (session: any) => session.sport === 'run',
         ).length,
         color: '#2F8A57',
