@@ -3440,9 +3440,26 @@ const swim1Minutes =
       );
 
 const bikeQualityMinutes =
-  Math.round(
-    targetMinutes *
-      adjustedWeight(phaseConfig.bikeQualityWeight),
+  isRaceWeek
+    ? Math.min(
+        50,
+        Math.round(
+          targetMinutes *
+            adjustedWeight(phaseConfig.bikeQualityWeight),
+        ),
+      )
+    : isTaper
+      ? Math.min(
+          75,
+          Math.round(
+            targetMinutes *
+              adjustedWeight(phaseConfig.bikeQualityWeight),
+          ),
+        )
+      : Math.round(
+          targetMinutes *
+            adjustedWeight(phaseConfig.bikeQualityWeight),
+        );
   );
 
 const easyRunMinutes =
