@@ -4083,7 +4083,6 @@ duration_min: longRideMinutes,
       targets: {},
 prescription: {
   focus:
-focus:
   isRaceSpecific
     ? 'Sustained race-power endurance and long-course durability'
     : phaseKey.includes('peak')
