@@ -6267,7 +6267,7 @@ Your confirmed training baseline is{' '}
 </strong>.
 {' '}This proposed week is{' '}
 <strong>
-  {planPreviewInsights.plannedHours.toFixed(1)} hours
+  {(previewTotalMinutes / 60).toFixed(1)} hours
 </strong>
 {' '}against a roadmap target of{' '}
 <strong>
