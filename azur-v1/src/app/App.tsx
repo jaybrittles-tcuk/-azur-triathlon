@@ -3291,7 +3291,18 @@ const recentTotalFrequency =
         recentSwimActivities.length
       ) / 6;
 
-const recommendedSessionCount =
+const confirmedSessionLimit =
+  savedBaseline?.sessions_per_week
+    ? Math.min(
+        6,
+        Math.max(
+          3,
+          Number(savedBaseline.sessions_per_week),
+        ),
+      )
+    : 6;
+
+const historyRecommendedSessionCount =
   recentTotalFrequency > 0
     ? Math.min(
         6,
@@ -3300,7 +3311,13 @@ const recommendedSessionCount =
           Math.ceil(recentTotalFrequency + 0.5),
         ),
       )
-    : 6;
+    : confirmedSessionLimit;
+
+const recommendedSessionCount =
+  Math.min(
+    confirmedSessionLimit,
+    historyRecommendedSessionCount,
+  );
 const phase =
   String(seasonWeek.phase ?? 'Base 1');
 
