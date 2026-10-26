@@ -3116,7 +3116,7 @@ if (recentActivitiesError) {
 } = await supabase
   .from('athlete_training_baseline')
 .select(
-  'weekly_hours, max_weekly_hours, sessions_per_week, swims_per_week, longest_ride_minutes, longest_run_minutes',
+  'weekly_hours, max_weekly_hours, sessions_per_week, swims_per_week, longest_ride_minutes, longest_run_minutes, strongest_sport, development_sport',
 )
   .eq('athlete_id', athlete.id)
   .maybeSingle();
@@ -4815,6 +4815,8 @@ setAthleteBaseline({
   swimsPerWeek: String(data.swims_per_week),
   longestRideMinutes: String(data.longest_ride_minutes),
   longestRunMinutes: String(data.longest_run_minutes),
+  strongestSport: data.strongest_sport ?? '',
+developmentSport: data.development_sport ?? '',
 });
 }
   useEffect(() => {
