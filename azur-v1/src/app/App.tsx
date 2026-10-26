@@ -3338,10 +3338,12 @@ const safeProgressionHours =
     : targetHours;
 
 const plannedHours =
-  Math.min(
-    targetHours,
-    safeProgressionHours,
-  );
+  previewOnly && previewWeekOffset > 0
+    ? targetHours
+    : Math.min(
+        targetHours,
+        safeProgressionHours,
+      );
 
 const targetMinutes =
   Math.round(plannedHours * 60);
