@@ -3440,6 +3440,32 @@ const phaseConfig =
                 longRideWeight: 0.30,
                 longRunWeight: 0.17,
               };
+    const strongestSport =
+  savedBaseline?.strongest_sport ?? 'balanced';
+
+const developmentSport =
+  savedBaseline?.development_sport ?? 'balanced';
+
+const sportBias = {
+  swim:
+    developmentSport === 'swim'
+      ? 1.12
+      : strongestSport === 'swim'
+        ? 0.94
+        : 1,
+  bike:
+    developmentSport === 'bike'
+      ? 1.12
+      : strongestSport === 'bike'
+        ? 0.94
+        : 1,
+  run:
+    developmentSport === 'run'
+      ? 1.12
+      : strongestSport === 'run'
+        ? 0.94
+        : 1,
+};
     const activeWeightTotal =
   phaseConfig.swim1Weight +
   phaseConfig.bikeQualityWeight +
