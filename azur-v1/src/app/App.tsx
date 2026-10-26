@@ -3332,9 +3332,21 @@ const isRaceWeek =
   phaseKey === 'race';
 const shouldIncludeEasyRun =
   recommendedSessionCount >= 5;
-    const shouldIncludeSecondSwim =
+const confirmedSwimLimit =
+  savedBaseline?.swims_per_week
+    ? Math.max(
+        1,
+        Math.min(
+          3,
+          Number(savedBaseline.swims_per_week),
+        ),
+      )
+    : 2;
+
+const shouldIncludeSecondSwim =
   !phaseKey.includes('recovery') &&
   recommendedSessionCount >= 6 &&
+  confirmedSwimLimit >= 2 &&
   (
     recentSwimFrequency === 0 ||
     recentSwimFrequency >= 1.25
