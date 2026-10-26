@@ -4468,6 +4468,11 @@ const [planPreview, setPlanPreview] =
   useState<any[] | null>(null);
   const [previewWeekOffset, setPreviewWeekOffset] =
   useState(0);
+  useEffect(() => {
+  if (!planPreview) return;
+
+  void generateCurrentWeekPlan(true);
+}, [previewWeekOffset]);
   const [showMacrocyclePreview, setShowMacrocyclePreview] =
   useState(false);
 const [chatMessage, setChatMessage] = useState('');
