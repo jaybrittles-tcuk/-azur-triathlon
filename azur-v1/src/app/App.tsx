@@ -6347,8 +6347,9 @@ Your confirmed training baseline is{' '}
     visibility: 'visible',
   }}
 >
-  {session.sport.toUpperCase()} ·{' '}
-  {session.duration_min} MIN
+{session.session_class === 'race'
+  ? 'A RACE'
+  : `${session.sport.toUpperCase()} · ${session.duration_min} MIN`}
 </div>
 <SessionVisual session={session} />   
           <button
