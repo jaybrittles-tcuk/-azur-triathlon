@@ -4223,12 +4223,12 @@ session_class:
         ? 'easy'
         : 'endurance',
       priority: 1,
-duration_min: longRunMinutes,
+duration_min: isRaceWeek ? 0 : longRunMinutes,
       targets: {},
 prescription: {
 focus:
   isRaceWeek
-    ? 'Short race-week run activation with relaxed race-effort strides'
+    ? 'A-race execution: race plan, pacing, nutrition and discipline'
     : isRaceSpecific || phaseKey.includes('peak')
       ? 'Race-specific endurance'
       : phaseKey.includes('build')
