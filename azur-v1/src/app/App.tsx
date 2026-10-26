@@ -4283,12 +4283,6 @@ cooldown: isRaceWeek
         duration_min: longRunCooldownMinutes,
         target: 'Easy recovery',
         rpe: '2–3',
-      },
-    ],
-    {
-      duration_min: longRunCooldownMinutes,
-      target: 'Easy recovery',
-      rpe: '2–3',
     },
   ],
 },
