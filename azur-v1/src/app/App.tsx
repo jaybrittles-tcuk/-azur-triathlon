@@ -4286,8 +4286,10 @@ cooldown: isRaceWeek
     },
   ],
 },
-      rationale:
-        'Build durable run endurance at controlled intensity.',
+rationale:
+  isRaceWeek
+    ? 'Execute your A-race plan with disciplined pacing, nutrition and decision-making from start to finish.'
+    : 'Build durable run endurance at controlled intensity.',
       terrain: 'Mixed',
       status: 'planned',
       locked: false,
