@@ -3466,17 +3466,32 @@ const sportBias = {
         ? 0.94
         : 1,
 };
-    const activeWeightTotal =
-  phaseConfig.swim1Weight +
-  phaseConfig.bikeQualityWeight +
+const weightedPhaseConfig = {
+  swim1Weight:
+    phaseConfig.swim1Weight * sportBias.swim,
+  bikeQualityWeight:
+    phaseConfig.bikeQualityWeight * sportBias.bike,
+  easyRunWeight:
+    phaseConfig.easyRunWeight * sportBias.run,
+  swim2Weight:
+    phaseConfig.swim2Weight * sportBias.swim,
+  longRideWeight:
+    phaseConfig.longRideWeight * sportBias.bike,
+  longRunWeight:
+    phaseConfig.longRunWeight * sportBias.run,
+};
+
+const activeWeightTotal =
+  weightedPhaseConfig.swim1Weight +
+  weightedPhaseConfig.bikeQualityWeight +
   (shouldIncludeEasyRun
-  ? phaseConfig.easyRunWeight
-  : 0) +
-  (shouldIncludeSecondSwim
-    ? phaseConfig.swim2Weight
+    ? weightedPhaseConfig.easyRunWeight
     : 0) +
-  phaseConfig.longRideWeight +
-  phaseConfig.longRunWeight;
+  (shouldIncludeSecondSwim
+    ? weightedPhaseConfig.swim2Weight
+    : 0) +
+  weightedPhaseConfig.longRideWeight +
+  weightedPhaseConfig.longRunWeight;
 
 const adjustedWeight = (weight: number) =>
   weight / activeWeightTotal;
