@@ -3459,7 +3459,6 @@ const bikeQualityMinutes =
       : Math.round(
           targetMinutes *
             adjustedWeight(phaseConfig.bikeQualityWeight),
-        );
   );
 
 const easyRunMinutes =
