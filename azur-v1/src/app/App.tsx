@@ -6086,6 +6086,43 @@ padding: '11px 16px',
     placeholder="e.g. 90"
   />
 </label>
+<label>
+  Strongest discipline
+  <select
+    value={athleteBaseline.strongestSport}
+    onChange={(e) =>
+      setAthleteBaseline((current) => ({
+        ...current,
+        strongestSport: e.target.value,
+      }))
+    }
+  >
+    <option value="">Select</option>
+    <option value="swim">Swim</option>
+    <option value="bike">Bike</option>
+    <option value="run">Run</option>
+    <option value="balanced">Balanced</option>
+  </select>
+</label>
+
+<label>
+  Development priority
+  <select
+    value={athleteBaseline.developmentSport}
+    onChange={(e) =>
+      setAthleteBaseline((current) => ({
+        ...current,
+        developmentSport: e.target.value,
+      }))
+    }
+  >
+    <option value="">Select</option>
+    <option value="swim">Swim</option>
+    <option value="bike">Bike</option>
+    <option value="run">Run</option>
+    <option value="balanced">Balanced</option>
+  </select>
+</label>
   </div>
     <button
   type="button"
