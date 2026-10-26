@@ -6182,15 +6182,19 @@ onClick={() => void saveTrainingBaseline()}
     </h4>
 
     <p style={{ color: '#52677B', lineHeight: 1.6 }}>
-      Your current training baseline is{' '}
-      <strong>
-        {planPreviewInsights.plannedHours.toFixed(1)}
-        {' '}hours per week
-      </strong>.
-      {' '}Your longer-term training target is{' '}
-      <strong>
-        {planPreviewInsights.targetHours} hours
-      </strong>.
+Your confirmed training baseline is{' '}
+<strong>
+  {Number(athleteBaseline.weeklyHours).toFixed(1)}
+  {' '}hours per week
+</strong>.
+{' '}This proposed week is{' '}
+<strong>
+  {planPreviewInsights.plannedHours.toFixed(1)} hours
+</strong>
+{' '}against a roadmap target of{' '}
+<strong>
+  {planPreviewInsights.targetHours} hours
+</strong>.
     </p>
 
     <p style={{ color: '#52677B', lineHeight: 1.6 }}>
