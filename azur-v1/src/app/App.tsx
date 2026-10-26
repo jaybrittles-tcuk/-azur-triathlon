@@ -5998,9 +5998,78 @@ onClick={() => void saveTrainingBaseline()}
       marginBottom: '24px',
     }}
   >
-<h3 style={{ color: '#17324D', marginTop: 0 }}>
-  Your Proposed Training Week
-</h3>
+<div
+  style={{
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '8px',
+  }}
+>
+  <h3
+    style={{
+      color: '#17324D',
+      margin: 0,
+    }}
+  >
+    Your Proposed Training Week
+  </h3>
+
+  <div
+    style={{
+      display: 'flex',
+      gap: '8px',
+    }}
+  >
+    <button
+      type="button"
+      onClick={() =>
+        setPreviewWeekOffset((current) =>
+          Math.max(0, current - 1),
+        )
+      }
+      disabled={previewWeekOffset === 0}
+      style={{
+        padding: '7px 10px',
+        borderRadius: '8px',
+        border: '1px solid #CBD8E5',
+        background: '#FFFFFF',
+        color:
+          previewWeekOffset === 0
+            ? '#A8B5C1'
+            : '#17324D',
+        fontSize: '12px',
+        fontWeight: 700,
+        cursor:
+          previewWeekOffset === 0
+            ? 'default'
+            : 'pointer',
+      }}
+    >
+      ← Previous
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        setPreviewWeekOffset((current) => current + 1)
+      }
+      style={{
+        padding: '7px 10px',
+        borderRadius: '8px',
+        border: '1px solid #CBD8E5',
+        background: '#FFFFFF',
+        color: '#17324D',
+        fontSize: '12px',
+        fontWeight: 700,
+        cursor: 'pointer',
+      }}
+    >
+      Next →
+    </button>
+  </div>
+</div>
 
     <p style={{ color: '#52677B' }}>
       Based on your current training and the upcoming
