@@ -4207,7 +4207,7 @@ rationale:
       sport: 'run',
 title:
   isRaceWeek
-    ? 'Race Week Run Activation'
+    ? primaryRace.name || 'A Race'
     : isRaceSpecific || phaseKey.includes('peak')
       ? 'Race-Specific Long Run'
       : phaseKey.includes('recovery')
@@ -4216,7 +4216,7 @@ title:
 
 session_class:
   isRaceWeek
-    ? 'easy'
+    ? 'race'
     : isRaceSpecific || phaseKey.includes('peak')
       ? 'race_specific'
       : phaseKey.includes('recovery')
