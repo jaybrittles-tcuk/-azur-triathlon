@@ -6517,7 +6517,9 @@ color:
   previewWeekOffset > 0 ? 'not-allowed' : 'pointer',
   }}
 >
-  Use This Plan
+  {previewWeekOffset > 0
+  ? 'Future Week Preview'
+  : 'Use This Plan'}
 </button>    
     <p style={{ marginTop: '20px', color: '#52677B' }}>
       Preview only — your existing training plan
