@@ -4109,20 +4109,24 @@ distance_m: swim2CooldownDistance,
       planned_date: addDays(5),
       sport: 'bike',
 title:
-  isRaceSpecific
-    ? 'Race-Specific Long Ride'
-    : phaseKey.includes('peak')
+  isRaceWeek
+    ? 'Race Eve Bike Activation'
+    : isRaceSpecific
       ? 'Race-Specific Long Ride'
-      : phaseKey.includes('recovery')
-        ? 'Reduced Aerobic Ride'
-        : 'Long Aerobic Ride',
+      : phaseKey.includes('peak')
+        ? 'Race-Specific Long Ride'
+        : phaseKey.includes('recovery')
+          ? 'Reduced Aerobic Ride'
+          : 'Long Aerobic Ride',
 
 session_class:
-  isRaceSpecific || phaseKey.includes('peak')
-    ? 'race_specific'
-    : phaseKey.includes('recovery')
-      ? 'easy'
-      : 'endurance',
+  isRaceWeek
+    ? 'easy'
+    : isRaceSpecific || phaseKey.includes('peak')
+      ? 'race_specific'
+      : phaseKey.includes('recovery')
+        ? 'easy'
+        : 'endurance',
       priority: 1,
 duration_min: longRideMinutes,
       targets: {},
