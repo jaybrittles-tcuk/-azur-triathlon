@@ -3928,15 +3928,17 @@ purpose:
           : 'Build muscular endurance and aerobic strength',
 
 rationale:
-  isRaceSpecific
-    ? 'Develop sustained race-power durability and controlled long-course intensity.'
-    : phaseKey.includes('build')
-      ? 'Develop sustainable threshold power and raise aerobic cycling capacity.'
-      : phaseKey.includes('peak')
-        ? 'Rehearse race-specific power while maintaining controlled fatigue.'
-        : phaseKey.includes('recovery')
-          ? 'Maintain aerobic movement while reducing overall training stress.'
-          : 'Build muscular endurance and aerobic strength before progressing toward threshold work.',
+  isTaper
+    ? 'Maintain race-specific sharpness while reducing fatigue and preserving freshness for race day.'
+    : isRaceSpecific
+      ? 'Develop sustained race-power durability and controlled long-course intensity.'
+      : phaseKey.includes('build')
+        ? 'Develop sustainable threshold power and raise aerobic cycling capacity.'
+        : phaseKey.includes('peak')
+          ? 'Rehearse race-specific power while maintaining controlled fatigue.'
+          : phaseKey.includes('recovery')
+            ? 'Maintain aerobic movement while reducing overall training stress.'
+            : 'Build muscular endurance and aerobic strength before progressing toward threshold work.',
   steps: [
     {
       type: 'warmup',
