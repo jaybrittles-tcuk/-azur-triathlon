@@ -3478,12 +3478,14 @@ const plannedLongRideMinutes =
 const longRideMinutes =
   isRaceWeek
     ? Math.min(60, plannedLongRideMinutes)
-    : longestRecentRideMinutes > 0
-      ? Math.min(
-          plannedLongRideMinutes,
-          Math.round(longestRecentRideMinutes * 1.12),
-        )
-      : plannedLongRideMinutes;
+    : previewOnly && previewWeekOffset > 0
+      ? plannedLongRideMinutes
+      : longestRecentRideMinutes > 0
+        ? Math.min(
+            plannedLongRideMinutes,
+            Math.round(longestRecentRideMinutes * 1.12),
+          )
+        : plannedLongRideMinutes;
 
 const plannedLongRunMinutes =
   Math.round(
@@ -3494,12 +3496,14 @@ const plannedLongRunMinutes =
 const longRunMinutes =
   isRaceWeek
     ? Math.min(30, plannedLongRunMinutes)
-    : longestRecentRunMinutes > 0
-      ? Math.min(
-          plannedLongRunMinutes,
-          Math.round(longestRecentRunMinutes * 1.10),
-        )
-      : plannedLongRunMinutes;
+    : previewOnly && previewWeekOffset > 0
+      ? plannedLongRunMinutes
+      : longestRecentRunMinutes > 0
+        ? Math.min(
+            plannedLongRunMinutes,
+            Math.round(longestRecentRunMinutes * 1.10),
+          )
+        : plannedLongRunMinutes;
     const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
 
