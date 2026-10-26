@@ -3856,23 +3856,27 @@ duration_min: bikeWarmupMinutes,
 reps: bikeIntervalReps,
 duration_min: bikeIntervalMinutes,
 recovery_min: bikeRecoveryMinutes,
-            ftp_percent:
-  phaseKey.includes('peak')
-    ? '85–92%'
-    : phaseKey.includes('recovery')
-      ? '60–70%'
-      : phaseKey.includes('build')
-        ? '95–100%'
-        : '80–90%',
+ftp_percent:
+  isTaper || isRaceWeek
+    ? '80–85%'
+    : phaseKey.includes('peak')
+      ? '85–92%'
+      : phaseKey.includes('recovery')
+        ? '60–70%'
+        : phaseKey.includes('build')
+          ? '95–100%'
+          : '80–90%',
 
 target:
-  phaseKey.includes('peak')
-    ? 'Race-specific'
-    : phaseKey.includes('recovery')
-      ? 'Easy aerobic'
-      : phaseKey.includes('build')
-        ? 'Threshold'
-        : 'Strength endurance',
+  isTaper || isRaceWeek
+    ? 'Controlled race effort'
+    : phaseKey.includes('peak')
+      ? 'Race-specific'
+      : phaseKey.includes('recovery')
+        ? 'Easy aerobic'
+        : phaseKey.includes('build')
+          ? 'Threshold'
+          : 'Strength endurance',
           },
         ],
         cooldown: [
