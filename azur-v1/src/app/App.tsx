@@ -5729,11 +5729,11 @@ padding: '11px 16px',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'flex-end',
-      borderRadius: '0 0 16px 16px',
-      border: 'none',
-      boxShadow: 'none',
+      borderRadius: '20px',
+      border: '1px solid rgba(68, 151, 205, 0.32)',
+      boxShadow: '0 16px 32px rgba(1, 9, 20, 0.24)',
      backgroundImage:
-  "linear-gradient(180deg, #061321 0%, rgba(6,19,33,0.18) 18%, rgba(6,19,33,0.10) 42%, rgba(6,19,33,0.72) 78%, #061321 100%), url('/race-images/roth.jpg')",
+  "linear-gradient(180deg, rgba(7,21,36,0.72) 0%, rgba(7,21,36,0.32) 32%, rgba(7,21,36,0.92) 82%, #071524 100%), url('/race-images/roth.jpg')",
       backgroundSize: 'cover',
       backgroundPosition: 'center',
     }}
@@ -5793,15 +5793,15 @@ height: '58px',
           textTransform: 'uppercase',
         }}
       >
-        Welcome back
+        YOUR A RACE
       </div>
 
       <h1
         style={{
           margin: 0,
           color: '#FFFFFF',
-          fontSize: '28px',
-          fontWeight: 700,
+          fontSize: '30px',
+          fontWeight: 800,
           lineHeight: 1.1,
           letterSpacing: '-0.025em',
         }}
