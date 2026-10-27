@@ -4805,3 +4805,36 @@ strong {
 .azur-workout-facts>div{display:grid;gap:6px;background:#14354f;border-radius:10px;padding:11px}
 .azur-workout-facts strong{color:#fff;font-size:15px}.azur-workout-facts small{color:#9fc3dc}
 @media(max-width:520px){.azur-workout-facts{grid-template-columns:1fr 1fr}.azur-workout-tab-nav button{font-size:12px;padding:9px 5px}}
+
+
+/* AZUR V2 athlete home: compact premium utility surfaces and honest metric indicators. */
+.azur-premium-home .azur-home-load{
+  background:linear-gradient(150deg,#102c46,#081c31);
+  border:1px solid #27506c;
+  border-radius:19px;
+  padding:16px;
+  box-shadow:0 10px 25px rgba(0,8,24,.18);
+}
+.azur-premium-home .azur-home-load-grid{margin-top:12px}
+.azur-premium-home .azur-home-load-grid>div:first-child strong{color:#4bbff4}
+.azur-premium-home .azur-home-load-grid>div:nth-child(2) strong{color:#f4ca57}
+.azur-premium-home .azur-home-load-grid>div:nth-child(3) strong{color:#6bddac}
+.azur-home-metric-visual{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:12px 0 8px}
+.azur-home-metric-track{height:4px;border-radius:99px;background:#26445c;overflow:hidden}
+.azur-home-metric-track>span{display:block;height:100%;border-radius:99px}
+.azur-home-tools{gap:10px!important;padding:15px!important;border-radius:19px!important}
+.azur-home-tools-actions{gap:7px!important}
+.azur-home-tools-actions button{
+  background:#12334e!important;color:#e5f6ff!important;
+  border:1px solid #315978!important;border-radius:12px!important;
+  min-height:42px;line-height:1.25;font-weight:700!important;
+  transition:background-color .16s ease,border-color .16s ease;
+}
+.azur-home-tools-actions button:last-child{background:#167eb7!important;border-color:#2996cf!important;color:white!important}
+.azur-home-tools-actions button:nth-child(3){background:#123b3b!important;border-color:#2e756b!important;color:#a4efd0!important}
+.azur-home-tools-actions button:focus-visible{outline:2px solid #f6cc4a;outline-offset:2px}
+@media(max-width:480px){
+  .azur-home-tools{margin:11px 0 15px!important}
+  .azur-home-tools-actions button{font-size:12px!important;padding:10px 6px!important}
+  .azur-premium-home .azur-home-load{padding:13px}
+}
