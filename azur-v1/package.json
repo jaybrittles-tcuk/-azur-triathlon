@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test src/lib/calculations/trainingPriority.test.mjs"
+    "test": "node --experimental-strip-types --test src/lib/calculations/*.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",
