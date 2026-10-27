@@ -3506,6 +3506,9 @@ const trainingPriority = resolveTrainingPriority({
   swimGapStatus: athleteRaceGap.swim.status,
   bikeGapStatus: athleteRaceGap.bike.status,
   runGapStatus: athleteRaceGap.run.status,
+  swimGapPct: athleteRaceGap.swim.gapPct,
+  bikeGapPct: athleteRaceGap.bike.gapPct,
+  runGapPct: athleteRaceGap.run.gapPct,
 });
 
 const sportBias = trainingPriority.multipliers;
