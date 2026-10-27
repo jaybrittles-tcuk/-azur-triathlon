@@ -8712,6 +8712,9 @@ const sessionVerdict =
     ? `Goal demand · ${raceGoalDemand.swimPaceLabel}/100m`
     : 'Controlled start and efficient rhythm.'}
 </small>
+              <small>
+  {athleteRaceGap.swim.label}
+</small>
             </div>
 
             <div>
