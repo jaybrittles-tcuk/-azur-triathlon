@@ -4690,13 +4690,17 @@ const [chatMessages, setChatMessages] = useState<
 ]);
   const [expandedPreviewSession, setExpandedPreviewSession] =
   useState<number | null>(null);
-  const [planPreviewInsights, setPlanPreviewInsights] =
+const [planPreviewInsights, setPlanPreviewInsights] =
   useState<{
     phase: string;
     targetHours: number;
     plannedHours: number;
     recommendedSessionCount: number;
     historySource: 'confirmed' | 'recorded';
+    trainingPriorityRationale: string;
+    resolvedPriority: string;
+    objectivePriority: string;
+    priorityConflict: boolean;
   } | null>(null);
 const previewTotalMinutes =
   (planPreview ?? []).reduce(
