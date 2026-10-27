@@ -3495,8 +3495,15 @@ const phaseConfig =
               };
     const strongestSport =
   savedBaseline?.strongest_sport ?? 'balanced';
-
-const developmentSport =
+const trainingPriority = resolveTrainingPriority({
+  developmentSport,
+  strongestSport,
+  phase,
+  swimGapStatus: athleteRaceGap.swim.status,
+  bikeGapStatus: athleteRaceGap.bike.status,
+  runGapStatus: athleteRaceGap.run.status,
+});
+    const developmentSport =
   savedBaseline?.development_sport ?? 'balanced';
 
 const sportBias = {
