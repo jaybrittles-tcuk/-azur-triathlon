@@ -4773,3 +4773,11 @@ strong {
 .calendar-layout .calendar-reschedule-button{background:#163b58;color:#8cd7ff;border:1px solid #366789;border-radius:8px}
 .calendar-layout .calendar-empty-state h3{color:#fff}.calendar-layout .calendar-empty-state p{color:#aac7dc}
 @media(max-width:750px){.calendar-layout{padding:10px;border-radius:14px}.calendar-layout .calendar-day{padding:8px}.calendar-layout .calendar-strip-days{gap:4px}.calendar-layout .calendar-strip-day{padding:7px 1px}}
+
+/* Selectable date focus within the premium calendar */
+.calendar-layout .calendar-strip-day{font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;appearance:none;color:inherit;transition:background .15s,border-color .15s,box-shadow .15s}
+.calendar-layout .calendar-strip-day.focused{border-color:#ffd044;background:#183e56;box-shadow:0 0 0 1px rgba(255,208,68,.35)}
+.calendar-layout .calendar-strip-day:focus-visible{outline:2px solid #ffd044;outline-offset:3px}
+.calendar-focus-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 13px;background:#0e2942;border:1px solid #284c68;border-radius:12px;margin:12px 0;color:#fff}
+.calendar-focus-toolbar>div{display:grid;gap:3px}.calendar-focus-toolbar small{color:#99c4df;font-size:11px}
+.calendar-focus-toolbar button{background:#145987;color:#fff;border:1px solid #347ca4;border-radius:20px;padding:7px 11px;cursor:pointer}
