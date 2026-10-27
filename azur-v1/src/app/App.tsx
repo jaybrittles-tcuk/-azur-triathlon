@@ -908,6 +908,44 @@ function WorkoutShape({
   );
 }
 
+function CalendarPrescriptionSteps({ prescription }: { prescription: Record<string, unknown> }) {
+  const steps: Array<{ kind: string; detail: string }> = [];
+  const add = (kind: string, value: unknown) => {
+    if (!Array.isArray(value)) return;
+    value.forEach((step) => {
+      if (!step || typeof step !== 'object') return;
+      const item = step as Record<string, unknown>;
+      const reps = Number(item.reps ?? 1);
+      const duration = Number(item.duration_min ?? 0);
+      const distance = Number(item.distance_m ?? 0);
+      if (!Number.isFinite(reps) || reps < 1 || reps > 100 || !Number.isFinite(duration) || !Number.isFinite(distance)) return;
+      const quantity = duration > 0 ? `${duration} min` : distance > 0 ? `${distance} m` : '';
+      if (!quantity) return;
+      steps.push({ kind, detail: `${reps > 1 ? `${reps} × ` : ''}${quantity}` });
+      if (kind === 'Work') {
+        const recovery = Number(item.recovery_min ?? 0) || Number(item.recovery_sec ?? 0) / 60;
+        if (recovery > 0 && Number.isFinite(recovery)) {
+          steps.push({ kind: 'Recovery', detail: `${Math.round(recovery * 10) / 10} min between efforts` });
+        }
+      }
+    });
+  };
+  add('Warm-up', prescription.warmup);
+  add('Work', prescription.main_set);
+  add('Cool-down', prescription.cooldown);
+  if (!steps.length) return null;
+  return (
+    <div className="calendar-prescription-steps" aria-label="Prescribed workout steps">
+      {steps.slice(0, 8).map((step, index) => (
+        <span key={index} className={`calendar-prescription-step ${step.kind.toLowerCase().replace('-', '')}`}>
+          <b>{step.kind}</b> {step.detail}
+        </span>
+      ))}
+      {steps.length > 8 && <span className="calendar-prescription-step">+{steps.length - 8} more</span>}
+    </div>
+  );
+}
+
 function ProgressRow({
   label,
   value,
@@ -7485,6 +7523,7 @@ onClick={() => {
 </div>
 
                         <strong>{session.title}</strong>
+<CalendarPrescriptionSteps prescription={session.prescription} />
 <div className="calendar-session-purpose">
   {session.status === 'completed' && session.completedDurationSec != null ? (
     <span>
