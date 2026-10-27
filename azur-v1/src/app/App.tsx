@@ -8748,6 +8748,9 @@ const sessionVerdict =
     ? `Goal demand · ${raceGoalDemand.runPaceLabel}/km`
     : 'Durability and late-race control.'}
 </small>
+<small>
+  {athleteRaceGap.run.label}
+</small>
             </div>
 
   <div>
