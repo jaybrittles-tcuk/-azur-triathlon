@@ -1,0 +1,27 @@
+name: Training Priority Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'azur-v1/src/lib/calculations/trainingPriority.ts'
+      - 'azur-v1/src/lib/calculations/trainingPriority.test.mjs'
+      - 'azur-v1/package.json'
+      - '.github/workflows/training-priority-tests.yml'
+  pull_request:
+    paths:
+      - 'azur-v1/src/lib/calculations/trainingPriority.ts'
+      - 'azur-v1/src/lib/calculations/trainingPriority.test.mjs'
+      - 'azur-v1/package.json'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Training Priority regression tests
+        working-directory: azur-v1
+        run: npm test
