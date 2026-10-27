@@ -1147,6 +1147,18 @@ const [primaryRace, setPrimaryRace] = useState({
   },
 });
   const [activeNav, setActiveNav] = useState('Home');
+  const [isCoachAccount, setIsCoachAccount] = useState(false);
+  const [homeMode, setHomeMode] = useState<'athlete' | 'coach'>('athlete');
+  useEffect(() => {
+    let mounted = true;
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!mounted) return;
+      const coach = user?.app_metadata?.role === 'coach';
+      setIsCoachAccount(coach);
+      if (!coach) setHomeMode('athlete');
+    });
+    return () => { mounted = false; };
+  }, [activeNav]);
   const [weekSessions, setWeekSessions] = useState<Session[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [sessionDetailOpen, setSessionDetailOpen] = useState(false);
@@ -10621,8 +10633,38 @@ style={
   </div>
 </div>
         </header>
-{activeNav === 'Home' && <CoachReviewInbox />}
-{activeNav === 'Home' && HomeView()}
+{activeNav === 'Home' && isCoachAccount && (
+  <div style={{
+    display: 'flex',
+    gap: 8,
+    padding: '12px 18px',
+    background: '#071524',
+    alignItems: 'center',
+  }} aria-label="AZUR account mode">
+    {(['athlete', 'coach'] as const).map((mode) => (
+      <button
+        key={mode}
+        type="button"
+        onClick={() => setHomeMode(mode)}
+        aria-pressed={homeMode === mode}
+        style={{
+          flex: 1,
+          padding: '11px 14px',
+          borderRadius: 12,
+          border: homeMode === mode ? '1px solid #258FD0' : '1px solid #274258',
+          background: homeMode === mode ? '#123B5C' : '#0C2035',
+          color: '#FFFFFF',
+          fontWeight: 700,
+          cursor: 'pointer',
+        }}
+      >
+        {mode === 'athlete' ? 'Athlete Mode' : 'Coach Mode'}
+      </button>
+    ))}
+  </div>
+)}
+{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <CoachReviewInbox />}
+{activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section
     style={{
