@@ -1460,14 +1460,26 @@ async function loadPrimaryRace(userId: string) {
     return;
   }
 
-  setPrimaryRace({
-    id: data.id,
-    name: data.name,
-    raceDate: data.race_date,
-    priority: data.priority,
-    location: data.location ?? '',
-    targetSplits: data.target_splits,
-  });
+setPrimaryRace({
+  id: data.id,
+  name: data.name,
+  raceDate: data.race_date,
+  priority: data.priority,
+  location: data.location ?? '',
+  swimDistanceM:
+    data.swim_distance_m != null
+      ? Number(data.swim_distance_m)
+      : null,
+  bikeDistanceKm:
+    data.bike_distance_km != null
+      ? Number(data.bike_distance_km)
+      : null,
+  runDistanceKm:
+    data.run_distance_km != null
+      ? Number(data.run_distance_km)
+      : null,
+  targetSplits: data.target_splits,
+});
 }
 
 async function loadPlannedSessions(userId: string) {
