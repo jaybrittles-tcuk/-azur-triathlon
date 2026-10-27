@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
-type AssignedAthlete = {
+export type AssignedAthlete = {
  id: string; display_name: string | null; ftp_w: number | null;
  run_threshold_sec_per_km: number | null; swim_threshold_sec_per_100m: number | null;
  normal_weekly_hours: number | null;
 };
 
-export default function CoachAthleteRoster() {
+export default function CoachAthleteRoster({ onSelect }: { onSelect: (athlete: AssignedAthlete | null) => void }) {
  const [athletes,setAthletes]=useState<AssignedAthlete[]>([]);
  const [selectedId,setSelectedId]=useState('');
  const [loading,setLoading]=useState(true);
@@ -38,7 +38,7 @@ export default function CoachAthleteRoster() {
   {error&&<p role="alert">{error}</p>}
   {!loading&&!error&&athletes.length===0&&<p>No athletes are assigned to this coach yet.</p>}
   {athletes.length>0&&<div className="coach-cycling-columns">
-   <div className="coach-cycling-list">{athletes.map(a=><button type="button" key={a.id} className={selectedId===a.id?'is-selected':''} onClick={()=>setSelectedId(a.id)}>
+   <div className="coach-cycling-list">{athletes.map(a=><button type="button" key={a.id} className={selectedId===a.id?'is-selected':''} onClick={()=>{setSelectedId(a.id);onSelect(a);}}>
     <strong>{a.display_name||'Unnamed athlete'}</strong><small>{a.ftp_w ? `FTP: ${a.ftp_w} W`:'FTP not recorded'}</small>
    </button>)}</div>
    <div className="coach-cycling-detail">{selected ? <>
