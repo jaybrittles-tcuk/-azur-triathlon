@@ -6445,32 +6445,15 @@ Your confirmed training baseline is{' '}
         ? 'athlete-confirmed training baseline'
         : 'recent recorded training history'}.
     </p>
-{athleteBaseline.developmentSport &&
-  athleteBaseline.developmentSport !== 'balanced' && (
-    <p
-      style={{
-        color: '#52677B',
-        lineHeight: 1.6,
-      }}
-    >
-      <strong>
-        Development focus:{' '}
-        {athleteBaseline.developmentSport.charAt(0).toUpperCase() +
-          athleteBaseline.developmentSport.slice(1)}
-      </strong>
-      . Azur has given this discipline additional training emphasis
-      this week
-      {athleteBaseline.strongestSport &&
-      athleteBaseline.strongestSport !== 'balanced' &&
-      athleteBaseline.strongestSport !==
-        athleteBaseline.developmentSport
-        ? ` while moderating ${
-            athleteBaseline.strongestSport.charAt(0).toUpperCase() +
-            athleteBaseline.strongestSport.slice(1)
-          } volume because you identified it as your strongest discipline.`
-        : '.'}
-    </p>
-  )}
+<p
+  style={{
+    color: '#52677B',
+    lineHeight: 1.6,
+  }}
+>
+  <strong>Training priority: </strong>
+  {trainingPriority.rationale}
+</p>
     <p style={{
       color: '#52677B',
       lineHeight: 1.6,
