@@ -3,6 +3,7 @@ import FitParser from 'fit-file-parser';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import PrivacyPolicy from './PrivacyPolicy';
+import CoachReviewInbox from './CoachReviewInbox';
 import {
   Activity,
   AlertTriangle,
@@ -10620,6 +10621,7 @@ style={
   </div>
 </div>
         </header>
+{activeNav === 'Home' && <CoachReviewInbox />}
 {activeNav === 'Home' && HomeView()}
 {activeNav === 'Chat' && (
   <section
