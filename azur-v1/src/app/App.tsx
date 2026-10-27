@@ -1,4 +1,5 @@
 import CoachAthleteRoster from './CoachAthleteRoster';
+import type { AssignedAthlete } from './CoachAthleteRoster';
 import CoachCyclingLibraryReview from './CoachCyclingLibraryReview';
 import MultisportPlannedStress from './MultisportPlannedStress';
 import { estimatePlannedStress } from '../lib/calculations/plannedStress';
@@ -1207,6 +1208,7 @@ function parsePaceInput(value: string) {
   weight: '',
   targetWeight: '',
 });
+  const [coachSelectedAthlete, setCoachSelectedAthlete] = useState<AssignedAthlete | null>(null);
   const [athleteProfile, setAthleteProfile] = useState({
   ftp: null as number | null,
   runThreshold: null as number | null,
@@ -10966,7 +10968,7 @@ style={
     ))}
   </div>
 )}
-{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachAthleteRoster /><CoachCyclingLibraryReview ftpWatts={athleteProfile.ftp} /></>}
+{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachAthleteRoster onSelect={setCoachSelectedAthlete} /><CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} /></>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section
