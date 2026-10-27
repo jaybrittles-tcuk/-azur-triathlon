@@ -1288,6 +1288,8 @@ const [garminConnected, setGarminConnected] = useState(false);
 
 const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
 const [trainingLoadHistory, setTrainingLoadHistory] = useState<ReturnType<typeof calculateTrainingLoad>>([]);
+const [loadRangeDays, setLoadRangeDays] = useState<42 | 90 | 180>(42);
+const [selectedLoadDate, setSelectedLoadDate] = useState<string | null>(null);
   const [completedActivityFeed, setCompletedActivityFeed] = useState<any[]>([]);
 useEffect(() => {
   if (trainingLoadActivities.length === 0) {
@@ -5979,27 +5981,28 @@ padding: '11px 16px',
     <div className="azur-home-load-grid">
       {([{label:'Fitness',value:trainingLoad.fitness},{label:'Fatigue',value:trainingLoad.fatigue},{label:'Form',value:trainingLoad.form}] as const).map(metric=><div key={metric.label}><small>{metric.label}</small><strong>{typeof metric.value==='number'&&Number.isFinite(metric.value)?Math.round(metric.value):'—'}</strong></div>)}
     </div>
-    {trainingLoadHistory.length >= 42 && trainingLoad.eligibleActivities >= 8 ? (
-      <div className="azur-load-chart" role="img" aria-label="Last 42 days of calculated fitness, fatigue and form">
-        <svg viewBox="0 0 340 124" preserveAspectRatio="none">
-          {(() => {
-            const points = trainingLoadHistory.slice(-42);
-            const values = points.flatMap(p => [p.fitness,p.fatigue,p.form]);
-            const min = Math.min(0,...values);
-            const max = Math.max(1,...values);
-            const y = (n:number) => 108 - (n-min)/Math.max(1,max-min)*94;
-            return <>
-              {[0,0.5,1].map((f,i)=><line key={i} x1="5" x2="335" y1={12+f*96} y2={12+f*96} stroke="#28475e" strokeDasharray="3 5" />)}
-              {([{key:'fitness',color:'#24b9f2'},{key:'fatigue',color:'#f5c544'},{key:'form',color:'#62d9a3'}] as const).map(s=>
-                <polyline key={s.key} fill="none" stroke={s.color} strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" points={points.map((p,i)=>`${5+i*330/Math.max(1,points.length-1)},${y(p[s.key])}`).join(' ')} />
-              )}
-            </>;
-          })()}
+    {trainingLoadHistory.length >= 42 && trainingLoad.eligibleActivities >= 8 ? (() => {
+      const points = trainingLoadHistory.slice(-loadRangeDays);
+      const values = points.flatMap(p => [p.fitness, p.fatigue, p.form]);
+      const min = Math.min(0, ...values);
+      const max = Math.max(1, ...values);
+      const y = (n:number) => 108 - (n-min)/Math.max(1,max-min)*94;
+      const selected = points.find(p => p.date === selectedLoadDate) ?? points[points.length-1];
+      return <div className="azur-load-chart">
+        <div className="azur-load-range" role="group" aria-label="Training load chart date range">
+          {([42,90,180] as const).map(days => <button type="button" key={days} aria-pressed={loadRangeDays===days} onClick={()=>{setLoadRangeDays(days);setSelectedLoadDate(null);}}>{days===42?'6W':days===90?'3M':'6M'}</button>)}
+        </div>
+        <svg viewBox="0 0 340 124" preserveAspectRatio="none" role="img" aria-label="Fitness, fatigue and form history, select a day using buttons below">
+          {[0,0.5,1].map((fraction,i)=><line key={i} x1="5" x2="335" y1={12+fraction*96} y2={12+fraction*96} stroke="#28475e" strokeDasharray="3 5" />)}
+          {([{key:'fitness',color:'#24b9f2'},{key:'fatigue',color:'#f5c544'},{key:'form',color:'#62d9a3'}] as const).map(s=><polyline key={s.key} fill="none" stroke={s.color} strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" points={points.map((p,i)=>`${5+i*330/Math.max(1,points.length-1)},${y(p[s.key])}`).join(' ')} />)}
+          {selected && <line x1={5+Math.max(0,points.findIndex(p=>p.date===selected.date))*330/Math.max(1,points.length-1)} x2={5+Math.max(0,points.findIndex(p=>p.date===selected.date))*330/Math.max(1,points.length-1)} y1="8" y2="110" stroke="#e9f7ff" strokeDasharray="3 3" opacity=".6"/>}
         </svg>
+        <input className="azur-load-scrubber" type="range" min={0} max={Math.max(0,points.length-1)} value={Math.max(0,points.findIndex(p=>p.date===selected?.date))} onChange={event=>setSelectedLoadDate(points[Number(event.target.value)]?.date ?? null)} aria-label="Select training load date" />
+        {selected && <div className="azur-load-details"><strong>{new Date(selected.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</strong><span>Fitness {Math.round(selected.fitness)}</span><span>Fatigue {Math.round(selected.fatigue)}</span><span>Form {Math.round(selected.form)}</span></div>}
         <div className="azur-load-chart-legend"><span>● Fitness</span><span>● Fatigue</span><span>● Form</span></div>
-        <small>Last 42 days · recorded activity estimates</small>
-      </div>
-    ) : <p className="azur-load-history-empty">Training-load trends become available after at least 42 days of history and 8 eligible activities with calculated stress.</p>}
+        <small>{points.length} days of recorded estimates · fitness reflects longer-term load, fatigue shorter-term load; form is their difference before today's stress update.</small>
+      </div>;
+    })() : <p className="azur-load-history-empty">Training-load trends become available after at least 42 days of history and 8 eligible activities with calculated stress.</p>}
     <p>{trainingLoad.eligibleActivities>0 ? `Based on ${trainingLoad.eligibleActivities} eligible recorded activities. These indicators are not a medical readiness assessment.` : 'Connect and record eligible workouts to build your training-load history.'}</p>
   </div>
 </section>
