@@ -22,7 +22,10 @@ export type TrainingPriorityInput = {
   runGapPct?: number | null;
 };
 
+export type PriorityConfidence = 'clear' | 'close' | 'limited_data' | 'none';
+
 export type TrainingPriorityResult = {
+  objectiveConfidence: PriorityConfidence;
   resolvedPriority: TrainingPrioritySport;
   objectivePriority: TrainingPrioritySport;
   conflict: boolean;
@@ -164,6 +167,29 @@ export function resolveTrainingPriority({
     runGapPct,
   });
 
+  const developmentGaps = [
+    { status: swimGapStatus, reserve: swimGapPct },
+    { status: bikeGapStatus, reserve: bikeGapPct },
+    { status: runGapStatus, reserve: runGapPct },
+  ].filter((gap) => gap.status === 'development');
+
+  const validReserves = developmentGaps
+    .map((gap) => gap.reserve)
+    .filter((reserve): reserve is number =>
+      reserve != null && Number.isFinite(reserve),
+    )
+    .sort((a, b) => a - b);
+
+  const objectiveConfidence: PriorityConfidence =
+    developmentGaps.length === 0
+      ? 'none'
+      : validReserves.length !== developmentGaps.length
+        ? 'limited_data'
+        : validReserves.length > 1 &&
+            validReserves[1] - validReserves[0] <= 1
+          ? 'close'
+          : 'clear';
+
   const conflict =
     athletePriority !== 'balanced' &&
     objectivePriority !== 'balanced' &&
@@ -274,6 +300,7 @@ export function resolveTrainingPriority({
   }
 
   return {
+    objectiveConfidence,
     resolvedPriority,
     objectivePriority,
     conflict,
