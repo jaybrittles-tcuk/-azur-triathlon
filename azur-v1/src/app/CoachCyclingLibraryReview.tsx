@@ -12,7 +12,9 @@ type Phase = typeof phases[number];
 type ReviewDraft = { level: 1 | 2 | 3; phases: Phase[] };
 const familyName = (family: string) => family.replaceAll('_', ' ');
 
-export default function CoachCyclingLibraryReview() {
+export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: number | null }) {
+  const [availableMinutes, setAvailableMinutes] = useState(90);
+  const [maxLevel, setMaxLevel] = useState<1|2|3>(2);
   const [events, setEvents] = useState<Array<{id:string;workout_id:string;workout_version:number;decision:'approved'|'revoked';level:number;phases:string[];decided_at:string}>>([]);
   const [feedback, setFeedback] = useState('');
   const [saving, setSaving] = useState(false);
@@ -47,7 +49,7 @@ export default function CoachCyclingLibraryReview() {
   const latestEvent = events.find(event=>event.workout_id===selectedId);
   const eligible = resolveCurrentBikeApprovals(events);
   const preview = selectCoachSession(eligible, {
-    sport: 'bike', family: 'threshold', phase: 'build', maxMinutes: 90, maxLevel: 2,
+    sport: 'bike', family: 'threshold', phase: 'build', maxMinutes: availableMinutes, maxLevel,
   });
   const draft = drafts[selectedId] ?? (latestEvent ? { level: latestEvent.level as 1|2|3, phases: latestEvent.phases as Phase[] } : { level: 1 as const, phases: [] });
   const issues = selected ? validateWorkout(selected) : [];
@@ -62,8 +64,14 @@ export default function CoachCyclingLibraryReview() {
             <div className="coach-cycling-preview" aria-label="Read-only session selection preview">
         <h4>Approved session selection preview</h4>
         <p>{eligible.length} workouts eligible from the latest coach decisions.</p>
-        <p>Example request: bike · threshold · build phase · Level 2 maximum · 90 minutes.</p>
-        <strong>{preview.status === 'selected' ? preview.session.title : preview.reason}</strong>
+        <p>Athlete FTP: {ftpWatts != null && ftpWatts > 0 ? `${ftpWatts} W` : 'Unavailable'}. Coach-adjustable preview: bike · threshold · build phase.</p>
+        <div className="coach-cycling-preview-controls">
+          <label>Time (min) <input type="number" min={15} max={360} value={availableMinutes} onChange={e=>setAvailableMinutes(Number(e.target.value))} /></label>
+          <label>Maximum progression <select value={maxLevel} onChange={e=>setMaxLevel(Number(e.target.value) as 1|2|3)}>
+            <option value={1}>Foundation</option><option value={2}>Development</option><option value={3}>Advanced</option>
+          </select></label>
+        </div>
+        <strong>{ftpWatts == null || ftpWatts <= 0 ? 'Valid athlete FTP required before power-target recommendations' : preview.status === 'selected' ? preview.session.title : preview.reason}</strong>
         <small>No athlete assignment, calendar change, or device export takes place.</small>
       </div>
 <div className="coach-cycling-columns">
