@@ -12,6 +12,7 @@ type PriorityReview = {
 
 export default function CoachReviewInbox() {
   const [assignedCount, setAssignedCount] = useState(0);
+  const [isVerifiedCoach, setIsVerifiedCoach] = useState(false);
   const [reviews, setReviews] = useState<PriorityReview[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,15 @@ export default function CoachReviewInbox() {
     try {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
+        setIsVerifiedCoach(false);
+        setAssignedCount(0);
+        setReviews([]);
+        return;
+      }
+      // app_metadata is server-managed; never trust editable user_metadata for roles.
+      const verifiedCoach = user.app_metadata?.role === 'coach';
+      setIsVerifiedCoach(verifiedCoach);
+      if (!verifiedCoach) {
         setAssignedCount(0);
         setReviews([]);
         return;
@@ -56,7 +66,7 @@ export default function CoachReviewInbox() {
 
   useEffect(() => { void reload(); }, []);
 
-  if (!assignedCount && !error) return null;
+  if (!isVerifiedCoach && !error) return null;
   return (
     <section style={{ padding: 20, margin: '16px 20px', background: '#0C2035', color: '#FFFFFF', borderRadius: 14 }}>
       <h3 style={{ marginTop: 0 }}>Coach Review Inbox</h3>
@@ -65,7 +75,8 @@ export default function CoachReviewInbox() {
         {loading ? 'Loading…' : 'Refresh reviews'}
       </button>
       {error && <p role="alert">{error}</p>}
-      {!error && !loading && reviews.length === 0 && <p>No pending priority reviews for assigned athletes.</p>}
+      {!error && !loading && assignedCount === 0 && <p>Coach account verified. Awaiting administrator-approved athlete assignments. No athlete records are accessible yet.</p>}
+      {!error && !loading && assignedCount > 0 && reviews.length === 0 && <p>No pending priority reviews for assigned athletes.</p>}
       {reviews.map((review) => (
         <article key={review.id} style={{ padding: 14, marginTop: 12, border: '1px solid #456078', borderRadius: 10 }}>
           <strong>Pending · {review.current_priority} → {review.suggested_priority}</strong>
