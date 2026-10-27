@@ -7464,7 +7464,16 @@ color:
       const suggestions = calendarMoveAlternatives(session);
       return (
         <div className="calendar-move-suggestions">
-          <span>Suggested days · based on planned session spacing and duration only</span>
+          <span>Suggested days · ranked by planned session spacing and duration</span>
+          <div className="calendar-move-load-context">
+            <strong>Current training-load context</strong>
+            {trainingLoad.form != null && trainingLoad.fatigue != null ? (
+              <p>Form (TSB): {trainingLoad.form} · Fatigue (ATL): {trainingLoad.fatigue}. These are current load estimates, not forecasts for the suggested days.</p>
+            ) : (
+              <p>Training-load history is insufficient for a reliable current form/fatigue estimate. Suggestions use the planned schedule only.</p>
+            )}
+            <small>AZUR does not yet predict day-specific readiness or use this snapshot to automatically approve high-intensity moves.</small>
+          </div>
           {suggestions.length === 0 ? <small>No conflict-free alternatives in this week.</small> : (
             <div>
               {suggestions.map((day) => (
