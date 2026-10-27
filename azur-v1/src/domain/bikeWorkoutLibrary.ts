@@ -1,7 +1,7 @@
 /** AZUR Build 07A: validated cycling workout templates. No automatic publishing. */
 export type WorkoutFamily = 'aerobic_foundation' | 'aerobic_development' | 'tempo' | 'sweet_spot' | 'threshold' | 'vo2_short' | 'vo2_long' | 'big_gear' | 'strength_endurance' | 'durability' | 'race_specific';
 export type WorkoutStep =
-  | { kind: 'steady'; minutes: number; minFtpPct: number; maxFtpPct: number; label: string }
+  | { kind: 'steady'; minutes: number; minFtpPct: number; maxFtpPct: number; label: string; cadenceRpm?: [number, number] }
   | { kind: 'repeat'; repetitions: number; work: Extract<WorkoutStep, {kind:'steady'}>; recovery: Extract<WorkoutStep, {kind:'steady'}> };
 export interface BikeWorkout {
   id: string;
