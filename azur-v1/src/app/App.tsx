@@ -5789,26 +5789,7 @@ height: '58px',
     </div>
   </div>
 </section>
-<section className="azur-premium-home" aria-label="AZUR athlete home">
-  <div className="azur-home-kicker"><span>AZUR / ATHLETE DASHBOARD</span><span>{homeDateLabel}</span></div>
-  <div className="azur-home-section-heading"><span>YOUR TRAINING WEEK</span><button type="button" onClick={()=>setActiveNav('Calendar')}>Calendar →</button></div>
-  <div className="azur-home-sports">
-    {(['swim','bike','run'] as const).map(sport=><div className={`azur-home-sport ${sport}`} key={sport}>
-      <span className="azur-sport-symbol">{sport==='swim'?'≈':sport==='bike'?'◉':'↗'}</span>
-      <span className="azur-home-sport-name">{sport[0].toUpperCase()+sport.slice(1)}</span>
-      <strong>{homeCompleted(sport)} / {homeCount(sport)}</strong>
-      <small>{homeMinutesLabel(homeMinutes(sport))} planned</small>
-      <div className="azur-home-progress"><span style={{width:homeCount(sport)?`${Math.min(100,100*homeCompleted(sport)/homeCount(sport))}%`:'0%'}} /></div>
-    </div>)}
-  </div>
-  <div className="azur-home-load">
-    <div className="azur-home-section-heading"><span>FITNESS · FATIGUE · FORM</span><span>Recorded training data</span></div>
-    <div className="azur-home-load-grid">
-      {([{label:'Fitness',value:trainingLoad.fitness},{label:'Fatigue',value:trainingLoad.fatigue},{label:'Form',value:trainingLoad.form}] as const).map(metric=><div key={metric.label}><small>{metric.label}</small><strong>{typeof metric.value==='number'&&Number.isFinite(metric.value)?Math.round(metric.value):'—'}</strong></div>)}
-    </div>
-    <p>{trainingLoad.eligibleActivities>0 ? `Based on ${trainingLoad.eligibleActivities} eligible recorded activities. These indicators are not a medical readiness assessment.` : 'Connect and record eligible workouts to build your training-load history.'}</p>
-  </div>
-</section>
+
 {todaySession && (
   <section
     style={{
@@ -5975,6 +5956,26 @@ padding: '11px 16px',
     </button>
   </section>
 )}
+<section className="azur-premium-home" aria-label="AZUR athlete home">
+  <div className="azur-home-kicker"><span>AZUR / ATHLETE DASHBOARD</span><span>{homeDateLabel}</span></div>
+  <div className="azur-home-section-heading"><span>YOUR TRAINING WEEK</span><button type="button" onClick={()=>setActiveNav('Calendar')}>Calendar →</button></div>
+  <div className="azur-home-sports">
+    {(['swim','bike','run'] as const).map(sport=><div className={`azur-home-sport ${sport}`} key={sport}>
+      <span className="azur-sport-symbol">{sport==='swim'?'≈':sport==='bike'?'◉':'↗'}</span>
+      <span className="azur-home-sport-name">{sport[0].toUpperCase()+sport.slice(1)}</span>
+      <strong>{homeCompleted(sport)} / {homeCount(sport)}</strong>
+      <small>{homeMinutesLabel(homeMinutes(sport))} planned</small>
+      <div className="azur-home-progress"><span style={{width:homeCount(sport)?`${Math.min(100,100*homeCompleted(sport)/homeCount(sport))}%`:'0%'}} /></div>
+    </div>)}
+  </div>
+  <div className="azur-home-load">
+    <div className="azur-home-section-heading"><span>FITNESS · FATIGUE · FORM</span><span>Recorded training data</span></div>
+    <div className="azur-home-load-grid">
+      {([{label:'Fitness',value:trainingLoad.fitness},{label:'Fatigue',value:trainingLoad.fatigue},{label:'Form',value:trainingLoad.form}] as const).map(metric=><div key={metric.label}><small>{metric.label}</small><strong>{typeof metric.value==='number'&&Number.isFinite(metric.value)?Math.round(metric.value):'—'}</strong></div>)}
+    </div>
+    <p>{trainingLoad.eligibleActivities>0 ? `Based on ${trainingLoad.eligibleActivities} eligible recorded activities. These indicators are not a medical readiness assessment.` : 'Connect and record eligible workouts to build your training-load history.'}</p>
+  </div>
+</section>
 
 <div
   style={{
