@@ -5553,9 +5553,11 @@ const todaySession = weekSessions.find(
     style={{
       marginBottom: '14px',
      padding: '16px',
-      background: '#FFFFFF',
-      border: '1px solid #E1E8EF',
-      borderRadius: '14px',
+      background: 'linear-gradient(145deg, #10283F 0%, #071827 100%)',
+      border: '1px solid rgba(68, 151, 205, 0.30)',
+      boxShadow: '0 16px 32px rgba(1, 9, 20, 0.25)',
+      color: '#F6FBFF',
+      borderRadius: '20px',
     }}
   >
     <div
@@ -5568,7 +5570,7 @@ const todaySession = weekSessions.find(
     >
       <span
         style={{
-          color: '#6B7F91',
+          color: '#91BCD8',
           fontSize: '11px',
           fontWeight: 700,
           letterSpacing: '0.08em',
@@ -5627,7 +5629,7 @@ const todaySession = weekSessions.find(
       <div>
         <div
           style={{
-            color: '#17324D',
+            color: '#FFFFFF',
             fontSize: '18px',
             fontWeight: 700,
             lineHeight: 1.25,
@@ -5700,7 +5702,7 @@ min
 padding: '11px 16px',
         border: 'none',
         borderRadius: '10px',
-        background: '#0A3556',
+        background: '#168DCE',
         color: '#FFFFFF',
         fontSize: '14px',
         fontWeight: 700,
