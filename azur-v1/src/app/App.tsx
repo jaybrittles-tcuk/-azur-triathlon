@@ -4526,6 +4526,17 @@ setPlanPreviewInsights({
   priorityConflict:
     trainingPriority.conflict,
   priorityConfidence: trainingPriority.objectiveConfidence,
+  reviewItem:
+    trainingPriority.conflict &&
+    trainingPriority.objectiveConfidence === 'clear'
+      ? {
+          status: 'pending',
+          reason: 'priority_conflict',
+          currentPriority: trainingPriority.resolvedPriority,
+          suggestedPriority: trainingPriority.objectivePriority,
+          rationale: trainingPriority.rationale,
+        }
+      : null,
 });  
   console.log(
     'AZUR PLAN PREVIEW — nothing saved',
@@ -4714,6 +4725,13 @@ const [planPreviewInsights, setPlanPreviewInsights] =
     objectivePriority: string;
     priorityConflict: boolean;
     priorityConfidence: 'clear' | 'close' | 'limited_data' | 'none';
+    reviewItem: {
+      status: 'pending';
+      reason: 'priority_conflict';
+      currentPriority: string;
+      suggestedPriority: string;
+      rationale: string;
+    } | null;
   } | null>(null);
 const previewTotalMinutes =
   (planPreview ?? []).reduce(
@@ -6471,6 +6489,26 @@ Your confirmed training baseline is{' '}
 <strong>Training priority: </strong>
 {planPreviewInsights.trainingPriorityRationale}
 </p>
+ {planPreviewInsights.reviewItem && (
+   <div style={{
+     border: '1px solid #E5C48F',
+     background: '#FFFAF0',
+     borderRadius: '10px',
+     padding: '14px',
+     marginBottom: '12px',
+     color: '#795114',
+   }}>
+     <strong>Coach review candidate — Pending</strong>
+     <p style={{ marginBottom: '8px', lineHeight: 1.6 }}>
+       Current athlete/coach priority: {planPreviewInsights.reviewItem.currentPriority}.
+       {' '}Objective suggestion: {planPreviewInsights.reviewItem.suggestedPriority}.
+     </p>
+     <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.5 }}>
+       Preview only. This has not been submitted to a coach queue.
+       No change is applied without a separate approval process.
+     </p>
+   </div>
+ )}
  {planPreviewInsights.priorityConflict && planPreviewInsights.priorityConfidence === 'clear' && (
    <p style={{ color: '#9A5D09', lineHeight: 1.6, fontWeight: 600 }}>
      Coach review recommended: a clear objective development priority
