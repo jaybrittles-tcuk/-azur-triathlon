@@ -16,7 +16,7 @@ const familyName = (family: string) => family.replaceAll('_', ' ');
 // Fail closed until end-to-end scheduling acceptance checks pass.
 const coachSchedulingEnabled = import.meta.env.VITE_ENABLE_COACH_SCHEDULING === 'true';
 
-export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: number | null }) {
+export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athleteWeeklyHours }: { ftpWatts: number | null; athleteName: string | null; athleteWeeklyHours: number | null }) {
   const [availableMinutes, setAvailableMinutes] = useState(90);
   const [selectionPhase, setSelectionPhase] = useState<Phase>('build');
   const [selectionFocus, setSelectionFocus] = useState<'threshold'|'aerobic_endurance'|'vo2max'|'strength_endurance'|'race_specific'>('threshold');
@@ -122,7 +122,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
             <div className="coach-cycling-preview" aria-label="Read-only session selection preview">
         <h4>Approved session selection preview</h4>
         <p>{eligible.length} workouts eligible from the latest coach decisions.</p>
-        <p>Athlete FTP: {ftpWatts != null && ftpWatts > 0 ? `${ftpWatts} W` : 'Unavailable'}. Coach-adjustable preview for the signed-in athlete.</p>
+        <p>Selected athlete: {athleteName ?? 'None selected'} · FTP: {ftpWatts != null && ftpWatts > 0 ? `${ftpWatts} W` : 'Unavailable'}. Weekly training baseline: {athleteWeeklyHours == null ? 'Not recorded' : `${athleteWeeklyHours} hours`}. Coach-adjustable preview for the selected athlete.</p>
         <div className="coach-cycling-preview-controls">
           <label>Training focus <select value={selectionFocus} onChange={e=>setSelectionFocus(e.target.value as typeof selectionFocus)}>
             <option value="threshold">Threshold</option><option value="aerobic_endurance">Aerobic endurance</option><option value="vo2max">VO₂max</option><option value="strength_endurance">Strength endurance</option><option value="race_specific">Race-specific</option>
@@ -135,7 +135,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
             <option value={1}>Foundation</option><option value={2}>Development</option><option value={3}>Advanced</option>
           </select></label>
         </div>
-        <strong>{ftpWatts == null || ftpWatts <= 0 ? 'Valid athlete FTP required before power-target recommendations' : preview.status === 'selected' ? preview.session.title : preview.reason}</strong>
+        <strong>{ftpWatts == null || ftpWatts <= 0 ? 'Select an assigned athlete with a valid FTP benchmark to preview power targets' : preview.status === 'selected' ? preview.session.title : preview.reason}</strong>
         {personalisedDraft && (
           <div className="coach-cycling-draft">
             <h5>FTP-personalised workout draft · review only</h5>
