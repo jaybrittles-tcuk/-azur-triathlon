@@ -8689,9 +8689,11 @@ const sessionVerdict =
     ? primaryRace.targetSplits.swim.slice(0, 5)
     : '—'}
 </strong>
-              <small>
-                Controlled start and efficient rhythm.
-              </small>
+<small>
+  {raceGoalDemand.swimPaceLabel
+    ? `Goal demand · ${raceGoalDemand.swimPaceLabel}/100m`
+    : 'Controlled start and efficient rhythm.'}
+</small>
             </div>
 
             <div>
