@@ -1,0 +1,85 @@
+import type { BikeWorkout, WorkoutFamily, WorkoutStep } from './bikeWorkoutLibrary';
+type Steady=Extract<WorkoutStep,{kind:'steady'}>;
+const s=(minutes:number,minFtpPct:number,maxFtpPct:number,label:string,cadenceRpm?:[number,number]):Steady=>
+ ({kind:'steady',minutes,minFtpPct,maxFtpPct,label,...(cadenceRpm?{cadenceRpm}:{})});
+const r=(repetitions:number,work:Steady,recovery:Steady):WorkoutStep=>
+ ({kind:'repeat',repetitions,work,recovery});
+const w=(id:string,title:string,family:WorkoutFamily,steps:WorkoutStep[],purpose:string):BikeWorkout=>
+ ({id,title,family,steps,purpose,version:1,status:'candidate'});
+const warm=(n=15)=>s(n,45,70,'Progressive warm up');
+const cool=(n=10)=>s(n,40,55,'Cool down');
+const easy=(n:number)=>s(n,45,60,'Easy recovery');
+
+/** Additional draft templates: coach review required before publication or device export. */
+export const expandedBikeWorkouts:readonly BikeWorkout[]=[
+ w('BIKE-AD-001','Aerobic Progression 60','aerobic_development',
+  [warm(10),s(20,65,68,'Aerobic 1'),s(20,68,73,'Aerobic 2'),cool(10)],'Progress aerobic work within tolerance'),
+ w('BIKE-AD-002','Aerobic Capacity Builder 75','aerobic_development',
+  [warm(10),s(55,65,75,'Aerobic development'),cool(10)],'Build aerobic capacity'),
+ w('BIKE-AD-003','Aerobic Endurance Plus 90','aerobic_development',
+  [warm(10),s(35,65,70,'Aerobic 1'),s(35,68,75,'Aerobic 2'),cool(10)],'Develop aerobic endurance'),
+ w('BIKE-AD-004','Aerobic Durability 120','aerobic_development',
+  [warm(15),s(45,65,70,'Aerobic 1'),s(45,68,75,'Aerobic 2'),cool(15)],'Extend controlled aerobic work'),
+ w('BIKE-TMP-003','Extended Tempo 2 x 20','tempo',
+  [warm(),r(2,s(20,80,88,'Tempo'),easy(5)),cool()],'Develop sustained tempo'),
+ w('BIKE-SS-003','Sweet Spot Extension 2 x 20','sweet_spot',
+  [warm(),r(2,s(20,88,94,'Sweet spot'),easy(5)),cool()],'Extend sweet spot duration'),
+ w('BIKE-THR-003','Threshold 3 x 12','threshold',
+  [warm(),r(3,s(12,95,100,'Threshold'),easy(5)),cool()],'Develop threshold repeatability'),
+ w('BIKE-THR-004','Threshold 2 x 20','threshold',
+  [warm(),r(2,s(20,95,100,'Threshold'),easy(6)),cool()],'Sustained threshold tolerance'),
+ w('BIKE-VO2-L-001','VO2 6 x 1/1','vo2_long',
+  [warm(),r(6,s(1,115,135,'High aerobic power'),easy(1)),cool()],'Short sustained high-aerobic efforts; calibrate individually'),
+ w('BIKE-VO2-L-002','VO2 8 x 1/1','vo2_long',
+  [warm(),r(8,s(1,115,135,'High aerobic power'),easy(1)),cool()],'Progress high-aerobic work volume'),
+ w('BIKE-VO2-L-003','VO2 5 x 2/2','vo2_long',
+  [warm(),r(5,s(2,110,125,'High aerobic power'),easy(2)),cool()],'Longer high-aerobic efforts'),
+ w('BIKE-VO2-L-004','VO2 6 x 2/2','vo2_long',
+  [warm(),r(6,s(2,110,125,'High aerobic power'),easy(2)),cool()],'Progress longer high-aerobic work'),
+ w('BIKE-VO2-L-005','VO2 4 x 3/3','vo2_long',
+  [warm(),r(4,s(3,105,120,'High aerobic power'),easy(3)),cool()],'Develop 3-minute interval repeatability'),
+ w('BIKE-VO2-L-006','VO2 5 x 3/3','vo2_long',
+  [warm(),r(5,s(3,105,120,'High aerobic power'),easy(3)),cool()],'Progress 3-minute interval volume'),
+ w('BIKE-BG-001','Big Gear 8 x 45 seconds','big_gear',
+  [warm(),r(8,s(.75,90,105,'Controlled big gear',[70,75]),easy(1.5)),cool()],
+  'Combine aerobic loading and torque; knee tolerance and RPE gate'),
+ w('BIKE-BG-002','Big Gear 8 x 60 seconds','big_gear',
+  [warm(),r(8,s(1,90,105,'Controlled big gear',[65,75]),easy(1.5)),cool()],
+  'Progress controlled big gear duration'),
+ w('BIKE-BG-003','Big Gear 6 x 90 seconds','big_gear',
+  [warm(),r(6,s(1.5,90,105,'Controlled big gear',[65,75]),easy(2)),cool()],
+  'Extend low cadence intervals with form maintained'),
+ w('BIKE-BG-004','Big Gear 6 x 2 minutes','big_gear',
+  [warm(),r(6,s(2,90,105,'Controlled big gear',[60,75]),easy(2.5)),cool()],
+  'Build controlled low cadence interval tolerance'),
+ w('BIKE-BG-005','Big Gear 5 x 3 minutes','big_gear',
+  [warm(),r(5,s(3,90,105,'Controlled big gear',[60,75]),easy(3)),cool()],
+  'Advanced low cadence interval tolerance'),
+ w('BIKE-SE-001','Strength Endurance 4 x 4','strength_endurance',
+  [warm(),r(4,s(4,75,85,'Strength endurance',[65,75]),easy(3)),cool()],
+  'Subthreshold cycling-specific torque tolerance'),
+ w('BIKE-SE-002','Strength Endurance 4 x 6','strength_endurance',
+  [warm(),r(4,s(6,75,85,'Strength endurance',[65,75]),easy(3)),cool()],
+  'Extend subthreshold low cadence work'),
+ w('BIKE-SE-003','Strength Endurance 3 x 10','strength_endurance',
+  [warm(),r(3,s(10,75,85,'Strength endurance',[65,75]),easy(4)),cool()],
+  'Build longer strength endurance intervals'),
+ w('BIKE-SE-004','Strength Endurance 3 x 12','strength_endurance',
+  [warm(),r(3,s(12,75,85,'Strength endurance',[65,75]),easy(5)),cool()],
+  'Consolidate longer low cadence intervals'),
+ w('BIKE-DUR-001','Aerobic Stability 90','durability',
+  [warm(10),s(70,65,73,'Steady aerobic'),cool(10)],'Assess aerobic steadiness with contextual HR and RPE'),
+ w('BIKE-DUR-002','Late Ride Tempo 120','durability',
+  [warm(15),s(65,65,72,'Aerobic endurance'),s(25,76,82,'Late ride tempo'),cool(15)],
+  'Develop late ride sustained power'),
+ w('BIKE-RACE-703-001','70.3 Race Power Introduction','race_specific',
+  [warm(),s(25,65,72,'Aerobic'),s(20,75,82,'Provisional 70.3 power'),cool()],
+  'Introduce race-specific power; confirm targets against athlete evidence'),
+ w('BIKE-RACE-703-002','70.3 Race Power Builder','race_specific',
+  [warm(),s(30,65,70,'Aerobic'),s(25,75,82,'Provisional 70.3 power'),easy(5),
+   s(25,75,82,'Provisional 70.3 power'),cool(20)],
+  'Build 70.3 race power tolerance; assess subsequent run'),
+ w('BIKE-RACE-IM-001','Ironman Aerobic Pacing','race_specific',
+  [warm(15),s(90,65,75,'Provisional Ironman race pacing'),cool(15)],
+  'Practise sustainable Ironman power, fueling and position')
+];
