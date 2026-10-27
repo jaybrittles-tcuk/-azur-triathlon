@@ -1,4 +1,4 @@
-import { normalizeWorkoutIntervals } from './workoutIntensity';
+import { normalizeWorkoutIntervals } from './workoutIntensity.ts';
 
 type PlannedWorkout = {
   sport: string;
