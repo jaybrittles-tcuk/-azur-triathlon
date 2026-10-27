@@ -86,3 +86,21 @@ test('no numerical winner explanation for missing reserve or taper', () => {
     assert.doesNotMatch(resolveTrainingPriority(input).rationale, /versus run/);
   }
 });
+
+test('confidence reports clear winner when reserves differ meaningfully', () => {
+  assert.equal(resolveTrainingPriority(gaps(2, 6)).objectiveConfidence, 'clear');
+});
+
+test('confidence reports close when competing reserves are within one point', () => {
+  assert.equal(resolveTrainingPriority(gaps(3, 3.5)).objectiveConfidence, 'close');
+});
+
+test('confidence reports limited data when a development reserve is missing', () => {
+  assert.equal(resolveTrainingPriority(gaps(null, 4)).objectiveConfidence, 'limited_data');
+});
+
+test('confidence reports none without any development status', () => {
+  assert.equal(resolveTrainingPriority(gaps(12, 12, {
+    swimGapStatus: 'on_track', runGapStatus: 'on_track',
+  })).objectiveConfidence, 'none');
+});
