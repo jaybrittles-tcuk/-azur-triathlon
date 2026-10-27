@@ -1,4 +1,4 @@
-import type { BikeWorkout, WorkoutFamily, WorkoutStep } from './bikeWorkoutLibrary';
+import type { BikeWorkout, WorkoutFamily, WorkoutStep } from './bikeWorkoutLibrary.ts';
 type Steady=Extract<WorkoutStep,{kind:'steady'}>;
 const s=(minutes:number,minFtpPct:number,maxFtpPct:number,label:string,cadenceRpm?:[number,number]):Steady=>
  ({kind:'steady',minutes,minFtpPct,maxFtpPct,label,...(cadenceRpm?{cadenceRpm}:{})});
