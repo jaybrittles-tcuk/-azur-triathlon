@@ -7582,7 +7582,7 @@ color:
     <button
       type="button"
       onClick={() =>
-        setCalendarWeekOffset((current) => current - 1)
+        { setCalendarFocusedDate(null); setCalendarWeekOffset((current) => current - 1); }
       }
       aria-label="Previous week"
     >
@@ -7606,7 +7606,7 @@ color:
     <button
       type="button"
       onClick={() =>
-        setCalendarWeekOffset((current) => current + 1)
+        { setCalendarFocusedDate(null); setCalendarWeekOffset((current) => current + 1); }
       }
       aria-label="Next week"
     >
