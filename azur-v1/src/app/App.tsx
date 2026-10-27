@@ -7485,7 +7485,18 @@ onClick={() => {
 </div>
 
                         <strong>{session.title}</strong>
-<WorkoutShape sessionClass={session.sessionClass} />
+<div className="calendar-session-purpose">
+  {session.status === 'completed' && session.completedDurationSec != null ? (
+    <span>
+      Planned {formatDuration(session.durationMin)} · Actual {formatDuration(Math.round(session.completedDurationSec / 60))}
+      {' · '}
+      {Math.round((session.completedDurationSec / 60) - session.durationMin) >= 0 ? '+' : ''}
+      {Math.round((session.completedDurationSec / 60) - session.durationMin)} min
+    </span>
+  ) : (
+    <span>{session.rationale || `${session.sessionClass.replace(/_/g, ' ')} session · ${formatDuration(session.durationMin)} planned`}</span>
+  )}
+</div>
 <div className="calendar-session-meta">
   <span>
     {session.status === 'completed' &&
