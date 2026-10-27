@@ -17,6 +17,9 @@ export type TrainingPriorityInput = {
   swimGapStatus?: ObjectiveGapStatus | null;
   bikeGapStatus?: ObjectiveGapStatus | null;
   runGapStatus?: ObjectiveGapStatus | null;
+  swimGapPct?: number | null;
+  bikeGapPct?: number | null;
+  runGapPct?: number | null;
 };
 
 export type TrainingPriorityResult = {
@@ -51,25 +54,65 @@ function objectivePriorityFromGaps({
   swimGapStatus,
   bikeGapStatus,
   runGapStatus,
+  swimGapPct,
+  bikeGapPct,
+  runGapPct,
 }: Pick<
   TrainingPriorityInput,
-  'swimGapStatus' | 'bikeGapStatus' | 'runGapStatus'
+  | 'swimGapStatus'
+  | 'bikeGapStatus'
+  | 'runGapStatus'
+  | 'swimGapPct'
+  | 'bikeGapPct'
+  | 'runGapPct'
 >): TrainingPrioritySport {
   const gaps = {
-    swim: swimGapStatus,
-    bike: bikeGapStatus,
-    run: runGapStatus,
+    swim: {
+      status: swimGapStatus,
+      gapPct: swimGapPct,
+    },
+    bike: {
+      status: bikeGapStatus,
+      gapPct: bikeGapPct,
+    },
+    run: {
+      status: runGapStatus,
+      gapPct: runGapPct,
+    },
   };
 
   const developmentSports = SPORTS.filter(
-    (sport) => gaps[sport] === 'development',
+    (sport) => gaps[sport].status === 'development',
   );
+
+  if (developmentSports.length === 0) {
+    return 'balanced';
+  }
 
   if (developmentSports.length === 1) {
     return developmentSports[0];
   }
 
-  return 'balanced';
+  const rankedDevelopmentSports = developmentSports
+    .filter((sport) => Number.isFinite(gaps[sport].gapPct))
+    .sort(
+      (a, b) =>
+        Number(gaps[a].gapPct) - Number(gaps[b].gapPct),
+    );
+
+  if (rankedDevelopmentSports.length === 0) {
+    return 'balanced';
+  }
+
+  if (
+    rankedDevelopmentSports.length > 1 &&
+    Number(gaps[rankedDevelopmentSports[0]].gapPct) ===
+      Number(gaps[rankedDevelopmentSports[1]].gapPct)
+  ) {
+    return 'balanced';
+  }
+
+  return rankedDevelopmentSports[0];
 }
 
 function phasePriorityStrength(phase?: string | null) {
@@ -97,6 +140,9 @@ export function resolveTrainingPriority({
   swimGapStatus,
   bikeGapStatus,
   runGapStatus,
+  swimGapPct,
+  bikeGapPct,
+  runGapPct,
 }: TrainingPriorityInput): TrainingPriorityResult {
   const athletePriority = normaliseSport(developmentSport);
   const strongest = normaliseSport(strongestSport);
@@ -105,6 +151,9 @@ export function resolveTrainingPriority({
     swimGapStatus,
     bikeGapStatus,
     runGapStatus,
+    swimGapPct,
+    bikeGapPct,
+    runGapPct,
   });
 
   const conflict =
