@@ -4733,6 +4733,52 @@ const [planPreviewInsights, setPlanPreviewInsights] =
       rationale: string;
     } | null;
   } | null>(null);
+const [reviewSubmitting, setReviewSubmitting] = useState(false);
+const [reviewSubmissionMessage, setReviewSubmissionMessage] = useState('');
+const [reviewSubmittedKey, setReviewSubmittedKey] = useState<string | null>(null);
+
+async function submitPriorityReview() {
+  const item = planPreviewInsights?.reviewItem;
+  if (!item || reviewSubmitting) return;
+  const key = `${item.currentPriority}:${item.suggestedPriority}`;
+  if (reviewSubmittedKey === key) return;
+  setReviewSubmitting(true);
+  setReviewSubmissionMessage('');
+  try {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error('Please sign in to submit a review.');
+    const { data: athlete, error: athleteError } = await supabase
+      .from('athlete_profile').select('id').eq('user_id', user.id).single();
+    if (athleteError || !athlete) throw new Error('Unable to identify your athlete profile.');
+    const { data: existing, error: lookupError } = await supabase
+      .from('training_priority_review').select('id')
+      .eq('athlete_id', athlete.id).eq('status', 'pending').limit(1);
+    if (lookupError) throw lookupError;
+    if (existing?.length) {
+      setReviewSubmittedKey(key);
+      setReviewSubmissionMessage('An existing pending review is already recorded for this athlete.');
+      return;
+    }
+    const { error: insertError } = await supabase
+      .from('training_priority_review').insert({
+        athlete_id: athlete.id,
+        reason: item.reason,
+        current_priority: item.currentPriority,
+        suggested_priority: item.suggestedPriority,
+        rationale: item.rationale,
+        confidence: 'clear',
+      });
+    if (insertError) throw insertError;
+    setReviewSubmittedKey(key);
+    setReviewSubmissionMessage('Review request saved. Your existing training priority is unchanged.');
+  } catch (error) {
+    setReviewSubmissionMessage(
+      error instanceof Error ? error.message : 'Review request could not be saved.',
+    );
+  } finally {
+    setReviewSubmitting(false);
+  }
+}
 const previewTotalMinutes =
   (planPreview ?? []).reduce(
     (total, session) =>
@@ -6504,9 +6550,19 @@ Your confirmed training baseline is{' '}
        {' '}Objective suggestion: {planPreviewInsights.reviewItem.suggestedPriority}.
      </p>
      <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.5 }}>
-       Preview only. This has not been submitted to a coach queue.
-       No change is applied without a separate approval process.
+       Review requests are saved for future coach assessment.
+       No training priority is changed by submission.
      </p>
+     <div style={{ marginTop: '12px' }}>
+       <button
+         type="button"
+         disabled={reviewSubmitting || reviewSubmittedKey === `${planPreviewInsights.reviewItem.currentPriority}:${planPreviewInsights.reviewItem.suggestedPriority}`}
+         onClick={() => { void submitPriorityReview(); }}
+       >
+         {reviewSubmitting ? 'Submitting…' : reviewSubmittedKey === `${planPreviewInsights.reviewItem.currentPriority}:${planPreviewInsights.reviewItem.suggestedPriority}` ? 'Review recorded' : 'Submit for coach review'}
+       </button>
+       {reviewSubmissionMessage && <p role="status" style={{ marginTop: '8px', fontSize: '12px' }}>{reviewSubmissionMessage}</p>}
+     </div>
    </div>
  )}
  {planPreviewInsights.priorityConflict && planPreviewInsights.priorityConfidence === 'clear' && (
