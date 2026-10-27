@@ -4848,3 +4848,11 @@ strong {
 .azur-load-chart-legend span:nth-child(3){color:#62d9a3}
 .azur-load-chart small,.azur-load-history-empty{font-size:11px;line-height:1.5;color:#91b4ca}
 .azur-load-history-empty{margin:12px 0 0}
+
+.azur-load-range{display:flex;gap:6px;justify-content:flex-end;margin-bottom:7px}
+.azur-load-range button{background:#102d45;color:#b8d3e6;border:1px solid #30556d;border-radius:9px;padding:6px 11px;font-weight:700;font-size:12px;cursor:pointer}
+.azur-load-range button[aria-pressed="true"]{background:#176c9f;border-color:#4bc2f5;color:white}
+.azur-load-range button:focus-visible,.azur-load-scrubber:focus-visible{outline:2px solid #f6cc4a;outline-offset:2px}
+.azur-load-scrubber{display:block;width:100%;margin:3px 0 12px;accent-color:#42baf2;cursor:pointer}
+.azur-load-details{display:flex;flex-wrap:wrap;gap:6px 13px;align-items:center;background:#11344e;border:1px solid #30556d;padding:10px;border-radius:11px;font-size:12px;color:#d2e8f7}
+.azur-load-details strong{color:white;width:100%;font-size:13px}
