@@ -4640,7 +4640,12 @@ setPlanPreviewInsights({
 }
 
 const sessionsToSave = generatedSessions.map(
-  ({ azurWorkout, ...session }: any) => session,
+  ({ azurWorkout, ...session }: any) => ({
+    ...session,
+    prescription: azurWorkout?.steps?.length
+      ? { ...(session.prescription ?? {}), azurWorkout }
+      : session.prescription,
+  }),
 );
 
 const { error: insertError } = await supabase
@@ -7565,7 +7570,7 @@ onClick={() => {
 </div>
 
                         <strong>{session.title}</strong>
-<CalendarIntensityProfile steps={(session as Session & { azurWorkout?: { steps?: unknown } }).azurWorkout?.steps} />
+<CalendarIntensityProfile steps={(session.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
 <CalendarPrescriptionSteps prescription={session.prescription} />
 <div className="calendar-session-purpose">
   {session.status === 'completed' && session.completedDurationSec != null ? (
