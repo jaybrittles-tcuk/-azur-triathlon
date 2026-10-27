@@ -4551,3 +4551,18 @@ strong {
   .calendar-layout .calendar-grid { padding: 12px; }
   .calendar-layout .calendar-day { border-radius: 12px; }
 }
+
+/* AZUR V2: week-strip status indicators */
+.calendar-layout .calendar-strip-dots i.done {
+  background: #5bd2a5 !important;
+  box-shadow: 0 0 0 2px rgba(91,210,165,.18);
+}
+.calendar-layout .calendar-strip-dots i.adjusted {
+  outline: 1px dashed #f4b43c;
+  outline-offset: 2px;
+}
+.calendar-layout .calendar-rest-indicator {
+  color: #7798ae;
+  font-size: 14px;
+  line-height: 1;
+}
