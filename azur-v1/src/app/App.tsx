@@ -7349,6 +7349,27 @@ color:
     );
   }
 
+  function calendarMoveSpacingWarnings(session: Session, targetDate: string): string[] {
+    const date = new Date(`${targetDate}T12:00:00`);
+    const adjacent = [-1, 1].flatMap((offset) => {
+      const next = new Date(date);
+      next.setDate(next.getDate() + offset);
+      const key = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
+      return weekSessions.filter((item) =>
+        item.id !== session.id && item.plannedDate === key &&
+        !['missed', 'cancelled'].includes(item.status));
+    });
+    const quality = (item: Session) => ['intensity', 'race_specific'].includes(item.sessionClass);
+    const warnings: string[] = [];
+    if (quality(session) && adjacent.some(quality)) {
+      warnings.push('This creates back-to-back quality training days.');
+    }
+    if (session.durationMin >= 120 && adjacent.some((item) => quality(item) && item.sport === 'run')) {
+      warnings.push('A long session will sit beside a demanding run.');
+    }
+    return warnings;
+  }
+
   async function saveCalendarMove() {
     const session = weekSessions.find((item) => item.id === movingSessionId);
     if (!session || !moveTargetDate || moveSaving) return;
@@ -7367,6 +7388,11 @@ color:
     const sameDay = weekSessions.filter((item) => item.id !== session.id && item.plannedDate === moveTargetDate && !['cancelled', 'missed'].includes(item.status));
     if (sameDay.some((item) => item.sessionClass === 'intensity' || item.sessionClass === 'race_specific') && ['intensity', 'race_specific'].includes(session.sessionClass)) {
       setMoveMessage('Another quality session is already planned on this day. Move not saved.');
+      return;
+    }
+    const spacingWarnings = calendarMoveSpacingWarnings(session, moveTargetDate);
+    if (spacingWarnings.length > 0) {
+      setMoveMessage(`Training-spacing review: ${spacingWarnings.join(' ')} Choose another day or discuss the change with your coach. Move not saved.`);
       return;
     }
     setMoveSaving(true);
