@@ -8757,6 +8757,9 @@ const sessionVerdict =
 <small>
   {athleteRaceGap.run.label}
 </small>
+<small>
+  {athleteRaceGap.run.explanation}
+</small>
             </div>
 
   <div>
