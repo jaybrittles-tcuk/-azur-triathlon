@@ -10965,7 +10965,7 @@ style={
     ))}
   </div>
 )}
-{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachCyclingLibraryReview /></>}
+{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachCyclingLibraryReview ftpWatts={athleteProfile.ftp} /></>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section
