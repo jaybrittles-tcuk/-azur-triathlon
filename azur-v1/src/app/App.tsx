@@ -1287,9 +1287,12 @@ const [garminConnected, setGarminConnected] = useState(false);
 });
 
 const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
+const [trainingLoadHistory, setTrainingLoadHistory] = useState<ReturnType<typeof calculateTrainingLoad>>([]);
   const [completedActivityFeed, setCompletedActivityFeed] = useState<any[]>([]);
 useEffect(() => {
   if (trainingLoadActivities.length === 0) {
+    setTrainingLoadHistory([]);
+    setTrainingLoad({fitness:null,fatigue:null,form:null,weeklyStress:null,eligibleActivities:0});
     return;
   }
 
@@ -1346,6 +1349,8 @@ useEffect(() => {
     .filter((activity) => activity.calculatedStress != null);
 
   if (activitiesWithStress.length === 0) {
+    setTrainingLoadHistory([]);
+    setTrainingLoad({fitness:null,fatigue:null,form:null,weeklyStress:null,eligibleActivities:0});
     return;
   }
 
@@ -1362,7 +1367,7 @@ useEffect(() => {
     );
   });
 
-  const firstDate = new Date(activitiesWithStress[0].start_time);
+  const firstDate = new Date(Math.min(...activitiesWithStress.map(activity => new Date(activity.start_time).getTime())));
   const today = new Date();
 
   const dailyStress = [];
@@ -1381,6 +1386,7 @@ useEffect(() => {
   }
 
   const loadSeries = calculateTrainingLoad(dailyStress);
+  setTrainingLoadHistory(loadSeries);
 
   const latestLoad =
     loadSeries.length > 0
@@ -5973,6 +5979,27 @@ padding: '11px 16px',
     <div className="azur-home-load-grid">
       {([{label:'Fitness',value:trainingLoad.fitness},{label:'Fatigue',value:trainingLoad.fatigue},{label:'Form',value:trainingLoad.form}] as const).map(metric=><div key={metric.label}><small>{metric.label}</small><strong>{typeof metric.value==='number'&&Number.isFinite(metric.value)?Math.round(metric.value):'—'}</strong></div>)}
     </div>
+    {trainingLoadHistory.length >= 42 && trainingLoad.eligibleActivities >= 8 ? (
+      <div className="azur-load-chart" role="img" aria-label="Last 42 days of calculated fitness, fatigue and form">
+        <svg viewBox="0 0 340 124" preserveAspectRatio="none">
+          {(() => {
+            const points = trainingLoadHistory.slice(-42);
+            const values = points.flatMap(p => [p.fitness,p.fatigue,p.form]);
+            const min = Math.min(0,...values);
+            const max = Math.max(1,...values);
+            const y = (n:number) => 108 - (n-min)/Math.max(1,max-min)*94;
+            return <>
+              {[0,0.5,1].map((f,i)=><line key={i} x1="5" x2="335" y1={12+f*96} y2={12+f*96} stroke="#28475e" strokeDasharray="3 5" />)}
+              {([{key:'fitness',color:'#24b9f2'},{key:'fatigue',color:'#f5c544'},{key:'form',color:'#62d9a3'}] as const).map(s=>
+                <polyline key={s.key} fill="none" stroke={s.color} strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" points={points.map((p,i)=>`${5+i*330/Math.max(1,points.length-1)},${y(p[s.key])}`).join(' ')} />
+              )}
+            </>;
+          })()}
+        </svg>
+        <div className="azur-load-chart-legend"><span>● Fitness</span><span>● Fatigue</span><span>● Form</span></div>
+        <small>Last 42 days · recorded activity estimates</small>
+      </div>
+    ) : <p className="azur-load-history-empty">Training-load trends become available after at least 42 days of history and 8 eligible activities with calculated stress.</p>}
     <p>{trainingLoad.eligibleActivities>0 ? `Based on ${trainingLoad.eligibleActivities} eligible recorded activities. These indicators are not a medical readiness assessment.` : 'Connect and record eligible workouts to build your training-load history.'}</p>
   </div>
 </section>
