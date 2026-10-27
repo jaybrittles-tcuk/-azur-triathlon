@@ -1,3 +1,4 @@
+import CoachCyclingLibraryReview from './CoachCyclingLibraryReview';
 import MultisportPlannedStress from './MultisportPlannedStress';
 import { estimatePlannedStress } from '../lib/calculations/plannedStress';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -10964,7 +10965,7 @@ style={
     ))}
   </div>
 )}
-{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <CoachReviewInbox />}
+{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachCyclingLibraryReview /></>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section
