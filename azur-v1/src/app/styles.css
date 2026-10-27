@@ -4838,3 +4838,13 @@ strong {
   .azur-home-tools-actions button{font-size:12px!important;padding:10px 6px!important}
   .azur-premium-home .azur-home-load{padding:13px}
 }
+
+/* True training-load history chart — hidden until sufficient eligible data. */
+.azur-load-chart{margin:14px 0 6px;padding:8px 0 0}
+.azur-load-chart svg{display:block;width:100%;height:128px;overflow:visible}
+.azur-load-chart-legend{display:flex;flex-wrap:wrap;gap:12px;margin:7px 0 4px;font-size:11px;font-weight:700;color:#b5ccdd}
+.azur-load-chart-legend span:first-child{color:#24b9f2}
+.azur-load-chart-legend span:nth-child(2){color:#f5c544}
+.azur-load-chart-legend span:nth-child(3){color:#62d9a3}
+.azur-load-chart small,.azur-load-history-empty{font-size:11px;line-height:1.5;color:#91b4ca}
+.azur-load-history-empty{margin:12px 0 0}
