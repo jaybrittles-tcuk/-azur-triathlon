@@ -5839,9 +5839,8 @@ padding: '11px 16px',
 )}
 <div
   style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr)',
     gap: '12px',
     margin: '14px 0 18px',
     padding: '12px 14px',
@@ -5874,9 +5873,10 @@ padding: '11px 16px',
 
   <div
     style={{
-      display: 'flex',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
       gap: '8px',
-      flexShrink: 0,
+      width: '100%',
     }}
   >
     <button
@@ -5891,13 +5891,14 @@ padding: '11px 16px',
   }
 }}
       style={{
-        padding: '8px 10px',
+        padding: '11px 8px',
         borderRadius: '8px',
         border: '1px solid #CBD8E5',
         background: '#FFFFFF',
         color: '#17324D',
         fontSize: '12px',
         fontWeight: 700,
+        minWidth: 0,
         cursor: 'pointer',
       }}
     >
@@ -5909,7 +5910,7 @@ padding: '11px 16px',
     setShowMacrocyclePreview((current) => !current)
   }
   style={{
-    padding: '8px 10px',
+    padding: '11px 8px',
     borderRadius: '8px',
     border: '1px solid #CBD8E5',
     background: showMacrocyclePreview
@@ -5931,7 +5932,7 @@ padding: '11px 16px',
     }
   }}
   style={{
-    padding: '8px 10px',
+    padding: '11px 8px',
     borderRadius: '8px',
     border: '1px solid #CBD8E5',
     background: garminConnected ? '#EEF7F1' : '#FFFFFF',
@@ -5949,13 +5950,14 @@ padding: '11px 16px',
         setShowBaselineForm((current) => !current)
       }
       style={{
-        padding: '8px 10px',
+        padding: '11px 8px',
         borderRadius: '8px',
         border: 'none',
         background: '#0A3556',
         color: '#FFFFFF',
         fontSize: '12px',
         fontWeight: 700,
+        minWidth: 0,
         cursor: 'pointer',
       }}
     >
