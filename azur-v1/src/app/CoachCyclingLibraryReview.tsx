@@ -34,14 +34,14 @@ export default function CoachCyclingLibraryReview() {
       });
       if(error) throw error;
       const {data, error:readError}=await supabase.from('coach_workout_approval_event')
-        .select('workout_id,workout_version,decision,level,phases,decided_at')
+        .select('id,workout_id,workout_version,decision,level,phases,decided_at')
         .order('decided_at',{ascending:false});
       if(readError) throw readError;
       setEvents(data??[]);setFeedback(decision==='approved'?'Approval recorded. Not published or scheduled.':'Approval revoked.');
     } catch(error) {setFeedback(error instanceof Error ? error.message : 'Could not save coach decision');}
     finally {setSaving(false);}
   }
-  const [selectedId] = useState(allBikeWorkouts[0]?.id ?? '');
+  const [selectedId, setSelectedId] = useState(allBikeWorkouts[0]?.id ?? '');
   const [drafts, setDrafts] = useState<Record<string, ReviewDraft>>({});
   const selected = useMemo(() => allBikeWorkouts.find(w => w.id === selectedId), [selectedId]);
   const latestEvent = events.find(event=>event.workout_id===selectedId);
