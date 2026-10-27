@@ -9,6 +9,7 @@ type PendingReview={id:string;athlete_id:string;current_priority:string;suggeste
 const dateKey=(d:Date)=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:AssignedAthlete)=>void}){
  const [items,setItems]=useState<InboxItem[]>([]);
+ const [assignedProfiles,setAssignedProfiles]=useState<AssignedAthlete[]>([]);
  const [reviews,setReviews]=useState<PendingReview[]>([]);
  const [filter,setFilter]=useState<'all'|'review'|'info'>('all');
  const [refreshKey,setRefreshKey]=useState(0);
@@ -24,7 +25,7 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
     const {data:assignments,error:ae}=await supabase.from('coach_athlete_assignment').select('athlete_id').eq('coach_user_id',user.id);
     if(ae)throw ae;
     const ids=[...new Set((assignments??[]).map(x=>x.athlete_id))];
-    if(!ids.length){if(!cancelled){setAthleteCount(0);setItems([]);}return;}
+    if(!ids.length){if(!cancelled){setAthleteCount(0);setItems([]);setAssignedProfiles([]);setReviews([]);}return;}
     const cutoff=new Date();cutoff.setDate(cutoff.getDate()-27);
     const today=dateKey(new Date());
     const [profiles,plans,completed,pending]=await Promise.all([
@@ -42,7 +43,7 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
     }
     next.sort((a,b)=>(a.signal.severity==='review'?0:1)-(b.signal.severity==='review'?0:1)||
       (a.athlete.display_name??'').localeCompare(b.athlete.display_name??''));
-    if(!cancelled){setAthleteCount(ids.length);setItems(next);setReviews(pending.data??[]);}
+    if(!cancelled){setAthleteCount(ids.length);setItems(next);setAssignedProfiles(profiles.data??[]);setReviews(pending.data??[]);}
    }catch(e){if(!cancelled)setError(e instanceof Error?e.message:'Unable to load attention inbox');}
    finally{if(!cancelled)setLoading(false);}
   }
@@ -51,7 +52,7 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
  const reviewItems=items.filter(x=>x.signal.severity==='review');
  const infoItems=items.filter(x=>x.signal.severity==='info');
  const filtered=items.filter(x=>filter==='all'||x.signal.severity===filter);
- const athleteFor=(id:string)=>items.find(x=>x.athlete.id===id)?.athlete;
+ const athleteFor=(id:string)=>assignedProfiles.find(x=>x.id===id);
  return <section className="coach-attention-v2">
   <header className="coach-attention-heading"><div><span className="coach-attention-eyebrow">AZUR / COACH WORKSPACE</span><h3>Attention Centre</h3><p>Training signals and pending decisions from assigned athletes</p></div>
     <button type="button" onClick={()=>setRefreshKey(x=>x+1)} disabled={loading}>↻ Refresh</button>
