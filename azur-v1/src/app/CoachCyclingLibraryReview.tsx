@@ -1,3 +1,4 @@
+import { createLibraryBikePrescription } from '../lib/calculations/libraryBikePrescription';
 import { previewApprovedBikeWorkout } from '../lib/calculations/bikeDraftPreview';
 import { resolveCurrentBikeApprovals } from '../lib/calculations/coachApprovalResolver';
 import { selectCoachSession } from '../lib/calculations/sessionSelection';
@@ -81,21 +82,12 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
         .eq('is_active_version',true).limit(1);
       if (checkError) throw checkError;
       if (existing?.length) throw new Error('There is already a planned session on this date. No changes made.');
-      const azurSteps = personalisedDraft.steps.map(step => step.kind === 'steady'
-        ? { type: step.label.toLowerCase().includes('warm') ? 'warmup' : step.label.toLowerCase().includes('cool') ? 'cooldown' : 'work',
-            durationMin:step.minutes, targetType:'ftp',targetLow:Math.round(step.powerWatts[0]/ftpWatts!*1000)/10,
-            targetHigh:Math.round(step.powerWatts[1]/ftpWatts!*1000)/10, targetText:step.label }
-        : { type:'repeat',reps:step.repetitions,
-            work:{type:'work',durationMin:step.work.minutes,targetType:'ftp',targetLow:Math.round(step.work.powerWatts[0]/ftpWatts!*1000)/10,targetHigh:Math.round(step.work.powerWatts[1]/ftpWatts!*1000)/10},
-            recovery:{type:'recovery',durationMin:step.recovery.minutes,targetType:'ftp',targetLow:Math.round(step.recovery.powerWatts[0]/ftpWatts!*1000)/10,targetHigh:Math.round(step.recovery.powerWatts[1]/ftpWatts!*1000)/10}});
       const { error: insertError } = await supabase.from('planned_session').insert({
         athlete_id:athlete.id,season_week_id:weeks[0].id,planned_date:scheduleDate,
         sport:'bike',title:personalisedDraft.title,session_class:'intensity',priority:2,
         duration_min:Math.round(personalisedDraft.durationMin),
         targets:{ ftpWatts, source:'azur-workout-library' },
-        prescription:{ source:'azur-workout-library',workoutId:personalisedDraft.workoutId,
-          workoutVersion:personalisedDraft.version,coachApproved:true,
-          resolvedSteps:personalisedDraft.steps,azurWorkout:{sport:'bike',steps:azurSteps}},
+        prescription:createLibraryBikePrescription(personalisedDraft, ftpWatts!),
         rationale:personalisedDraft.purpose,status:'planned',locked:false,version:1,is_active_version:true,
       });
       if (insertError) throw insertError;
