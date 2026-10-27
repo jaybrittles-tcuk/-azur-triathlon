@@ -1243,6 +1243,11 @@ const [primaryRace, setPrimaryRace] = useState({
   const [selectedId, setSelectedId] = useState('');
   const [sessionDetailOpen, setSessionDetailOpen] = useState(false);
   const [calendarWeekOffset, setCalendarWeekOffset] = useState(0);
+  const [movingSessionId, setMovingSessionId] = useState<string | null>(null);
+  const [moveTargetDate, setMoveTargetDate] = useState('');
+  const [moveMessage, setMoveMessage] = useState('');
+  const [moveSaving, setMoveSaving] = useState(false);
+
   const [selectedStravaActivity, setSelectedStravaActivity] =
   useState<number | null>(null);
   const [importFiles, setImportFiles] = useState<File[]>([]);
@@ -7344,6 +7349,51 @@ color:
     );
   }
 
+  async function saveCalendarMove() {
+    const session = weekSessions.find((item) => item.id === movingSessionId);
+    if (!session || !moveTargetDate || moveSaving) return;
+    if (session.locked || !['planned', 'edited'].includes(session.status)) {
+      setMoveMessage('Locked or completed sessions cannot be rescheduled.');
+      return;
+    }
+    if (moveTargetDate === session.plannedDate) {
+      setMoveMessage('Choose a different training day.');
+      return;
+    }
+    if (calendarWeekDates.every((day) => day.dateKey !== moveTargetDate)) {
+      setMoveMessage('For now, choose a day within this displayed week.');
+      return;
+    }
+    const sameDay = weekSessions.filter((item) => item.id !== session.id && item.plannedDate === moveTargetDate && !['cancelled', 'missed'].includes(item.status));
+    if (sameDay.some((item) => item.sessionClass === 'intensity' || item.sessionClass === 'race_specific') && ['intensity', 'race_specific'].includes(session.sessionClass)) {
+      setMoveMessage('Another quality session is already planned on this day. Move not saved.');
+      return;
+    }
+    setMoveSaving(true);
+    setMoveMessage('');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Sign in to reschedule a workout.');
+      const { data: athlete, error: athleteError } = await supabase.from('athlete_profile').select('id').eq('user_id', user.id).single();
+      if (athleteError || !athlete) throw new Error('Athlete profile unavailable.');
+      const { data, error } = await supabase.from('planned_session')
+        .update({ planned_date: moveTargetDate, status: 'edited' })
+        .eq('id', session.id).eq('athlete_id', athlete.id)
+        .eq('planned_date', session.plannedDate)
+        .eq('locked', false).in('status', ['planned', 'edited'])
+        .select('id');
+      if (error) throw error;
+      if (data?.length !== 1) throw new Error('Session changed since loading. Refresh and try again.');
+      await loadPlannedSessions(user.id);
+      setMovingSessionId(null);
+      setMoveMessage('Session rescheduled. Review recovery spacing before training.');
+    } catch (error) {
+      setMoveMessage(error instanceof Error ? error.message : 'Unable to reschedule.');
+    } finally {
+      setMoveSaving(false);
+    }
+  }
+
   function CalendarView() {
     const completedCount = calendarWeekSessions.filter(
       (session) => session.status === 'completed',
@@ -7354,6 +7404,21 @@ color:
     return (
       <div className="calendar-layout">
         <div>
+{movingSessionId && (
+  <section className="calendar-move-panel" aria-label="Reschedule workout">
+    <strong>Reschedule {weekSessions.find((item) => item.id === movingSessionId)?.title}</strong>
+    <p>Choose another day this week. Quality-session clashes are blocked; check your recovery plan before committing.</p>
+    <div className="calendar-move-actions">
+      <select aria-label="New workout day" value={moveTargetDate} onChange={(event) => {setMoveTargetDate(event.target.value); setMoveMessage('');}}>
+        <option value="">Choose day</option>
+        {calendarWeekDates.map((day) => <option key={day.dateKey} value={day.dateKey}>{day.dayLabel} {day.dayNumber}</option>)}
+      </select>
+      <button type="button" disabled={!moveTargetDate || moveSaving} onClick={() => void saveCalendarMove()}>{moveSaving ? 'Saving…' : 'Confirm move'}</button>
+      <button type="button" onClick={() => setMovingSessionId(null)}>Cancel</button>
+    </div>
+  </section>
+)}
+{moveMessage && <p role="status" className="calendar-move-message">{moveMessage}</p>}
 <section className="panel calendar-toolbar calendar-week-strip">
   <div className="calendar-strip-top">
     <button
@@ -7527,6 +7592,10 @@ const dayCompletedActivities = completedActivityFeed.filter(
 
                   <div className="day-stack">
                     {daySessions.map((session) => (
+                      <div className="calendar-session-wrapper">
+                      {!session.locked && (session.status === 'planned' || session.status === 'edited') && (
+                        <button className="calendar-reschedule-button" type="button" onClick={() => {setMovingSessionId(session.id); setMoveTargetDate(session.plannedDate); setMoveMessage('');}}>Move session</button>
+                      )}
                       <button
                         key={session.id}
 className={`calendar-session ${
@@ -7591,6 +7660,7 @@ onClick={() => {
     <span>{session.rationale || `${session.sessionClass.replace(/_/g, ' ')} session · ${formatDuration(session.durationMin)} planned`}</span>
   )}
 </div>
+<span className="calendar-move-hint">{session.locked ? 'Locked' : session.status === 'planned' || session.status === 'edited' ? 'Select to reschedule' : ''}</span>
 <div className="calendar-session-meta">
   <span>
     {session.status === 'completed' &&
@@ -7620,6 +7690,7 @@ onClick={() => {
     : Object.values(session.targets)[0]?.toString()}
 </span>
                       </button>
+                      </div>
                     ))}
                     {dayCompletedActivities.map((activity) => {
   const activityIndex = completedActivityFeed.indexOf(activity);
