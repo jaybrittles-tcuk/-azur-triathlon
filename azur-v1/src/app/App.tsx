@@ -5639,6 +5639,20 @@ color:
   );
 };
 function HomeView() {
+const homeWeek = weekSessions.filter(session => {
+  const date = new Date(session.plannedDate + 'T12:00:00');
+  const now = new Date();
+  const day = (now.getDay() + 6) % 7;
+  const monday = new Date(now.getFullYear(),now.getMonth(),now.getDate()-day);
+  const sunday = new Date(monday);sunday.setDate(sunday.getDate()+6);
+  return date >= monday && date <= sunday;
+});
+const homeMinutes = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport).reduce((sum,s)=>sum+(Number(s.durationMin)||0),0);
+const homeCount = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport).length;
+const homeCompleted = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport && s.status==='completed').length;
+const homeDateLabel = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const homeRaceDays = primaryRace.raceDate ? Math.max(0,Math.ceil((new Date(primaryRace.raceDate+'T12:00:00').getTime()-Date.now())/86400000)) : null;
+const homeMinutesLabel = (mins:number) => mins >= 60 ? `${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m` : `${mins}m`;
 const todaySession = weekSessions.find(
   (session: any) =>
     session.plannedDate === todayKey,
@@ -5646,6 +5660,40 @@ const todaySession = weekSessions.find(
 
   return (
       <>
+<section className="azur-premium-home" aria-label="AZUR athlete home">
+  <div className="azur-home-kicker"><span>AZUR / ATHLETE DASHBOARD</span><span>{homeDateLabel}</span></div>
+  <div className="azur-home-race">
+    <span className="azur-eyebrow">YOUR NEXT CHALLENGE</span>
+    <h2>{primaryRace.name || 'Your next race starts here'}</h2>
+    <p>{primaryRace.raceDate ? new Date(primaryRace.raceDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : 'Add your race to unlock a personalised countdown'}</p>
+    <div className="azur-race-bottom"><strong>{homeRaceDays == null ? '—' : homeRaceDays}</strong><span>{homeRaceDays == null ? 'Race date not set' : 'days until race'}</span><button type="button" onClick={()=>setActiveNav('Calendar')}>View training <span aria-hidden="true">→</span></button></div>
+  </div>
+  <div className="azur-home-today">
+    <div className="azur-home-section-heading"><span>TODAY'S TRAINING</span><span>{homeDateLabel}</span></div>
+    <div className="azur-home-today-body">
+      <span className={`azur-sport-symbol ${todaySession?.sport || 'rest'}`}>{todaySession?.sport==='bike'?'◉':todaySession?.sport==='swim'?'≈':todaySession?.sport==='run'?'↗':'☾'}</span>
+      <div><h3>{todaySession?.title || 'No workout scheduled'}</h3><p>{todaySession ? `${todaySession.sport.toUpperCase()} · ${homeMinutesLabel(Number(todaySession.durationMin)||0)} · ${todaySession.status}` : 'Recovery, flexibility, or a free day'}</p></div>
+      <button type="button" onClick={()=>setActiveNav('Calendar')} aria-label="Open training calendar">→</button>
+    </div>
+  </div>
+  <div className="azur-home-section-heading"><span>YOUR TRAINING WEEK</span><button type="button" onClick={()=>setActiveNav('Calendar')}>Calendar →</button></div>
+  <div className="azur-home-sports">
+    {(['swim','bike','run'] as const).map(sport=><div className={`azur-home-sport ${sport}`} key={sport}>
+      <span className="azur-sport-symbol">{sport==='swim'?'≈':sport==='bike'?'◉':'↗'}</span>
+      <span className="azur-home-sport-name">{sport[0].toUpperCase()+sport.slice(1)}</span>
+      <strong>{homeCompleted(sport)} / {homeCount(sport)}</strong>
+      <small>{homeMinutesLabel(homeMinutes(sport))} planned</small>
+      <div className="azur-home-progress"><span style={{width:homeCount(sport)?`${Math.min(100,100*homeCompleted(sport)/homeCount(sport))}%`:'0%'}} /></div>
+    </div>)}
+  </div>
+  <div className="azur-home-load">
+    <div className="azur-home-section-heading"><span>FITNESS · FATIGUE · FORM</span><span>Recorded training data</span></div>
+    <div className="azur-home-load-grid">
+      {([{label:'Fitness',value:trainingLoad.fitness},{label:'Fatigue',value:trainingLoad.fatigue},{label:'Form',value:trainingLoad.form}] as const).map(metric=><div key={metric.label}><small>{metric.label}</small><strong>{typeof metric.value==='number'&&Number.isFinite(metric.value)?Math.round(metric.value):'—'}</strong></div>)}
+    </div>
+    <p>{trainingLoad.eligibleActivities>0 ? `Based on ${trainingLoad.eligibleActivities} eligible recorded activities. These indicators are not a medical readiness assessment.` : 'Connect and record eligible workouts to build your training-load history.'}</p>
+  </div>
+</section>
 {todaySession && (
   <section
     style={{
