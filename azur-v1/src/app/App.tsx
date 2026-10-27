@@ -5846,26 +5846,27 @@ height: '58px',
     gap: '12px',
     margin: '14px 0 18px',
     padding: '12px 14px',
-    background: '#F7FAFC',
-    border: '1px solid #E3EAF0',
-    borderRadius: '12px',
+    background: 'linear-gradient(145deg, #10283F 0%, #071827 100%)',
+    border: '1px solid rgba(68, 151, 205, 0.30)',
+    boxShadow: '0 12px 24px rgba(1, 9, 20, 0.18)',
+    borderRadius: '20px',
   }}
 >
   <div>
     <div
       style={{
-        color: '#17324D',
-        fontSize: '13px',
+        color: '#F6FBFF',
+        fontSize: '15px',
         fontWeight: 700,
       }}
     >
-      Plan settings
+      Training Tools
     </div>
 
     <div
       style={{
         marginTop: '2px',
-        color: '#718394',
+        color: '#91BCD8',
         fontSize: '12px',
       }}
     >
@@ -5894,10 +5895,10 @@ height: '58px',
 }}
       style={{
         padding: '11px 8px',
-        borderRadius: '8px',
-        border: '1px solid #CBD8E5',
-        background: '#FFFFFF',
-        color: '#17324D',
+        borderRadius: '12px',
+        border: '1px solid rgba(80, 155, 202, 0.30)',
+        background: '#16344D',
+        color: '#F6FBFF',
         fontSize: '12px',
         fontWeight: 700,
         minWidth: 0,
@@ -5913,12 +5914,12 @@ height: '58px',
   }
   style={{
     padding: '11px 8px',
-    borderRadius: '8px',
-    border: '1px solid #CBD8E5',
+    borderRadius: '12px',
+    border: '1px solid rgba(80, 155, 202, 0.30)',
     background: showMacrocyclePreview
       ? '#EAF4FD'
       : '#FFFFFF',
-    color: '#17324D',
+    color: '#F6FBFF',
     fontSize: '12px',
     fontWeight: 700,
     cursor: 'pointer',
@@ -5935,8 +5936,8 @@ height: '58px',
   }}
   style={{
     padding: '11px 8px',
-    borderRadius: '8px',
-    border: '1px solid #CBD8E5',
+    borderRadius: '12px',
+    border: '1px solid rgba(80, 155, 202, 0.30)',
     background: garminConnected ? '#EEF7F1' : '#FFFFFF',
     color: garminConnected ? '#2E6B45' : '#17324D',
     fontSize: '12px',
@@ -5953,9 +5954,9 @@ height: '58px',
       }
       style={{
         padding: '11px 8px',
-        borderRadius: '8px',
+        borderRadius: '12px',
         border: 'none',
-        background: '#0A3556',
+        background: '#168DCE',
         color: '#FFFFFF',
         fontSize: '12px',
         fontWeight: 700,
