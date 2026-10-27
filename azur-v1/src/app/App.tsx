@@ -1,3 +1,4 @@
+import WorkoutTargetDetails from './WorkoutTargetDetails';
 import CoachAttentionInbox from './CoachAttentionInbox';
 import CoachAthletePerformance from './CoachAthletePerformance';
 import CoachAthleteRoster from './CoachAthleteRoster';
@@ -7805,6 +7806,7 @@ onClick={() => {
                         <strong>{session.title}</strong>
 <CalendarIntensityProfile steps={(session.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
 <CalendarPrescriptionSteps prescription={session.prescription} />
+<WorkoutTargetDetails prescription={session.prescription} ftpWatts={athleteProfile.ftp} compact />
 <div className="calendar-session-purpose">
   {session.status === 'completed' && session.completedDurationSec != null ? (
     <div className="calendar-actual-comparison">
@@ -7956,6 +7958,11 @@ onClick={() => {
             </button>
           </div>
 
+          <div className="azur-workout-modal-summary">
+ <span>{selected.rationale || 'Workout prescription and athlete targets'}</span>
+ <CalendarIntensityProfile steps={(selected.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
+ <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />
+</div>
           <div className="editor-grid">
             {selected.prescription?.focus && (
  <div className="wide session-block">
