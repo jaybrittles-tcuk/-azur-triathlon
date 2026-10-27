@@ -6463,8 +6463,8 @@ Your confirmed training baseline is{' '}
     lineHeight: 1.6,
   }}
 >
-  <strong>Training priority: </strong>
-  {trainingPriority.rationale}
+<strong>Training priority: </strong>
+{planPreviewInsights.trainingPriorityRationale}
 </p>
     <p style={{
       color: '#52677B',
