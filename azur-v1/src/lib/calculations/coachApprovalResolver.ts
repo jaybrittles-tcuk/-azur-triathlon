@@ -1,6 +1,6 @@
 import { approvedCyclingSelections } from './cyclingLibraryBridge.ts';
 import type { CoachBikeApproval } from './cyclingLibraryBridge.ts';
-import { allBikeWorkouts } from '../../domain/bikeWorkoutCatalog';
+import { allBikeWorkouts } from '../../domain/bikeWorkoutCatalog.ts';
 
 export type ApprovalEvent = {
   id: string;
