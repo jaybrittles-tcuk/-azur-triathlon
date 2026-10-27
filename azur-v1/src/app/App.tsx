@@ -7574,12 +7574,19 @@ onClick={() => {
 <CalendarPrescriptionSteps prescription={session.prescription} />
 <div className="calendar-session-purpose">
   {session.status === 'completed' && session.completedDurationSec != null ? (
-    <span>
-      Planned {formatDuration(session.durationMin)} · Actual {formatDuration(Math.round(session.completedDurationSec / 60))}
-      {' · '}
-      {Math.round((session.completedDurationSec / 60) - session.durationMin) >= 0 ? '+' : ''}
-      {Math.round((session.completedDurationSec / 60) - session.durationMin)} min
-    </span>
+    <div className="calendar-actual-comparison">
+      <strong>Planned {formatDuration(session.durationMin)} · Actual {formatDuration(Math.round(session.completedDurationSec / 60))}</strong>
+      <span>
+        {session.durationMin > 0
+          ? `${Math.round((session.completedDurationSec / 60 / session.durationMin) * 100)}% of prescribed time · `
+          : ''}
+        {Math.round(session.completedDurationSec / 60 - session.durationMin) >= 0 ? '+' : ''}
+        {Math.round(session.completedDurationSec / 60 - session.durationMin)} min
+      </span>
+      {session.completedSource && (
+        <small>Recorded via {session.completedSource === 'manual_fit' ? 'FIT upload' : session.completedSource === 'garmin' ? 'Garmin' : session.completedSource}</small>
+      )}
+    </div>
   ) : (
     <span>{session.rationale || `${session.sessionClass.replace(/_/g, ' ')} session · ${formatDuration(session.durationMin)} planned`}</span>
   )}
