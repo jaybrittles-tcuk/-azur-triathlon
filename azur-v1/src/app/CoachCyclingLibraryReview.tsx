@@ -1,3 +1,4 @@
+import { previewApprovedBikeWorkout } from '../lib/calculations/bikeDraftPreview';
 import { resolveCurrentBikeApprovals } from '../lib/calculations/coachApprovalResolver';
 import { selectCoachSession } from '../lib/calculations/sessionSelection';
 import { useEffect } from 'react';
@@ -53,6 +54,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
   const preview = selectCoachSession(eligible, {
     sport: 'bike', family: selectionFocus, phase: selectionPhase, maxMinutes: availableMinutes, maxLevel,
   });
+  const personalisedDraft = preview.status === 'selected' && ftpWatts != null ? previewApprovedBikeWorkout(preview.session, ftpWatts) : null;
   const draft = drafts[selectedId] ?? (latestEvent ? { level: latestEvent.level as 1|2|3, phases: latestEvent.phases as Phase[] } : { level: 1 as const, phases: [] });
   const issues = selected ? validateWorkout(selected) : [];
   const setDraft = (next: ReviewDraft) => setDrafts(previous => ({ ...previous, [selectedId]: next }));
@@ -80,6 +82,18 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
           </select></label>
         </div>
         <strong>{ftpWatts == null || ftpWatts <= 0 ? 'Valid athlete FTP required before power-target recommendations' : preview.status === 'selected' ? preview.session.title : preview.reason}</strong>
+        {personalisedDraft && (
+          <div className="coach-cycling-draft">
+            <h5>FTP-personalised workout draft · review only</h5>
+            <p>{personalisedDraft.title} · {personalisedDraft.durationMin} min · {personalisedDraft.purpose}</p>
+            <ol>{personalisedDraft.steps.map((step,index) => (
+              <li key={index}>{step.kind === 'steady'
+                ? `${step.minutes} min · ${step.powerWatts[0]}–${step.powerWatts[1]} W · ${step.label}`
+                : `${step.repetitions} × ${step.work.minutes} min · ${step.work.powerWatts[0]}–${step.work.powerWatts[1]} W; ${step.recovery.minutes} min recovery at ${step.recovery.powerWatts[0]}–${step.recovery.powerWatts[1]} W`}
+              </li>
+            ))}</ol>
+          </div>
+        )}
         <small>No athlete assignment, calendar change, or device export takes place.</small>
       </div>
 <div className="coach-cycling-columns">
