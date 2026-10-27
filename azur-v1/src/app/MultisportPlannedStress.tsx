@@ -30,7 +30,7 @@ export default function MultisportPlannedStress({ sessions, runThreshold, swimCs
           return (
             <div key={sport} className="calendar-stress-sport">
               <span>{label}</span>
-              <strong>{valid.length > 0 ? points.toFixed(1) : '—'}</strong>
+              <strong>{planned.length > 0 && valid.length === planned.length ? points.toFixed(1) : '—'}</strong>
               <small>{method} · {valid.length}/{planned.length} sessions estimated</small>
               {valid.length !== planned.length && <small>Incomplete coverage — no full-sport total</small>}
             </div>
