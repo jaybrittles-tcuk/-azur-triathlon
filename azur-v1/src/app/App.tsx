@@ -9963,6 +9963,13 @@ const sportMap: Record<string, 'swim' | 'bike' | 'run'> = {
   run: 'run',
   cycling: 'bike',
   bike: 'bike',
+  indoor_cycling: 'bike',
+  indoorcycling: 'bike',
+  indoor_bike: 'bike',
+  virtual_ride: 'bike',
+  virtualride: 'bike',
+  spinning: 'bike',
+  trainer: 'bike',
   swimming: 'swim',
   swim: 'swim',
 };
@@ -10001,7 +10008,7 @@ const activityDateKey = new Date(startTime)
     .eq('planned_date', activityDateKey)
     .eq('sport', mappedSport)
     .eq('is_active_version', true)
-    .limit(1);
+    .limit(2);
 
 if (matchingSessionError) {
   console.error(
@@ -10010,8 +10017,12 @@ if (matchingSessionError) {
   );
 }
 
+// A same-day sport match is safe only when exactly one active session exists.
+// Multiple candidates are left unlinked for deliberate athlete confirmation.
 const matchedPlannedSessionId =
-  matchingSessions?.[0]?.id ?? null;
+  matchingSessionError || matchingSessions?.length !== 1
+    ? null
+    : matchingSessions[0].id;
 const sourceActivityId = [
   new Date(startTime).toISOString(),
   mappedSport,
