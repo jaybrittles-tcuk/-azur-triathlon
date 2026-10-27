@@ -21,6 +21,9 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
   const [events, setEvents] = useState<Array<{id:string;workout_id:string;workout_version:number;decision:'approved'|'revoked';level:number;phases:string[];decided_at:string}>>([]);
   const [feedback, setFeedback] = useState('');
   const [saving, setSaving] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState('');
+  const [scheduleSaving, setScheduleSaving] = useState(false);
+  const [scheduleMessage, setScheduleMessage] = useState('');
   useEffect(() => {
     void supabase.from('coach_workout_approval_event')
       .select('id,workout_id,workout_version,decision,level,phases,decided_at')
@@ -46,6 +49,62 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
     } catch(error) {setFeedback(error instanceof Error ? error.message : 'Could not save coach decision');}
     finally {setSaving(false);}
   }
+  async function confirmSchedule() {
+    if (!personalisedDraft || !scheduleDate || scheduleSaving || preview.status !== 'selected') return;
+    setScheduleSaving(true); setScheduleMessage('');
+    try {
+      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(scheduleDate) ||
+        new Date(scheduleDate + 'T12:00:00').toISOString().slice(0,10) !== scheduleDate) {
+        throw new Error('Select a valid calendar date.');
+      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || user.app_metadata?.role !== 'coach') throw new Error('Verified coach login required.');
+      const { data: athlete, error: athleteError } = await supabase.from('athlete_profile')
+        .select('id').eq('user_id', user.id).single();
+      if (athleteError || !athlete) throw new Error('Signed-in athlete profile unavailable.');
+      // Re-fetch decisions before writing; local approval state may be stale or revoked.
+      const { data: freshEvents, error: approvalError } = await supabase.from('coach_workout_approval_event')
+        .select('id,workout_id,workout_version,decision,level,phases,decided_at').order('decided_at',{ascending:false});
+      if (approvalError) throw approvalError;
+      const current = resolveCurrentBikeApprovals(freshEvents ?? []);
+      const stillApproved = current.some(entry => entry.id === personalisedDraft.workoutId);
+      if (!stillApproved) throw new Error('Approval has changed; review the workout again.');
+      const monday = new Date(scheduleDate + 'T12:00:00');
+      monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
+      const weekKey = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
+      const { data: weeks, error: weekError } = await supabase.from('season_week')
+        .select('id,locked').eq('athlete_id',athlete.id).eq('week_start',weekKey).limit(2);
+      if (weekError) throw weekError;
+      if (weeks?.length !== 1 || weeks[0].locked) throw new Error('An unlocked existing training week is required.');
+      const { data: existing, error: checkError } = await supabase.from('planned_session')
+        .select('id').eq('athlete_id',athlete.id).eq('planned_date',scheduleDate)
+        .eq('is_active_version',true).limit(1);
+      if (checkError) throw checkError;
+      if (existing?.length) throw new Error('There is already a planned session on this date. No changes made.');
+      const azurSteps = personalisedDraft.steps.map(step => step.kind === 'steady'
+        ? { type: step.label.toLowerCase().includes('warm') ? 'warmup' : step.label.toLowerCase().includes('cool') ? 'cooldown' : 'work',
+            durationMin:step.minutes, targetType:'ftp',targetLow:Math.round(step.powerWatts[0]/ftpWatts!*1000)/10,
+            targetHigh:Math.round(step.powerWatts[1]/ftpWatts!*1000)/10, targetText:step.label }
+        : { type:'repeat',reps:step.repetitions,
+            work:{type:'work',durationMin:step.work.minutes,targetType:'ftp',targetLow:Math.round(step.work.powerWatts[0]/ftpWatts!*1000)/10,targetHigh:Math.round(step.work.powerWatts[1]/ftpWatts!*1000)/10},
+            recovery:{type:'recovery',durationMin:step.recovery.minutes,targetType:'ftp',targetLow:Math.round(step.recovery.powerWatts[0]/ftpWatts!*1000)/10,targetHigh:Math.round(step.recovery.powerWatts[1]/ftpWatts!*1000)/10}});
+      const { error: insertError } = await supabase.from('planned_session').insert({
+        athlete_id:athlete.id,season_week_id:weeks[0].id,planned_date:scheduleDate,
+        sport:'bike',title:personalisedDraft.title,session_class:'intensity',priority:2,
+        duration_min:Math.round(personalisedDraft.durationMin),
+        targets:{ ftpWatts, source:'azur-workout-library' },
+        prescription:{ source:'azur-workout-library',workoutId:personalisedDraft.workoutId,
+          workoutVersion:personalisedDraft.version,coachApproved:true,
+          resolvedSteps:personalisedDraft.steps,azurWorkout:{sport:'bike',steps:azurSteps}},
+        rationale:personalisedDraft.purpose,status:'planned',locked:false,version:1,is_active_version:true,
+      });
+      if (insertError) throw insertError;
+      setScheduleMessage('Workout saved to the signed-in athlete calendar. Refresh the calendar to view it.');
+    } catch (error) {
+      setScheduleMessage(error instanceof Error ? error.message : 'Unable to schedule workout.');
+    } finally { setScheduleSaving(false); }
+  }
+
   const [selectedId, setSelectedId] = useState(allBikeWorkouts[0]?.id ?? '');
   const [drafts, setDrafts] = useState<Record<string, ReviewDraft>>({});
   const selected = useMemo(() => allBikeWorkouts.find(w => w.id === selectedId), [selectedId]);
@@ -94,7 +153,13 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
             ))}</ol>
           </div>
         )}
-        <small>No athlete assignment, calendar change, or device export takes place.</small>
+        {personalisedDraft && <div className="coach-cycling-schedule">
+          <label>Schedule for signed-in athlete <input aria-label="Workout date" type="date" value={scheduleDate} onChange={e=>setScheduleDate(e.target.value)} /></label>
+          <button type="button" disabled={!scheduleDate || scheduleSaving} onClick={()=>void confirmSchedule()}>{scheduleSaving?'Saving…':'Confirm and add to calendar'}</button>
+          <small>Uses an existing unlocked training week. Refuses to overwrite an existing workout.</small>
+          {scheduleMessage && <p role="status">{scheduleMessage}</p>}
+        </div>}
+        <small>Nothing is added until a verified coach confirms. Garmin export remains disabled.</small>
       </div>
 <div className="coach-cycling-columns">
         <div className="coach-cycling-list" aria-label="Cycling workout catalogue">
