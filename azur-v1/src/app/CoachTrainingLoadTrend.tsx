@@ -63,7 +63,7 @@ export default function CoachTrainingLoadTrend({athlete}:{athlete:AssignedAthlet
           const days=[];const firstDate=new Date(first+'T00:00:00Z');
           const last=new Date(dayKey(today)+'T00:00:00Z');
           for(let date=new Date(firstDate);date<=last;date.setUTCDate(date.getUTCDate()+1)){
-            const date=dayKey(date);days.push({date,stress:stressByDay.get(date)??0});
+            const key=dayKey(date);days.push({date:key,stress:stressByDay.get(key)??0});
           }
           points=calculateTrainingLoad(days);
         }
