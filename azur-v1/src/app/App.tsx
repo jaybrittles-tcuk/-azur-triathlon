@@ -5957,7 +5957,7 @@ padding: '11px 16px',
   </section>
 )}
 <section className="azur-premium-home" aria-label="AZUR athlete home">
-  <div className="azur-home-kicker"><span>AZUR / ATHLETE DASHBOARD</span><span>{homeDateLabel}</span></div>
+  
   <div className="azur-home-section-heading"><span>YOUR TRAINING WEEK</span><button type="button" onClick={()=>setActiveNav('Calendar')}>Calendar →</button></div>
   <div className="azur-home-sports">
     {(['swim','bike','run'] as const).map(sport=><div className={`azur-home-sport ${sport}`} key={sport}>
