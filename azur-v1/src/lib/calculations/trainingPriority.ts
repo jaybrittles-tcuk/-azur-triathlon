@@ -93,22 +93,30 @@ function objectivePriorityFromGaps({
     return developmentSports[0];
   }
 
-  const rankedDevelopmentSports = developmentSports
-    .filter((sport) => Number.isFinite(gaps[sport].gapPct))
-    .sort(
-      (a, b) =>
-        Number(gaps[a].gapPct) - Number(gaps[b].gapPct),
-    );
-
-  if (rankedDevelopmentSports.length === 0) {
+  // Compare severity only when every development gap has a valid
+  // numerical reserve; a missing value must not decide the winner.
+  if (
+    developmentSports.some(
+      (sport) =>
+        gaps[sport].gapPct == null ||
+        !Number.isFinite(gaps[sport].gapPct),
+    )
+  ) {
     return 'balanced';
   }
 
-  if (
-    rankedDevelopmentSports.length > 1 &&
-    Number(gaps[rankedDevelopmentSports[0]].gapPct) ===
-      Number(gaps[rankedDevelopmentSports[1]].gapPct)
-  ) {
+  const rankedDevelopmentSports = [...developmentSports].sort(
+    (a, b) =>
+      Number(gaps[a].gapPct) - Number(gaps[b].gapPct),
+  );
+
+  // A difference of 1 percentage point or less is too small
+  // to select a single limiter confidently.
+  const severityDifference =
+    Number(gaps[rankedDevelopmentSports[1]].gapPct) -
+    Number(gaps[rankedDevelopmentSports[0]].gapPct);
+
+  if (severityDifference <= 1) {
     return 'balanced';
   }
 
