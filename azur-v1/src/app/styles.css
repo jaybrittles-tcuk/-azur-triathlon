@@ -4689,3 +4689,12 @@ strong {
 .calendar-layout .calendar-move-suggestions button:hover,
 .calendar-layout .calendar-move-suggestions button:focus-visible { border-color: #f4b43c; }
 .calendar-layout .calendar-move-suggestions small { color: #d9b875; }
+
+/* V2: measured training-load context, not a future recovery prediction */
+.calendar-layout .calendar-move-load-context {
+  background: rgba(7,21,36,.55); border: 1px solid rgba(68,151,205,.24);
+  border-radius: 10px; padding: 11px 12px;
+}
+.calendar-layout .calendar-move-load-context strong { color: #e0f0fa; font-size: 12px; }
+.calendar-layout .calendar-move-load-context p { color: #b8d3e5; font-size: 12px; margin: 6px 0; }
+.calendar-layout .calendar-move-load-context small { color: #91bcd8; font-size: 10px; }
