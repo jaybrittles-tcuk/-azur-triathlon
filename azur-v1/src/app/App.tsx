@@ -1133,6 +1133,9 @@ const [primaryRace, setPrimaryRace] = useState({
   raceDate: '',
   priority: '',
   location: '',
+  swimDistanceM: null as number | null,
+  bikeDistanceKm: null as number | null,
+  runDistanceKm: null as number | null,
   targetSplits: null as null | {
     swim?: string;
     bike?: string;
