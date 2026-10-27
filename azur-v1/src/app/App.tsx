@@ -934,7 +934,47 @@ function CalendarPrescriptionSteps({ prescription }: { prescription: Record<stri
   add('Work', prescription.main_set);
   add('Cool-down', prescription.cooldown);
   if (!steps.length) return null;
+
+  // Timed steps are shown proportionally. No estimated intensity is implied.
+  const timed: Array<{ kind: string; minutes: number }> = [];
+  const pushTimed = (kind: string, source: unknown) => {
+    if (!Array.isArray(source)) return;
+    for (const raw of source) {
+      if (!raw || typeof raw !== 'object') continue;
+      const item = raw as Record<string, unknown>;
+      const minutes = Number(item.duration_min ?? 0);
+      const reps = kind === 'Work' ? Number(item.reps ?? 1) : 1;
+      if (!Number.isFinite(minutes) || minutes <= 0 || minutes > 1440 || !Number.isInteger(reps) || reps < 1 || reps > 30) continue;
+      const recovery = kind === 'Work'
+        ? Number(item.recovery_min ?? 0) || Number(item.recovery_sec ?? 0) / 60
+        : 0;
+      for (let i = 0; i < reps; i += 1) {
+        timed.push({ kind, minutes });
+        if (i < reps - 1 && recovery > 0 && Number.isFinite(recovery)) {
+          timed.push({ kind: 'Recovery', minutes: recovery });
+        }
+      }
+    }
+  };
+  pushTimed('Warm-up', prescription.warmup);
+  pushTimed('Work', prescription.main_set);
+  pushTimed('Cool-down', prescription.cooldown);
+  const allPartsTimed = [prescription.warmup, prescription.main_set, prescription.cooldown]
+    .flatMap((group) => Array.isArray(group) ? group : [])
+    .every((item) => item && typeof item === 'object' && Number((item as Record<string, unknown>).duration_min) > 0);
+  const totalMinutes = timed.reduce((sum, step) => sum + step.minutes, 0);
+  const showTimeline = allPartsTimed && timed.length > 0 && timed.length <= 60 && totalMinutes > 0;
   return (
+    <>
+    {showTimeline && (
+      <div className="calendar-duration-timeline" role="img" aria-label={`Prescribed interval timeline, ${Math.round(totalMinutes)} minutes total; widths represent duration, not intensity`}>
+        {timed.map((part, index) => (
+          <span key={index} className={`timeline-part ${part.kind.toLowerCase().replace('-', '')}`}
+            title={`${part.kind}: ${part.minutes} min`}
+            style={{ flexGrow: part.minutes, flexBasis: 0, minWidth: 2 }} />
+        ))}
+      </div>
+    )}
     <div className="calendar-prescription-steps" aria-label="Prescribed workout steps">
       {steps.slice(0, 8).map((step, index) => (
         <span key={index} className={`calendar-prescription-step ${step.kind.toLowerCase().replace('-', '')}`}>
@@ -943,6 +983,7 @@ function CalendarPrescriptionSteps({ prescription }: { prescription: Record<stri
       ))}
       {steps.length > 8 && <span className="calendar-prescription-step">+{steps.length - 8} more</span>}
     </div>
+    </>
   );
 }
 
