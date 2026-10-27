@@ -8703,10 +8703,12 @@ const sessionVerdict =
     ? primaryRace.targetSplits.bike.slice(0, 5)
     : '—'}
 </strong>
-      <small>
-  {athleteProfile.ftp
-    ? `Target power guidance will be based on your current FTP of ${athleteProfile.ftp} W.`
-    : 'Add a current FTP to generate race-specific bike power guidance.'}
+<small>
+  {raceGoalDemand.bikeAverageKphLabel
+    ? `Goal demand · ${raceGoalDemand.bikeAverageKphLabel} km/h average`
+    : athleteProfile.ftp
+      ? `Target power guidance will be based on your current FTP of ${athleteProfile.ftp} W.`
+      : 'Add a current FTP to generate race-specific bike power guidance.'}
 </small>
             </div>
 
