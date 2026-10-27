@@ -5983,7 +5983,7 @@ padding: '11px 16px',
     gridTemplateColumns: 'minmax(0, 1fr)',
     gap: '12px',
     margin: '14px 0 18px',
-    padding: '12px 14px',
+    padding: '16px',
     background: 'linear-gradient(145deg, #10283F 0%, #071827 100%)',
     border: '1px solid rgba(68, 151, 205, 0.30)',
     boxShadow: '0 12px 24px rgba(1, 9, 20, 0.18)',
@@ -6982,9 +6982,9 @@ color:
   style={{
     marginBottom: '14px',
     padding: '14px 16px',
-    background: '#FFFFFF',
-    border: '1px solid #E1E8EF',
-    borderRadius: '14px',
+    background: 'linear-gradient(145deg, #102B43, #071C30)',
+    border: '1px solid rgba(72,153,201,0.32)',
+    borderRadius: '20px',
     display: 'flex',
     alignItems: 'center',
     gap: '14px',
@@ -7006,7 +7006,7 @@ color:
             ? '#FFF6DF'
             : recoveryReadiness?.color === 'red'
               ? '#FDECEC'
-              : '#F1F5F8',
+              : '#1A3951',
     }}
   >
     <div
@@ -7029,7 +7029,7 @@ color:
   <div style={{ flex: 1 }}>
     <div
       style={{
-        color: '#708396',
+        color: '#79C9F4',
         fontSize: '11px',
         fontWeight: 700,
         letterSpacing: '0.08em',
@@ -7042,7 +7042,7 @@ color:
     <div
       style={{
         marginTop: '3px',
-        color: '#17324D',
+        color: '#F6FBFF',
         fontSize: '15px',
         fontWeight: 700,
       }}
@@ -7059,7 +7059,7 @@ color:
     <div
       style={{
         marginTop: '2px',
-        color: '#65798B',
+        color: '#A9C6D9',
         fontSize: '13px',
         lineHeight: 1.4,
       }}
@@ -7089,144 +7089,14 @@ color:
     ›
   </button>
 </section>
-<section
-  style={{
-    marginBottom: '14px',
-    padding: '16px',
-    background: '#FFFFFF',
-    border: '1px solid #E1E8EF',
-    borderRadius: '14px',
-  }}
->
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '12px',
-      marginBottom: '14px',
-    }}
-  >
-    <div>
-      <div
-        style={{
-          color: '#708396',
-          fontSize: '11px',
-          fontWeight: 700,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-        }}
-      >
-        This Week
-      </div>
-
-      <div
-        style={{
-          marginTop: '3px',
-          color: '#17324D',
-          fontSize: '18px',
-          fontWeight: 700,
-        }}
-      >
-{calendarWeekSessions.length} sessions ·{' '}
-{(
-  calendarWeekSessions.reduce(
-    (total, session) => total + session.durationMin,
-    0,
-  ) / 60
-).toFixed(1)}h planned
-      </div>
-    </div>
-
-    <button
-      type="button"
-      onClick={() => setActiveNav('Calendar')}
-      style={{
-        padding: 0,
-        border: 'none',
-        background: 'transparent',
-        color: '#1673AE',
-        fontSize: '13px',
-        fontWeight: 700,
-        cursor: 'pointer',
-      }}
-    >
-      View plan →
-    </button>
-  </div>
-
-  <div
-    style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '10px',
-    }}
-  >
-    {[
-      {
-        label: 'Swim',
-        value:calendarWeekSessions.filter(
-          (session: any) => session.sport === 'swim',
-        ).length,
-        color: '#208FD0',
-        background: '#EEF7FC',
-      },
-      {
-        label: 'Bike',
-        value:calendarWeekSessions.filter(
-          (session: any) => session.sport === 'bike',
-        ).length,
-        color: '#B77B00',
-        background: '#FFF7E2',
-      },
-      {
-        label: 'Run',
-         value:calendarWeekSessions.filter(
-          (session: any) => session.sport === 'run',
-        ).length,
-        color: '#2F8A57',
-        background: '#EEF8F1',
-      },
-    ].map((item) => (
-      <div
-        key={item.label}
-        style={{
-          padding: '10px',
-          borderRadius: '10px',
-          background: item.background,
-        }}
-      >
-        <div
-          style={{
-            color: item.color,
-            fontSize: '18px',
-            fontWeight: 700,
-          }}
-        >
-          {item.value}
-        </div>
-
-        <div
-          style={{
-            marginTop: '2px',
-            color: '#65798B',
-            fontSize: '12px',
-            fontWeight: 600,
-          }}
-        >
-          {item.label}
-        </div>
-      </div>
-    ))}
-  </div>
-</section>        
+        
        <section
   style={{
     marginBottom: '16px',
     padding: '18px',
-    background: '#F7FAFC',
-    border: '1px solid #E2EAF0',
-    borderRadius: '14px',
+    background: 'linear-gradient(145deg,#102B43,#071C30)',
+    border: '1px solid rgba(72,153,201,0.32)',
+    borderRadius: '20px',
   }}
 >
   <div
@@ -7240,7 +7110,7 @@ color:
   >
     <span
       style={{
-        color: '#1673AE',
+        color: '#58C3F6',
         fontSize: '11px',
         fontWeight: 800,
         letterSpacing: '0.09em',
@@ -7262,14 +7132,14 @@ color:
         textTransform: 'uppercase',
       }}
     >
-      On track
+      Coaching focus
     </span>
   </div>
 
   <h3
     style={{
       margin: 0,
-      color: '#17324D',
+      color: '#F6FBFF',
       fontSize: '19px',
       fontWeight: 700,
     }}
@@ -7280,7 +7150,7 @@ color:
   <p
     style={{
       margin: '8px 0 14px',
-      color: '#607487',
+      color: '#AAC7D9',
       fontSize: '14px',
       lineHeight: 1.55,
     }}
@@ -7305,13 +7175,13 @@ color:
       style={{
         padding: '10px 12px',
         borderRadius: '10px',
-        background: '#FFFFFF',
-        border: '1px solid #E5ECF2',
+        background: '#14344E',
+        border: '1px solid #28516C',
       }}
     >
       <div
         style={{
-          color: '#8293A2',
+          color: '#82B5D0',
           fontSize: '10px',
           fontWeight: 800,
           letterSpacing: '0.07em',
@@ -7324,7 +7194,7 @@ color:
       <div
         style={{
           marginTop: '4px',
-          color: '#17324D',
+          color: '#F6FBFF',
           fontSize: '14px',
           fontWeight: 700,
           textTransform: 'capitalize',
@@ -7340,13 +7210,13 @@ color:
       style={{
         padding: '10px 12px',
         borderRadius: '10px',
-        background: '#FFFFFF',
-        border: '1px solid #E5ECF2',
+        background: '#14344E',
+        border: '1px solid #28516C',
       }}
     >
       <div
         style={{
-          color: '#8293A2',
+          color: '#82B5D0',
           fontSize: '10px',
           fontWeight: 800,
           letterSpacing: '0.07em',
@@ -7359,7 +7229,7 @@ color:
       <div
         style={{
           marginTop: '4px',
-          color: '#17324D',
+          color: '#F6FBFF',
           fontSize: '14px',
           fontWeight: 700,
         }}
@@ -7384,7 +7254,7 @@ color:
       padding: 0,
       border: 'none',
       background: 'transparent',
-      color: '#1673AE',
+      color: '#58C3F6',
       fontSize: '13px',
       fontWeight: 700,
       cursor: 'pointer',
