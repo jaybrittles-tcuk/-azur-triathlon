@@ -7,7 +7,7 @@ export type AssignedAthlete = {
  normal_weekly_hours: number | null;
 };
 
-export default function CoachAthleteRoster({ onSelect }: { onSelect: (athlete: AssignedAthlete | null) => void }) {
+export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { onSelect: (athlete: AssignedAthlete | null) => void; selectedAthleteId?: string | null }) {
  const [athletes,setAthletes]=useState<AssignedAthlete[]>([]);
  const [selectedId,setSelectedId]=useState('');
  const [loading,setLoading]=useState(true);
@@ -31,14 +31,14 @@ export default function CoachAthleteRoster({ onSelect }: { onSelect: (athlete: A
    finally{if(!cancelled)setLoading(false);}
   }; void load();return()=>{cancelled=true;};
  },[]);
- const selected=athletes.find(a=>a.id===selectedId);
+ const selected=athletes.find(a=>a.id===(selectedAthleteId ?? selectedId));
  return <section className="panel coach-cycling-review">
   <header><h3>Assigned Athletes</h3><p>Read-only training profile overview · coach assignments only</p></header>
   {loading&&<p>Loading assigned athletes…</p>}
   {error&&<p role="alert">{error}</p>}
   {!loading&&!error&&athletes.length===0&&<p>No athletes are assigned to this coach yet.</p>}
   {athletes.length>0&&<div className="coach-cycling-columns">
-   <div className="coach-cycling-list">{athletes.map(a=><button type="button" key={a.id} className={selectedId===a.id?'is-selected':''} onClick={()=>{setSelectedId(a.id);onSelect(a);}}>
+   <div className="coach-cycling-list">{athletes.map(a=><button type="button" key={a.id} className={(selectedAthleteId ?? selectedId)===a.id?'is-selected':''} onClick={()=>{setSelectedId(a.id);onSelect(a);}}>
     <strong>{a.display_name||'Unnamed athlete'}</strong><small>{a.ftp_w ? `FTP: ${a.ftp_w} W`:'FTP not recorded'}</small>
    </button>)}</div>
    <div className="coach-cycling-detail">{selected ? <>
