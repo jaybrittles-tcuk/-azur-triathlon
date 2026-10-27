@@ -1,6 +1,6 @@
-import type { BikeWorkout } from './bikeWorkoutLibrary';
-import { bikeWorkouts } from './bikeWorkoutLibrary';
-import { expandedBikeWorkouts } from './bikeWorkoutExpanded';
+import type { BikeWorkout } from './bikeWorkoutLibrary.ts';
+import { bikeWorkouts } from './bikeWorkoutLibrary.ts';
+import { expandedBikeWorkouts } from './bikeWorkoutExpanded.ts';
 
 type Steady = Extract<BikeWorkout['steps'][number], { kind: 'steady' }>;
 const s = (minutes:number,minFtpPct:number,maxFtpPct:number,label:string):Steady =>
