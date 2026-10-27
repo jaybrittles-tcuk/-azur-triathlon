@@ -1,0 +1,28 @@
+name: AZUR calculation checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'azur-v1/src/lib/calculations/**'
+      - 'azur-v1/src/domain/bikeWorkout*.ts'
+      - 'azur-v1/package.json'
+      - '.github/workflows/azur-calculations.yml'
+  pull_request:
+    paths:
+      - 'azur-v1/src/lib/calculations/**'
+      - 'azur-v1/src/domain/bikeWorkout*.ts'
+      - 'azur-v1/package.json'
+      - '.github/workflows/azur-calculations.yml'
+jobs:
+  calculations:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: azur-v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run calculation tests
+        run: npm test
