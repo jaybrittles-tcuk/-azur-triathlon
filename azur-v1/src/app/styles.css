@@ -4726,3 +4726,5 @@ strong {
 @media(max-width: 640px) { .coach-cycling-columns { grid-template-columns: minmax(0,1fr); } .coach-cycling-list { max-height: 220px; } }
 
 .coach-performance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:14px 0}.coach-performance-grid>div{background:#163249;border:1px solid #315470;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:5px}.coach-performance-grid small{color:#a7c4d7}.coach-performance-grid strong{font-size:18px;color:#fff}
+
+.coach-attention-inbox{display:grid;gap:10px;margin:14px 0}.coach-attention-item{display:flex;justify-content:space-between;gap:14px;align-items:center;background:#163249;border:1px solid #345771;padding:13px;border-radius:10px}.coach-attention-item p{color:#b4cfe0;font-size:13px;margin:6px 0 0}.coach-attention-item small{color:#eac57f;margin-left:8px}.coach-attention-item button{background:#168dce;color:white;padding:9px 13px;border:0;border-radius:8px;cursor:pointer;white-space:nowrap}@media(max-width:640px){.coach-attention-item{flex-direction:column;align-items:stretch}}
