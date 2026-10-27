@@ -6,13 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types --test src/lib/calculations/trainingPriority.test.mjs"
   },
- "dependencies": {
-  "@supabase/supabase-js": "latest",
-  "@vitejs/plugin-react": "latest",
-   "fit-file-parser": "^6.1.2",
-   "leaflet": "latest",
+  "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "@vitejs/plugin-react": "latest",
+    "fit-file-parser": "^6.1.2",
+    "leaflet": "latest",
     "vite": "latest",
     "typescript": "latest",
     "react": "latest",
