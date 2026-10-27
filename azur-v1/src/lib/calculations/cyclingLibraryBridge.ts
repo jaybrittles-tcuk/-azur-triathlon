@@ -1,7 +1,7 @@
-import { allBikeWorkouts } from '../../domain/bikeWorkoutCatalog';
-import { validateWorkout, workoutMinutes } from '../../domain/bikeWorkoutLibrary';
-import type { WorkoutFamily } from '../../domain/bikeWorkoutLibrary';
-import type { SessionEntry, SessionFamily } from './sessionSelection';
+import { allBikeWorkouts } from '../../domain/bikeWorkoutCatalog.ts';
+import { validateWorkout, workoutMinutes } from '../../domain/bikeWorkoutLibrary.ts';
+import type { WorkoutFamily } from '../../domain/bikeWorkoutLibrary.ts';
+import type { SessionEntry, SessionFamily } from './sessionSelection.ts';
 
 const familyMap: Record<WorkoutFamily, SessionFamily> = {
   aerobic_foundation: 'aerobic_endurance',
