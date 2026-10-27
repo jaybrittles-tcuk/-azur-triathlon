@@ -7325,11 +7325,14 @@ color:
 
           <strong>{day.dayNumber}</strong>
 
-          <div className="calendar-strip-dots">
-            {sessionsForDate.slice(0, 3).map((session) => (
+          <div className="calendar-strip-dots" aria-label={sessionsForDate.length ? `${sessionsForDate.filter((session) => session.status === 'completed').length} of ${sessionsForDate.length} sessions completed` : 'Rest day'}>
+            {sessionsForDate.length === 0 ? (
+              <span className="calendar-rest-indicator" title="Rest day">—</span>
+            ) : sessionsForDate.slice(0, 3).map((session) => (
               <i
                 key={session.id}
-                className={session.sport}
+                className={`${session.sport} ${session.status === 'completed' ? 'done' : session.status === 'edited' ? 'adjusted' : ''}`}
+                title={`${sportName(session.sport)}: ${session.status === 'completed' ? 'Completed' : session.status === 'edited' ? 'Adjusted' : 'Planned'}`}
               />
             ))}
           </div>
