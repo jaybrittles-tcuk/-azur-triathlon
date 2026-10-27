@@ -4781,3 +4781,13 @@ strong {
 .calendar-focus-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 13px;background:#0e2942;border:1px solid #284c68;border-radius:12px;margin:12px 0;color:#fff}
 .calendar-focus-toolbar>div{display:grid;gap:3px}.calendar-focus-toolbar small{color:#99c4df;font-size:11px}
 .calendar-focus-toolbar button{background:#145987;color:#fff;border:1px solid #347ca4;border-radius:20px;padding:7px 11px;cursor:pointer}
+
+/* AZUR structured workout card and modal visual hierarchy */
+.azur-workout-targets{background:#0b2238;border:1px solid #2c506a;border-radius:14px;padding:12px;color:#e9f7ff;display:grid;gap:7px;margin:12px 0}
+.azur-workout-targets h4{font-size:13px;margin:0 0 4px;display:flex;justify-content:space-between;align-items:center;color:#fff}.azur-workout-targets h4 small{font-weight:400;color:#92b7d0}
+.azur-target-row{display:grid;grid-template-columns:minmax(66px,1fr) minmax(65px,.9fr) minmax(100px,1.4fr);gap:8px;align-items:center;background:#14344c;border-left:3px solid #209fe4;border-radius:8px;padding:9px;color:#e7f5ff;font-size:12px}
+.azur-target-row.work{border-left-color:#f6c53b}.azur-target-row.recovery{border-left-color:#7a9ab2}.azur-target-row.cooldown{border-left-color:#66a4ca}
+.azur-target-kind{text-transform:capitalize;font-size:11px;color:#b3d0e3}.azur-target-row strong{color:#fff}.azur-target-row>span:last-child{display:grid;gap:3px}.azur-target-row small{color:#f6ce58;font-size:11px}
+.azur-workout-targets.compact{padding:7px;gap:5px;margin:8px 0;background:rgba(8,30,50,.55)}.azur-workout-targets.compact .azur-target-row{padding:5px;grid-template-columns:1fr 1fr 1.3fr;font-size:10px}.azur-workout-targets.compact .azur-target-kind{font-size:10px}.azur-workout-targets.compact>small{color:#8bb8d4}
+.azur-workout-modal-summary{background:linear-gradient(145deg,#102d49,#071a2c);border:1px solid #315675;border-radius:16px;padding:14px;color:#c2dced;margin:12px 0}.azur-target-empty{color:#7d9db1;font-size:12px;padding:10px}
+@media(max-width:600px){.azur-target-row{grid-template-columns:1fr 1fr;gap:4px}.azur-target-row>span:last-child{grid-column:1/-1}.azur-workout-targets.compact .azur-target-row{grid-template-columns:1fr 1fr}.azur-workout-targets.compact .azur-target-row>span:last-child{grid-column:1/-1}}
