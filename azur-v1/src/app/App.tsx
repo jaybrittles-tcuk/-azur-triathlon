@@ -4514,6 +4514,14 @@ setPlanPreviewInsights({
     hasSufficientHistory
       ? 'recorded'
       : 'confirmed',
+  trainingPriorityRationale:
+    trainingPriority.rationale,
+  resolvedPriority:
+    trainingPriority.resolvedPriority,
+  objectivePriority:
+    trainingPriority.objectivePriority,
+  priorityConflict:
+    trainingPriority.conflict,
 });  
   console.log(
     'AZUR PLAN PREVIEW — nothing saved',
