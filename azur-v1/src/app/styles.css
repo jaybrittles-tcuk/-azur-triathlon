@@ -4611,3 +4611,24 @@ strong {
 .calendar-layout .calendar-prescription-step.recovery b {
   color: #f4b43c;
 }
+
+/* AZUR V2: true-duration prescription timeline (not an intensity chart) */
+.calendar-layout .calendar-duration-timeline {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  height: 24px;
+  padding: 3px;
+  margin-top: 10px;
+  border-radius: 8px;
+  background: rgba(7,21,36,.55);
+  overflow: hidden;
+}
+.calendar-layout .calendar-duration-timeline .timeline-part {
+  height: 100%;
+  border-radius: 3px;
+  background: #168dce;
+}
+.calendar-layout .calendar-duration-timeline .timeline-part.work { background: #f4b43c; }
+.calendar-layout .calendar-duration-timeline .timeline-part.recovery { background: #597d99; }
+.calendar-layout .calendar-duration-timeline .timeline-part.cooldown { background: #3d92bc; }
