@@ -8719,9 +8719,11 @@ const sessionVerdict =
     ? primaryRace.targetSplits.run.slice(0, 5)
     : '—'}
 </strong>
-              <small>
-                Durability and late-race control.
-              </small>
+  <small>
+  {raceGoalDemand.runPaceLabel
+    ? `Goal demand · ${raceGoalDemand.runPaceLabel}/km`
+    : 'Durability and late-race control.'}
+</small>
             </div>
 
   <div>
