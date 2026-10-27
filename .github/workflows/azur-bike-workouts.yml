@@ -33,3 +33,7 @@ jobs:
         run: |
           node -e "require('esbuild').buildSync({entryPoints:['src/domain/bikeDiagnosticSmokeChecks.ts'],bundle:true,platform:'node',format:'esm',outfile:'/tmp/azur-bike-diagnostic.mjs'})"
           node --input-type=module -e "import('/tmp/azur-bike-diagnostic.mjs').then(m=>m.runBikeDiagnosticSmokeChecks())"
+      - name: Bundle and run four-week planner checks
+        run: |
+          node -e "require('esbuild').buildSync({entryPoints:['src/domain/fourWeekPlannerSmokeChecks.ts'],bundle:true,platform:'node',format:'esm',outfile:'/tmp/azur-four-week.mjs'})"
+          node --input-type=module -e "import('/tmp/azur-four-week.mjs').then(m=>m.runFourWeekPlannerSmokeChecks())"
