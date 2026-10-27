@@ -2298,6 +2298,23 @@ const raceGoalDemand = useMemo(
     primaryRace.runDistanceKm,
   ],
 );
+  const athleteRaceGap = useMemo(
+  () =>
+    calculateAthleteRaceGap({
+      swimThresholdSecPer100m: athleteProfile.swimThreshold,
+      swimGoalSecPer100m: raceGoalDemand.swimPaceSecPer100m,
+      runThresholdSecPerKm: athleteProfile.runThreshold,
+      runGoalSecPerKm: raceGoalDemand.runPaceSecPerKm,
+      ftpW: athleteProfile.ftp,
+      bikeGoalAverageKph: raceGoalDemand.bikeAverageKph,
+    }),
+  [
+    athleteProfile.swimThreshold,
+    athleteProfile.runThreshold,
+    athleteProfile.ftp,
+    raceGoalDemand,
+  ],
+);
   console.log('AZUR MACROCYCLE', {
   race: primaryRace.name,
   raceDate: primaryRace.raceDate,
