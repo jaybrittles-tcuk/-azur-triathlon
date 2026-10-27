@@ -8731,6 +8731,9 @@ const sessionVerdict =
       ? `Target power guidance will be based on your current FTP of ${athleteProfile.ftp} W.`
       : 'Add a current FTP to generate race-specific bike power guidance.'}
 </small>
+              <small>
+  {athleteRaceGap.bike.label}
+</small>
             </div>
 
             <div>
