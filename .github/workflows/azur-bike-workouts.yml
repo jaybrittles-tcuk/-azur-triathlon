@@ -1,0 +1,31 @@
+name: AZUR Build 07A checks
+on:
+  push:
+    branches:
+      - feature/azur-build-07a-workout-library
+  pull_request:
+    paths:
+      - 'azur-v1/src/domain/**'
+      - 'azur-v1/package.json'
+      - '.github/workflows/azur-bike-workouts.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: azur-v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Build application
+        run: npm run build
+      - name: Bundle and run cycling workout smoke checks
+        run: |
+          node -e "require('esbuild').buildSync({entryPoints:['src/domain/bikeWorkoutSmokeChecks.ts'],bundle:true,platform:'node',format:'esm',outfile:'/tmp/azur-bike-check.mjs'})"
+          node --input-type=module -e "import('/tmp/azur-bike-check.mjs').then(m=>m.runBikeWorkoutSmokeChecks())"
