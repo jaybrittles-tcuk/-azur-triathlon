@@ -13,6 +13,8 @@ const phases = ['base', 'build', 'peak', 'taper', 'recovery'] as const;
 type Phase = typeof phases[number];
 type ReviewDraft = { level: 1 | 2 | 3; phases: Phase[] };
 const familyName = (family: string) => family.replaceAll('_', ' ');
+// Fail closed until end-to-end scheduling acceptance checks pass.
+const coachSchedulingEnabled = import.meta.env.VITE_ENABLE_COACH_SCHEDULING === 'true';
 
 export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: number | null }) {
   const [availableMinutes, setAvailableMinutes] = useState(90);
@@ -51,6 +53,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
     finally {setSaving(false);}
   }
   async function confirmSchedule() {
+    if (!coachSchedulingEnabled) { setScheduleMessage('Calendar scheduling is not yet enabled for beta.'); return; }
     if (!personalisedDraft || !scheduleDate || scheduleSaving || preview.status !== 'selected') return;
     setScheduleSaving(true); setScheduleMessage('');
     try {
@@ -147,8 +150,8 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
         )}
         {personalisedDraft && <div className="coach-cycling-schedule">
           <label>Schedule for signed-in athlete <input aria-label="Workout date" type="date" value={scheduleDate} onChange={e=>setScheduleDate(e.target.value)} /></label>
-          <button type="button" disabled={!scheduleDate || scheduleSaving} onClick={()=>void confirmSchedule()}>{scheduleSaving?'Saving…':'Confirm and add to calendar'}</button>
-          <small>Uses an existing unlocked training week. Refuses to overwrite an existing workout.</small>
+          <button type="button" disabled={!coachSchedulingEnabled || !scheduleDate || scheduleSaving} onClick={()=>void confirmSchedule()}>{scheduleSaving?'Saving…':'Confirm and add to calendar'}</button>
+          <small>{coachSchedulingEnabled ? 'Uses an existing unlocked training week. Refuses to overwrite an existing workout.' : 'Scheduling disabled pending acceptance testing; workout preview remains available.'}</small>
           {scheduleMessage && <p role="status">{scheduleMessage}</p>}
         </div>}
         <small>Nothing is added until a verified coach confirms. Garmin export remains disabled.</small>
