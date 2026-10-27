@@ -3508,26 +3508,7 @@ const trainingPriority = resolveTrainingPriority({
   runGapStatus: athleteRaceGap.run.status,
 });
 
-const sportBias = {
-  swim:
-    developmentSport === 'swim'
-      ? 1.12
-      : strongestSport === 'swim'
-        ? 0.94
-        : 1,
-  bike:
-    developmentSport === 'bike'
-      ? 1.12
-      : strongestSport === 'bike'
-        ? 0.94
-        : 1,
-  run:
-    developmentSport === 'run'
-      ? 1.12
-      : strongestSport === 'run'
-        ? 0.94
-        : 1,
-};
+const sportBias = trainingPriority.multipliers;
 const weightedPhaseConfig = {
   swim1Weight:
     phaseConfig.swim1Weight * sportBias.swim,
