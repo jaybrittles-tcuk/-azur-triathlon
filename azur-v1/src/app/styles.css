@@ -4746,3 +4746,30 @@ strong {
 .azur-home-load-grid{display:grid;grid-template-columns:repeat(3,1fr)}.azur-home-load-grid>div{display:grid;gap:5px;padding:0 15px;border-right:1px solid #2a506c}.azur-home-load-grid>div:first-child{padding-left:0}.azur-home-load-grid>div:last-child{border:0}.azur-home-load-grid small{color:#a6c5da;font-size:12px}.azur-home-load-grid strong{color:#fff;font-size:25px}.azur-home-load p{color:#88acc5;font-size:11px;margin:0}
 .azur-home-section-heading button{background:none;border:none;padding:0;color:#49baff}
 @media(max-width:580px){.azur-premium-home{padding:13px;border-radius:17px}.azur-home-sports{gap:6px}.azur-home-sport{padding:9px}.azur-home-race{padding:15px}.azur-home-kicker{align-items:start;flex-direction:column;gap:3px}.azur-home-load-grid strong{font-size:21px}}
+
+/* AZUR V2 calendar visual system: preserves all existing calendar interactions. */
+.calendar-layout{background:linear-gradient(145deg,#061526,#0a2036);border:1px solid #1c3a53;border-radius:22px;padding:17px;color:#ecf7ff;box-shadow:0 18px 38px rgba(0,10,26,.2)}
+.calendar-layout .panel{background:#0e2942;color:#e8f6ff;border:1px solid #284c68;box-shadow:none;border-radius:16px}
+.calendar-layout .calendar-toolbar{background:linear-gradient(130deg,#0e304f,#081f35);border:1px solid #285a7b;padding:16px}
+.calendar-layout .calendar-strip-top h3{color:#fff;font-size:21px;letter-spacing:-.025em}
+.calendar-layout .calendar-strip-top .eyebrow{color:#4cc1ff;letter-spacing:.13em}
+.calendar-layout .calendar-strip-top button{background:#153954;border:1px solid #2b6386;color:#dcf5ff;border-radius:50%;width:36px;height:36px;display:grid;place-items:center}
+.calendar-layout .calendar-strip-days{gap:7px}
+.calendar-layout .calendar-strip-day{background:#102d46;border:1px solid #234a67;border-radius:12px;padding:9px 3px;min-width:0}
+.calendar-layout .calendar-strip-day.today{background:#12669e;border-color:#40baf6;box-shadow:0 0 0 1px #2b9bd3,0 6px 18px rgba(11,133,213,.25)}
+.calendar-layout .calendar-strip-day>span,.calendar-layout .calendar-strip-day strong{color:#eaf7ff}
+.calendar-layout .calendar-strip-footer small{color:#aecce0}
+.calendar-layout .calendar-grid{background:transparent;border:0;padding:0;box-shadow:none}
+.calendar-layout .calendar-day{background:#0d263d;border:1px solid #23455f;border-radius:16px;padding:10px;min-width:0}
+.calendar-layout .calendar-day-head{border-bottom:1px solid #23475f;padding-bottom:9px;margin-bottom:10px}
+.calendar-layout .calendar-day-head span{color:#97bfd9}.calendar-layout .calendar-day-head strong{color:#f8fcff}.calendar-layout .calendar-day-head.today{background:rgba(22,146,210,.13);border-radius:8px;padding:8px}
+.calendar-layout .calendar-session-wrapper{position:relative;min-width:0}
+.calendar-layout .calendar-session{background:#12344f;border:1px solid #315878;border-left:4px solid #269ce1;border-radius:12px;color:#eaf7ff;box-shadow:0 7px 15px rgba(0,9,22,.16);padding:11px;text-align:left;transition:border-color .15s,transform .15s}
+.calendar-layout .calendar-session:hover{border-color:#3cb4f2;transform:translateY(-1px)}
+.calendar-layout .calendar-session.selected{box-shadow:0 0 0 1px #49bfff,0 6px 20px rgba(0,117,195,.22)}
+.calendar-layout .calendar-session.bike{border-left-color:#ffd044}.calendar-layout .calendar-session.run{border-left-color:#ff905a}.calendar-layout .calendar-session.swim{border-left-color:#27b2f6}
+.calendar-layout .calendar-session-top span{color:#a6cfe8}.calendar-layout .calendar-session strong{color:#fff}
+.calendar-layout .calendar-session-status{color:#b4d1e6}.calendar-layout .calendar-session.completed{background:#123747}
+.calendar-layout .calendar-reschedule-button{background:#163b58;color:#8cd7ff;border:1px solid #366789;border-radius:8px}
+.calendar-layout .calendar-empty-state h3{color:#fff}.calendar-layout .calendar-empty-state p{color:#aac7dc}
+@media(max-width:750px){.calendar-layout{padding:10px;border-radius:14px}.calendar-layout .calendar-day{padding:8px}.calendar-layout .calendar-strip-days{gap:4px}.calendar-layout .calendar-strip-day{padding:7px 1px}}
