@@ -1,5 +1,6 @@
 import type { BikeWorkout } from './bikeWorkoutLibrary';
 import { bikeWorkouts } from './bikeWorkoutLibrary';
+import { expandedBikeWorkouts } from './bikeWorkoutExpanded';
 
 type Steady = Extract<BikeWorkout['steps'][number], { kind: 'steady' }>;
 const s = (minutes:number,minFtpPct:number,maxFtpPct:number,label:string):Steady =>
@@ -27,4 +28,4 @@ export const additionalBikeWorkouts:readonly BikeWorkout[]=[
   [s(15,45,75,'Warm up'),r(8,s(.5,115,130,'30s hard'),s(.5,40,60,'30s easy')),
    s(5,40,55,'Between sets'),r(8,s(.5,115,130,'30s hard'),s(.5,40,60,'30s easy')),s(10,40,55,'Cool down')])
 ];
-export const allBikeWorkouts:readonly BikeWorkout[]=[...bikeWorkouts,...additionalBikeWorkouts];
+export const allBikeWorkouts:readonly BikeWorkout[]=[...bikeWorkouts,...additionalBikeWorkouts,...expandedBikeWorkouts];
