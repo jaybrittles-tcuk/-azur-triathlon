@@ -41,6 +41,7 @@ export function validateWorkout(workout:BikeWorkout):string[] {
   if(!workout.steps.length) errors.push('Workout has no steps');
   const validateStep=(step:Extract<WorkoutStep,{kind:'steady'}>)=>{
     if(!Number.isFinite(step.minutes)||step.minutes<=0) errors.push('Invalid step duration');
+    if(step.cadenceRpm && (step.cadenceRpm.length!==2 || !step.cadenceRpm.every(Number.isFinite) || step.cadenceRpm[0]<40 || step.cadenceRpm[1]>130 || step.cadenceRpm[0]>step.cadenceRpm[1])) errors.push('Invalid cadence target');
     if(!Number.isFinite(step.minFtpPct)||!Number.isFinite(step.maxFtpPct)||
        step.minFtpPct<=0||step.maxFtpPct>200||step.minFtpPct>step.maxFtpPct) errors.push('Invalid FTP target');
   };
