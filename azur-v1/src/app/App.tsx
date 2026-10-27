@@ -8715,6 +8715,9 @@ const sessionVerdict =
               <small>
   {athleteRaceGap.swim.label}
 </small>
+              <small>
+  {athleteRaceGap.swim.explanation}
+</small>
             </div>
 
             <div>
