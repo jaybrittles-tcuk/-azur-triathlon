@@ -4525,6 +4525,7 @@ setPlanPreviewInsights({
     trainingPriority.objectivePriority,
   priorityConflict:
     trainingPriority.conflict,
+  priorityConfidence: trainingPriority.objectiveConfidence,
 });  
   console.log(
     'AZUR PLAN PREVIEW — nothing saved',
@@ -4712,6 +4713,7 @@ const [planPreviewInsights, setPlanPreviewInsights] =
     resolvedPriority: string;
     objectivePriority: string;
     priorityConflict: boolean;
+    priorityConfidence: 'clear' | 'close' | 'limited_data' | 'none';
   } | null>(null);
 const previewTotalMinutes =
   (planPreview ?? []).reduce(
@@ -6469,6 +6471,25 @@ Your confirmed training baseline is{' '}
 <strong>Training priority: </strong>
 {planPreviewInsights.trainingPriorityRationale}
 </p>
+ {planPreviewInsights.priorityConflict && planPreviewInsights.priorityConfidence === 'clear' && (
+   <p style={{ color: '#9A5D09', lineHeight: 1.6, fontWeight: 600 }}>
+     Coach review recommended: a clear objective development priority
+     conflicts with the selected athlete/coach priority. The selected
+     priority is retained; no automatic override has been made.
+   </p>
+ )}
+ {planPreviewInsights.priorityConfidence === 'close' && (
+   <p style={{ color: '#52677B', lineHeight: 1.6 }}>
+     Development gaps are closely matched. AZUR is not declaring one
+     discipline the greater objective limiter.
+   </p>
+ )}
+ {planPreviewInsights.priorityConfidence === 'limited_data' && (
+   <p style={{ color: '#52677B', lineHeight: 1.6 }}>
+     The objective assessment needs more valid race-gap data
+     before competing development needs can be ranked.
+   </p>
+ )}
     <p style={{
       color: '#52677B',
       lineHeight: 1.6,
