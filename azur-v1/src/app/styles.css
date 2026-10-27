@@ -4677,3 +4677,15 @@ strong {
 .calendar-layout .calendar-move-actions button:disabled { opacity: .55; }
 .calendar-layout .calendar-move-message { color: #91bcd8; margin: 8px 0; }
 .calendar-layout .calendar-move-hint { display: none; }
+
+/* AZUR V2: suggested conflict-free reschedule days */
+.calendar-layout .calendar-move-suggestions { display: grid; gap: 8px; margin: 12px 0; }
+.calendar-layout .calendar-move-suggestions > span { color: #a4c0d4; font-size: 11px; }
+.calendar-layout .calendar-move-suggestions > div { display: flex; flex-wrap: wrap; gap: 7px; }
+.calendar-layout .calendar-move-suggestions button {
+  background: #173b58; color: #e1f1fb; border: 1px solid rgba(68,151,205,.4);
+  padding: 9px 11px; border-radius: 10px; font-size: 11px; cursor: pointer;
+}
+.calendar-layout .calendar-move-suggestions button:hover,
+.calendar-layout .calendar-move-suggestions button:focus-visible { border-color: #f4b43c; }
+.calendar-layout .calendar-move-suggestions small { color: #d9b875; }
