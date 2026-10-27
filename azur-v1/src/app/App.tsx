@@ -3493,8 +3493,12 @@ const phaseConfig =
                 longRideWeight: 0.30,
                 longRunWeight: 0.17,
               };
-    const strongestSport =
+const strongestSport =
   savedBaseline?.strongest_sport ?? 'balanced';
+
+const developmentSport =
+  savedBaseline?.development_sport ?? 'balanced';
+
 const trainingPriority = resolveTrainingPriority({
   developmentSport,
   strongestSport,
@@ -3503,8 +3507,6 @@ const trainingPriority = resolveTrainingPriority({
   bikeGapStatus: athleteRaceGap.bike.status,
   runGapStatus: athleteRaceGap.run.status,
 });
-    const developmentSport =
-  savedBaseline?.development_sport ?? 'balanced';
 
 const sportBias = {
   swim:
