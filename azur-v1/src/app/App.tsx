@@ -1446,7 +1446,9 @@ async function loadPrimaryRace(userId: string) {
 
   const { data, error } = await supabase
     .from('race')
-    .select('id, name, race_date, priority, location, target_splits')
+    .select(
+  'id, name, race_date, priority, location, swim_distance_m, bike_distance_km, run_distance_km, target_splits',
+)
     .eq('athlete_id', athlete.id)
     .eq('priority', 'A')
     .order('race_date', { ascending: true })
