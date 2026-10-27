@@ -1,3 +1,5 @@
+import { coachAttentionSignals } from '../lib/calculations/coachAttention';
+import type { CoachAttention } from '../lib/calculations/coachAttention';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { AssignedAthlete } from './CoachAthleteRoster';
@@ -9,10 +11,11 @@ export default function CoachAthletePerformance({ athlete }: { athlete:AssignedA
  const [baseline,setBaseline]=useState<Baseline|null>(null);
  const [summary,setSummary]=useState<TrainingSummary|null>(null);
  const [loading,setLoading]=useState(false);
+ const [alerts,setAlerts]=useState<CoachAttention[]>([]);
  const [error,setError]=useState('');
  useEffect(()=>{
   let cancelled=false;
-  setBaseline(null);setSummary(null);setError('');
+  setBaseline(null);setSummary(null);setAlerts([]);setError('');
   if(!athlete)return;
   setLoading(true);
   async function load(){
@@ -24,12 +27,13 @@ export default function CoachAthletePerformance({ athlete }: { athlete:AssignedA
     const end=new Date();const start=new Date();start.setDate(end.getDate()-27);
     const [base,plans,activities]=await Promise.all([
       supabase.from('athlete_training_baseline').select('strongest_sport,development_sport,weekly_hours,sessions_per_week,confirmed_at').eq('athlete_id',athlete!.id).maybeSingle(),
-      supabase.from('planned_session').select('id,planned_date').eq('athlete_id',athlete!.id).eq('is_active_version',true).gte('planned_date',localDate(start)).lte('planned_date',localDate(end)),
-      supabase.from('completed_activity').select('id,duration_sec,start_time').eq('athlete_id',athlete!.id).gte('start_time',start.toISOString()).lte('start_time',end.toISOString())
+      supabase.from('planned_session').select('id,planned_date,priority,session_class,status').eq('athlete_id',athlete!.id).eq('is_active_version',true).gte('planned_date',localDate(start)).lte('planned_date',localDate(end)),
+      supabase.from('completed_activity').select('id,duration_sec,start_time,planned_session_id').eq('athlete_id',athlete!.id).gte('start_time',start.toISOString()).lte('start_time',end.toISOString())
     ]);
     if(base.error||plans.error||activities.error)throw new Error(base.error?.message||plans.error?.message||activities.error?.message);
     if(!cancelled){
       setBaseline(base.data??null);
+      setAlerts(coachAttentionSignals(plans.data??[],activities.data??[],localDate(end)));
       setSummary({planned:plans.data?.length??0,completed:activities.data?.length??0,
         completedHours:Math.round((activities.data??[]).reduce((sum,a)=>sum+(Math.max(0,a.duration_sec??0)),0)/360)/10,
         start:localDate(start),end:localDate(end)});
@@ -53,6 +57,8 @@ export default function CoachAthletePerformance({ athlete }: { athlete:AssignedA
    </div>
    <p>Development focus: <strong>{baseline?.development_sport||'Not assessed'}</strong> · Strongest discipline: <strong>{baseline?.strongest_sport||'Not assessed'}</strong></p>
    <p>Baseline target: {baseline?.weekly_hours!=null?`${baseline.weekly_hours} hr/week`:'Not recorded'} · {baseline?.sessions_per_week!=null?`${baseline.sessions_per_week} sessions/week`:'Sessions not recorded'}</p>
+   <h5>Coach attention signals</h5>
+   {alerts.length===0?<p>No attention signals identified from available records. This does not indicate recovery readiness.</p>:<ul>{alerts.map(a=><li key={a.code}><strong>{a.severity==='review'?'Review':'Information'}:</strong> {a.description}</li>)}</ul>}
    <h5>Recent training (28 days)</h5>
    {summary&&<p>{summary.completed} recorded activities · {summary.completedHours} hours completed · {summary.planned} active planned sessions in the same period</p>}
    <small>Activity count is not a completion percentage. Race focus, adherence and training load are not inferred from incomplete records. Read-only.</small>
