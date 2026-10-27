@@ -4709,3 +4709,18 @@ strong {
 .calendar-layout .calendar-stress-sport > strong { font-size: 22px; color: #f4b43c; }
 .calendar-layout .calendar-stress-sport > small { font-size: 10px; color: #b5d1e3; }
 @media(max-width: 640px) { .calendar-layout .calendar-stress-sports { grid-template-columns: 1fr; } }
+
+.coach-cycling-review { margin-top: 16px; background: #0d2238; color: #e2f0fa; padding: 18px; }
+.coach-cycling-review header p,.coach-cycling-detail p,.coach-cycling-detail small { color: #a7c4d7; }
+.coach-cycling-warning { padding: 10px; background: #243c4b; border-radius: 8px; color: #f4ce91; font-size: 12px; }
+.coach-cycling-columns { display: grid; grid-template-columns: minmax(180px,1fr) minmax(0,2fr); gap: 14px; }
+.coach-cycling-list { max-height: 480px; overflow-y: auto; display: grid; align-content: start; gap: 6px; }
+.coach-cycling-list button { background: #153249; border: 1px solid #35566d; color: #e2f0fa; padding: 10px; border-radius: 8px; text-align: left; cursor: pointer; display: grid; gap: 4px; }
+.coach-cycling-list button.is-selected { border-color: #f4b43c; }
+.coach-cycling-list small { color: #a8c5d9; }
+.coach-cycling-detail { background: #153249; padding: 15px; border-radius: 12px; min-width: 0; }
+.coach-cycling-detail ol { padding-left: 22px; line-height: 1.7; }
+.coach-cycling-detail label { display: inline-flex; gap: 6px; align-items: center; margin: 5px 10px 5px 0; }
+.coach-cycling-detail select { padding: 7px; border-radius: 7px; }
+.coach-cycling-detail fieldset { border: 1px solid #45627a; border-radius: 8px; margin: 12px 0; }
+@media(max-width: 640px) { .coach-cycling-columns { grid-template-columns: minmax(0,1fr); } .coach-cycling-list { max-height: 220px; } }
