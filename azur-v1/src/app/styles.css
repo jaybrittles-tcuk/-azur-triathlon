@@ -4724,3 +4724,5 @@ strong {
 .coach-cycling-detail select { padding: 7px; border-radius: 7px; }
 .coach-cycling-detail fieldset { border: 1px solid #45627a; border-radius: 8px; margin: 12px 0; }
 @media(max-width: 640px) { .coach-cycling-columns { grid-template-columns: minmax(0,1fr); } .coach-cycling-list { max-height: 220px; } }
+
+.coach-performance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:14px 0}.coach-performance-grid>div{background:#163249;border:1px solid #315470;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:5px}.coach-performance-grid small{color:#a7c4d7}.coach-performance-grid strong{font-size:18px;color:#fff}
