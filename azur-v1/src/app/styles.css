@@ -4566,3 +4566,20 @@ strong {
   font-size: 14px;
   line-height: 1;
 }
+
+/* AZUR V2: actual calendar prescription context, not decorative intervals */
+.calendar-layout .calendar-session-purpose {
+  margin: 9px 0 7px;
+  padding: 8px 10px;
+  background: rgba(7, 21, 36, .42);
+  border-radius: 8px;
+  color: #c1d8e9;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.calendar-layout .calendar-session.completed .calendar-session-purpose {
+  background: rgba(91, 210, 165, .09);
+  color: #c3eddb;
+}
