@@ -4791,3 +4791,17 @@ strong {
 .azur-workout-targets.compact{padding:7px;gap:5px;margin:8px 0;background:rgba(8,30,50,.55)}.azur-workout-targets.compact .azur-target-row{padding:5px;grid-template-columns:1fr 1fr 1.3fr;font-size:10px}.azur-workout-targets.compact .azur-target-kind{font-size:10px}.azur-workout-targets.compact>small{color:#8bb8d4}
 .azur-workout-modal-summary{background:linear-gradient(145deg,#102d49,#071a2c);border:1px solid #315675;border-radius:16px;padding:14px;color:#c2dced;margin:12px 0}.azur-target-empty{color:#7d9db1;font-size:12px;padding:10px}
 @media(max-width:600px){.azur-target-row{grid-template-columns:1fr 1fr;gap:4px}.azur-target-row>span:last-child{grid-column:1/-1}.azur-workout-targets.compact .azur-target-row{grid-template-columns:1fr 1fr}.azur-workout-targets.compact .azur-target-row>span:last-child{grid-column:1/-1}}
+
+.azur-premium-workout-tabs{background:linear-gradient(140deg,#081d31,#0d2c46);border:1px solid #2f5672;color:#ebf8ff;border-radius:16px;padding:12px;margin:12px 0}
+.azur-workout-tab-nav{display:flex;gap:5px;border-radius:12px;padding:4px;background:#071827}
+.azur-workout-tab-nav button{flex:1;color:#a9c9df;font-weight:700;font-size:13px;background:transparent;border:0;border-radius:9px;padding:11px 8px;cursor:pointer}
+.azur-workout-tab-nav button[aria-selected="true"]{background:#176799;color:#fff;box-shadow:0 3px 12px rgba(0,0,0,.25)}
+.azur-workout-tab-nav button:focus-visible{outline:2px solid #f6c53b;outline-offset:2px}
+.azur-workout-tab-content{padding:13px 4px 4px;display:grid;gap:11px}
+.azur-workout-tab-content p{color:#b9d2e6;margin:0;font-size:13px;line-height:1.55}
+.azur-workout-tab-content h4{color:#fff;margin:0}
+.azur-workout-tab-content small{color:#92b7d0}
+.azur-workout-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.azur-workout-facts>div{display:grid;gap:6px;background:#14354f;border-radius:10px;padding:11px}
+.azur-workout-facts strong{color:#fff;font-size:15px}.azur-workout-facts small{color:#9fc3dc}
+@media(max-width:520px){.azur-workout-facts{grid-template-columns:1fr 1fr}.azur-workout-tab-nav button{font-size:12px;padding:9px 5px}}
