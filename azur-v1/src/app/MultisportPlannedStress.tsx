@@ -1,3 +1,4 @@
+import { auditPrescription } from '../lib/calculations/prescriptionAudit';
 import { estimatePlannedStress } from '../lib/calculations/plannedStress';
 import { estimatePlannedRunStress } from '../lib/calculations/plannedRunStress';
 import { estimatePlannedSwimStress } from '../lib/calculations/plannedSwimStress';
@@ -25,6 +26,7 @@ export default function MultisportPlannedStress({ sessions, runThreshold, swimCs
             sport === 'bike' ? estimatePlannedStress({ sport, prescription: s.prescription }) :
             sport === 'run' ? estimatePlannedRunStress(s.prescription, runThreshold) :
             estimatePlannedSwimStress(s.prescription, swimCss));
+          const incomplete = planned.map(p => auditPrescription(p)).filter(result => !result.ready);
           const valid = outcomes.filter(o => o.status === 'estimated');
           const points = valid.reduce((sum, result) => sum + (result.status === 'estimated' ? result.points : 0), 0);
           return (
@@ -32,7 +34,7 @@ export default function MultisportPlannedStress({ sessions, runThreshold, swimCs
               <span>{label}</span>
               <strong>{planned.length > 0 && valid.length === planned.length ? points.toFixed(1) : '—'}</strong>
               <small>{method} · {valid.length}/{planned.length} sessions estimated</small>
-              {valid.length !== planned.length && <small>Incomplete coverage — no full-sport total</small>}
+              {valid.length !== planned.length && <small>Incomplete coverage — no full-sport total. {incomplete[0]?.reason ?? 'Athlete benchmark or target validation required'}.</small>}
             </div>
           );
         })}
