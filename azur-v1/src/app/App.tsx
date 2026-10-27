@@ -2280,8 +2280,24 @@ const currentMacrocycleWeek =
   macrocycle.length > 0
     ? macrocycle[0]
     : null;
-
-console.log('AZUR MACROCYCLE', {
+const raceGoalDemand = useMemo(
+  () =>
+    calculateRaceGoalDemand({
+      swimSplit: primaryRace.targetSplits?.swim,
+      bikeSplit: primaryRace.targetSplits?.bike,
+      runSplit: primaryRace.targetSplits?.run,
+      swimDistanceM: primaryRace.swimDistanceM,
+      bikeDistanceKm: primaryRace.bikeDistanceKm,
+      runDistanceKm: primaryRace.runDistanceKm,
+    }),
+  [
+    primaryRace.targetSplits,
+    primaryRace.swimDistanceM,
+    primaryRace.bikeDistanceKm,
+    primaryRace.runDistanceKm,
+  ],
+);
+  console.log('AZUR MACROCYCLE', {
   race: primaryRace.name,
   raceDate: primaryRace.raceDate,
   totalWeeks: macrocycle.length,
