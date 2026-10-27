@@ -5973,13 +5973,6 @@ padding: '11px 16px',
     <div className="azur-home-load-grid">
       {([{label:'Fitness',value:trainingLoad.fitness},{label:'Fatigue',value:trainingLoad.fatigue},{label:'Form',value:trainingLoad.form}] as const).map(metric=><div key={metric.label}><small>{metric.label}</small><strong>{typeof metric.value==='number'&&Number.isFinite(metric.value)?Math.round(metric.value):'—'}</strong></div>)}
     </div>
-    <div className="azur-home-metric-visual" aria-hidden="true">
-      {([
-        {value:trainingLoad.fitness, color:'#24B9F2'},
-        {value:trainingLoad.fatigue, color:'#F5C544'},
-        {value:trainingLoad.form, color:'#62D9A3'},
-      ] as const).map((metric,index)=><div className="azur-home-metric-track" key={index}><span style={{width:typeof metric.value==='number'&&Number.isFinite(metric.value)?`${Math.max(5,Math.min(100,Math.abs(metric.value)))}%`:'0%',background:metric.color}} /></div>)}
-    </div>
     <p>{trainingLoad.eligibleActivities>0 ? `Based on ${trainingLoad.eligibleActivities} eligible recorded activities. These indicators are not a medical readiness assessment.` : 'Connect and record eligible workouts to build your training-load history.'}</p>
   </div>
 </section>
