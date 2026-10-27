@@ -54,6 +54,9 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
   }
   async function confirmSchedule() {
     if (!coachSchedulingEnabled) { setScheduleMessage('Calendar scheduling is not yet enabled for beta.'); return; }
+    // This legacy save route targets the logged-in account, not the selected athlete.
+    // Fail closed until an assignment-verified coach scheduling API replaces it.
+    setScheduleMessage('Assigned-athlete scheduling requires an authorised server workflow.'); return;
     if (!personalisedDraft || !scheduleDate || scheduleSaving || preview.status !== 'selected') return;
     setScheduleSaving(true); setScheduleMessage('');
     try {
