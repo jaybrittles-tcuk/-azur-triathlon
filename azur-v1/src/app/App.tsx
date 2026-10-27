@@ -1,3 +1,4 @@
+import CoachAthleteRoster from './CoachAthleteRoster';
 import CoachCyclingLibraryReview from './CoachCyclingLibraryReview';
 import MultisportPlannedStress from './MultisportPlannedStress';
 import { estimatePlannedStress } from '../lib/calculations/plannedStress';
@@ -10965,7 +10966,7 @@ style={
     ))}
   </div>
 )}
-{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachCyclingLibraryReview ftpWatts={athleteProfile.ftp} /></>}
+{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachAthleteRoster /><CoachCyclingLibraryReview ftpWatts={athleteProfile.ftp} /></>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section
