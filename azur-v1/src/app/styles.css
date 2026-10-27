@@ -4654,3 +4654,26 @@ strong {
 .calendar-layout .calendar-actual-comparison strong { color: #f6fbff; font-size: 11px; }
 .calendar-layout .calendar-actual-comparison span { color: #a5f0cf; }
 .calendar-layout .calendar-actual-comparison small { color: #91bcd8; font-size: 10px; }
+
+/* V2: explicit same-week workout moves; no drag gesture or automated plan rewrites */
+.calendar-layout .calendar-session-wrapper { min-width: 0; display: grid; gap: 5px; }
+.calendar-layout .calendar-session-wrapper > .calendar-session { width: 100%; }
+.calendar-layout .calendar-reschedule-button {
+  justify-self: end; padding: 5px 9px; border-radius: 7px;
+  background: #173b58; color: #d7ecfa; border: 1px solid rgba(68,151,205,.4);
+  font-size: 11px; cursor: pointer;
+}
+.calendar-layout .calendar-move-panel {
+  margin-bottom: 12px; padding: 16px; border-radius: 16px;
+  background: #10283f; color: #f6fbff; border: 1px solid rgba(68,151,205,.4);
+}
+.calendar-layout .calendar-move-panel p { color: #a4c0d4; font-size: 12px; }
+.calendar-layout .calendar-move-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.calendar-layout .calendar-move-actions select,
+.calendar-layout .calendar-move-actions button {
+  min-height: 38px; border-radius: 9px; padding: 8px 12px;
+  border: 1px solid #39617a; background: #173b58; color: #f6fbff;
+}
+.calendar-layout .calendar-move-actions button:disabled { opacity: .55; }
+.calendar-layout .calendar-move-message { color: #91bcd8; margin: 8px 0; }
+.calendar-layout .calendar-move-hint { display: none; }
