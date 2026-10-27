@@ -29,3 +29,7 @@ jobs:
         run: |
           node -e "require('esbuild').buildSync({entryPoints:['src/domain/bikeWorkoutSmokeChecks.ts'],bundle:true,platform:'node',format:'esm',outfile:'/tmp/azur-bike-check.mjs'})"
           node --input-type=module -e "import('/tmp/azur-bike-check.mjs').then(m=>m.runBikeWorkoutSmokeChecks())"
+      - name: Bundle and run performance diagnostic checks
+        run: |
+          node -e "require('esbuild').buildSync({entryPoints:['src/domain/bikeDiagnosticSmokeChecks.ts'],bundle:true,platform:'node',format:'esm',outfile:'/tmp/azur-bike-diagnostic.mjs'})"
+          node --input-type=module -e "import('/tmp/azur-bike-diagnostic.mjs').then(m=>m.runBikeDiagnosticSmokeChecks())"
