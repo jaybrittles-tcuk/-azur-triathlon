@@ -7260,6 +7260,12 @@ color:
   }
 
   function CalendarView() {
+    const completedCount = calendarWeekSessions.filter(
+      (session) => session.status === 'completed',
+    ).length;
+    const plannedCount = calendarWeekSessions.filter(
+      (session) => session.status === 'planned' || session.status === 'edited',
+    ).length;
     return (
       <div className="calendar-layout">
         <div>
@@ -7334,7 +7340,7 @@ color:
 
   <div className="calendar-strip-footer">
     <small>
-      {calendarWeekSessions.length} sessions ·{' '}
+      {calendarWeekSessions.length} sessions · {completedCount} completed · {plannedCount} planned ·{' '}
       {(
         calendarWeekSessions.reduce(
           (total, session) =>
@@ -7412,9 +7418,7 @@ const dayCompletedActivities = completedActivityFeed.filter(
 >
     <div
       className={`calendar-day-head ${
-        daySessions.some(
-          (session) => session.plannedDate === todayKey,
-        )
+        calendarDay?.dateKey === todayKey
           ? 'today'
           : ''
       }`}
@@ -7423,20 +7427,14 @@ const dayCompletedActivities = completedActivityFeed.filter(
         <span>{day}</span>
 
         <strong>
-          {daySessions[0]
-            ? new Date(
-                `${daySessions[0].plannedDate}T12:00:00`,
-              ).toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'short',
-              })
-            : ''}
+          {calendarDay?.date.toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+            }) ?? ''}
         </strong>
       </div>
 
-{daySessions.some(
-  (session) => session.plannedDate === todayKey,
-) && <small>TODAY</small>}
+{calendarDay?.dateKey === todayKey && <small>TODAY</small>}
 </div>
 
                   <div className="day-stack">
@@ -7448,7 +7446,9 @@ className={`calendar-session ${
 } ${
   session.status === 'completed'
     ? 'completed'
-    : ''
+    : session.status === 'edited'
+      ? 'edited'
+      : 'planned'
 } ${
   selected.id === session.id
     ? 'selected'
@@ -7466,7 +7466,11 @@ onClick={() => {
   <span>
     {session.status === 'completed'
       ? 'Completed'
-      : session.status}
+      : session.status === 'edited'
+        ? 'Adjusted'
+        : session.status === 'planned'
+          ? 'Planned'
+          : session.status}
   </span>
 
   {session.status === 'completed' ? (
