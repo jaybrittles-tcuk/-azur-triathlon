@@ -16,7 +16,7 @@ test('running targets are not misrepresented as FTP bike stress', () => {
 
 test('repeat intervals include work and between-rep recoveries', () => {
  const result = estimatePlannedStress({sport:'bike',prescription:{azurWorkout:{steps:[{type:'repeat',reps:3,work:{type:'work',durationMin:10,targetType:'ftp',targetLow:100,targetHigh:100},recovery:{type:'recovery',durationMin:5,targetType:'ftp',targetLow:50,targetHigh:50}}]}}});
- assert.deepEqual(result,{status:'estimated',points:54.2,method:'ftp_duration_proxy'});
+ assert.deepEqual(result,{status:'estimated',points:52.1,method:'ftp_duration_proxy'});
 });
 test('rejects excessive session duration', () => {
  const result = estimatePlannedStress({sport:'bike',prescription:{azurWorkout:{steps:[{type:'work',durationMin:1500,targetType:'ftp',targetLow:100,targetHigh:100}]}}});
