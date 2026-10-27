@@ -1,3 +1,4 @@
+import PremiumWorkoutTabs from './PremiumWorkoutTabs';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
 import CoachAttentionInbox from './CoachAttentionInbox';
 import CoachAthletePerformance from './CoachAthletePerformance';
@@ -7958,6 +7959,7 @@ onClick={() => {
             </button>
           </div>
 
+          <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
           <div className="azur-workout-modal-summary">
  <span>{selected.rationale || 'Workout prescription and athlete targets'}</span>
  <CalendarIntensityProfile steps={(selected.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
