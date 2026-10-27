@@ -4,6 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import PrivacyPolicy from './PrivacyPolicy';
 import CoachReviewInbox from './CoachReviewInbox';
+import CalendarIntensityProfile from './CalendarIntensityProfile';
 import {
   Activity,
   AlertTriangle,
@@ -7564,6 +7565,7 @@ onClick={() => {
 </div>
 
                         <strong>{session.title}</strong>
+<CalendarIntensityProfile steps={(session as Session & { azurWorkout?: { steps?: unknown } }).azurWorkout?.steps} />
 <CalendarPrescriptionSteps prescription={session.prescription} />
 <div className="calendar-session-purpose">
   {session.status === 'completed' && session.completedDurationSec != null ? (
