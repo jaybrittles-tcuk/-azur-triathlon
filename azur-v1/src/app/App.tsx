@@ -1,3 +1,4 @@
+import CoachAttentionInbox from './CoachAttentionInbox';
 import CoachAthletePerformance from './CoachAthletePerformance';
 import CoachAthleteRoster from './CoachAthleteRoster';
 import type { AssignedAthlete } from './CoachAthleteRoster';
@@ -10969,7 +10970,7 @@ style={
     ))}
   </div>
 )}
-{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachAthleteRoster onSelect={setCoachSelectedAthlete} /><CoachAthletePerformance athlete={coachSelectedAthlete} /><CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} /></>}
+{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachAttentionInbox onSelect={setCoachSelectedAthlete} /><CoachAthleteRoster onSelect={setCoachSelectedAthlete} selectedAthleteId={coachSelectedAthlete?.id ?? null} /><CoachAthletePerformance athlete={coachSelectedAthlete} /><CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} /></>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section
