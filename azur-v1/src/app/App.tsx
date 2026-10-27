@@ -12,7 +12,6 @@ import FitParser from 'fit-file-parser';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import PrivacyPolicy from './PrivacyPolicy';
-import CoachReviewInbox from './CoachReviewInbox';
 import CalendarIntensityProfile from './CalendarIntensityProfile';
 import {
   Activity,
@@ -10924,7 +10923,7 @@ style={
     ))}
   </div>
 )}
-{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachReviewInbox /><CoachAttentionInbox onSelect={setCoachSelectedAthlete} /><CoachAthleteRoster onSelect={setCoachSelectedAthlete} selectedAthleteId={coachSelectedAthlete?.id ?? null} /><CoachAthletePerformance athlete={coachSelectedAthlete} /><CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} /></>}
+{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachAttentionInbox onSelect={setCoachSelectedAthlete} /><CoachAthleteRoster onSelect={setCoachSelectedAthlete} selectedAthleteId={coachSelectedAthlete?.id ?? null} /><CoachAthletePerformance athlete={coachSelectedAthlete} /><CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} /></>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section
