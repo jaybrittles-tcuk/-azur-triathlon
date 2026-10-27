@@ -257,6 +257,22 @@ export function resolveTrainingPriority({
       'No single discipline currently dominates the development signals, so AZUR keeps the plan balanced.';
   }
 
+
+  // Show numerical evidence only when both competing development
+  // reserves are valid and a clear objective winner exists.
+  if (
+    phaseStrength > 0 &&
+    (objectivePriority === 'swim' || objectivePriority === 'run') &&
+    swimGapStatus === 'development' &&
+    runGapStatus === 'development' &&
+    swimGapPct != null &&
+    runGapPct != null &&
+    Number.isFinite(swimGapPct) &&
+    Number.isFinite(runGapPct)
+  ) {
+    rationale += ` Objective analysis identifies ${objectivePriority} as the greater current limiter: swim race-pace reserve ${swimGapPct.toFixed(1)}% versus run ${runGapPct.toFixed(1)}%. The lower reserve indicates the greater development need.`;
+  }
+
   return {
     resolvedPriority,
     objectivePriority,
