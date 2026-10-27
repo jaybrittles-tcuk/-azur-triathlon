@@ -7381,11 +7381,22 @@ color:
         const clashes = hard && existing.some((item) => ['intensity', 'race_specific'].includes(item.sessionClass));
         const warnings = calendarMoveSpacingWarnings(session, day.dateKey);
         const plannedMinutes = existing.reduce((sum, item) => sum + item.durationMin, 0);
+        // This is a planned-duration projection, not TSS, CTL, ATL or predicted recovery.
+        const projectedDayMinutes = plannedMinutes + session.durationMin;
+        const rollingDays = calendarWeekDates.filter((date) => date.dateKey <= day.dateKey && date.dateKey >= calendarWeekDates[0].dateKey);
+        const projectedWeekToDateMinutes = rollingDays.reduce((sum, date) => {
+          const activities = weekSessions.filter((item) =>
+            item.id !== session.id && item.plannedDate === date.dateKey &&
+            !['missed', 'cancelled'].includes(item.status));
+          return sum + activities.reduce((minutes, item) => minutes + item.durationMin, 0);
+        }, 0) + session.durationMin;
         return {
           dateKey: day.dateKey,
           label: `${day.dayLabel} ${day.dayNumber}`,
           available: !clashes && warnings.length === 0,
           plannedMinutes,
+          projectedDayMinutes,
+          projectedWeekToDateMinutes,
           reason: clashes ? 'Quality session already scheduled' : warnings.join(' ') || `${Math.round(plannedMinutes)} min already planned`,
         };
       })
@@ -7472,13 +7483,13 @@ color:
             ) : (
               <p>Training-load history is insufficient for a reliable current form/fatigue estimate. Suggestions use the planned schedule only.</p>
             )}
-            <small>AZUR does not yet predict day-specific readiness or use this snapshot to automatically approve high-intensity moves.</small>
+            <small>Suggested dates show projected scheduled minutes after the move. Current training load is context only; this is not a TSS or day-specific recovery forecast. High-intensity conflicts remain blocked.</small>
           </div>
           {suggestions.length === 0 ? <small>No conflict-free alternatives in this week.</small> : (
             <div>
               {suggestions.map((day) => (
                 <button type="button" key={day.dateKey} onClick={() => { setMoveTargetDate(day.dateKey); setMoveMessage(''); }}>
-                  {day.label} · {day.reason}
+                  {day.label} · {Math.round(day.projectedDayMinutes)} min projected that day · {Math.round(day.projectedWeekToDateMinutes)} min week-to-date
                 </button>
               ))}
             </div>
