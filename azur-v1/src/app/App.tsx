@@ -7370,6 +7370,30 @@ color:
     return warnings;
   }
 
+  function calendarMoveAlternatives(session: Session) {
+    return calendarWeekDates
+      .filter((day) => day.dateKey !== session.plannedDate)
+      .map((day) => {
+        const existing = weekSessions.filter((item) =>
+          item.id !== session.id && item.plannedDate === day.dateKey &&
+          !['missed', 'cancelled'].includes(item.status));
+        const hard = ['intensity', 'race_specific'].includes(session.sessionClass);
+        const clashes = hard && existing.some((item) => ['intensity', 'race_specific'].includes(item.sessionClass));
+        const warnings = calendarMoveSpacingWarnings(session, day.dateKey);
+        const plannedMinutes = existing.reduce((sum, item) => sum + item.durationMin, 0);
+        return {
+          dateKey: day.dateKey,
+          label: `${day.dayLabel} ${day.dayNumber}`,
+          available: !clashes && warnings.length === 0,
+          plannedMinutes,
+          reason: clashes ? 'Quality session already scheduled' : warnings.join(' ') || `${Math.round(plannedMinutes)} min already planned`,
+        };
+      })
+      .filter((candidate) => candidate.available)
+      .sort((a, b) => a.plannedMinutes - b.plannedMinutes || a.dateKey.localeCompare(b.dateKey))
+      .slice(0, 3);
+  }
+
   async function saveCalendarMove() {
     const session = weekSessions.find((item) => item.id === movingSessionId);
     if (!session || !moveTargetDate || moveSaving) return;
@@ -7434,6 +7458,25 @@ color:
   <section className="calendar-move-panel" aria-label="Reschedule workout">
     <strong>Reschedule {weekSessions.find((item) => item.id === movingSessionId)?.title}</strong>
     <p>Choose another day this week. Quality-session clashes are blocked; check your recovery plan before committing.</p>
+    {(() => {
+      const session = weekSessions.find((item) => item.id === movingSessionId);
+      if (!session) return null;
+      const suggestions = calendarMoveAlternatives(session);
+      return (
+        <div className="calendar-move-suggestions">
+          <span>Suggested days · based on planned session spacing and duration only</span>
+          {suggestions.length === 0 ? <small>No conflict-free alternatives in this week.</small> : (
+            <div>
+              {suggestions.map((day) => (
+                <button type="button" key={day.dateKey} onClick={() => { setMoveTargetDate(day.dateKey); setMoveMessage(''); }}>
+                  {day.label} · {day.reason}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    })()}
     <div className="calendar-move-actions">
       <select aria-label="New workout day" value={moveTargetDate} onChange={(event) => {setMoveTargetDate(event.target.value); setMoveMessage('');}}>
         <option value="">Choose day</option>
