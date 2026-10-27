@@ -32,6 +32,7 @@ import { supabase } from '../lib/supabase';
 import { keySessionExecution } from '../lib/calculations/sessionExecution';
 import { dailyReadiness } from '../lib/calculations/recovery';
 import { calculateRaceGoalDemand } from '../lib/calculations/raceGoalDemand';
+import { calculateAthleteRaceGap } from '../lib/calculations/athleteRaceGap';
 import {
   calculateBikeTrainingStress,
   calculateRunTrainingStress,
