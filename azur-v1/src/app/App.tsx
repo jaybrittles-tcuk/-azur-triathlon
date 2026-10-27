@@ -1,3 +1,4 @@
+import MultisportPlannedStress from './MultisportPlannedStress';
 import { estimatePlannedStress } from '../lib/calculations/plannedStress';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import FitParser from 'fit-file-parser';
@@ -7472,6 +7473,11 @@ color:
     return (
       <div className="calendar-layout">
         <div>
+<MultisportPlannedStress
+  sessions={calendarWeekSessions}
+  runThreshold={athleteProfile.runThreshold}
+  swimCss={athleteProfile.swimThreshold}
+/>
 {movingSessionId && (
   <section className="calendar-move-panel" aria-label="Reschedule workout">
     <strong>Reschedule {weekSessions.find((item) => item.id === movingSessionId)?.title}</strong>
