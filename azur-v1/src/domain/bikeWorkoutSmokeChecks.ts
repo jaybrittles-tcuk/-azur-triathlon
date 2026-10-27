@@ -6,12 +6,14 @@ import { toPlannedBikeSession } from './bikeWorkoutAdapter';
 export function runBikeWorkoutSmokeChecks():void {
  const ids=new Set<string>();
  for(const workout of allBikeWorkouts){
+   if(workout.status!=='candidate') throw new Error('Unexpected approved workout: '+workout.id);
    if(ids.has(workout.id)) throw new Error('Duplicate workout ID: '+workout.id);
    ids.add(workout.id);
    const errors=validateWorkout(workout);
    if(errors.length) throw new Error(workout.id+': '+errors.join(', '));
    if(workoutMinutes(workout)<=0) throw new Error('Zero duration: '+workout.id);
  }
+ if(allBikeWorkouts.length!==38) throw new Error('Expected 38 candidate workouts');
  const af=allBikeWorkouts.find(w=>w.id==='BIKE-AF-001');
  if(!af) throw new Error('Missing aerobic foundation workout');
  if(workoutMinutes(af)!==45) throw new Error('Aerobic reset duration should be 45 minutes');
