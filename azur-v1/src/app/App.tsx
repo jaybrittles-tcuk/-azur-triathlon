@@ -5663,22 +5663,134 @@ const todaySession = weekSessions.find(
 
   return (
       <>
-<section className="azur-premium-home" aria-label="AZUR athlete home">
-  <div className="azur-home-kicker"><span>AZUR / ATHLETE DASHBOARD</span><span>{homeDateLabel}</span></div>
-  <div className="azur-home-race">
-    <span className="azur-eyebrow">YOUR NEXT CHALLENGE</span>
-    <h2>{primaryRace.name || 'Your next race starts here'}</h2>
-    <p>{primaryRace.raceDate ? new Date(primaryRace.raceDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : 'Add your race to unlock a personalised countdown'}</p>
-    <div className="azur-race-bottom"><strong>{homeRaceDays == null ? '—' : homeRaceDays}</strong><span>{homeRaceDays == null ? 'Race date not set' : 'days until race'}</span><button type="button" onClick={()=>setActiveNav('Calendar')}>View training <span aria-hidden="true">→</span></button></div>
-  </div>
-  <div className="azur-home-today">
-    <div className="azur-home-section-heading"><span>TODAY'S TRAINING</span><span>{homeDateLabel}</span></div>
-    <div className="azur-home-today-body">
-      <span className={`azur-sport-symbol ${todaySession?.sport || 'rest'}`}>{todaySession?.sport==='bike'?'◉':todaySession?.sport==='swim'?'≈':todaySession?.sport==='run'?'↗':'☾'}</span>
-      <div><h3>{todaySession?.title || 'No workout scheduled'}</h3><p>{todaySession ? `${todaySession.sport.toUpperCase()} · ${homeMinutesLabel(Number(todaySession.durationMin)||0)} · ${todaySession.status}` : 'Recovery, flexibility, or a free day'}</p></div>
-      <button type="button" onClick={()=>setActiveNav('Calendar')} aria-label="Open training calendar">→</button>
+<section
+  className="mobile-home-hero"
+  style={{
+    marginBottom: '14px',
+  }}
+>
+  <div
+    className="race-hero-card"
+    style={{
+      minHeight: '210px',
+      padding: '22px 20px',
+      position: 'relative',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-end',
+      borderRadius: '20px',
+      border: '1px solid rgba(68, 151, 205, 0.32)',
+      boxShadow: '0 16px 32px rgba(1, 9, 20, 0.24)',
+     backgroundImage:
+  "linear-gradient(180deg, rgba(7,21,36,0.72) 0%, rgba(7,21,36,0.32) 32%, rgba(7,21,36,0.92) 82%, #071524 100%), url('/race-images/roth.jpg')",
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    }}
+  >
+    <button
+      type="button"
+      onClick={() => setActiveNav('Profile')}
+      style={{
+        position: 'absolute',
+        top: '16px',
+right: '16px',
+        width: '58px',
+height: '58px',
+        padding: 0,
+        borderRadius: '50%',
+        border: '2px solid rgba(255,255,255,0.95)',
+        background: '#0A3556',
+        boxShadow: '0 0 0 2px rgba(32,143,208,0.85)',
+        overflow: 'hidden',
+        cursor: 'pointer',
+      }}
+    >
+      {avatarUrl ? (
+        <img
+          src={avatarUrl}
+          alt={`${athleteName} profile`}
+          style={{
+  width: '100%',
+  height: '100%',
+  objectFit: 'contain',
+  objectPosition: 'center',
+  display: 'block',
+  background: '#071524',
+}}
+        />
+      ) : (
+        <User
+          size={20}
+          color="#FFFFFF"
+        />
+      )}
+    </button>
+
+    <div
+      style={{
+        position: 'relative',
+        zIndex: 1,
+      }}
+    >
+      <div
+        style={{
+          marginBottom: '5px',
+          color: 'rgba(255,255,255,0.72)',
+          fontSize: '11px',
+          fontWeight: 700,
+          letterSpacing: '0.10em',
+          textTransform: 'uppercase',
+        }}
+      >
+        YOUR A RACE
+      </div>
+
+      <h1
+        style={{
+          margin: 0,
+          color: '#FFFFFF',
+          fontSize: '30px',
+          fontWeight: 800,
+          lineHeight: 1.1,
+          letterSpacing: '-0.025em',
+        }}
+      >
+        {primaryRace.name || 'Primary Race'}
+      </h1>
+
+      <div
+        style={{
+          marginTop: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '7px',
+          color: 'rgba(255,255,255,0.86)',
+          fontSize: '14px',
+          fontWeight: 500,
+        }}
+      >
+        <span>
+        {currentMacrocycleWeek?.phase || 'Base 1'}
+        </span>
+
+        <span style={{ opacity: 0.4 }}>
+          •
+        </span>
+
+        <span>
+          {daysToRace} days to race day
+        </span>
+        <span style={{ opacity: 0.7 }}>
+  • {currentMacrocycleWeek?.weeksToRace ?? 0} weeks to race
+</span>
+      </div>
     </div>
   </div>
+</section>
+<section className="azur-premium-home" aria-label="AZUR athlete home">
+  <div className="azur-home-kicker"><span>AZUR / ATHLETE DASHBOARD</span><span>{homeDateLabel}</span></div>
   <div className="azur-home-section-heading"><span>YOUR TRAINING WEEK</span><button type="button" onClick={()=>setActiveNav('Calendar')}>Calendar →</button></div>
   <div className="azur-home-sports">
     {(['swim','bike','run'] as const).map(sport=><div className={`azur-home-sport ${sport}`} key={sport}>
@@ -5844,6 +5956,7 @@ min
 
     <button
       type="button"
+      onClick={() => setActiveNav("Calendar")}
       style={{
        width: 'auto',
         minWidth: '140px',
@@ -5862,132 +5975,7 @@ padding: '11px 16px',
     </button>
   </section>
 )}
-<section
-  className="mobile-home-hero"
-  style={{
-    marginBottom: '14px',
-  }}
->
-  <div
-    className="race-hero-card"
-    style={{
-      minHeight: '210px',
-      padding: '22px 20px',
-      position: 'relative',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-end',
-      borderRadius: '20px',
-      border: '1px solid rgba(68, 151, 205, 0.32)',
-      boxShadow: '0 16px 32px rgba(1, 9, 20, 0.24)',
-     backgroundImage:
-  "linear-gradient(180deg, rgba(7,21,36,0.72) 0%, rgba(7,21,36,0.32) 32%, rgba(7,21,36,0.92) 82%, #071524 100%), url('/race-images/roth.jpg')",
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-    }}
-  >
-    <button
-      type="button"
-      onClick={() => setActiveNav('Profile')}
-      style={{
-        position: 'absolute',
-        top: '16px',
-right: '16px',
-        width: '58px',
-height: '58px',
-        padding: 0,
-        borderRadius: '50%',
-        border: '2px solid rgba(255,255,255,0.95)',
-        background: '#0A3556',
-        boxShadow: '0 0 0 2px rgba(32,143,208,0.85)',
-        overflow: 'hidden',
-        cursor: 'pointer',
-      }}
-    >
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt={`${athleteName} profile`}
-          style={{
-  width: '100%',
-  height: '100%',
-  objectFit: 'contain',
-  objectPosition: 'center',
-  display: 'block',
-  background: '#071524',
-}}
-        />
-      ) : (
-        <User
-          size={20}
-          color="#FFFFFF"
-        />
-      )}
-    </button>
 
-    <div
-      style={{
-        position: 'relative',
-        zIndex: 1,
-      }}
-    >
-      <div
-        style={{
-          marginBottom: '5px',
-          color: 'rgba(255,255,255,0.72)',
-          fontSize: '11px',
-          fontWeight: 700,
-          letterSpacing: '0.10em',
-          textTransform: 'uppercase',
-        }}
-      >
-        YOUR A RACE
-      </div>
-
-      <h1
-        style={{
-          margin: 0,
-          color: '#FFFFFF',
-          fontSize: '30px',
-          fontWeight: 800,
-          lineHeight: 1.1,
-          letterSpacing: '-0.025em',
-        }}
-      >
-        {primaryRace.name || 'Primary Race'}
-      </h1>
-
-      <div
-        style={{
-          marginTop: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '7px',
-          color: 'rgba(255,255,255,0.86)',
-          fontSize: '14px',
-          fontWeight: 500,
-        }}
-      >
-        <span>
-        {currentMacrocycleWeek?.phase || 'Base 1'}
-        </span>
-
-        <span style={{ opacity: 0.4 }}>
-          •
-        </span>
-
-        <span>
-          {daysToRace} days to race day
-        </span>
-        <span style={{ opacity: 0.7 }}>
-  • {currentMacrocycleWeek?.weeksToRace ?? 0} weeks to race
-</span>
-      </div>
-    </div>
-  </div>
-</section>
 <div
   style={{
     display: 'grid',
@@ -6066,8 +6054,8 @@ height: '58px',
     borderRadius: '12px',
     border: '1px solid rgba(80, 155, 202, 0.30)',
     background: showMacrocyclePreview
-      ? '#EAF4FD'
-      : '#FFFFFF',
+      ? '#22516F'
+      : '#16344D',
     color: '#F6FBFF',
     fontSize: '12px',
     fontWeight: 700,
