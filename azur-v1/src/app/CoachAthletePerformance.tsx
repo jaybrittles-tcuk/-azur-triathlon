@@ -1,3 +1,4 @@
+import CoachTrainingLoadTrend from './CoachTrainingLoadTrend';
 import { coachAttentionSignals } from '../lib/calculations/coachAttention';
 import type { CoachAttention } from '../lib/calculations/coachAttention';
 import { useEffect, useState } from 'react';
@@ -57,6 +58,7 @@ export default function CoachAthletePerformance({ athlete }: { athlete:AssignedA
    </div>
    <p>Development focus: <strong>{baseline?.development_sport||'Not assessed'}</strong> · Strongest discipline: <strong>{baseline?.strongest_sport||'Not assessed'}</strong></p>
    <p>Baseline target: {baseline?.weekly_hours!=null?`${baseline.weekly_hours} hr/week`:'Not recorded'} · {baseline?.sessions_per_week!=null?`${baseline.sessions_per_week} sessions/week`:'Sessions not recorded'}</p>
+   <CoachTrainingLoadTrend key={athlete.id} athlete={athlete} />
    <h5>Coach attention signals</h5>
    {alerts.length===0?<p>No attention signals identified from available records. This does not indicate recovery readiness.</p>:<ul>{alerts.map(a=><li key={a.code}><strong>{a.severity==='review'?'Review':'Information'}:</strong> {a.description}</li>)}</ul>}
    <h5>Recent training (28 days)</h5>
