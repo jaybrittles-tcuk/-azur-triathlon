@@ -53,7 +53,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts }: { ftpWatts: numb
     if (!personalisedDraft || !scheduleDate || scheduleSaving || preview.status !== 'selected') return;
     setScheduleSaving(true); setScheduleMessage('');
     try {
-      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(scheduleDate) ||
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(scheduleDate) ||
         new Date(scheduleDate + 'T12:00:00').toISOString().slice(0,10) !== scheduleDate) {
         throw new Error('Select a valid calendar date.');
       }
