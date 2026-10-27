@@ -1,3 +1,4 @@
+import { estimatePlannedStress } from '../lib/calculations/plannedStress';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import FitParser from 'fit-file-parser';
 import L from 'leaflet';
@@ -7383,6 +7384,11 @@ color:
         const plannedMinutes = existing.reduce((sum, item) => sum + item.durationMin, 0);
         // This is a planned-duration projection, not TSS, CTL, ATL or predicted recovery.
         const projectedDayMinutes = plannedMinutes + session.durationMin;
+        const stressInputs = [...existing, session].map((item) =>
+          estimatePlannedStress({ sport: item.sport, prescription: item.prescription }));
+        const projectedBikeStress = stressInputs.every((result) => result.status === 'estimated')
+          ? Math.round(stressInputs.reduce((sum, result) => sum + (result.status === 'estimated' ? result.points : 0), 0))
+          : null;
         const rollingDays = calendarWeekDates.filter((date) => date.dateKey <= day.dateKey && date.dateKey >= calendarWeekDates[0].dateKey);
         const projectedWeekToDateMinutes = rollingDays.reduce((sum, date) => {
           const activities = weekSessions.filter((item) =>
@@ -7396,6 +7402,7 @@ color:
           available: !clashes && warnings.length === 0,
           plannedMinutes,
           projectedDayMinutes,
+          projectedBikeStress,
           projectedWeekToDateMinutes,
           reason: clashes ? 'Quality session already scheduled' : warnings.join(' ') || `${Math.round(plannedMinutes)} min already planned`,
         };
@@ -7489,7 +7496,7 @@ color:
             <div>
               {suggestions.map((day) => (
                 <button type="button" key={day.dateKey} onClick={() => { setMoveTargetDate(day.dateKey); setMoveMessage(''); }}>
-                  {day.label} · {Math.round(day.projectedDayMinutes)} min projected that day · {Math.round(day.projectedWeekToDateMinutes)} min week-to-date
+                  {day.label} · {Math.round(day.projectedDayMinutes)} min projected that day · {Math.round(day.projectedWeekToDateMinutes)} min week-to-date · {day.projectedBikeStress != null ? `${day.projectedBikeStress} estimated bike-stress proxy` : 'Stress unavailable (incomplete or mixed-sport targets)'}
                 </button>
               ))}
             </div>
