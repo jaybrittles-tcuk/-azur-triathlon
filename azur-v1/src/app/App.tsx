@@ -8737,6 +8737,9 @@ const sessionVerdict =
               <small>
   {athleteRaceGap.bike.label}
 </small>
+<small>
+  {athleteRaceGap.bike.explanation}
+</small>
             </div>
 
             <div>
