@@ -88,8 +88,7 @@ export function createFourWeekDraft(request:FourWeekPlanRequest):FourWeekDraft {
    if(index===3&&isHard) weekWarnings.push('Recovery week: demanding bike objective omitted pending coach review.');
    else if(warnings.length===0&&suggestions.length){
      // One proposed bike focus session per week; no implicit second intensity session.
-     const eligible=suggestions.filter(s=>!isHard||!request.commitments.some(c=>c.intensity==='hard'&&c.day===''+c.day));
-     const candidate:BikeWorkoutRecommendation|undefined=eligible[0];
+     const candidate:BikeWorkoutRecommendation|undefined=suggestions[0];
      if(candidate){
        const day=days.find(day=>{
          const free=(available.get(day)??0)-(occupied.get(day)??0);
