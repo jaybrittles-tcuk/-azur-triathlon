@@ -4979,3 +4979,43 @@ strong {
  .session-detail-modal .section-heading h3{font-size:22px}
  .session-detail-modal .session-detail-meta span{font-size:10px}
 }
+
+
+/* AZUR Calendar V2: TrainingPeaks-inspired week grid on desktop, single-day focus on mobile */
+.calendar-layout .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;overflow:visible;align-items:stretch;background:transparent;border:0;box-shadow:none;padding:0}
+.calendar-layout .calendar-day{min-width:0;min-height:0;margin:0;padding:6px;border-radius:11px;background:#0d253b}
+.calendar-layout .calendar-day-head{padding:5px 3px 7px;margin:0 0 6px}
+.calendar-layout .calendar-day-head>div{display:flex;flex-direction:column;gap:2px}
+.calendar-layout .calendar-day-head span{font-size:10px}
+.calendar-layout .calendar-day-head strong{font-size:12px}
+.calendar-layout .calendar-day .day-stack{padding:0;gap:6px}
+.calendar-layout .calendar-session{padding:7px 6px;gap:5px;border-radius:9px}
+.calendar-layout .calendar-session>strong{font-size:11px;line-height:1.3}
+.calendar-layout .calendar-session-meta{gap:3px;flex-wrap:wrap}
+.calendar-layout .calendar-session-meta>span{font-size:10px}
+.calendar-layout .calendar-session-status>span{font-size:9px!important;padding:2px 4px!important}
+.calendar-layout .calendar-session-top>span{font-size:9px}
+.calendar-layout .calendar-reschedule-button{font-size:9px;padding:3px 5px}
+@media(max-width:900px) and (min-width:751px){
+ .calendar-layout .calendar-grid{grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+ .calendar-layout .calendar-day{padding:4px}
+ .calendar-layout .calendar-session{padding:6px 4px}
+ .calendar-layout .calendar-session>strong{font-size:10px}
+}
+@media(max-width:750px){
+ .calendar-layout .calendar-grid{display:flex;flex-direction:column;gap:8px;overflow:visible}
+ .calendar-layout .calendar-day{width:100%;margin:0;padding:9px;min-height:0;border-radius:12px}
+ .calendar-layout .calendar-day.mobile-unfocused{display:none}
+ .calendar-layout .calendar-day-head{padding:3px 4px 8px;margin-bottom:8px}
+ .calendar-layout .calendar-day-head>div{flex-direction:row;align-items:center;gap:8px}
+ .calendar-layout .calendar-day-head span{font-size:11px}
+ .calendar-layout .calendar-day-head strong{font-size:13px}
+ .calendar-layout .calendar-day .day-stack{gap:7px}
+ .calendar-layout .calendar-session{padding:11px 12px;gap:7px;border-radius:11px}
+ .calendar-layout .calendar-session>strong{font-size:15px}
+ .calendar-layout .calendar-session-meta>span{font-size:11px}
+ .calendar-layout .calendar-session-top>span{font-size:10px}
+ .calendar-layout .calendar-session-status>span{font-size:10px!important}
+ .calendar-layout .calendar-focus-toolbar{margin:7px 0;padding:8px 1px}
+ .calendar-layout .calendar-focus-toolbar button{padding:6px 9px;font-size:11px;border-radius:8px;background:#153c57;border-color:#356780}
+}
