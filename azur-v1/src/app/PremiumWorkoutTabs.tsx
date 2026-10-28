@@ -24,19 +24,19 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
   {tab==='overview'&&<div role="tabpanel" className="azur-workout-tab-content">
    <p>{rationale||'Review this session and its prescribed training objective.'}</p>
    <div className="azur-workout-facts">
-    <div><small>Planned</small><strong>{plannedMinutes} min</strong></div>
-    <div><small>Completed</small><strong>{completedMinutes==null?'Not recorded':completedMinutes+' min'}</strong></div>
-    <div><small>Structured targets</small><strong>{intervals.length?intervals.length+' blocks':'Not supplied'}</strong></div>
+    <div><small>Scheduled</small><strong>{plannedMinutes} min</strong></div>
+    <div><small>Recorded</small><strong>{completedMinutes==null?'Awaiting activity':completedMinutes+' min'}</strong></div>
+    <div><small>Workout structure</small><strong>{intervals.length?intervals.length+' timed blocks':'Coach-prescribed'}</strong></div>
    </div>
    {completedMinutes!=null&&<p>Recorded duration difference: {completedMinutes-plannedMinutes>=0?'+':''}{completedMinutes-plannedMinutes} min{completedSource?' · '+completedSource:''}. Duration alone does not establish intensity compliance.</p>}
-   {intervals.length>0&&<p>Prescribed timed intervals: {Math.round(duration*10)/10} min. Targets below use original workout prescription.</p>}
+   {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Intervals for prescribed targets.</p>}
   </div>}
   {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
    <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/>
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
   {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <h4>Coaching purpose</h4><p>{rationale||'No additional coaching rationale recorded.'}</p>
+   <h4>Coaching notes</h4><p>{rationale||'No additional coaching rationale recorded.'}</p>
    <p>{typeof prescription?.focus==='string'?prescription.focus:'No additional focus notes supplied.'}</p>
    <small>Additional workout notes and editable athlete feedback remain in the detailed sections below.</small>
   </div>}
