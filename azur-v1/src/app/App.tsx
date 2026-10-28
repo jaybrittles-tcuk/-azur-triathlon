@@ -7864,136 +7864,78 @@ onClick={() => {
     <strong>{selected.prescription.focus}</strong>
   </div>
 )}
-{Array.isArray(selected.prescription?.warmup) && (
- <div className="wide session-block">
+{Array.isArray(selected.prescription?.warmup) && selected.prescription.warmup.length > 0 && (
+  <div className="wide session-block">
     <span className="eyebrow">WARM-UP</span>
-
-{selected.prescription.warmup.map(
-  (block: any, index: number) => (
-    <div key={index} className="session-block-item">
-    <strong>
-            {block.reps ? `${block.reps} × ` : ''}
-            {block.distance_m
-  ? `${block.distance_m} m`
-  : block.duration_min
-    ? `${block.duration_min} min`
-    : block.duration_sec
-      ? `${block.duration_sec} sec`
-      : ''}
-          </strong>
-
-          {block.target && (
-            <div>{block.target}</div>
-          )}
-
-          {block.notes && (
-            <small>{block.notes}</small>
-          )}
-
-          {block.recovery_sec && (
-            <div>
-              <small>
-                {block.recovery_sec} sec easy recovery
-              </small>
-            </div>
-          )}
-        </div>
-      ),
-    )}
-  </div>
-)}
-{Array.isArray(selected.prescription?.main_set) && (
-<div className="wide session-block">
-    <span className="eyebrow">MAIN SET</span>
-
-    {selected.prescription.main_set.map(
-      (block: any, index: number) => (
-      <div key={index} className="session-block-item">
-        {block.discipline && (
-  <span className="eyebrow">
-    {block.discipline.toUpperCase()}
-  </span>
-)}
-<strong>
-  {block.reps ? `${block.reps} × ` : ''}
-  {block.distance_m
-    ? `${block.distance_m} m`
-    : `${block.duration_min} min`}
-</strong>
-
-          <div>
-            {block.target}
+    {selected.prescription.warmup.map((block: any, index: number) => (
+      <div key={index} className="session-block-item azur-prescription-step">
+        <strong>{block.reps ? `${block.reps} × ` : ''}{block.distance_m ? `${block.distance_m} m` : block.duration_min ? `${block.duration_min} min` : block.duration_sec ? `${block.duration_sec} sec` : 'Training block'}</strong>
+        {block.discipline && <small>{String(block.discipline).toUpperCase()}</small>}
+        {(block.target || block.pace || block.ftp_percent || block.rpe || block.cadence) ? (
+          <div className="azur-prescription-targets">
+            {block.target && <div><span>Effort / target</span><strong>{block.target}</strong></div>}
+            {block.pace && <div><span>Pace</span><strong>{block.pace}</strong></div>}
+            {block.ftp_percent && <div><span>Power</span><strong>{block.ftp_percent} FTP</strong></div>}
+            {block.rpe && <div><span>RPE</span><strong>{block.rpe}</strong></div>}
+            {block.cadence && <div><span>Cadence</span><strong>{block.cadence}</strong></div>}
           </div>
-
-          {block.ftp_percent && (
-            <small>
-              {block.ftp_percent} FTP
-            </small>
-          )}
-
-          {block.cadence && (
-            <small>
-              · {block.cadence}
-            </small>
-          )}
-
-          {block.rpe && (
-            <small>
-              · RPE {block.rpe}
-            </small>
-          )}
-{block.pace && (
-  <div>
-    <small>
-      Pace: {block.pace}
-    </small>
+        ) : <small className="azur-prescription-missing">No intensity target recorded — ask your coach for the intended effort.</small>}
+        {(block.recovery_sec || block.recovery_min || block.rest_sec || block.rest_min) && (
+          <div className="azur-prescription-rest"><span>Recovery between efforts</span><strong>{block.recovery_sec ?? block.rest_sec ? `${block.recovery_sec ?? block.rest_sec} sec` : `${block.recovery_min ?? block.rest_min} min`}</strong></div>
+        )}
+        {block.notes && <small className="azur-prescription-note">{block.notes}</small>}
+      </div>
+    ))}
   </div>
 )}
-
-{block.notes && (
-  <div>
-    <small>
-      {block.notes}
-    </small>
-  </div>
-)}          {block.recovery_min && (
-            <div>
-              <small>
-                {block.recovery_min} min easy recovery
-              </small>
-            </div>
-          )}
-        </div>
-      ),
-    )}
+{Array.isArray(selected.prescription?.main_set) && selected.prescription.main_set.length > 0 && (
+  <div className="wide session-block">
+    <span className="eyebrow">MAIN SET</span>
+    {selected.prescription.main_set.map((block: any, index: number) => (
+      <div key={index} className="session-block-item azur-prescription-step">
+        <strong>{block.reps ? `${block.reps} × ` : ''}{block.distance_m ? `${block.distance_m} m` : block.duration_min ? `${block.duration_min} min` : block.duration_sec ? `${block.duration_sec} sec` : 'Training block'}</strong>
+        {block.discipline && <small>{String(block.discipline).toUpperCase()}</small>}
+        {(block.target || block.pace || block.ftp_percent || block.rpe || block.cadence) ? (
+          <div className="azur-prescription-targets">
+            {block.target && <div><span>Effort / target</span><strong>{block.target}</strong></div>}
+            {block.pace && <div><span>Pace</span><strong>{block.pace}</strong></div>}
+            {block.ftp_percent && <div><span>Power</span><strong>{block.ftp_percent} FTP</strong></div>}
+            {block.rpe && <div><span>RPE</span><strong>{block.rpe}</strong></div>}
+            {block.cadence && <div><span>Cadence</span><strong>{block.cadence}</strong></div>}
+          </div>
+        ) : <small className="azur-prescription-missing">No intensity target recorded — ask your coach for the intended effort.</small>}
+        {(block.recovery_sec || block.recovery_min || block.rest_sec || block.rest_min) && (
+          <div className="azur-prescription-rest"><span>Recovery between efforts</span><strong>{block.recovery_sec ?? block.rest_sec ? `${block.recovery_sec ?? block.rest_sec} sec` : `${block.recovery_min ?? block.rest_min} min`}</strong></div>
+        )}
+        {block.notes && <small className="azur-prescription-note">{block.notes}</small>}
+      </div>
+    ))}
   </div>
 )}
-{Array.isArray(selected.prescription?.cooldown) && (
+{Array.isArray(selected.prescription?.cooldown) && selected.prescription.cooldown.length > 0 && (
   <div className="wide session-block">
     <span className="eyebrow">COOL-DOWN</span>
-
-    {selected.prescription.cooldown.map(
-      (block: any, index: number) => (
-       <div key={index} className="session-block-item">
-<strong>
-  {block.reps ? `${block.reps} × ` : ''}
-  {block.distance_m
-    ? `${block.distance_m} m`
-    : `${block.duration_min} min`}
-</strong>
-
-          {block.target && (
-            <div>{block.target}</div>
-          )}
-
-          {block.notes && (
-            <small>{block.notes}</small>
-          )}
-        </div>
-      ),
-    )}
+    {selected.prescription.cooldown.map((block: any, index: number) => (
+      <div key={index} className="session-block-item azur-prescription-step">
+        <strong>{block.reps ? `${block.reps} × ` : ''}{block.distance_m ? `${block.distance_m} m` : block.duration_min ? `${block.duration_min} min` : block.duration_sec ? `${block.duration_sec} sec` : 'Training block'}</strong>
+        {block.discipline && <small>{String(block.discipline).toUpperCase()}</small>}
+        {(block.target || block.pace || block.ftp_percent || block.rpe || block.cadence) ? (
+          <div className="azur-prescription-targets">
+            {block.target && <div><span>Effort / target</span><strong>{block.target}</strong></div>}
+            {block.pace && <div><span>Pace</span><strong>{block.pace}</strong></div>}
+            {block.ftp_percent && <div><span>Power</span><strong>{block.ftp_percent} FTP</strong></div>}
+            {block.rpe && <div><span>RPE</span><strong>{block.rpe}</strong></div>}
+            {block.cadence && <div><span>Cadence</span><strong>{block.cadence}</strong></div>}
+          </div>
+        ) : <small className="azur-prescription-missing">No intensity target recorded — ask your coach for the intended effort.</small>}
+        {(block.recovery_sec || block.recovery_min || block.rest_sec || block.rest_min) && (
+          <div className="azur-prescription-rest"><span>Recovery between efforts</span><strong>{block.recovery_sec ?? block.rest_sec ? `${block.recovery_sec ?? block.rest_sec} sec` : `${block.recovery_min ?? block.rest_min} min`}</strong></div>
+        )}
+        {block.notes && <small className="azur-prescription-note">{block.notes}</small>}
+      </div>
+    ))}
   </div>
-)}          
+)}
 {selected.prescription?.fueling && (
   <div className="wide session-block">
     <span className="eyebrow">FUELING</span>
