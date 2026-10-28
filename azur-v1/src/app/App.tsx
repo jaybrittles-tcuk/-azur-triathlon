@@ -7412,7 +7412,7 @@ color:
     const completedCount = calendarWeekSessions.filter(
       (session) => session.status === 'completed',
     ).length;
-    const focusedDay = calendarWeekDates.find(d => d.dateKey === calendarFocusedDate);
+    const focusedDay = calendarFocusedDate === 'all' ? null : (calendarWeekDates.find(d => d.dateKey === calendarFocusedDate) ?? calendarWeekDates.find(d => d.dateKey === todayKey) ?? calendarWeekDates[0]);
     const plannedCount = calendarWeekSessions.filter(
       (session) => session.status === 'planned' || session.status === 'edited',
     ).length;
@@ -7516,10 +7516,10 @@ color:
         <button
           type="button"
           key={day.dateKey}
-          aria-pressed={calendarFocusedDate === day.dateKey}
+          aria-pressed={focusedDay?.dateKey === day.dateKey}
           aria-label={`View workouts for ${day.dayLabel} ${day.dayNumber}`}
-          onClick={() => setCalendarFocusedDate(current => current === day.dateKey ? null : day.dateKey)}
-          className={`calendar-strip-day ${day.dateKey === todayKey ? 'today' : ''} ${calendarFocusedDate === day.dateKey ? 'focused' : ''}`}
+          onClick={() => setCalendarFocusedDate(day.dateKey)}
+          className={`calendar-strip-day ${day.dateKey === todayKey ? 'today' : ''} ${focusedDay?.dateKey === day.dateKey ? 'focused' : ''}`}
         >
           <span>{day.dayLabel.slice(0, 1)}</span>
 
@@ -7566,8 +7566,8 @@ color:
 </section>
 
 <div className="calendar-focus-toolbar">
-  <div><strong>{focusedDay ? focusedDay.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}) : 'Full training week'}</strong><small>{focusedDay ? 'Showing sessions for selected day' : 'Select a date above to focus your calendar'}</small></div>
-  {focusedDay && <button type="button" onClick={() => setCalendarFocusedDate(null)}>View full week</button>}
+  <div><strong>{focusedDay ? focusedDay.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}) : 'Full training week'}</strong><small>{focusedDay ? 'Tap another date to view its sessions' : 'All seven training days'}</small></div>
+  <button type="button" onClick={() => setCalendarFocusedDate(focusedDay ? 'all' : null)}>{focusedDay ? 'Full week' : 'Focus day'}</button>
 </div>
 <section className="panel calendar-grid">
   {calendarWeekSessions.length === 0 ? (
@@ -7591,7 +7591,7 @@ color:
       )}
     </div>
   ) : (
-    days.filter(day => !focusedDay || focusedDay.dayLabel === day).map((day) => {
+    days.map((day) => {
              const daySessions = calendarWeekSessions.filter(
                 (session) => session.dayLabel === day,
               );
@@ -7620,7 +7620,7 @@ const dayCompletedActivities = completedActivityFeed.filter(
 <div
   className={`calendar-day ${
     daySessions.length === 0 ? 'empty-day' : ''
-  }`}
+  } ${focusedDay && focusedDay.dayLabel !== day ? 'mobile-unfocused' : ''}`}
   key={day}
 >
     <div
