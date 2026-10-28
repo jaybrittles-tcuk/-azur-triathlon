@@ -7419,11 +7419,14 @@ color:
     return (
       <div className="calendar-layout">
         <div>
-<MultisportPlannedStress
-  sessions={calendarWeekSessions}
-  runThreshold={athleteProfile.runThreshold}
-  swimCss={athleteProfile.swimThreshold}
-/>
+<details className="calendar-stress-disclosure">
+  <summary><span><strong>Planned training load</strong><small>Sport-specific estimates · view analysis</small></span><span aria-hidden="true">⌄</span></summary>
+  <MultisportPlannedStress
+    sessions={calendarWeekSessions}
+    runThreshold={athleteProfile.runThreshold}
+    swimCss={athleteProfile.swimThreshold}
+  />
+</details>
 {movingSessionId && (
   <section className="calendar-move-panel" aria-label="Reschedule workout">
     <strong>Reschedule {weekSessions.find((item) => item.id === movingSessionId)?.title}</strong>
@@ -7768,9 +7771,7 @@ onClick={() => {
       </div>
 
       <strong>
-        {activity.source === 'manual_fit'
-          ? 'Garmin FIT Activity'
-          : 'Completed Activity'}
+        {activity.name || activity.title || `Unplanned ${sportName(activity.sport)}`}
       </strong>
 
       <div className="calendar-session-meta">
