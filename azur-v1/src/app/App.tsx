@@ -7855,6 +7855,9 @@ onClick={() => {
  <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />
 </div>
           <div className="editor-grid">
+          <details className="session-prescription-disclosure">
+            <summary><span><strong>Full workout prescription</strong><small>Warm-up · Main set · Cool-down · Fueling</small></span><span aria-hidden="true">⌄</span></summary>
+            <div className="session-prescription-sections">
             {selected.prescription?.focus && (
  <div className="wide session-block">
     <span className="eyebrow">FOCUS</span>
@@ -8049,6 +8052,9 @@ onClick={() => {
   </div>
 )}
 
+</div>
+          </details>
+
 <div className="session-block">
   <span className="eyebrow">DURATION</span>
   <strong>{formatDuration(selected.durationMin)}</strong>
@@ -8059,7 +8065,8 @@ onClick={() => {
       <div className="completed-session-heading">
         <div>
           <span className="eyebrow">SESSION COMPLETE</span>
-          <strong>Workout matched successfully</strong>
+          <strong>Completed activity{selected.completedSource === 'garmin' ? ' · Garmin' : selected.completedSource === 'manual_fit' ? ' · FIT upload' : ''}</strong>
+          <small>Planned {formatDuration(selected.durationMin)} · Actual {formatDuration(Math.round(selected.completedDurationSec / 60))} · {selected.durationMin > 0 ? Math.round(selected.completedDurationSec / 60 / selected.durationMin * 100) + '% duration adherence' : 'Duration recorded'}</small>
         </div>
 
         <span className="completed-check">✓</span>
