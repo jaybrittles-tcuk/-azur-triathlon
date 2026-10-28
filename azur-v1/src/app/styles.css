@@ -5070,3 +5070,16 @@ strong {
 .session-detail-modal .completed-session-heading>div{display:grid;gap:5px}
 .session-detail-modal .completed-session-heading small{font-size:11px;color:#9dc8dd;line-height:1.5}
 @media(max-width:600px){.session-detail-modal .session-prescription-sections{grid-template-columns:1fr;padding:8px}}
+
+/* AZUR prescription coaching cues */
+.session-detail-modal .azur-prescription-step{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid #29465c}
+.session-detail-modal .azur-prescription-step:last-child{border-bottom:0}
+.session-detail-modal .azur-prescription-step>strong{font-size:16px;color:#f5fbff}
+.session-detail-modal .azur-prescription-targets{display:flex;flex-wrap:wrap;gap:6px}
+.session-detail-modal .azur-prescription-targets>div,.session-detail-modal .azur-prescription-rest{display:grid;gap:3px;background:#143b55;border:1px solid #34617c;border-radius:8px;padding:8px 10px}
+.session-detail-modal .azur-prescription-targets span,.session-detail-modal .azur-prescription-rest span{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#8fbfdd}
+.session-detail-modal .azur-prescription-targets strong,.session-detail-modal .azur-prescription-rest strong{font-size:13px;color:#f6fbff}
+.session-detail-modal .azur-prescription-rest{background:#3b311a;border-color:#84692f}
+.session-detail-modal .azur-prescription-rest span{color:#eac56f}
+.session-detail-modal .azur-prescription-note{color:#b9d8e8;line-height:1.5}
+.session-detail-modal .azur-prescription-missing{color:#e5bd75}
