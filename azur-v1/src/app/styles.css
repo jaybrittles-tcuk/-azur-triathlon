@@ -5019,3 +5019,21 @@ strong {
  .calendar-layout .calendar-focus-toolbar{margin:7px 0;padding:8px 1px}
  .calendar-layout .calendar-focus-toolbar button{padding:6px 9px;font-size:11px;border-radius:8px;background:#153c57;border-color:#356780}
 }
+
+/* Calendar V2.2: collapse optional analysis; remove repeated mobile day headers */
+.calendar-layout .calendar-stress-disclosure{background:#0c263d;border:1px solid #294c66;border-radius:12px;margin:0 0 10px;color:#edf7ff;overflow:hidden}
+.calendar-layout .calendar-stress-disclosure>summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:11px 13px;gap:12px;list-style:none}
+.calendar-layout .calendar-stress-disclosure>summary::-webkit-details-marker{display:none}
+.calendar-layout .calendar-stress-disclosure>summary>span:first-child{display:grid;gap:2px}
+.calendar-layout .calendar-stress-disclosure>summary strong{font-size:13px;color:#f4faff}
+.calendar-layout .calendar-stress-disclosure>summary small{color:#96bbd2;font-size:11px}
+.calendar-layout .calendar-stress-disclosure[open]>summary{border-bottom:1px solid #28465f}
+.calendar-layout .calendar-stress-disclosure[open]>summary>span:last-child{transform:rotate(180deg)}
+.calendar-layout .calendar-stress-disclosure>summary:focus-visible{outline:2px solid #f6c747;outline-offset:-2px}
+.calendar-layout .calendar-stress-disclosure>div{margin:8px}
+@media(max-width:750px){
+ .calendar-layout .calendar-focus-toolbar{margin:4px 0 6px;padding:7px 1px}
+ .calendar-layout .calendar-day:not(.mobile-unfocused)>.calendar-day-head{display:none}
+ .calendar-layout .calendar-day:not(.mobile-unfocused){padding:7px}
+ .calendar-layout .calendar-grid{gap:5px}
+}
