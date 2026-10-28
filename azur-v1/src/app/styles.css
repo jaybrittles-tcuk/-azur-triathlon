@@ -5037,3 +5037,20 @@ strong {
  .calendar-layout .calendar-day:not(.mobile-unfocused){padding:7px}
  .calendar-layout .calendar-grid{gap:5px}
 }
+
+/* AZUR workout detail V2: compact overview, clear tabs and accessible coaching information */
+.session-detail-modal .azur-premium-workout-tabs{background:#0b263d;border:1px solid #2b4b65;border-radius:14px;padding:11px;margin:12px 0 10px}
+.session-detail-modal .azur-workout-tab-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;background:#071b2c;border-radius:11px}
+.session-detail-modal .azur-workout-tab-nav button{min-width:0;padding:9px 5px;border-radius:8px;font-size:12px;font-weight:750;background:transparent;color:#a7c9dd;border:0}
+.session-detail-modal .azur-workout-tab-nav button[aria-selected=true]{background:#14628e;color:#fff;box-shadow:none}
+.session-detail-modal .azur-workout-tab-content{padding:11px 3px 2px;color:#c0daea}
+.session-detail-modal .azur-workout-tab-content>p{font-size:13px;line-height:1.5;margin:0 0 10px}
+.session-detail-modal .azur-workout-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.session-detail-modal .azur-workout-facts>div{min-width:0;background:#12334d;border:1px solid #28506a;border-radius:10px;padding:10px 8px;display:grid;gap:5px}
+.session-detail-modal .azur-workout-facts small{font-size:10px;color:#9abdd3}
+.session-detail-modal .azur-workout-facts strong{font-size:13px;color:#f5fbff;line-height:1.35;overflow-wrap:anywhere}
+.session-detail-modal .azur-workout-footnote{font-size:11px!important;color:#89afc9}
+.session-detail-modal .editor-grid>.session-block:first-child{margin-top:0}
+.session-detail-modal .session-block-item{font-size:12px;line-height:1.4}
+.session-detail-modal .session-block .eyebrow{font-size:10px;color:#76c2ef}
+@media(max-width:600px){.session-detail-modal .azur-workout-facts{gap:5px}.session-detail-modal .azur-workout-facts>div{padding:8px 6px}.session-detail-modal .azur-workout-facts strong{font-size:12px}}
