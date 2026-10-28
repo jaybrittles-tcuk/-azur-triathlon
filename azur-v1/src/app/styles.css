@@ -5054,3 +5054,19 @@ strong {
 .session-detail-modal .session-block-item{font-size:12px;line-height:1.4}
 .session-detail-modal .session-block .eyebrow{font-size:10px;color:#76c2ef}
 @media(max-width:600px){.session-detail-modal .azur-workout-facts{gap:5px}.session-detail-modal .azur-workout-facts>div{padding:8px 6px}.session-detail-modal .azur-workout-facts strong{font-size:12px}}
+
+/* AZUR V2.3: progressively disclosed workout prescription */
+.session-detail-modal .session-prescription-disclosure{grid-column:1/-1;background:#0d293f;border:1px solid #2c526d;border-radius:13px;overflow:hidden;color:#edf8ff}
+.session-detail-modal .session-prescription-disclosure>summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;list-style:none}
+.session-detail-modal .session-prescription-disclosure>summary::-webkit-details-marker{display:none}
+.session-detail-modal .session-prescription-disclosure>summary>span:first-child{display:grid;gap:4px}
+.session-detail-modal .session-prescription-disclosure>summary strong{font-size:14px;color:#f7fbff}
+.session-detail-modal .session-prescription-disclosure>summary small{color:#9abbd1;font-size:11px}
+.session-detail-modal .session-prescription-disclosure[open]>summary{border-bottom:1px solid #2a4a63}
+.session-detail-modal .session-prescription-disclosure[open]>summary>span:last-child{transform:rotate(180deg)}
+.session-detail-modal .session-prescription-disclosure>summary:focus-visible{outline:2px solid #f5c647;outline-offset:-2px}
+.session-detail-modal .session-prescription-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px}
+.session-detail-modal .session-prescription-sections>.wide{grid-column:1/-1}
+.session-detail-modal .completed-session-heading>div{display:grid;gap:5px}
+.session-detail-modal .completed-session-heading small{font-size:11px;color:#9dc8dd;line-height:1.5}
+@media(max-width:600px){.session-detail-modal .session-prescription-sections{grid-template-columns:1fr;padding:8px}}
