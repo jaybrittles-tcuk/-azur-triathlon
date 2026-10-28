@@ -4935,3 +4935,47 @@ strong {
  .calendar-layout .calendar-grid{gap:8px}
  .calendar-layout .calendar-session{padding:10px 11px;gap:6px}
 }
+
+
+/* AZUR Calendar V2.1: denser week navigation and workout detail sheet */
+.calendar-layout .calendar-week-strip{padding:13px 12px;border-radius:15px;box-shadow:none}
+.calendar-layout .calendar-strip-top{grid-template-columns:34px 1fr 34px;gap:8px}
+.calendar-layout .calendar-strip-top>button{width:34px;height:34px;border-radius:10px;font-size:21px;background:#12354f;color:#c4e8fa;border-color:#35617d}
+.calendar-layout .calendar-strip-top h3{font-size:18px;line-height:1.2;margin:2px 0 0}
+.calendar-layout .calendar-strip-top .eyebrow{font-size:9px;letter-spacing:.12em}
+.calendar-layout .calendar-strip-days{gap:5px;margin-top:13px}
+.calendar-layout .calendar-strip-day{padding:8px 2px 6px;gap:2px;border-radius:10px;background:#102d46;border:1px solid #2a4e69;box-shadow:none;min-height:62px}
+.calendar-layout .calendar-strip-day>span{font-size:10px;margin-bottom:0;color:#a9c8db}
+.calendar-layout .calendar-strip-day>strong{font-size:16px;color:#f5fbff;line-height:1.1}
+.calendar-layout .calendar-strip-day.today{background:#144d72;border-color:#29aff0;box-shadow:inset 0 0 0 1px rgba(59,187,249,.45)}
+.calendar-layout .calendar-strip-day.focused{background:#164567;border-color:#f5c647;box-shadow:inset 0 0 0 1px rgba(245,198,71,.4)}
+.calendar-layout .calendar-strip-dots{margin-top:3px;min-height:5px}
+.calendar-layout .calendar-strip-footer{margin-top:10px;line-height:1.4}
+.calendar-layout .calendar-strip-footer small{font-size:11px}
+.calendar-layout .calendar-focus-toolbar{background:transparent;border:0;border-bottom:1px solid #23445b;border-radius:0;margin:10px 0 8px;padding:8px 2px}
+.calendar-layout .calendar-focus-toolbar strong{font-size:14px}
+.calendar-layout .calendar-focus-toolbar small{font-size:10px}
+.calendar-layout .calendar-grid{margin-top:0}
+.calendar-layout .calendar-day{margin-bottom:8px}
+.calendar-layout .calendar-session-status>span{background:rgba(70,155,199,.14)!important;color:#a6d8f2!important;border:1px solid #32576e!important;border-radius:7px!important;padding:3px 6px!important}
+.calendar-layout .calendar-session.completed .calendar-session-status>span{background:rgba(75,195,143,.11)!important;color:#89dfb7!important;border-color:rgba(109,207,164,.3)!important}
+.session-detail-modal{border-radius:20px 20px 0 0;padding:18px 18px 28px;background:#071827}
+.session-detail-modal .section-heading h3{font-size:25px;line-height:1.12;margin-top:6px}
+.session-detail-modal .session-detail-meta{gap:5px;margin-top:10px}
+.session-detail-modal .session-detail-meta span{background:#123047!important;border:1px solid #31516b!important;color:#b7d7ea!important;padding:5px 8px;border-radius:8px;font-size:11px}
+.session-detail-modal .azur-workout-modal-summary{display:none}
+.session-detail-modal .azur-premium-workout-tabs{margin-top:12px;border-radius:13px;padding:12px}
+.session-detail-modal .editor-grid{gap:8px;margin-top:10px}
+.session-detail-modal .session-block{background:#0d2539;border:1px solid #28465d;border-radius:12px;padding:11px 12px}
+.session-detail-modal .session-detail-close{background:#142e43;color:#f4fbff;border:1px solid #35536a}
+@media(max-width:600px){
+ .calendar-layout .calendar-strip-day{min-height:55px;padding:6px 1px 4px}
+ .calendar-layout .calendar-strip-day>strong{font-size:15px}
+ .calendar-layout .calendar-week-strip{padding:12px 9px}
+ .calendar-layout .calendar-strip-days{gap:4px}
+ .calendar-layout .calendar-day{border-radius:11px;padding:7px}
+ .session-detail-overlay{padding:0!important;align-items:flex-end!important}
+ .session-detail-modal{width:100%;max-height:94dvh;padding:16px 15px 30px;border-radius:18px 18px 0 0}
+ .session-detail-modal .section-heading h3{font-size:22px}
+ .session-detail-modal .session-detail-meta span{font-size:10px}
+}
