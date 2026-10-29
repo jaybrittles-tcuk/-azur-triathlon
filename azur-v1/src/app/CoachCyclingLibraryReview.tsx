@@ -1,3 +1,4 @@
+import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
 import { createLibraryBikePrescription } from '../lib/calculations/libraryBikePrescription';
 import { previewApprovedBikeWorkout } from '../lib/calculations/bikeDraftPreview';
 import { resolveCurrentBikeApprovals } from '../lib/calculations/coachApprovalResolver';
@@ -34,7 +35,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
       .then(({data,error}) => {if(error) setFeedback(error.message); else setEvents(data??[]);});
   }, []);
   async function recordDecision(decision:'approved'|'revoked') {
-    if (!selected || saving || !draft.phases.length || issues.length) return;
+    if (!selected || saving || !draft.phases.length || issues.length || !instructionAudit?.complete) return;
     setSaving(true);setFeedback('');
     try {
       const {data:{user}}=await supabase.auth.getUser();
@@ -114,6 +115,13 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
   const personalisedDraft = preview.status === 'selected' && ftpWatts != null ? previewApprovedBikeWorkout(preview.session, ftpWatts) : null;
   const draft = drafts[selectedId] ?? (latestEvent ? { level: latestEvent.level as 1|2|3, phases: latestEvent.phases as Phase[] } : { level: 1 as const, phases: [] });
   const issues = selected ? validateWorkout(selected) : [];
+  const instructionAudit = useMemo(() => selected ? auditAthleteInstructions({
+    azurWorkout: {steps: selected.steps.map(step => step.kind === 'steady'
+      ? {type:'work',durationMin:step.minutes,targetType:'ftp',targetLow:step.minFtpPct,targetHigh:step.maxFtpPct}
+      : {type:'repeat',reps:step.repetitions,
+        work:{type:'work',durationMin:step.work.minutes,targetType:'ftp',targetLow:step.work.minFtpPct,targetHigh:step.work.maxFtpPct},
+        recovery:{type:'recovery',durationMin:step.recovery.minutes,targetType:'ftp',targetLow:step.recovery.minFtpPct,targetHigh:step.recovery.maxFtpPct}})}
+  }) : null,[selected]);
   const setDraft = (next: ReviewDraft) => setDrafts(previous => ({ ...previous, [selectedId]: next }));
   const displayStep = (step: BikeWorkout['steps'][number]) => step.kind === 'steady'
     ? `${step.minutes} min @ ${step.minFtpPct}–${step.maxFtpPct}% FTP · ${step.label}${step.cadenceRpm ? ` · ${step.cadenceRpm.join('–')} rpm` : ''}`
@@ -175,6 +183,11 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
           <h5>Coach-authored prescription</h5>
           <ol>{selected.steps.map((step,index) => <li key={index}>{displayStep(step)}</li>)}</ol>
           <p>{issues.length ? `Validation issues: ${issues.join('; ')}` : 'Template structure passes existing library validation.'}</p>
+          <div className="coach-prescription-audit" role="status">
+            <strong>{instructionAudit?.complete ? 'Athlete instructions complete' : 'Athlete instructions need review'}</strong>
+            <small>Checks each block for duration, an explicit intensity target and recovery between repeated efforts. This does not replace coach approval.</small>
+            {!!instructionAudit?.gaps.length && <ul>{instructionAudit.gaps.map((gap,i) => <li key={i}>{gap.section} · block {gap.block}: missing {gap.missing.replaceAll('_',' ')}</li>)}</ul>}
+          </div>
           <h5>Draft progression classification</h5>
           <label>Level <select value={draft.level} onChange={event => setDraft({ ...draft, level: Number(event.target.value) as 1 | 2 | 3 })}>
             <option value={1}>1 · Foundation</option><option value={2}>2 · Development</option><option value={3}>3 · Advanced</option>
@@ -185,7 +198,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
           </fieldset>
           <p>Latest decision: {latestEvent ? `${latestEvent.decision} · ${new Date(latestEvent.decided_at).toLocaleString()}` : 'No approval recorded'}</p>
           <div className="coach-cycling-actions">
-            <button type="button" disabled={saving || issues.length>0 || !draft.phases.length} onClick={()=>void recordDecision('approved')}>Approve classification</button>
+            <button type="button" disabled={saving || issues.length>0 || !instructionAudit?.complete || !draft.phases.length} onClick={()=>void recordDecision('approved')}>Approve classification</button>
             <button type="button" disabled={saving || issues.length>0 || !draft.phases.length || latestEvent?.decision!=='approved'} onClick={()=>void recordDecision('revoked')}>Revoke approval</button>
           </div>
           {feedback && <p role="status">{feedback}</p>}
