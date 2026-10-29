@@ -5443,3 +5443,14 @@ strong {
  .azur-manual-training-insights p.azur-insight-interpretation,
  .azur-manual-training-insights p.azur-insight-decision{padding:13px;font-size:13px!important}
 }
+
+
+/* Reported-data consistency warning: information only, no automatic plan changes */
+.azur-manual-training-insights p.azur-insight-data-warning{
+ display:grid;gap:8px;padding:14px 16px;background:#372c24;border:1px solid #91693e;
+ border-left:4px solid #f1bf62;border-radius:12px;color:#f3e0c6!important;
+ font-size:13px!important;line-height:1.55!important;margin:12px 0!important;
+}
+.azur-manual-training-insights p.azur-insight-data-warning strong{
+ color:#ffd48b;font-size:11px;letter-spacing:.12em;
+}
