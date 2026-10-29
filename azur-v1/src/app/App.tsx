@@ -1167,6 +1167,8 @@ export function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [registrationMode, setRegistrationMode] = useState(false);
+  const [registrationNotice, setRegistrationNotice] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [athleteName, setAthleteName] = useState('Athlete');
@@ -10345,6 +10347,15 @@ onClick={handleImportActivities}
 
     setAuthLoading(false);
   }
+async function handleRegister(event: React.FormEvent) {
+  event.preventDefault();
+  if (password.length < 12) { setAuthError('Use a password of at least 12 characters.'); return; }
+  setAuthLoading(true); setAuthError(''); setRegistrationNotice('');
+  const {data,error}=await supabase.auth.signUp({email:email.trim(),password});
+  if(error) setAuthError(error.message);
+  else { setPassword(''); setRegistrationNotice(data.session ? 'Account created. Coach assignment and training-plan activation remain separate.' : 'Check your email to confirm your account, then sign in. Coach assignment follows separately.'); }
+  setAuthLoading(false);
+}
 async function handleSignOut() {
   await supabase.auth.signOut();
 
@@ -10535,19 +10546,19 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   if (!isAuthenticated) {
     return (
       <div className="login-screen">
-        <form className="login-card" onSubmit={handleLogin}>
+        <form className="login-card" onSubmit={registrationMode ? handleRegister : handleLogin}>
           <img
             src="/brand/azur-logo.png"
             alt="Azur Triathlon Coaching"
             className="login-logo"
           />
 
-          <span className="eyebrow">ATHLETE LOGIN</span>
+          <span className="eyebrow">{registrationMode ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
 
-          <h2>Welcome to Azur</h2>
+          <h2>{registrationMode ? 'Join AZUR' : 'Welcome to Azur'}</h2>
 
           <p>
-            Sign in to access your training, performance and recovery data.
+            {registrationMode ? 'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.' : 'Sign in to access your training, performance and recovery data.'}
           </p>
 
           <label>
@@ -10581,8 +10592,10 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
             type="submit"
             disabled={authLoading}
           >
-            {authLoading ? 'Signing in...' : 'Sign in'}
+            {authLoading ? (registrationMode ? 'Creating account...' : 'Signing in...') : registrationMode ? 'Create athlete account' : 'Sign in'}
           </button>
+        <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>
+          {registrationNotice && <p className="azur-registration-notice" role="status">{registrationNotice}</p>}
         </form>
       </div>
     );
