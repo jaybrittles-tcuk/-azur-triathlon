@@ -7754,7 +7754,7 @@ onClick={() => {
     <span>{session.rationale || `${session.sessionClass.replace(/_/g, ' ')} session · ${formatDuration(session.durationMin)} planned`}</span>
   )}
 </div>
-<span className="calendar-move-hint">{session.locked ? 'Locked' : session.status === 'planned' || session.status === 'edited' ? 'Select to reschedule' : ''}</span>
+<span className="calendar-move-hint" aria-hidden="true">View session details ›</span>
 <div className="calendar-session-meta">
   <span>
     {session.status === 'completed' &&
