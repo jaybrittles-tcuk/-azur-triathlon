@@ -10604,6 +10604,10 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     );
   }
 
+  if (window.location.pathname === '/onboarding') {
+    return <div className="login-screen"><AthleteOnboardingDraft /></div>;
+  }
+
   return (
   <>
     <div className="app-shell">
