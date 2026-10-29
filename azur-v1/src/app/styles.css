@@ -5342,3 +5342,18 @@ strong {
 .azur-library-v2 fieldset{border:1px solid #396580;border-radius:11px;padding:11px}
 .azur-library-v2 fieldset label{display:inline-flex;align-items:center;gap:5px;margin:5px 8px 5px 0;color:#d4eaf6}
 @media(max-width:670px){.azur-library-v2 .coach-cycling-list{grid-template-columns:1fr}.azur-library-v2 .coach-cycling-detail{padding:12px!important}.azur-library-v2 .coach-cycling-actions button{flex:1 1 140px}}
+
+/* AZUR cycling library V2 final compact mobile workflow */
+.azur-library-v2 .coach-cycling-list button{display:flex!important;align-items:center;justify-content:space-between;gap:8px;text-align:left!important;min-height:54px!important;padding:10px 12px!important}
+.azur-library-row-content{display:grid;gap:3px;min-width:0}
+.azur-library-v2 .coach-cycling-list button .azur-library-row-content strong{font-size:13px!important;line-height:1.2}
+.azur-library-v2 .coach-cycling-list button .azur-library-row-content small{font-size:11px!important;line-height:1.3}
+.azur-library-row-arrow{font-size:23px;color:#6cc8f4;flex-shrink:0}
+.azur-library-v2 .azur-library-catalogue{padding:11px}
+.azur-library-v2 .azur-library-catalogue-head{margin-bottom:6px}
+.azur-library-v2 .azur-library-search{margin-bottom:8px}
+.azur-library-v2 .azur-library-preview-empty{padding:9px 11px;margin:9px 0;border-color:#294f67;background:#0d293f}
+.azur-library-v2 .azur-library-preview-empty>summary{font-size:12px;color:#a5c7da}
+.azur-library-v2 .azur-library-preview-empty>summary span{font-size:11px;color:#8dbbd1}
+.azur-library-v2 .coach-cycling-warning{padding:9px 11px;font-size:11px}
+@media(max-width:670px){.azur-library-v2 .coach-cycling-list{gap:6px}.azur-library-v2 .coach-cycling-list button{min-height:54px!important}.azur-library-v2 .coach-cycling-detail{margin-top:0!important}}
