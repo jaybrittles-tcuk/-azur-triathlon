@@ -5169,3 +5169,50 @@ strong {
 .azur-coach-v2 .coach-cycling-review fieldset{min-width:0}
 @media(max-width:650px){.azur-coach-v2{padding:8px 0 100px}.azur-coach-v2 .coach-cycling-list{grid-template-columns:repeat(2,minmax(0,1fr))}.azur-coach-v2 .coach-cycling-list button{min-width:0}.azur-coach-tabs button{padding:10px}.azur-coach-v2 .coach-cycling-review{padding:12px!important}.azur-coach-v2 .coach-cycling-review select,.azur-coach-v2 .coach-cycling-review input{font-size:14px}}
 @media(max-width:390px){.azur-coach-v2 .coach-cycling-list{grid-template-columns:1fr}}
+
+/* AZUR Coach V3 — premium squad-first mobile UI */
+.azur-coach-v2{--azur-panel:#0d2942;--azur-line:#285674}
+.azur-coach-hero{padding:14px 4px 10px;margin-bottom:8px}
+.azur-coach-hero h2{font-weight:850;letter-spacing:-.035em;font-size:clamp(26px,5vw,36px)}
+.azur-coach-hero p{font-size:13px;color:#9ebed3}
+.azur-coach-tabs{margin:0 0 14px;gap:6px}
+.azur-coach-tabs button{border-radius:999px;padding:10px 15px;background:#102c43;border:1px solid #28506a;font-weight:750}
+.azur-coach-tabs button[aria-pressed=true]{background:#168ed1;box-shadow:0 0 0 1px rgba(65,183,241,.4) inset}
+.azur-coach-kpis{display:flex;justify-content:space-between;align-items:center;gap:16px;border:1px solid #275775;border-radius:17px;background:linear-gradient(115deg,#103c59 0%,#0b2740 75%);padding:16px;margin:4px 0 12px}
+.azur-coach-kpis div{display:grid;gap:3px}
+.azur-coach-kpis small,.azur-coach-eyebrow{color:#41beed;font-weight:850;letter-spacing:.14em;font-size:10px}
+.azur-coach-kpis strong{color:#f6fbff;font-size:21px;font-weight:850;letter-spacing:-.02em}
+.azur-coach-kpis span{color:#a7c8db;font-size:12px;line-height:1.4}
+.azur-coach-kpis button{background:#167eaf;border:1px solid #47baf0;border-radius:11px;color:white;padding:11px 13px;font-weight:800;font-size:12px;white-space:nowrap;cursor:pointer}
+.azur-roster-v3{background:linear-gradient(160deg,#0c2d49,#0b253d);border:1px solid #2a5a76;border-radius:20px;padding:17px;box-shadow:0 12px 32px rgba(0,0,0,.12);margin-bottom:14px}
+.azur-roster-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:15px}
+.azur-roster-head h3{font-size:21px;letter-spacing:-.025em;color:#f6fbff;margin:5px 0 3px}
+.azur-roster-head p{color:#a4c4d6;font-size:12px;line-height:1.4;margin:0}
+.azur-roster-total{color:#f7fbff;font-size:20px;white-space:nowrap}
+.azur-roster-total small{display:block;font-size:10px;color:#9cbcd1;text-align:right;font-weight:550}
+.azur-roster-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.azur-athlete-tile{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;position:relative;min-height:94px;text-align:left;border:1px solid #31627e;border-radius:14px;background:linear-gradient(120deg,#123952,#0e2d46);padding:13px;color:#ecf8ff;cursor:pointer}
+.azur-athlete-tile.is-selected{border-color:#f3bb40;box-shadow:inset 0 0 0 1px rgba(243,187,64,.26)}
+.azur-athlete-avatar{grid-row:1/3;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;background:#174c70;border:1px solid #3c789a;color:white;font-size:18px;font-weight:850}
+.azur-athlete-info{min-width:0;display:grid;gap:5px}
+.azur-athlete-info strong{font-size:15px;line-height:1.1;overflow-wrap:anywhere;color:#fff}
+.azur-athlete-info small{font-size:11px;color:#adccde;line-height:1.3}
+.azur-athlete-chip{grid-column:2;grid-row:2;justify-self:start;border-radius:99px;border:1px solid #94723b;background:#43392552;color:#fbd57a;padding:3px 9px;font-size:10px;font-weight:800}
+.azur-athlete-chip.is-ready{border-color:#248e7c;background:#124940;color:#85efcb}
+.azur-athlete-chevron{grid-column:3;grid-row:1/3;font-size:27px;color:#69c7f2}
+.azur-athlete-summary{margin-top:13px;padding:15px;border-radius:14px;border:1px solid #32617c;background:#0d2a42}
+.azur-athlete-summary-title{display:flex;justify-content:space-between;align-items:center}
+.azur-athlete-summary-title h4{font-size:19px;color:white;margin:4px 0 12px}
+.azur-summary-note{font-size:10px;color:#a4c5d8}
+.azur-athlete-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.azur-athlete-metrics>div{border:1px solid #2b5570;border-radius:10px;background:#153750;padding:12px 9px;display:grid;gap:8px;min-width:0}
+.azur-athlete-metrics small{font-size:10px;letter-spacing:.07em;color:#9fc3d8}
+.azur-athlete-metrics strong{font-size:14px;color:#f7fbff;overflow-wrap:anywhere}
+.azur-athlete-next-step{border:1px solid #745b34;background:#473a2463;color:#f1d6a0;border-radius:10px;padding:11px;font-size:12px;line-height:1.45;margin:12px 0 0}
+.azur-athlete-review-details{margin-top:12px;color:#aecfe2;font-size:12px}
+.azur-athlete-review-details summary{cursor:pointer;color:#65c9f6;font-weight:750}
+.azur-athlete-review-details li{margin:10px 0}
+.azur-athlete-review-details li small{display:block}
+.azur-coach-shortcuts button{border-radius:13px;background:linear-gradient(110deg,#113750,#0b2941);border-color:#2f607c;min-height:64px}
+.azur-roster-state{font-size:13px;color:#bbd3e2}
+@media(max-width:680px){.azur-roster-v3{padding:13px}.azur-roster-grid{grid-template-columns:1fr}.azur-athlete-tile{min-height:73px}.azur-athlete-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.azur-coach-kpis{padding:13px}.azur-coach-kpis span{max-width:200px}}
