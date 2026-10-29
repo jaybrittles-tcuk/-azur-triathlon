@@ -5685,3 +5685,11 @@ strong {
  background:#102036!important;border-top:0!important;padding-top:18px!important;
 }
 @media(max-width:560px){.session-detail-modal .azur-v2-session-hero{min-height:128px;padding:16px 17px 28px}}
+
+
+/* V2 workout-first structure: immediate goal and training profile */
+.session-detail-modal .azur-v2-workout-first{padding:16px 18px;background:#101f32;border-radius:14px;border:1px solid #263a52;margin:0 0 12px}
+.session-detail-modal .azur-v2-workout-first .eyebrow{color:#71bcf2;font-size:10px;letter-spacing:.15em}
+.session-detail-modal .azur-v2-workout-first p{font-size:15px;line-height:1.5;color:#e4effb;margin:8px 0 14px}
+.session-detail-modal .azur-v2-workout-first .workout-shape{margin:8px 0 0}
+@media(max-width:560px){.session-detail-modal .azur-v2-workout-first{padding:14px}.session-detail-modal .azur-v2-workout-first p{font-size:14px}}
