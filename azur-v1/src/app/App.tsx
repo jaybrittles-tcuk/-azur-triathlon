@@ -4787,11 +4787,6 @@ const calendarWeekDates = useMemo(() => {
   });
 }, [calendarWeekOffset, todayKey]);
 
-const homeCompletedTotal=homeWeek.filter(s=>s.status==='completed').length;
-const homePlannedTotal=homeWeek.length;
-const todaySessions=weekSessions.filter(s=>s.plannedDate===todayKey);
-const homeTodayLabel=todaySessions.length?String(todaySessions.length)+' scheduled session'+(todaySessions.length===1?'':'s'):'No workout scheduled';
-const homeProgressPercent=homePlannedTotal?Math.round(homeCompletedTotal/homePlannedTotal*100):0;
 const todaySession = weekSessions.find(
   (session) => session.plannedDate === todayKey,
 );
@@ -5677,6 +5672,12 @@ const homeMinutes = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport==
 const homeCount = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport).length;
 const homeCompleted = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport && s.status==='completed').length;
 const homeDateLabel = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const homeCompletedTotal=homeWeek.filter(s=>s.status==='completed').length;
+const homePlannedTotal=homeWeek.length;
+const todaySessions=weekSessions.filter(s=>s.plannedDate===todayKey);
+const homeTodayLabel=todaySessions.length?String(todaySessions.length)+' scheduled session'+(todaySessions.length===1?'':'s'):'No workout scheduled';
+const homeProgressPercent=homePlannedTotal?Math.round(homeCompletedTotal/homePlannedTotal*100):0;
+
 const homeRaceDays = primaryRace.raceDate ? Math.max(0,Math.ceil((new Date(primaryRace.raceDate+'T12:00:00').getTime()-Date.now())/86400000)) : null;
 const homeMinutesLabel = (mins:number) => mins >= 60 ? `${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m` : `${mins}m`;
 const todaySession = weekSessions.find(
