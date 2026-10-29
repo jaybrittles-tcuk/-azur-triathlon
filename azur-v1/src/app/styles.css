@@ -5454,3 +5454,47 @@ strong {
 .azur-manual-training-insights p.azur-insight-data-warning strong{
  color:#ffd48b;font-size:11px;letter-spacing:.12em;
 }
+
+
+/* AZUR V3.1: purposeful tonal variation within the session detail view */
+.editor-panel .completed-session-summary{
+  background:linear-gradient(150deg,#0b2831,#08202c)!important;
+  border-color:#27605e!important;
+}
+.editor-panel .completed-session-metrics{
+  background:#132c40;border:1px solid #37556c;border-radius:14px;
+  padding:12px;margin:18px 0;
+}
+.editor-panel .completed-activity-details{
+  background:#e8f1f8!important;color:#17344b!important;
+  border:1px solid #c2dae8!important;border-radius:16px!important;
+  padding:18px!important;
+}
+.editor-panel .completed-activity-title span{color:#426a82!important}
+.editor-panel .completed-activity-grid>div{border-color:#c9dae5!important}
+.editor-panel .completed-activity-grid span{color:#587184!important}
+.editor-panel .completed-activity-grid strong{color:#0d293d!important}
+.azur-manual-training-insights{
+  background:linear-gradient(155deg,#103c54,#0e2c45)!important;
+  border-left-color:#43b9ff!important;
+}
+.azur-manual-insight-metrics>div:first-child{background:#dcecf7!important;border-color:#b6d5e7!important}
+.azur-manual-insight-metrics>div:first-child small{color:#456477!important}
+.azur-manual-insight-metrics>div:first-child strong{color:#15344b!important}
+.azur-manual-insight-metrics>div:nth-child(3){background:#22384d!important;border-color:#53677b!important}
+.azur-manual-insight-metrics>div:nth-child(4){background:#463c32!important;border-color:#967441!important}
+.azur-manual-insight-metrics>div:nth-child(4) strong{color:#ffe0a0!important}
+.editor-panel .session-analysis-card{
+  background:#e7f2fb!important;border:1px solid #b7d9f1!important;
+  border-left:4px solid #188bea!important;border-radius:18px!important;
+  color:#17374f!important;
+}
+.editor-panel .session-analysis-card .eyebrow{color:#366e96!important}
+.azur-manual-completion{
+  background:#122f41!important;border:1px solid #39758f!important;
+  border-top:3px solid #e3b84d!important;
+}
+@media(max-width:480px){
+ .editor-panel .completed-activity-details{padding:13px!important}
+ .editor-panel .completed-session-metrics{padding:10px}
+}
