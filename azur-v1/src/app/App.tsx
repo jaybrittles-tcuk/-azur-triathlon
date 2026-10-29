@@ -1282,6 +1282,10 @@ const [nextSessionDecision, setNextSessionDecision] =
   const [confirmedMatchSessionId, setConfirmedMatchSessionId] =
   useState<string | null>(null);
 const [sessionFeedbackMessage, setSessionFeedbackMessage] = useState('');
+const [manualDuration,setManualDuration]=useState('');
+const [manualDistance,setManualDistance]=useState('');
+const [manualSaving,setManualSaving]=useState(false);
+const [manualMessage,setManualMessage]=useState('');
 const [garminConnected, setGarminConnected] = useState(false);
   
   const [trainingLoad, setTrainingLoad] = useState({
@@ -8525,6 +8529,7 @@ const sessionVerdict =
     <div>{selected.rationale}</div>
   </div>
 </div>
+{selected.status!=='completed'&&<div className="wide session-block azur-manual-completion"><span className="eyebrow">MANUAL WORKOUT COMPLETION</span><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><small>Enter RPE 1–10 and optional notes in Athlete Feedback below, then save completion.</small><button type="button" className="primary-button" disabled={manualSaving||!manualDuration||!sessionFeedback.rpe} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</div>}
 <div className="wide session-block">
   <span className="eyebrow">ATHLETE FEEDBACK</span>
 
@@ -10478,6 +10483,20 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 
   setProfileEditing(false);
 }
+  async function handleManualCompletion() {
+    if(!selected?.id || manualSaving)return;
+    const duration=Number(manualDuration),distance=manualDistance.trim()===''?null:Number(manualDistance);
+    const rpe=Number(sessionFeedback.rpe);
+    if(!Number.isFinite(duration)||duration<=0||duration>1440||!Number.isInteger(duration*60)||!Number.isInteger(rpe)||rpe<1||rpe>10|| (distance!==null&&(!Number.isFinite(distance)||distance<0||distance>1000))){setManualMessage('Enter actual duration, RPE 1–10 and an optional valid distance.');return;}
+    setManualSaving(true);setManualMessage('');
+    try{
+      const {error}=await supabase.rpc('athlete_record_manual_completion',{p_session_id:selected.id,p_duration_min:duration,p_distance_km:distance,p_rpe:rpe,p_notes:sessionFeedback.notes.trim()||null});
+      if(error)throw error;
+      setManualMessage('Manual completion saved. Refresh the calendar to view updated status.');
+      setManualDuration('');setManualDistance('');
+    }catch(e){setManualMessage(e instanceof Error?e.message:'Unable to save manual completion');}
+    finally{setManualSaving(false);}
+  }
   async function handleSessionFeedbackSave() {
   const feedbackRpe=sessionFeedback.rpe.trim();
   if(feedbackRpe && (!Number.isInteger(Number(feedbackRpe))||Number(feedbackRpe)<1||Number(feedbackRpe)>10)){setSessionFeedbackMessage('Enter an RPE between 1 and 10.');return;}
