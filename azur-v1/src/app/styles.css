@@ -5376,3 +5376,12 @@ strong {
 .azur-calendar-quickbar strong{color:#dff4ff;font-size:10px;letter-spacing:.12em;margin-right:auto}
 .azur-calendar-quickbar button{border:1px solid #376b8c;border-radius:9px;background:#164363;color:#d9f3ff;padding:7px 11px;font-size:11px;font-weight:750;cursor:pointer}
 @media(max-width:460px){.azur-athlete-today-summary{padding:12px}.azur-athlete-today-summary strong{font-size:16px}.azur-athlete-today-summary button{padding:9px 10px}.azur-athlete-week-progress{padding:12px}}
+
+/* Athlete manual workout completion V2 */
+.azur-manual-completion{background:#103249!important;border:1px solid #397994!important;border-radius:14px;padding:15px}
+.azur-manual-completion p,.azur-manual-completion small{color:#b9d6e7;font-size:12px;line-height:1.5}
+.azur-manual-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.azur-manual-fields label{display:grid;gap:6px;color:#d5eefa;font-size:12px;font-weight:750}
+.azur-manual-fields input{width:100%;min-width:0;box-sizing:border-box;background:#193e55;border:1px solid #427995;border-radius:10px;color:#fff;padding:11px}
+.azur-manual-completion .primary-button{margin-top:10px}
+@media(max-width:480px){.azur-manual-fields{grid-template-columns:1fr}}
