@@ -1167,6 +1167,7 @@ export function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true';
   const [registrationMode, setRegistrationMode] = useState(false);
   const [registrationNotice, setRegistrationNotice] = useState('');
   const [authError, setAuthError] = useState('');
@@ -10546,14 +10547,14 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   if (!isAuthenticated) {
     return (
       <div className="login-screen">
-        <form className="login-card" onSubmit={registrationMode ? handleRegister : handleLogin}>
+        <form className="login-card" onSubmit={registrationMode && betaRegistrationEnabled ? handleRegister : handleLogin}>
           <img
             src="/brand/azur-logo.png"
             alt="Azur Triathlon Coaching"
             className="login-logo"
           />
 
-          <span className="eyebrow">{registrationMode ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
+          <span className="eyebrow">{registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
 
           <h2>{registrationMode ? 'Join AZUR' : 'Welcome to Azur'}</h2>
 
@@ -10594,7 +10595,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
           >
             {authLoading ? (registrationMode ? 'Creating account...' : 'Signing in...') : registrationMode ? 'Create athlete account' : 'Sign in'}
           </button>
-        <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>
+        <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
           {registrationNotice && <p className="azur-registration-notice" role="status">{registrationNotice}</p>}
         </form>
       </div>
