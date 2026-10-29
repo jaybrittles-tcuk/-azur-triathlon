@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 type Device = 'garmin'|'coros'|'polar'|'apple'|'other'|'none';
 type Race = 'sprint'|'olympic'|'70.3'|'ironman'|'other';
@@ -7,7 +8,7 @@ const devices: {id:Device;label:string}[]=[
  {id:'polar',label:'Polar / Wahoo'}, {id:'apple',label:'Apple Watch'},
  {id:'other',label:'Another device'}, {id:'none',label:'No training watch'},
 ];
-/** Gated beta onboarding preview: state is intentionally local until secure profile provisioning exists. */
+/** Athlete-owned setup; does not create a coach assignment or activate training. */
 export default function AthleteOnboardingDraft(){
  const [step,setStep]=useState(0);
  const [device,setDevice]=useState<Device>('garmin');
@@ -16,6 +17,49 @@ export default function AthleteOnboardingDraft(){
  const [hours,setHours]=useState(8);
  const [experience,setExperience]=useState('first');
  const [ready,setReady]=useState(false);
+ const [userId,setUserId]=useState<string|null>(null);
+ const [loading,setLoading]=useState(true);
+ const [saving,setSaving]=useState(false);
+ const [message,setMessage]=useState('');
+ const [isCoach,setIsCoach]=useState(false);
+ useEffect(()=>{
+  let cancelled=false;
+  async function load(){
+   const {data:{user},error:authError}=await supabase.auth.getUser();
+   if(cancelled)return;
+   if(authError || !user){setMessage('Sign in to save your athlete setup.');setLoading(false);return;}
+   if(user.app_metadata?.role==='coach'){setIsCoach(true);setLoading(false);return;}
+   setUserId(user.id);
+   const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,device,onboarding_step').eq('user_id',user.id).maybeSingle();
+   if(cancelled)return;
+   if(error)setMessage('Could not load your saved setup: '+error.message);
+   else if(data){
+    setRace(data.race_distance as Race);setRaceDate(data.race_date||'');
+    setExperience(data.experience);setHours(Number(data.weekly_hours));
+    setDevice(data.device as Device);setStep(Math.min(2,Math.max(0,data.onboarding_step)));
+   }
+   setLoading(false);
+  }
+  void load();
+  return ()=>{cancelled=true};
+ },[]);
+ async function save(nextStep:number){
+  if(!userId){setMessage('Sign in to save your setup.');return;}
+  if(!Number.isFinite(hours)||hours<2||hours>25){setMessage('Weekly hours must be between 2 and 25.');return;}
+  setSaving(true);setMessage('');
+  const {error}=await supabase.from('athlete_onboarding').upsert({
+   user_id:userId,race_distance:race,race_date:raceDate||null,
+   experience,weekly_hours:hours,device,onboarding_step:nextStep,
+   updated_at:new Date().toISOString()
+  },{onConflict:'user_id'});
+  setSaving(false);
+  if(error){setMessage('Unable to save setup: '+error.message);return;}
+  setStep(Math.min(2,nextStep));
+  if(nextStep===3){setReady(true);setMessage('Your preferences have been saved. A coach assignment and training plan are separate steps.');}
+  else setMessage('Progress saved.');
+ }
+ if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
+ if(isCoach)return <section className="azur-onboarding-draft"><h3>Athlete onboarding</h3><p>This setup is for athlete accounts. Coach access and assignments are managed separately.</p></section>;
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
   <div className="azur-onboarding-progress"><strong>Getting started</strong><span>Step {step+1} of 3</span></div>
   <div className="azur-onboarding-track"><span style={{width:`${(step+1)/3*100}%`}}/></div>
@@ -45,12 +89,13 @@ export default function AthleteOnboardingDraft(){
   </div>}
   <div className="azur-onboarding-actions">
    {step>0&&<button type="button" onClick={()=>{setStep(s=>s-1);setReady(false)}}>Back</button>}
-   {step<2?<button type="button" onClick={()=>setStep(s=>s+1)}>Continue</button>
-   :<button type="button" onClick={()=>setReady(true)}>Review setup</button>}
+   {step<2?<button type="button" disabled={saving} onClick={()=>void save(step+1)}>Continue</button>
+   :<button type="button" disabled={saving} onClick={()=>void save(3)}>Review setup</button>}
   </div>
+  {message && <p role="status" className="azur-onboarding-message">{message}</p>}
   {ready&&<div role="status" className="azur-onboarding-recap"><strong>Draft setup</strong>
    <p>{race.toUpperCase()} {raceDate?'· '+raceDate:''} · {hours} h/week · {device==='none'?'Manual logging':device.toUpperCase()}</p>
-   <small>This is a local preview only. No profile, coach assignment, Garmin connection or training plan has been saved or activated.</small>
+   <small>These onboarding preferences are saved to your account. No performance profile, coach assignment, Garmin connection or training plan has been created or activated.</small>
   </div>}
  </section>;
 }
