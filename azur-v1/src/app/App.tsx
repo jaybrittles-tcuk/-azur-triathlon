@@ -8448,7 +8448,7 @@ const sessionVerdict =
       : matchCompletionPercent >= 105
         ? 'Recorded duration exceeded the plan. This alone does not confirm the intended intensity or training stimulus.'
         : matchCompletionPercent >= 95
-          ? selected.completedSource === 'manual' ? 'Reported duration met the plan; intensity and training stimulus remain unverified.' : 'Planned training time was completed. Review measured intensity before confirming the intended training stimulus.'
+          ? selected.completedSource === 'manual' ? 'Reported duration was within 5% of the plan; prescribed intensity and training stimulus remain unverified.' : 'Planned training time was completed. Review measured intensity before confirming the intended training stimulus.'
           : matchCompletionPercent >= 85
             ? 'Most of the planned training time was completed. The session still contributed meaningfully to the intended training load.'
             : 'Completed training time was below plan. Azur will consider this alongside recovery, athlete feedback and upcoming sessions.'}
