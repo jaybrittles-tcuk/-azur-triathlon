@@ -5660,3 +5660,28 @@ strong {
  padding:0 16px 16px;border-top:1px solid #283a4c;
 }
 .session-detail-modal .azur-v2-workout-breakdown-body p{color:#adc4dc;font-size:13px;line-height:1.5}
+
+
+/* AZUR V2 session identity: hero is intentionally graphic until approved imagery is available. */
+.session-detail-modal .azur-v2-session-hero{
+ position:relative;isolation:isolate;min-height:154px;margin:0 0 -14px;
+ display:flex;flex-direction:column;justify-content:space-between;
+ padding:18px 20px 36px;overflow:hidden;border-radius:17px 17px 0 0;
+ background:radial-gradient(ellipse at 75% 35%,rgba(39,144,246,.39),transparent 52%),
+ linear-gradient(125deg,#0c1a2b 18%,#17344f 65%,#0a1726);
+ border:1px solid #2c4259;border-bottom:0;color:#dcecff;
+}
+.session-detail-modal .azur-v2-session-hero:before{
+ content:"";position:absolute;inset:0;z-index:-1;opacity:.28;
+ background:repeating-linear-gradient(155deg,transparent 0 26px,rgba(139,195,249,.12) 27px 28px,transparent 29px 53px);
+}
+.session-detail-modal .azur-v2-sport-bike{background:radial-gradient(ellipse at 75% 35%,rgba(234,177,56,.25),transparent 56%),linear-gradient(125deg,#101b2d,#20314a 65%,#081525)}
+.session-detail-modal .azur-v2-sport-run{background:radial-gradient(ellipse at 75% 35%,rgba(240,137,82,.28),transparent 56%),linear-gradient(125deg,#101b2d,#20314a 65%,#081525)}
+.session-detail-modal .azur-v2-sport-swim{background:radial-gradient(ellipse at 75% 35%,rgba(38,180,223,.35),transparent 56%),linear-gradient(125deg,#101b2d,#173956 65%,#081525)}
+.session-detail-modal .azur-v2-hero-label{font-size:10px;font-weight:750;letter-spacing:.19em;color:#a0c1e1}
+.session-detail-modal .azur-v2-hero-sport{font-size:14px;font-weight:650;letter-spacing:.02em;color:#f1f8ff}
+.session-detail-modal>.section-heading{
+ position:relative;margin-top:0!important;border-radius:0 0 17px 17px!important;
+ background:#102036!important;border-top:0!important;padding-top:18px!important;
+}
+@media(max-width:560px){.session-detail-modal .azur-v2-session-hero{min-height:128px;padding:16px 17px 28px}}
