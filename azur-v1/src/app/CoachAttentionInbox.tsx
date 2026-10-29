@@ -62,24 +62,27 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
   {error&&<p role="alert">{error}</p>}
   {!loading&&!error&&<>
     <div className="coach-attention-stats"><div><small>Assigned athletes</small><strong>{athleteCount}</strong></div><div><small>Approval queue</small><strong>{reviews.length}</strong></div><div><small>Training review</small><strong>{reviewItems.length}</strong></div><div><small>Benchmarks pending</small><strong>{baselinePending.length}</strong></div></div>
-    {baselinePending.length>0&&<div className="coach-attention-group azur-monitor-actions">
-      <div className="coach-attention-group-head"><h4>Athlete setup priorities</h4><span>{baselinePending.length} athletes</span></div>
-      {baselinePending.map(a=><article key={a.id} className="coach-attention-row"><div><span className="coach-attention-tag info">Baseline needed</span><strong>{a.display_name||'Unnamed athlete'}</strong><p>{[!a.ftp_w?'FTP':null,!a.run_threshold_sec_per_km?'Run threshold':null,!a.swim_threshold_sec_per_100m?'Swim CSS':null].filter(Boolean).join(' · ')} not yet recorded. Assess before using discipline-specific intensity targets.</p></div><button type="button" onClick={()=>onSelect(a)}>Review athlete</button></article>)}
-      <small>Missing benchmarks are onboarding tasks, not evidence of a training or recovery problem.</small>
+    {(reviews.length>0||reviewItems.length>0)&&<div className="coach-attention-group azur-monitor-priority">
+      <div className="coach-attention-group-head"><h4>Needs coach review</h4><span>{reviews.length+reviewItems.length} items</span></div>
+      {reviews.map(review=><article key={review.id} className="coach-attention-row"><div><span className="coach-attention-tag review">Decision required</span><strong>{athleteFor(review.athlete_id)?.display_name||'Assigned athlete'} · {review.current_priority} → {review.suggested_priority}</strong><p>{review.rationale}</p></div>{athleteFor(review.athlete_id)&&<button type="button" onClick={()=>onSelect(athleteFor(review.athlete_id)!)}>View athlete</button>}</article>)}
+      {reviewItems.map((item,index)=><article key={item.athlete.id+item.signal.code+index} className="coach-attention-row"><div><span className="coach-attention-tag review">Training review</span><strong>{item.athlete.display_name||'Unnamed athlete'}</strong><p>{item.signal.description}</p></div><button type="button" onClick={()=>onSelect(item.athlete)}>View athlete</button></article>)}
+      <small>Read-only. No decisions or training changes are applied automatically.</small>
     </div>}
-    <div className="coach-attention-group">
-      <div className="coach-attention-group-head"><h4>Decisions awaiting coach review</h4><span>{reviews.length} pending</span></div>
-      {reviews.length===0?<p>No pending priority changes for assigned athletes.</p>:reviews.map(review=><article key={review.id} className="coach-attention-row">
-        <div><span className="coach-attention-tag review">Approval required</span><strong>{review.current_priority} → {review.suggested_priority}</strong>
-        <small>{new Date(review.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</small><p>{review.rationale}</p></div>
-        {athleteFor(review.athlete_id)?<button type="button" onClick={()=>onSelect(athleteFor(review.athlete_id)!)}>View athlete</button>:<small>Assigned athlete · {review.athlete_id.slice(0,8)}</small>}
-      </article>)}
-      <small>Pending requests are read-only here. No approvals or training-plan changes are applied automatically.</small>
-    </div>
-    <div className="coach-attention-group">
-      <div className="coach-attention-group-head"><h4>Training monitoring</h4><div className="coach-attention-filters" role="group" aria-label="Filter attention signals">{(['all','review','info'] as const).map(kind=><button type="button" key={kind} aria-pressed={filter===kind} onClick={()=>setFilter(kind)}>{kind==='all'?'All':kind==='review'?'Review':'Information'}</button>)}</div></div>
-      {filtered.length===0?<p>No {filter==='all'?'training signals':'matching signals'} in the evaluated records. There is insufficient evidence to claim training or recovery is on track.</p>:filtered.map((item,index)=><article className="coach-attention-row" key={item.athlete.id+item.signal.code+index}><div><span className={`coach-attention-tag ${item.signal.severity}`}>{item.signal.severity==='review'?'Check required':'For awareness'}</span><strong>{item.athlete.display_name||'Unnamed athlete'}</strong><p>{item.signal.description}</p></div><button type="button" onClick={()=>onSelect(item.athlete)}>View athlete</button></article>)}
-    </div>
+    {baselinePending.length>0&&<div className="coach-attention-group azur-monitor-actions">
+      <div className="coach-attention-group-head"><h4>Baseline setup</h4><span>{baselinePending.length} athletes</span></div>
+      <div className="azur-monitor-compact-list">{baselinePending.map(a=><article key={a.id} className="azur-monitor-compact-row">
+        <span className="azur-monitor-compact-avatar" aria-hidden="true">{(a.display_name||'A').trim().slice(0,1).toUpperCase()}</span>
+        <div><strong>{a.display_name||'Unnamed athlete'}</strong><small>{[!a.ftp_w?'Bike FTP':null,!a.run_threshold_sec_per_km?'Run threshold':null,!a.swim_threshold_sec_per_100m?'Swim CSS':null].filter(Boolean).join(' · ')}</small></div>
+        <button type="button" onClick={()=>onSelect(a)}>Review <span aria-hidden="true">›</span></button>
+      </article>)}</div>
+      <small>Missing benchmarks indicate setup work, not poor training or recovery.</small>
+    </div>}
+    <details className="azur-monitor-secondary" open={false}>
+      <summary>Training signals <span>{infoItems.length} information · {reviewItems.length} review</span></summary>
+      <div className="coach-attention-filters" role="group" aria-label="Filter attention signals">{(['all','review','info'] as const).map(kind=><button type="button" key={kind} aria-pressed={filter===kind} onClick={()=>setFilter(kind)}>{kind==='all'?'All':kind==='review'?'Review':'Information'}</button>)}</div>
+      {filtered.length===0?<p>No {filter==='all'?'training signals':'matching signals'} in evaluated records. No conclusion about device sync or recovery can be drawn.</p>:filtered.map((item,index)=><article className="coach-attention-row" key={item.athlete.id+item.signal.code+index}><div><span className={`coach-attention-tag ${item.signal.severity}`}>{item.signal.severity==='review'?'Check required':'For awareness'}</span><strong>{item.athlete.display_name||'Unnamed athlete'}</strong><p>{item.signal.description}</p></div><button type="button" onClick={()=>onSelect(item.athlete)}>View athlete</button></article>)}
+    </details>
+    {reviews.length===0&&reviewItems.length===0&&<p className="azur-monitor-empty-review">No coach review requests or training exceptions were identified in available records. This is not a recovery-readiness assessment.</p>}
   </>}
   <small className="coach-attention-disclaimer">Monitoring signals are advisory. Missing device matches, incomplete data or changes in athlete circumstances need human review. No automatic schedule edits.</small>
  </section>;
