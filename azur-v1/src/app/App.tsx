@@ -10493,8 +10493,11 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     try{
       const {error}=await supabase.rpc('athlete_record_manual_completion',{p_session_id:selected.id,p_duration_min:duration,p_distance_km:distance,p_rpe:rpe,p_notes:sessionFeedback.notes.trim()||null});
       if(error)throw error;
-      setManualMessage('Manual completion saved. Refresh the calendar to view updated status.');
+      setWeekSessions(previous=>previous.map(session=>session.id===selected.id?{...session,status:'completed' as const,completedDurationSec:Math.round(duration*60),completedSource:'manual'}:session));
+      setManualMessage('Workout completed and saved to your calendar.');
       setManualDuration('');setManualDistance('');
+      const {data:{user}}=await supabase.auth.getUser();
+      if(user)await loadPlannedSessions(user.id);
     }catch(e){setManualMessage(e instanceof Error?e.message:'Unable to save manual completion');}
     finally{setManualSaving(false);}
   }
