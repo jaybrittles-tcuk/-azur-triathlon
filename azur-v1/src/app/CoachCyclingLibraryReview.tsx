@@ -109,7 +109,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
   const [selectedId, setSelectedId] = useState(allBikeWorkouts[0]?.id ?? '');
   const [drafts, setDrafts] = useState<Record<string, ReviewDraft>>({});
   const selected = useMemo(() => allBikeWorkouts.find(w => w.id === selectedId), [selectedId]);
-  const visibleWorkouts=useMemo(()=>{const query=searchTerm.toLowerCase().trim();const matches=allBikeWorkouts.filter(w=>!query || `${w.title} ${w.family} ${w.purpose}`.toLowerCase().includes(query));return showFullCatalogue||query?matches:matches.slice(0,6)},[searchTerm,showFullCatalogue]);
+  const visibleWorkouts=useMemo(()=>{const query=searchTerm.toLowerCase().trim();const matches=allBikeWorkouts.filter(w=>!query || `${w.title} ${w.family} ${w.purpose}`.toLowerCase().includes(query));return showFullCatalogue||query?matches:matches.slice(0,3)},[searchTerm,showFullCatalogue]);
   const latestEvent = events.find(event=>event.workout_id===selectedId);
   const eligible = resolveCurrentBikeApprovals(events);
   const preview = selectCoachSession(eligible, {
@@ -133,7 +133,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
     <section className="panel coach-cycling-review azur-library-v2">
       <header><span className="azur-coach-eyebrow">AZUR / COACH WORKSPACE</span><h3>Cycling Session Review</h3><p>{allBikeWorkouts.length} coach-authored templates · select, inspect and classify</p></header>
       <p className="coach-cycling-warning">Coach decisions are recorded for review only. No automatic publishing, scheduling or Garmin export.</p>
-            <details className="coach-cycling-preview azur-library-preview" aria-label="Read-only session selection preview"><summary>Approved workout selection preview <span>{eligible.length} eligible</span></summary>
+            <details className={"coach-cycling-preview azur-library-preview"+(eligible.length===0?" azur-library-preview-empty":"")} aria-label="Read-only session selection preview"><summary>Approved workout selection preview <span>{eligible.length} eligible</span></summary>
         <h4>Approved session selection preview</h4>
         <p>{eligible.length} workouts eligible from the latest coach decisions.</p>
         <p>Selected athlete: {athleteName ?? 'None selected'} · FTP: {ftpWatts != null && ftpWatts > 0 ? `${ftpWatts} W` : 'Unavailable'}. Weekly training baseline: {athleteWeeklyHours == null ? 'Not recorded' : `${athleteWeeklyHours} hours`}. Coach-adjustable preview for the selected athlete.</p>
@@ -174,11 +174,11 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
         <div className="azur-library-catalogue"><div className="azur-library-catalogue-head"><h4>Candidate sessions</h4><span>{allBikeWorkouts.length} templates</span></div><label className="azur-library-search">Find session <input type="search" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} placeholder="Search by name or training focus" /></label><div className="coach-cycling-list" aria-label="Cycling workout catalogue">
           {visibleWorkouts.map(workout => (
             <button type="button" key={workout.id} className={workout.id === selectedId ? 'is-selected' : ''}
-              onClick={() => setSelectedId(workout.id)}>
-              <strong>{workout.title}</strong><small>{familyName(workout.family)} · {workoutMinutes(workout)} min · {workout.status}</small>
+              onClick={() => {setSelectedId(workout.id);setShowFullCatalogue(false)}} aria-pressed={workout.id === selectedId}>
+              <span className="azur-library-row-content"><strong>{workout.title}</strong><small>{familyName(workout.family)} · {workoutMinutes(workout)} min · {workout.status}</small></span><span className="azur-library-row-arrow" aria-hidden="true">›</span>
             </button>
           ))}
-        </div>{!searchTerm&&allBikeWorkouts.length>6&&<button className="azur-library-more" type="button" onClick={()=>setShowFullCatalogue(v=>!v)}>{showFullCatalogue?"Show fewer sessions":"Browse all "+allBikeWorkouts.length+" sessions"}</button>}</div>
+        </div>{!searchTerm&&allBikeWorkouts.length>3&&<button className="azur-library-more" type="button" onClick={()=>setShowFullCatalogue(v=>!v)}>{showFullCatalogue?"Show fewer sessions":"Browse all "+allBikeWorkouts.length+" sessions"}</button>}</div>
         {selected && <div className="coach-cycling-detail">
           <div className="azur-library-selected-head"><div><span className="azur-coach-eyebrow">SELECTED WORKOUT</span><h4>{selected.title}</h4></div><span className="azur-library-status">{latestEvent?.decision==="approved"?"Approved":selected.status}</span></div>
           <p>{selected.purpose}</p>
