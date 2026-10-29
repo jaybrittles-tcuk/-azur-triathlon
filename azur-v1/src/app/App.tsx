@@ -8259,7 +8259,7 @@ const sessionVerdict =
   </div>
 )}
 
-<div className="completed-session-metrics">
+{selected.completedSource !== 'manual' && <div className="completed-session-metrics">
   <div>
     <span>PLANNED</span>
     <strong>
@@ -8294,7 +8294,7 @@ const sessionVerdict =
     : 'Matched'}
     </strong>
   </div>
-</div>
+}
       {selected.completedMetrics && (
         <details className="completed-activity-details azur-collapsible-detail">
           <summary className="completed-activity-title">
@@ -8431,7 +8431,7 @@ const sessionVerdict =
       )}
     </div>
   )}
-{selectedExecution && (
+{selectedExecution && selected.completedSource !== 'manual' && (
   <div className="wide session-block session-analysis-card">
     <span className="eyebrow">AZUR SESSION ANALYSIS</span>
 
