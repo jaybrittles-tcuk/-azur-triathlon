@@ -5142,3 +5142,30 @@ strong {
 .azur-invite-row strong{color:#f2faff;font-size:13px;overflow-wrap:anywhere}
 .azur-invite-row small{display:block;color:#a8cadb;font-size:11px;margin-top:5px}
 .azur-invitations .azur-invite-note{font-size:11px;color:#9bbfd5}
+
+/* AZUR Coach Dashboard V2: focused mobile workspace */
+.azur-coach-v2{width:100%;max-width:1180px;margin:0 auto;padding:12px 0 96px;color:#edf8ff}
+.azur-coach-hero{display:flex;justify-content:space-between;align-items:center;margin:0 0 14px;padding:4px 3px}
+.azur-coach-hero span{font-size:11px;letter-spacing:.18em;color:#40b9f1;font-weight:800}
+.azur-coach-hero h2{color:#f5fbff;font-size:clamp(23px,4vw,30px);line-height:1.15;margin:6px 0}
+.azur-coach-hero p,.azur-coach-intro p{color:#a6c6dc;font-size:13px;line-height:1.5;margin:4px 0}
+.azur-coach-tabs{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:0 2px 12px}
+.azur-coach-tabs button{flex:0 0 auto;border:1px solid #315b75;background:#10314b;color:#b5d1e2;border-radius:10px;padding:11px 13px;font-size:12px;font-weight:750;cursor:pointer}
+.azur-coach-tabs button[aria-pressed=true]{background:#138bc7;border-color:#40c0f2;color:#fff}
+.azur-coach-intro{margin:4px 3px 10px}.azur-coach-intro h3{color:#f2faff;font-size:19px;margin:0}
+.azur-coach-v2 .coach-cycling-review{margin:10px 0!important;padding:14px!important}
+.azur-coach-v2 .coach-cycling-review>header h3{font-size:18px!important}
+.azur-coach-v2 .coach-cycling-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}
+.azur-coach-v2 .coach-cycling-list button{min-height:64px;padding:12px!important;border-radius:12px!important;text-align:left;background:#153850;color:#eff9ff;border:1px solid #335c75!important;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.azur-coach-v2 .coach-cycling-list button.is-selected{border:1.5px solid #f7c24b!important;box-shadow:inset 0 0 0 1px #f7c24b33}
+.azur-coach-v2 .coach-cycling-list button strong{color:#f6fbff!important;font-size:15px}
+.azur-coach-v2 .coach-cycling-list button small{color:#a9cbdf!important;font-size:12px}
+.azur-coach-v2 .coach-cycling-columns{display:flex;flex-direction:column;gap:10px}
+.azur-coach-v2 .coach-cycling-detail{padding:13px!important;margin:0!important;border-radius:12px}
+.azur-coach-shortcuts{display:grid;gap:9px;margin-top:12px}
+.azur-coach-shortcuts button{display:flex;align-items:center;justify-content:space-between;text-align:left;gap:15px;background:#102f48;color:#f1faff;border:1px solid #315774;border-radius:12px;padding:16px;font-size:14px;font-weight:750;cursor:pointer}
+.azur-coach-shortcuts button span{color:#36b6ef;font-size:12px;white-space:nowrap}
+.azur-coach-v2 select,.azur-coach-v2 input[type=number]{background:#133a54;color:#f2faff;border:1px solid #54768e;border-radius:8px;padding:9px;max-width:100%}
+.azur-coach-v2 .coach-cycling-review fieldset{min-width:0}
+@media(max-width:650px){.azur-coach-v2{padding:8px 0 100px}.azur-coach-v2 .coach-cycling-list{grid-template-columns:repeat(2,minmax(0,1fr))}.azur-coach-v2 .coach-cycling-list button{min-width:0}.azur-coach-tabs button{padding:10px}.azur-coach-v2 .coach-cycling-review{padding:12px!important}.azur-coach-v2 .coach-cycling-review select,.azur-coach-v2 .coach-cycling-review input{font-size:14px}}
+@media(max-width:390px){.azur-coach-v2 .coach-cycling-list{grid-template-columns:1fr}}
