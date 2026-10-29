@@ -39,7 +39,7 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   await refresh();
  }
  async function copyInstructions(inv:Invitation){
-  const msg = `You've been invited to the AZUR Triathlon beta as ${inv.invitee_email}. Use the same email address for your athlete account. Once your account is confirmed, sign in at https://azur-triathlon.vercel.app/onboarding, complete your profile, and accept the coach invitation. Please note: beta account registration is currently controlled by AZUR and may need to be enabled for your pilot.`;
+  const msg = `You've been invited to the AZUR Triathlon beta as ${inv.invitee_email}. Use the same email address for your athlete account. Once your account is confirmed, sign in at https://azur-triathlon.vercel.app/?join=1, create your account, verify your email, then complete your profile, and accept the coach invitation. Please note: registration is enabled only after AZUR activates its invite-only signup protection.`;
   try{await navigator.clipboard.writeText(msg);setMessage('Invitation instructions copied. Sharing them does not create an account or activate public registration.');}
   catch{setMessage('Copy unavailable. Share the onboarding URL and invited email address manually.');}
  }
