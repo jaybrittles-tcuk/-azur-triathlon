@@ -1920,6 +1920,10 @@ const matchConfidence =
   if (!selected || !nextPlannedSession || !selected.completedDurationSec) {
     return null;
   }
+  // Manual records carry duration, distance and self-reported RPE, not measured
+  // power, heart rate or verified recovery. Never propose an automated change
+  // to another session based solely on a manual completion.
+  if (selected.completedSource === 'manual') return null;
 // Existing accepted plan changes are historical context, not a new
 // recommendation caused by this completed activity.
 if(nextPlannedSession.prescription?.azur_adaptation?.status==='accepted'){
@@ -8140,6 +8144,12 @@ const sessionVerdict =
     </div>
   );
 })()}
+ {selected?.completedDurationSec && selected.completedSource === 'manual' && (
+   <div className="azur-existing-plan-change" role="status">
+     <strong>Manual session recorded</strong>
+     <p>Duration, distance and your RPE are saved as athlete-reported information. AZUR has not measured power, pace or heart rate from this entry, so it will not propose changing another workout based on this entry alone. Your coach can review the feedback alongside other evidence.</p>
+   </div>
+ )}
  {selected?.completedDurationSec && nextPlannedSession?.prescription?.azur_adaptation?.status==='accepted' && (
    <div className="azur-existing-plan-change">
      <strong>Existing plan adjustment</strong>
