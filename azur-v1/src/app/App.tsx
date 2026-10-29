@@ -1286,6 +1286,7 @@ const [manualDuration,setManualDuration]=useState('');
 const [manualDistance,setManualDistance]=useState('');
 const [manualSaving,setManualSaving]=useState(false);
 const [manualMessage,setManualMessage]=useState('');
+const [editableManualId,setEditableManualId]=useState<string|null>(null);
 const [garminConnected, setGarminConnected] = useState(false);
   
   const [trainingLoad, setTrainingLoad] = useState({
@@ -2274,6 +2275,23 @@ return {
 };
   
 })();
+useEffect(()=>{
+  let cancelled=false;
+  setEditableManualId(null);
+  setManualDuration('');setManualDistance('');setManualMessage('');
+  if(selected?.id && selected.status==='completed'){
+    void supabase.from('completed_activity').select('id,source,duration_sec,distance_m,session_rpe,notes')
+      .eq('planned_session_id',selected.id).then(({data,error})=>{
+        if(cancelled||error||!data||data.length!==1||data[0].source!=='manual')return;
+        const activity=data[0];
+        setEditableManualId(activity.id);
+        setManualDuration(String(Number(activity.duration_sec)/60));
+        setManualDistance(activity.distance_m == null?'':String(Number(activity.distance_m)/1000));
+        setSessionFeedback({rpe:activity.session_rpe==null?'':String(activity.session_rpe),notes:activity.notes??''});
+      });
+  }
+  return()=>{cancelled=true};
+},[selected?.id,selected?.status]);
 useEffect(() => {
   async function loadSessionFeedback() {
     if (!selected?.id) return;
@@ -8530,7 +8548,7 @@ const sessionVerdict =
     <div>{selected.rationale}</div>
   </div>
 </div>
-{selected.status!=='completed'&&<div className="wide session-block azur-manual-completion"><span className="eyebrow">MANUAL WORKOUT COMPLETION</span><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</div>}
+{(selected.status!=='completed'||editableManualId)&&<div className="wide session-block azur-manual-completion"><span className="eyebrow">{editableManualId?'EDIT MANUAL COMPLETION':'MANUAL WORKOUT COMPLETION'}</span><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</div>}
 <div className="wide session-block">
   <span className="eyebrow">ATHLETE FEEDBACK</span>
 
@@ -10488,17 +10506,17 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     if(!selected?.id || manualSaving)return;
     const latestAllowed=new Date();latestAllowed.setDate(latestAllowed.getDate()+1);
     const latestKey=[latestAllowed.getFullYear(),String(latestAllowed.getMonth()+1).padStart(2,'0'),String(latestAllowed.getDate()).padStart(2,'0')].join('-');
-    if(selected.plannedDate>latestKey){setManualMessage('This session is scheduled for a future date. You can record completion on the scheduled day or within the permitted early-completion window.');return;}
+    if(!editableManualId && selected.plannedDate>latestKey){setManualMessage('This session is scheduled for a future date. You can record completion on the scheduled day or within the permitted early-completion window.');return;}
     const duration=Number(manualDuration),distance=manualDistance.trim()===''?null:Number(manualDistance);
     const rpe=Number(sessionFeedback.rpe);
     if(!Number.isFinite(duration)||duration<=0||duration>1440||!Number.isInteger(duration*60)||!Number.isInteger(rpe)||rpe<1||rpe>10|| (distance!==null&&(!Number.isFinite(distance)||distance<0||distance>1000))){setManualMessage('Enter actual duration, RPE 1–10 and an optional valid distance.');return;}
     setManualSaving(true);setManualMessage('');
     try{
-      const {error}=await supabase.rpc('athlete_record_manual_completion',{p_session_id:selected.id,p_duration_min:duration,p_distance_km:distance,p_rpe:rpe,p_notes:sessionFeedback.notes.trim()||null});
+      const {error}=await supabase.rpc(editableManualId?'athlete_edit_manual_completion':'athlete_record_manual_completion',{p_session_id:selected.id,p_duration_min:duration,p_distance_km:distance,p_rpe:rpe,p_notes:sessionFeedback.notes.trim()||null});
       if(error)throw error;
       setWeekSessions(previous=>previous.map(session=>session.id===selected.id?{...session,status:'completed' as const,completedDurationSec:Math.round(duration*60),completedSource:'manual'}:session));
-      setManualMessage('Workout completed and saved to your calendar.');
-      setManualDuration('');setManualDistance('');
+      setManualMessage(editableManualId?'Manual activity changes saved.':'Workout completed and saved to your calendar.');
+      if(!editableManualId){setManualDuration('');setManualDistance('');}
       const {data:{user}}=await supabase.auth.getUser();
       if(user){try{await loadPlannedSessions(user.id);}catch(refreshError){console.warn('Calendar refresh after successful completion failed',refreshError);}}
     }catch(e){const message=e&&typeof e==='object'&&'message' in e?String(e.message):'Unable to save manual completion';setManualMessage(message);}
