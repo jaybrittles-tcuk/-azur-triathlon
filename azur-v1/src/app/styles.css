@@ -5238,3 +5238,17 @@ strong {
 .azur-athlete-metric-details summary{font-weight:750;color:#74cdf6;cursor:pointer;font-size:12px}
 .azur-athlete-metric-details .azur-athlete-metrics{margin-top:10px}
 @media(max-width:680px){.azur-athlete-tile{min-height:61px}.azur-roster-v3{padding:12px!important}.azur-roster-head h3{font-size:19px}.azur-athlete-next-step{font-size:11px;padding:9px}}
+
+/* Coach V3.2 — actionable athlete readiness */
+.azur-coach-actions-panel{border:1px solid #305d79;background:linear-gradient(120deg,#123650,#0e2a42);border-radius:13px;padding:14px;margin:12px 0}
+.azur-coach-actions-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.azur-coach-actions-title strong{color:#f2faff;font-size:15px}
+.azur-coach-actions-title small{color:#9dc4db;font-size:11px}
+.azur-coach-actions-panel ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.azur-coach-actions-panel li{display:flex;align-items:center;gap:10px;border-top:1px solid #2c5069;padding:10px 0 2px}
+.azur-action-symbol{flex:0 0 auto;display:grid;place-items:center;border:1px solid #8e7035;background:#4d412952;color:#ffcb66;border-radius:9px;width:30px;height:30px;font-size:11px;font-weight:850}
+.azur-coach-actions-panel li div{display:grid;gap:4px}
+.azur-coach-actions-panel li strong{color:#f4faff;font-size:13px}
+.azur-coach-actions-panel li small{color:#a7c8db;line-height:1.4;font-size:11px}
+.azur-coach-actions-complete{color:#91e7ce;font-size:12px}
+.azur-coach-manual-note{background:#0d2b44;border-left:2px solid #35b9ef;padding:9px 11px;color:#b1d6e9;font-size:12px;line-height:1.5;margin:10px 0 0}
