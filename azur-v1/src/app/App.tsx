@@ -1,3 +1,4 @@
+import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
@@ -10605,7 +10606,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   }
 
   if (window.location.pathname === '/onboarding') {
-    return <div className="login-screen"><AthleteOnboardingDraft /></div>;
+    return <div className="login-screen"><div><AthleteOnboardingDraft /><CoachInvitations mode="athlete" /></div></div>;
   }
 
   return (
@@ -10903,7 +10904,7 @@ style={
     ))}
   </div>
 )}
-{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachAttentionInbox onSelect={setCoachSelectedAthlete} /><CoachAthleteRoster onSelect={setCoachSelectedAthlete} selectedAthleteId={coachSelectedAthlete?.id ?? null} /><CoachAthletePerformance athlete={coachSelectedAthlete} /><CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} /></>}
+{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachInvitations mode="coach" /><CoachAttentionInbox onSelect={setCoachSelectedAthlete} /><CoachAthleteRoster onSelect={setCoachSelectedAthlete} selectedAthleteId={coachSelectedAthlete?.id ?? null} /><CoachAthletePerformance athlete={coachSelectedAthlete} /><CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} /></>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section
