@@ -2280,8 +2280,9 @@ useEffect(()=>{
   if(selected?.id && selected.status==='completed'){
     void supabase.from('completed_activity').select('id,source,duration_sec,distance_m,session_rpe,notes')
       .eq('planned_session_id',selected.id).then(({data,error})=>{
-        if(cancelled||error||!data||data.length!==1||data[0].source!=='manual')return;
-        const activity=data[0];
+        if(cancelled||error||!data)return;
+        const activity=data.find(row=>row.source==='manual' && row.id===selected.completedActivityId) ?? (data.length===1 && data[0].source==='manual' ? data[0] : null);
+        if(!activity)return;
         setEditableManualId(activity.id);
         setManualDuration(String(Number(activity.duration_sec)/60));
         setManualDistance(activity.distance_m == null?'':String(Number(activity.distance_m)/1000));
@@ -8613,8 +8614,9 @@ const sessionVerdict =
           </div>
 
 <button
+  type="button"
   className="primary-button"
-  onClick={handleSessionFeedbackSave}
+  onClick={()=>void handleSessionFeedbackSave()}
   disabled={sessionFeedbackSaving}
 >
   <Save size={17} />
@@ -10523,6 +10525,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 }
   async function handleManualCompletion() {
     if(!selected?.id || manualSaving)return;
+    if(selected.status==='completed' && (!editableManualId || selected.completedSource!=='manual')){setManualMessage('Only a linked manual completion can be edited. Imported device activities remain protected.');return;}
     const latestAllowed=new Date();latestAllowed.setDate(latestAllowed.getDate()+1);
     const latestKey=[latestAllowed.getFullYear(),String(latestAllowed.getMonth()+1).padStart(2,'0'),String(latestAllowed.getDate()).padStart(2,'0')].join('-');
     if(!editableManualId && selected.plannedDate>latestKey){setManualMessage('This session is scheduled for a future date. You can record completion on the scheduled day or within the permitted early-completion window.');return;}
@@ -10553,6 +10556,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 
   if (!user) {
     setSessionFeedbackSaving(false);
+    setSessionFeedbackMessage('Please sign in again to save feedback.');
     return;
   }
 
