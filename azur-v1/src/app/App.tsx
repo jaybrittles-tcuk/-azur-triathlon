@@ -10925,7 +10925,7 @@ style={
   </>}
   {coachWorkspace==='monitoring'&&<CoachAttentionInbox onSelect={(a)=>{setCoachSelectedAthlete(a);setCoachWorkspace('overview')}}/>}
   {coachWorkspace==='invitations'&&<CoachInvitations mode="coach"/>}
-  {coachWorkspace==='library'&&<CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null}/>}
+  {coachWorkspace==='library'&&<CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} athleteId={coachSelectedAthlete?.id ?? null}/>}
 </div>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
