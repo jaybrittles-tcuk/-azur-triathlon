@@ -5513,3 +5513,83 @@ strong {
 .editor-panel .azur-edit-summary span{display:block;color:#accbdc;font-size:12px;font-weight:400;margin-top:5px}
 .editor-panel details.azur-manual-completion:not([open]){padding:17px 20px!important}
 .editor-panel details.azur-manual-completion[open]>.azur-edit-summary{margin-bottom:14px}
+
+
+/* AZUR V2 master reference — cohesive premium mobile session treatment.
+   Scoped to the session modal to preserve calendar, dashboard and coach logic. */
+.session-detail-overlay{background:rgba(2,8,19,.88);backdrop-filter:blur(14px);padding:12px}
+.session-detail-modal{
+ --azur-v2-bg:#081423;--azur-v2-panel:#111f32;--azur-v2-raised:#17273d;
+ --azur-v2-blue:#2696f7;--azur-v2-muted:#a3b5cd;
+ background:var(--azur-v2-bg)!important;color:#f3f7ff!important;
+ border:1px solid #26364a!important;border-radius:24px!important;
+ box-shadow:0 28px 75px rgba(0,0,0,.48)!important;
+ padding:22px 19px 34px!important;max-height:94dvh;
+}
+.session-detail-modal>.section-heading{
+ padding:28px 18px 20px!important;margin:0 0 15px!important;
+ background:linear-gradient(145deg,rgba(26,58,88,.76),rgba(10,24,42,.95)),
+ radial-gradient(circle at 88% 14%,rgba(37,148,245,.22),transparent 42%)!important;
+ border:1px solid #273c53;border-radius:18px!important;
+}
+.session-detail-modal .section-heading h3{font-size:clamp(25px,5.5vw,34px)!important;line-height:1.12!important;letter-spacing:-.035em!important;max-width:18ch}
+.session-detail-modal .section-heading .eyebrow{font-size:10px!important;letter-spacing:.2em;color:#6dbdf9!important}
+.session-detail-modal .session-detail-meta{display:flex!important;flex-wrap:wrap;gap:7px!important;margin-top:16px!important}
+.session-detail-modal .session-detail-meta span{
+ background:#182c42!important;border:1px solid #34485d!important;color:#d2e2f4!important;
+ padding:6px 10px!important;border-radius:8px!important;font-size:11px!important;
+}
+.session-detail-modal .session-block,
+.session-detail-modal .wide.session-block{
+ background:#111f31!important;border:1px solid #26384d!important;
+ border-radius:15px!important;box-shadow:none!important;
+}
+.session-detail-modal .completed-session-summary{
+ background:#10212b!important;border:1px solid #254743!important;
+ border-radius:17px!important;padding:16px!important;
+}
+.session-detail-modal .azur-manual-training-insights{
+ background:#111f32!important;border:1px solid #34445b!important;border-left:3px solid #2696f7!important;
+ border-radius:15px!important;box-shadow:none!important;padding:17px!important;
+}
+.session-detail-modal .azur-manual-training-insights h4{font-size:21px!important;margin-bottom:13px!important}
+.session-detail-modal .azur-manual-insight-metrics>div{background:#17283f!important;border:1px solid #32445a!important;min-height:70px!important}
+.session-detail-modal .azur-manual-insight-metrics>div:first-child{background:#17283f!important;border-color:#32445a!important}
+.session-detail-modal .azur-manual-insight-metrics>div:first-child small{color:#a3b5cd!important}
+.session-detail-modal .azur-manual-insight-metrics>div:first-child strong{color:#f4f8ff!important}
+.session-detail-modal .azur-manual-insight-metrics>div:nth-child(2){background:#163b61!important;border-color:#257bce!important}
+.session-detail-modal .azur-manual-insight-metrics>div:nth-child(3){background:#17283f!important;border-color:#32445a!important}
+.session-detail-modal .azur-manual-insight-metrics>div:nth-child(4){background:#242d3c!important;border-color:#62583c!important}
+.session-detail-modal .azur-manual-training-insights p.azur-insight-observation,
+.session-detail-modal .azur-manual-training-insights p.azur-insight-interpretation,
+.session-detail-modal .azur-manual-training-insights p.azur-insight-decision{
+ background:transparent!important;border:0!important;border-left:2px solid #2696f7!important;
+ border-radius:0!important;margin:0!important;padding:12px 12px 12px 14px!important;
+}
+.session-detail-modal .azur-manual-training-insights p.azur-insight-interpretation{border-left-color:#e6b943!important}
+.session-detail-modal .azur-manual-training-insights p.azur-insight-decision{border-left-color:#67bc9b!important}
+.session-detail-modal .completed-session-metrics{background:#142337!important;border:0!important;padding:12px 5px!important}
+.session-detail-modal .completed-activity-details{
+ background:#142337!important;border:1px solid #293e53!important;color:#eef6ff!important;padding:15px!important;
+}
+.session-detail-modal .completed-activity-details .completed-activity-title span{color:#bdd1e3!important}
+.session-detail-modal .completed-activity-grid strong{color:#f4f8ff!important}
+.session-detail-modal .completed-activity-grid span{color:#91a8bf!important}
+.session-detail-modal .session-analysis-card{
+ background:#12243b!important;color:#eef5ff!important;
+ border:1px solid #294a6b!important;border-left:3px solid #2696f7!important;
+}
+.session-detail-modal .session-analysis-card .eyebrow{color:#7ac5ff!important}
+.session-detail-modal .azur-manual-completion{background:#121f32!important;border:1px solid #36475a!important;border-top:2px solid #e6b943!important}
+.session-detail-modal .primary-button{background:#238df0!important;border-radius:11px!important;box-shadow:none!important}
+.session-detail-modal .session-detail-close{
+ position:sticky!important;top:0!important;background:#182b41!important;border:1px solid #3e536b!important;
+ width:40px!important;height:40px!important;
+}
+@media(max-width:560px){
+ .session-detail-overlay{padding:0!important}
+ .session-detail-modal{width:100%!important;max-height:100dvh!important;min-height:100dvh!important;border-radius:0!important;padding:18px 15px 90px!important}
+ .session-detail-modal>.section-heading{padding:26px 16px 17px!important}
+ .session-detail-modal .azur-manual-insight-metrics{gap:8px!important;margin:11px 0 17px!important}
+ .session-detail-modal .azur-manual-insight-metrics>div{min-height:65px!important;padding:11px!important}
+}
