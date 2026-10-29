@@ -30,6 +30,11 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   setEmail('');setMessage('Invitation created. Share the onboarding link with the athlete; they must register using the invited email address.');
   await refresh();
  }
+ async function copyInstructions(inv:Invitation){
+  const msg = `You've been invited to the AZUR Triathlon beta as ${inv.invitee_email}. Use the same email address for your athlete account. Once your account is confirmed, sign in at https://azur-triathlon.vercel.app/onboarding, complete your profile, and accept the coach invitation. Please note: beta account registration is currently controlled by AZUR and may need to be enabled for your pilot.`;
+  try{await navigator.clipboard.writeText(msg);setMessage('Invitation instructions copied. Sharing them does not create an account or activate public registration.');}
+  catch{setMessage('Copy unavailable. Share the onboarding URL and invited email address manually.');}
+ }
  async function accept(inv:Invitation){
   setBusy(true);setMessage('');
   const {data:{user}}=await supabase.auth.getUser();
@@ -46,8 +51,9 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   {message&&<p role="status">{message}</p>}
   {loading?<p>Loading invitations…</p>:items.length===0?<p>No invitations yet.</p>:<div className="azur-invite-list">{items.map(inv=><div key={inv.id} className="azur-invite-row">
    <div><strong>{mode==='coach'?inv.invitee_email:'AZUR coach invitation'}</strong><small>{inv.accepted_at?'Accepted':new Date(inv.expires_at).getTime()<Date.now()?'Expired':'Awaiting acceptance'}</small></div>
+   {mode==='coach'&&!inv.accepted_at&&<button type="button" onClick={()=>void copyInstructions(inv)}>Copy instructions</button>}
    {mode==='athlete'&&!inv.accepted_at&&new Date(inv.expires_at).getTime()>Date.now()&&<button disabled={busy} onClick={()=>void accept(inv)}>Accept</button>}
   </div>)}</div>}
-  {mode==='coach'&&<p className="azur-invite-note">Athletes can sign in and complete their profile at azur-triathlon.vercel.app/onboarding. Automated invitation email delivery is not active yet.</p>}
+  {mode==='coach'&&<p className="azur-invite-note">Athletes can sign in and complete their profile at azur-triathlon.vercel.app/onboarding. Automated invitation email delivery is not active yet. Account registration is still controlled; copying an invitation does not enable sign-up.</p>}
  </section>;
 }
