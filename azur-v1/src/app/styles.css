@@ -5252,3 +5252,13 @@ strong {
 .azur-coach-actions-panel li small{color:#a7c8db;line-height:1.4;font-size:11px}
 .azur-coach-actions-complete{color:#91e7ce;font-size:12px}
 .azur-coach-manual-note{background:#0d2b44;border-left:2px solid #35b9ef;padding:9px 11px;color:#b1d6e9;font-size:12px;line-height:1.5;margin:10px 0 0}
+
+/* Coach V3.2 — actual 28-day performance facts */
+.azur-training-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0}
+.azur-training-facts div{border:1px solid #32617b;border-radius:12px;background:#153750;padding:13px 11px;display:grid;gap:8px}
+.azur-training-facts small{font-size:10px;color:#a8cadd;letter-spacing:.05em}
+.azur-training-facts strong{font-size:20px;color:#f5fbff}
+.azur-training-data-note{border:1px solid #5a674e;border-radius:10px;background:#273b35;color:#cee1cd;padding:10px 12px;font-size:12px;line-height:1.5}
+.azur-training-context{border:1px solid #315a74;border-radius:10px;background:#123249;padding:12px;margin:12px 0;color:#b9d5e4;font-size:12px}
+.azur-training-context summary{color:#6bc7f5;font-weight:750;cursor:pointer}
+@media(max-width:420px){.azur-training-facts div{padding:10px 8px}.azur-training-facts strong{font-size:18px}.azur-training-facts small{font-size:9px}}
