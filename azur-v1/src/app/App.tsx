@@ -10914,9 +10914,9 @@ style={
     <button type="button" aria-pressed={coachWorkspace==='invitations'} onClick={()=>setCoachWorkspace('invitations')}>Invitations</button>
   </nav>
   {coachWorkspace==='overview'&&<>
-    <div className="azur-coach-intro"><h3>Assigned athletes</h3><p>Choose an athlete to inspect their benchmarks and available training records.</p></div>
+    <div className="azur-coach-kpis"><div><small>COACH WORKSPACE</small><strong>Squad overview</strong><span>Connected athletes and training priorities</span></div><button type="button" onClick={()=>setCoachWorkspace('invitations')}>+ Invite athlete</button></div>
     <CoachAthleteRoster onSelect={setCoachSelectedAthlete} selectedAthleteId={coachSelectedAthlete?.id ?? null}/>
-    <CoachAthletePerformance athlete={coachSelectedAthlete}/>
+    {coachSelectedAthlete&&<CoachAthletePerformance athlete={coachSelectedAthlete}/>}
     <div className="azur-coach-shortcuts">
       <button type="button" onClick={()=>setCoachWorkspace('monitoring')}>Training monitoring <span>View signals →</span></button>
       <button type="button" onClick={()=>setCoachWorkspace('library')}>Cycling session review <span>Open library →</span></button>
