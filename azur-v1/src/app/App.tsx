@@ -7581,7 +7581,7 @@ color:
   </div>
 
   <div className="calendar-strip-footer">
-    <small>
+    <small>Planned programme · 
       {calendarWeekSessions.length} sessions · {completedCount} completed · {plannedCount} planned ·{' '}
       {(
         calendarWeekSessions.reduce(
@@ -7681,13 +7681,14 @@ const dayCompletedActivities = completedActivityFeed.filter(
       </div>
 
 {calendarDay?.dateKey === todayKey && <small>TODAY</small>}
+<small className="azur-day-count">{daySessions.length} planned · {dayCompletedActivities.length} additional</small>
 </div>
 
                   <div className="day-stack">
                     {daySessions.map((session) => (
                       <div className="calendar-session-wrapper">
                       {!session.locked && (session.status === 'planned' || session.status === 'edited') && (
-                        <button className="calendar-reschedule-button" type="button" onClick={() => {setMovingSessionId(session.id); setMoveTargetDate(session.plannedDate); setMoveMessage('');}}>Move session</button>
+                        <button className="calendar-reschedule-button" type="button" onClick={() => {setMovingSessionId(session.id); setMoveTargetDate(session.plannedDate); setMoveMessage('');}} aria-label={`Reschedule ${session.title}`}>Reschedule</button>
                       )}
                       <button
                         key={session.id}
