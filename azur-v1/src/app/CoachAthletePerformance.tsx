@@ -44,25 +44,25 @@ export default function CoachAthletePerformance({ athlete }: { athlete:AssignedA
   }void load();return()=>{cancelled=true;};
  },[athlete?.id]);
  return <section className="panel coach-cycling-review">
-  <header><h3>Athlete Performance</h3><p>Assigned athlete · verified benchmarks and last 28 days</p></header>
+  <header><h3>Training intelligence</h3><p>Verified activity context · last 28 days</p></header>
   {!athlete&&<p>Select an assigned athlete above to view their performance.</p>}
   {loading&&<p>Loading performance…</p>}
   {error&&<p role="alert">{error}</p>}
   {athlete&&!loading&&!error&&<>
    <h4>{athlete.display_name||'Unnamed athlete'}</h4>
-   <div className="coach-performance-grid">
-    <div><small>Bike FTP</small><strong>{athlete.ftp_w!=null?`${athlete.ftp_w} W`:'Not recorded'}</strong></div>
-    <div><small>Run threshold</small><strong>{athlete.run_threshold_sec_per_km!=null?`${athlete.run_threshold_sec_per_km} s/km`:'Not recorded'}</strong></div>
-    <div><small>Swim CSS</small><strong>{athlete.swim_threshold_sec_per_100m!=null?`${athlete.swim_threshold_sec_per_100m} s/100m`:'Not recorded'}</strong></div>
-    <div><small>Weekly availability</small><strong>{athlete.normal_weekly_hours!=null?`${athlete.normal_weekly_hours} hours`:'Not recorded'}</strong></div>
-   </div>
-   <p>Development focus: <strong>{baseline?.development_sport||'Not assessed'}</strong> · Strongest discipline: <strong>{baseline?.strongest_sport||'Not assessed'}</strong></p>
-   <p>Baseline target: {baseline?.weekly_hours!=null?`${baseline.weekly_hours} hr/week`:'Not recorded'} · {baseline?.sessions_per_week!=null?`${baseline.sessions_per_week} sessions/week`:'Sessions not recorded'}</p>
+   {summary&&<div className="azur-training-facts">
+     <div><small>ACTIVITIES LOGGED</small><strong>{summary.completed}</strong></div>
+     <div><small>TRAINING HOURS</small><strong>{summary.completedHours} h</strong></div>
+     <div><small>PLANNED SESSIONS</small><strong>{summary.planned}</strong></div>
+   </div>}
+   {summary?.completed===0&&<p className="azur-training-data-note">No completed activities have been recorded for the last 28 days. This is not a recovery or adherence judgement.</p>}
+   <details className="azur-training-context"><summary>Training baseline and discipline focus</summary>
+    <p>Development focus: <strong>{baseline?.development_sport||'Not assessed'}</strong> · Strongest discipline: <strong>{baseline?.strongest_sport||'Not assessed'}</strong></p>
+    <p>Confirmed baseline: {baseline?.weekly_hours!=null?`${baseline.weekly_hours} h/week`:'Not recorded'} · {baseline?.sessions_per_week!=null?`${baseline.sessions_per_week} sessions/week`:'Sessions not recorded'}</p>
+   </details>
    <CoachTrainingLoadTrend key={athlete.id} athlete={athlete} />
    <h5>Coach attention signals</h5>
    {alerts.length===0?<p>No attention signals identified from available records. This does not indicate recovery readiness.</p>:<ul>{alerts.map(a=><li key={a.code}><strong>{a.severity==='review'?'Review':'Information'}:</strong> {a.description}</li>)}</ul>}
-   <h5>Recent training (28 days)</h5>
-   {summary&&<p>{summary.completed} recorded activities · {summary.completedHours} hours completed · {summary.planned} active planned sessions in the same period</p>}
    <small>Activity count is not a completion percentage. Race focus, adherence and training load are not inferred from incomplete records. Read-only.</small>
   </>}
  </section>;
