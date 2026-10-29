@@ -5278,3 +5278,28 @@ strong {
 .azur-coach-v2 .azur-monitor-actions .coach-attention-group-head>span{color:#f5c870;font-size:12px}
 .azur-coach-v2 .coach-attention-disclaimer{display:block;color:#a5c7dc;font-size:11px;line-height:1.5;padding:8px}
 @media(max-width:620px){.azur-coach-v2 .coach-attention-row{flex-wrap:wrap}.azur-coach-v2 .coach-attention-row button{margin-left:auto}.azur-coach-v2 .coach-attention-group{padding:12px}}
+
+/* Monitoring V2 final: dense priority-first coach view */
+.azur-coach-v2 .coach-attention-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.azur-coach-v2 .coach-attention-heading p{margin:5px 0}
+.azur-coach-v2 .coach-attention-heading button{flex-shrink:0;padding:9px 10px;font-size:12px}
+.azur-coach-v2 .coach-attention-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.azur-coach-v2 .coach-attention-stats>div{padding:11px 8px;min-width:0}
+.azur-coach-v2 .coach-attention-stats small{font-size:11px;line-height:1.25}
+.azur-coach-v2 .coach-attention-stats strong{font-size:24px}
+.azur-coach-v2 .coach-attention-group{margin:10px 0;padding:13px}
+.azur-monitor-compact-list{display:grid;gap:7px;margin:12px 0}
+.azur-monitor-compact-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid #315c76;background:#14364f;border-radius:11px;min-width:0}
+.azur-monitor-compact-avatar{height:36px;width:36px;flex-shrink:0;display:grid;place-items:center;border-radius:50%;background:#1b5375;border:1px solid #367b9e;color:white;font-weight:800}
+.azur-monitor-compact-row>div{display:grid;gap:3px;flex:1;min-width:0}
+.azur-monitor-compact-row strong{font-size:13px;color:#f4fbff}
+.azur-monitor-compact-row small{font-size:11px;color:#a9c9da;overflow-wrap:anywhere;line-height:1.35}
+.azur-monitor-compact-row button{background:#126b98;border:1px solid #348db6;color:#fff;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:750;flex-shrink:0;cursor:pointer}
+.azur-monitor-compact-row button span{font-size:18px}
+.azur-monitor-secondary{border:1px solid #2b536d;background:#0f2c44;border-radius:12px;padding:13px;margin:10px 0}
+.azur-monitor-secondary summary{color:#f1faff;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.azur-monitor-secondary summary span{font-size:11px;color:#a9c9dc;font-weight:500}
+.azur-monitor-secondary .coach-attention-filters{margin:12px 0}
+.azur-monitor-secondary p,.azur-monitor-empty-review{color:#a9c9db;font-size:12px;line-height:1.5}
+.azur-monitor-empty-review{border-left:2px solid #40708a;padding:8px 11px;margin:8px 0}
+@media(max-width:650px){.azur-coach-v2 .coach-attention-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.azur-coach-v2 .coach-attention-stats>div{padding:9px 5px}.azur-coach-v2 .coach-attention-stats small{font-size:9px}.azur-coach-v2 .coach-attention-stats strong{font-size:20px}.azur-coach-v2 .coach-attention-heading{align-items:flex-start}.azur-coach-v2 .coach-attention-heading h3{font-size:22px}}
