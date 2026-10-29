@@ -7741,7 +7741,7 @@ onClick={() => {
       <strong>Planned {formatDuration(session.durationMin)} · Actual {formatDuration(Math.round(session.completedDurationSec / 60))}</strong>
       <span>
         {session.durationMin > 0
-          ? `${Math.round((session.completedDurationSec / 60 / session.durationMin) * 100)}% of prescribed time · `
+          ? `${Math.round((session.completedDurationSec / 60 / session.durationMin) * 100)}% duration adherence · `
           : ''}
         {Math.round(session.completedDurationSec / 60 - session.durationMin) >= 0 ? '+' : ''}
         {Math.round(session.completedDurationSec / 60 - session.durationMin)} min
@@ -7770,7 +7770,7 @@ onClick={() => {
     session.completedMatchConfidence != null
       ? `${Math.round(
           session.completedMatchConfidence,
-        )}% match`
+        )}% match confidence`
       : `Priority ${session.priority}`}
   </span>
 </div>
