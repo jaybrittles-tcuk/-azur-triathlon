@@ -4783,6 +4783,11 @@ const calendarWeekDates = useMemo(() => {
   });
 }, [calendarWeekOffset, todayKey]);
 
+const homeCompletedTotal=homeWeek.filter(s=>s.status==='completed').length;
+const homePlannedTotal=homeWeek.length;
+const todaySessions=weekSessions.filter(s=>s.plannedDate===todayKey);
+const homeTodayLabel=todaySessions.length?String(todaySessions.length)+' scheduled session'+(todaySessions.length===1?'':'s'):'No workout scheduled';
+const homeProgressPercent=homePlannedTotal?Math.round(homeCompletedTotal/homePlannedTotal*100):0;
 const todaySession = weekSessions.find(
   (session) => session.plannedDate === todayKey,
 );
@@ -5804,6 +5809,8 @@ height: '58px',
   </div>
 </section>
 
+<section className="azur-athlete-today-summary"><div><span>TODAY'S TRAINING</span><strong>{homeTodayLabel}</strong><small>{todaySessions.length ? String(todaySessions.filter(s=>s.status==='completed').length)+' recorded complete today' : 'No sessions on the calendar today.'}</small></div><button type="button" onClick={()=>setActiveNav('Calendar')}>View calendar →</button></section>
+<section className="azur-athlete-week-progress"><div><strong>This week</strong><span>{homeCompletedTotal} of {homePlannedTotal} recorded complete</span></div><div role="progressbar" aria-label="Recorded session completion" aria-valuenow={homeCompletedTotal} aria-valuemin={0} aria-valuemax={homePlannedTotal||1}><span style={{width:String(homeProgressPercent)+'%'}}/></div><small>Completion is based on recorded status, not training quality.</small></section>
 {todaySession && (
   <section
     style={{
@@ -5846,7 +5853,7 @@ height: '58px',
           fontWeight: 700,
         }}
       >
-        Today
+        {todaySession.status==='completed'?'Completed':todaySession.status==='planned'?'Planned':'Updated'}
       </span>
     </div>
 
@@ -7477,7 +7484,7 @@ color:
   </section>
 )}
 {moveMessage && <p role="status" className="calendar-move-message">{moveMessage}</p>}
-<section className="panel calendar-toolbar calendar-week-strip">
+<section className="panel calendar-toolbar calendar-week-strip"><div className="azur-calendar-quickbar"><strong>YOUR TRAINING WEEK</strong><button type="button" onClick={()=>{setCalendarWeekOffset(0);setCalendarFocusedDate(todayKey)}}>Today</button><button type="button" onClick={()=>setCalendarFocusedDate('all')}>Full week</button></div>
   <div className="calendar-strip-top">
     <button
       type="button"
@@ -8554,7 +8561,7 @@ const sessionVerdict =
             notes: event.target.value,
           })
         }
-        placeholder="How did the session feel?"
+        placeholder="Effort, fatigue, discomfort or changes from the plan…"
       />
     </label>
   </div>
@@ -10472,6 +10479,8 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   setProfileEditing(false);
 }
   async function handleSessionFeedbackSave() {
+  const feedbackRpe=sessionFeedback.rpe.trim();
+  if(feedbackRpe && (!Number.isInteger(Number(feedbackRpe))||Number(feedbackRpe)<1||Number(feedbackRpe)>10)){setSessionFeedbackMessage('Enter an RPE between 1 and 10.');return;}
   setSessionFeedbackSaving(true);
   setSessionFeedbackMessage('');
 
