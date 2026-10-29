@@ -83,3 +83,32 @@ export function auditAthleteInstructions(prescription: InstructionPrescription |
   }
   return {complete:blockCount>0 && gaps.length===0,gaps,blockCount};
 }
+
+
+/** Draft-only exception routing. Never approves, publishes or schedules a session. */
+export type PrescriptionDecision = {
+  status: 'routine' | 'review' | 'blocked';
+  reasons: string[];
+  eligibleForAutomaticUse: boolean;
+};
+export function classifyPrescriptionException(args: {
+  sport: string;
+  prescription: InstructionPrescription | null | undefined;
+  templateApproved?: boolean;
+  hasValidBenchmark?: boolean;
+  materialChange?: boolean;
+}): PrescriptionDecision {
+  const audit = auditAthleteInstructions(args.prescription);
+  const reasons: string[] = [];
+  if (!['swim', 'bike', 'run'].includes(args.sport)) reasons.push('Unsupported discipline');
+  if (audit.blockCount === 0) reasons.push('Workout instructions missing');
+  else if (audit.gaps.length) reasons.push(`${audit.gaps.length} incomplete instruction field(s)`);
+  if (!args.templateApproved) reasons.push('Template has not been coach-approved');
+  if (!args.hasValidBenchmark) reasons.push('Valid athlete benchmark unavailable');
+  if (reasons.length) return { status: 'blocked', reasons, eligibleForAutomaticUse: false };
+  if (args.materialChange) return {
+    status: 'review', reasons: ['Material training change requires coach approval'],
+    eligibleForAutomaticUse: false,
+  };
+  return {status:'routine',reasons:[],eligibleForAutomaticUse:true};
+}
