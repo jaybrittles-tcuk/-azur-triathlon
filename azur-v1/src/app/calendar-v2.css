@@ -10,3 +10,16 @@
 .calendar-layout .calendar-session-purpose{background:transparent!important;color:#bfd5e7!important}
 .calendar-layout .calendar-actual-comparison{background:#0d263a!important;border:1px solid #36546b!important;border-radius:9px!important;padding:8px!important}
 @media(max-width:750px){.calendar-layout .calendar-day{padding:8px!important}.calendar-layout .calendar-session{padding:9px 10px!important}}
+
+.calendar-layout .calendar-strip-days{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:6px!important}
+.calendar-layout .calendar-strip-day{min-width:0!important;border:1px solid #36516a!important;background:#132d44!important;border-radius:11px!important;color:#d7e9f7!important}
+.calendar-layout .calendar-strip-day.focused{background:#19415e!important;border-color:#54bfff!important;box-shadow:inset 0 0 0 1px #54bfff!important}
+.calendar-layout .calendar-strip-day.today{border-color:#f6c54b!important}
+.calendar-layout .calendar-strip-day strong{color:#f6faff!important}
+.calendar-layout .calendar-strip-day:focus-visible{outline:2px solid #65c7ff!important;outline-offset:2px!important}
+.calendar-layout .calendar-strip-footer{color:#c8dced!important}
+.calendar-layout .calendar-focus-toolbar{color:#e8f4ff!important}
+.calendar-layout .calendar-session-top>span{font-weight:800!important;letter-spacing:.06em!important}
+.calendar-layout .calendar-session.swim .calendar-session-top>span{color:#37bdf4!important}
+.calendar-layout .calendar-session.bike .calendar-session-top>span{color:#f6c54b!important}
+.calendar-layout .calendar-session.run .calendar-session-top>span{color:#ff925e!important}
