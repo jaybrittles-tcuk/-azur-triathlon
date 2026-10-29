@@ -5593,3 +5593,20 @@ strong {
  .session-detail-modal .azur-manual-insight-metrics{gap:8px!important;margin:11px 0 17px!important}
  .session-detail-modal .azur-manual-insight-metrics>div{min-height:65px!important;padding:11px!important}
 }
+
+
+/* Premium V2 calendar: compact dark cards, sport icons and restrained highlights */
+.calendar-layout .calendar-session{
+ background:#142237!important;color:#f0f5fc!important;
+ border:1px solid #293c51!important;border-left:3px solid #399eea!important;
+ border-radius:12px!important;box-shadow:none!important;
+}
+.calendar-layout .calendar-session.swim{border-left-color:#29b9e9!important}
+.calendar-layout .calendar-session.bike{border-left-color:#eebd4e!important}
+.calendar-layout .calendar-session.run{border-left-color:#f09255!important}
+.calendar-layout .calendar-session.completed{background:#152638!important}
+.calendar-layout .calendar-session.selected{border-color:#4ea9ee!important;box-shadow:0 0 0 1px #4ea9ee!important}
+.calendar-layout .calendar-session strong{color:#f5f8ff!important;letter-spacing:-.015em}
+.calendar-layout .calendar-session-meta,.calendar-layout .calendar-session-target{color:#aebfd2!important}
+.calendar-layout .calendar-week-strip{background:#0e1c2e!important;border-color:#25394c!important}
+.calendar-layout .calendar-week-nav button{box-shadow:none!important}
