@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
-type Invitation = {id:string;invitee_email:string;coach_user_id:string;created_at:string;expires_at:string;accepted_at:string|null};
+type Invitation = {id:string;invitee_email:string;coach_user_id:string;created_at:string;expires_at:string;accepted_at:string|null;email_sent_at:string|null};
 export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
  const [email,setEmail]=useState('');
  const [items,setItems]=useState<Invitation[]>([]);
@@ -12,7 +12,7 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   setLoading(true);
   const {data:{user}}=await supabase.auth.getUser();
   if(!user){setMessage('Sign in to manage invitations.');setLoading(false);return;}
-  const {data,error}=await supabase.from('coach_athlete_invitation').select('id,invitee_email,coach_user_id,created_at,expires_at,accepted_at').order('created_at',{ascending:false}).limit(30);
+  const {data,error}=await supabase.from('coach_athlete_invitation').select('id,invitee_email,coach_user_id,created_at,expires_at,accepted_at,email_sent_at').order('created_at',{ascending:false}).limit(30);
   if(error)setMessage(error.message);
   else setItems((data||[]) as Invitation[]);
   setLoading(false);
@@ -28,6 +28,14 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   setBusy(false);
   if(error){setMessage(error.message);return;}
   setEmail('');setMessage('Invitation created. Share the onboarding link with the athlete; they must register using the invited email address.');
+  await refresh();
+ }
+ async function sendEmail(inv:Invitation){
+  setBusy(true);setMessage('');
+  const {data,error}=await supabase.functions.invoke('send-coach-invitation',{body:{invitation_id:inv.id}});
+  setBusy(false);
+  if(error||data?.error){setMessage(data?.error || error?.message || 'Unable to send invitation email.');return;}
+  setMessage('The email provider accepted the invitation. Inbox delivery is not yet confirmed.');
   await refresh();
  }
  async function copyInstructions(inv:Invitation){
@@ -51,9 +59,10 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   {message&&<p role="status">{message}</p>}
   {loading?<p>Loading invitations…</p>:items.length===0?<p>No invitations yet.</p>:<div className="azur-invite-list">{items.map(inv=><div key={inv.id} className="azur-invite-row">
    <div><strong>{mode==='coach'?inv.invitee_email:'AZUR coach invitation'}</strong><small>{inv.accepted_at?'Accepted':new Date(inv.expires_at).getTime()<Date.now()?'Expired':'Awaiting acceptance'}</small></div>
+   {mode==='coach'&&!inv.accepted_at&&new Date(inv.expires_at).getTime()>Date.now()&&<button type="button" disabled={busy} onClick={()=>void sendEmail(inv)}>{inv.email_sent_at?'Resend email':'Send email'}</button>}
    {mode==='coach'&&!inv.accepted_at&&<button type="button" onClick={()=>void copyInstructions(inv)}>Copy instructions</button>}
    {mode==='athlete'&&!inv.accepted_at&&new Date(inv.expires_at).getTime()>Date.now()&&<button disabled={busy} onClick={()=>void accept(inv)}>Accept</button>}
   </div>)}</div>}
-  {mode==='coach'&&<p className="azur-invite-note">Athletes can sign in and complete their profile at azur-triathlon.vercel.app/onboarding. Automated invitation email delivery is not active yet. Account registration is still controlled; copying an invitation does not enable sign-up.</p>}
+  {mode==='coach'&&<p className="azur-invite-note">Athletes can sign in and complete their profile at azur-triathlon.vercel.app/onboarding. Email sending requires configured server-side provider credentials. Provider acceptance does not guarantee inbox delivery. Beta account registration remains controlled.</p>}
  </section>;
 }
