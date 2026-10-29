@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { allBikeWorkouts } from '../domain/bikeWorkoutCatalog';
 import { resolveCurrentBikeApprovals } from '../lib/calculations/coachApprovalResolver';
 import { auditAthleteInstructions, classifyPrescriptionException } from '../lib/calculations/prescriptionAudit';
 
@@ -33,7 +34,8 @@ export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { on
     .order('decided_at',{ascending:false}).limit(500);
   if(approvalError)throw approvalError;
   const approvedBikeIds=new Set(resolveCurrentBikeApprovals(approvals??[]).map(w=>w.id));
-  if(!cancelled)setPrescriptionReviews((data??[]).map(item=>({id:item.id,title:item.title,sport:item.sport,planned_date:item.planned_date,gaps:(()=>{const audit=auditAthleteInstructions(item.prescription);return audit.blockCount===0?['Structured prescription missing']:audit.gaps.map(g=>`${g.section} block ${g.block}: ${g.missing.replaceAll('_',' ')}`)})(),...(()=>{const decision=classifyPrescriptionException({sport:item.sport,prescription:item.prescription,templateApproved:item.sport==='bike' && typeof item.prescription?.workoutId==='string' && approvedBikeIds.has(item.prescription.workoutId) && item.prescription?.coachApproved===true,hasValidBenchmark:item.sport==='bike' ? typeof profile.ftp_w==='number' && profile.ftp_w>0 : item.sport==='run' ? typeof profile.run_threshold_sec_per_km==='number' && profile.run_threshold_sec_per_km>0 : item.sport==='swim' ? typeof profile.swim_threshold_sec_per_100m==='number' && profile.swim_threshold_sec_per_100m>0 : false});return {decision:decision.status,reasons:decision.reasons}})()})).filter(item=>item.gaps.length));
+  const approvedBikeVersions=new Map(allBikeWorkouts.filter(w=>approvedBikeIds.has(w.id)).map(w=>[w.id,w.version]));
+  if(!cancelled)setPrescriptionReviews((data??[]).map(item=>({id:item.id,title:item.title,sport:item.sport,planned_date:item.planned_date,gaps:(()=>{const audit=auditAthleteInstructions(item.prescription);return audit.blockCount===0?['Structured prescription missing']:audit.gaps.map(g=>`${g.section} block ${g.block}: ${g.missing.replaceAll('_',' ')}`)})(),...(()=>{const decision=classifyPrescriptionException({sport:item.sport,prescription:item.prescription,templateApproved:item.sport==='bike' && typeof item.prescription?.workoutId==='string' && approvedBikeIds.has(item.prescription.workoutId) && approvedBikeVersions.get(item.prescription.workoutId)===item.prescription?.workoutVersion && item.prescription?.coachApproved===true,hasValidBenchmark:item.sport==='bike' ? typeof profile.ftp_w==='number' && profile.ftp_w>0 : item.sport==='run' ? typeof profile.run_threshold_sec_per_km==='number' && profile.run_threshold_sec_per_km>0 : item.sport==='swim' ? typeof profile.swim_threshold_sec_per_100m==='number' && profile.swim_threshold_sec_per_100m>0 : false});return {decision:decision.status,reasons:decision.reasons}})()})).filter(item=>item.gaps.length));
   }catch(e){if(!cancelled)setReviewError(e instanceof Error?e.message:'Could not audit assigned sessions');}finally{if(!cancelled)setReviewLoading(false);}})();return()=>{cancelled=true};
  },[selectedAthleteId]);
  useEffect(()=>{
