@@ -14,6 +14,7 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
  const [filter,setFilter]=useState<'all'|'review'|'info'>('all');
  const [refreshKey,setRefreshKey]=useState(0);
  const [athleteCount,setAthleteCount]=useState(0);
+ const [baselinePending,setBaselinePending]=useState<AssignedAthlete[]>([]);
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState('');
  useEffect(()=>{
@@ -25,7 +26,7 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
     const {data:assignments,error:ae}=await supabase.from('coach_athlete_assignment').select('athlete_id').eq('coach_user_id',user.id);
     if(ae)throw ae;
     const ids=[...new Set((assignments??[]).map(x=>x.athlete_id))];
-    if(!ids.length){if(!cancelled){setAthleteCount(0);setItems([]);setAssignedProfiles([]);setReviews([]);}return;}
+    if(!ids.length){if(!cancelled){setAthleteCount(0);setItems([]);setAssignedProfiles([]);setReviews([]);setBaselinePending([]);}return;}
     const cutoff=new Date();cutoff.setDate(cutoff.getDate()-27);
     const today=dateKey(new Date());
     const [profiles,plans,completed,pending]=await Promise.all([
@@ -43,7 +44,7 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
     }
     next.sort((a,b)=>(a.signal.severity==='review'?0:1)-(b.signal.severity==='review'?0:1)||
       (a.athlete.display_name??'').localeCompare(b.athlete.display_name??''));
-    if(!cancelled){setAthleteCount(ids.length);setItems(next);setAssignedProfiles(profiles.data??[]);setReviews(pending.data??[]);}
+    if(!cancelled){setAthleteCount(ids.length);setItems(next);setAssignedProfiles(profiles.data??[]);setReviews(pending.data??[]);setBaselinePending((profiles.data??[]).filter(a=>![a.ftp_w,a.run_threshold_sec_per_km,a.swim_threshold_sec_per_100m].every(v=>typeof v==='number'&&v>0)));}
    }catch(e){if(!cancelled)setError(e instanceof Error?e.message:'Unable to load attention inbox');}
    finally{if(!cancelled)setLoading(false);}
   }
@@ -60,7 +61,12 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
   {loading&&<p>Checking assigned athlete records…</p>}
   {error&&<p role="alert">{error}</p>}
   {!loading&&!error&&<>
-    <div className="coach-attention-stats"><div><small>Assigned athletes</small><strong>{athleteCount}</strong></div><div><small>Approval queue</small><strong>{reviews.length}</strong></div><div><small>Training review</small><strong>{reviewItems.length}</strong></div><div><small>Information</small><strong>{infoItems.length}</strong></div></div>
+    <div className="coach-attention-stats"><div><small>Assigned athletes</small><strong>{athleteCount}</strong></div><div><small>Approval queue</small><strong>{reviews.length}</strong></div><div><small>Training review</small><strong>{reviewItems.length}</strong></div><div><small>Benchmarks pending</small><strong>{baselinePending.length}</strong></div></div>
+    {baselinePending.length>0&&<div className="coach-attention-group azur-monitor-actions">
+      <div className="coach-attention-group-head"><h4>Athlete setup priorities</h4><span>{baselinePending.length} athletes</span></div>
+      {baselinePending.map(a=><article key={a.id} className="coach-attention-row"><div><span className="coach-attention-tag info">Baseline needed</span><strong>{a.display_name||'Unnamed athlete'}</strong><p>{[!a.ftp_w?'FTP':null,!a.run_threshold_sec_per_km?'Run threshold':null,!a.swim_threshold_sec_per_100m?'Swim CSS':null].filter(Boolean).join(' · ')} not yet recorded. Assess before using discipline-specific intensity targets.</p></div><button type="button" onClick={()=>onSelect(a)}>Review athlete</button></article>)}
+      <small>Missing benchmarks are onboarding tasks, not evidence of a training or recovery problem.</small>
+    </div>}
     <div className="coach-attention-group">
       <div className="coach-attention-group-head"><h4>Decisions awaiting coach review</h4><span>{reviews.length} pending</span></div>
       {reviews.length===0?<p>No pending priority changes for assigned athletes.</p>:reviews.map(review=><article key={review.id} className="coach-attention-row">
@@ -72,7 +78,7 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
     </div>
     <div className="coach-attention-group">
       <div className="coach-attention-group-head"><h4>Training monitoring</h4><div className="coach-attention-filters" role="group" aria-label="Filter attention signals">{(['all','review','info'] as const).map(kind=><button type="button" key={kind} aria-pressed={filter===kind} onClick={()=>setFilter(kind)}>{kind==='all'?'All':kind==='review'?'Review':'Information'}</button>)}</div></div>
-      {filtered.length===0?<p>No {filter==='all'?'training signals':'matching signals'} from currently available records. This does not confirm complete device syncing or recovery readiness.</p>:filtered.map((item,index)=><article className="coach-attention-row" key={item.athlete.id+item.signal.code+index}><div><span className={`coach-attention-tag ${item.signal.severity}`}>{item.signal.severity==='review'?'Check required':'For awareness'}</span><strong>{item.athlete.display_name||'Unnamed athlete'}</strong><p>{item.signal.description}</p></div><button type="button" onClick={()=>onSelect(item.athlete)}>View athlete</button></article>)}
+      {filtered.length===0?<p>No {filter==='all'?'training signals':'matching signals'} in the evaluated records. There is insufficient evidence to claim training or recovery is on track.</p>:filtered.map((item,index)=><article className="coach-attention-row" key={item.athlete.id+item.signal.code+index}><div><span className={`coach-attention-tag ${item.signal.severity}`}>{item.signal.severity==='review'?'Check required':'For awareness'}</span><strong>{item.athlete.display_name||'Unnamed athlete'}</strong><p>{item.signal.description}</p></div><button type="button" onClick={()=>onSelect(item.athlete)}>View athlete</button></article>)}
     </div>
   </>}
   <small className="coach-attention-disclaimer">Monitoring signals are advisory. Missing device matches, incomplete data or changes in athlete circumstances need human review. No automatic schedule edits.</small>
