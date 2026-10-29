@@ -8294,7 +8294,7 @@ const sessionVerdict =
     : 'Matched'}
     </strong>
   </div>
-}
+</div>}
       {selected.completedMetrics && (
         <details className="completed-activity-details azur-collapsible-detail">
           <summary className="completed-activity-title">
