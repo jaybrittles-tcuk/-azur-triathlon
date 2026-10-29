@@ -5107,3 +5107,23 @@ strong {
 .login-card .azur-auth-switch:hover{background:#194760}
 .login-card .azur-auth-switch:focus-visible{outline:2px solid #f5c647;outline-offset:2px}
 .login-card .azur-registration-notice{margin:10px 0 0;padding:12px;background:#113b38;border:1px solid #3e8179;color:#b9f5da;border-radius:10px;font-size:12px;line-height:1.5}
+
+/* AZUR Block 10: gated beta onboarding draft */
+.azur-onboarding-draft{margin:16px auto 0;width:100%;max-width:480px;background:#0c283f;border:1px solid #31546e;border-radius:16px;padding:16px;color:#eaf7ff}
+.azur-onboarding-progress{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#a8cfe6}
+.azur-onboarding-progress strong{color:#f6fbff}
+.azur-onboarding-track{height:5px;background:#163b52;border-radius:10px;margin:10px 0 18px;overflow:hidden}
+.azur-onboarding-track span{display:block;height:100%;background:#2daee6;transition:width .2s}
+.azur-onboarding-draft h3{color:#f6fbff;font-size:19px;margin:0 0 12px}
+.azur-onboarding-draft label{display:grid;gap:6px;font-size:12px;color:#a6c9db;margin:9px 0}
+.azur-onboarding-draft input:not([type=radio]),.azur-onboarding-draft select{width:100%;box-sizing:border-box;border-radius:9px;background:#173c54;color:#f6fbff;border:1px solid #376481;padding:10px}
+.azur-onboarding-draft p{color:#acccdf;font-size:12px;line-height:1.5}
+.azur-onboarding-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.azur-onboarding-options label{display:flex;align-items:center;gap:7px;padding:10px;background:#12354c;border:1px solid #35566c;border-radius:9px;margin:0;cursor:pointer}
+.azur-onboarding-options label.selected{border-color:#35b8ec;background:#184d69;color:#f6fbff}
+.azur-onboarding-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}
+.azur-onboarding-actions button{padding:9px 15px;border:1px solid #3a7695;border-radius:9px;background:#176a97;color:white;font-weight:700;cursor:pointer}
+.azur-onboarding-actions button:first-child:not(:last-child){background:#17394f}
+.azur-onboarding-recap{margin-top:13px;border:1px solid #3e8179;background:#103b37;border-radius:10px;padding:11px;color:#c4f4df}
+.azur-onboarding-recap small{color:#b2d5ca}
+@media(max-width:480px){.azur-onboarding-options{grid-template-columns:1fr}.azur-onboarding-draft{padding:12px}}
