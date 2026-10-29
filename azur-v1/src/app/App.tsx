@@ -1218,6 +1218,7 @@ function parsePaceInput(value: string) {
   targetWeight: '',
 });
   const [coachSelectedAthlete, setCoachSelectedAthlete] = useState<AssignedAthlete | null>(null);
+  const [coachWorkspace, setCoachWorkspace] = useState<'overview'|'library'|'monitoring'|'invitations'>('overview');
   const [athleteProfile, setAthleteProfile] = useState({
   ftp: null as number | null,
   runThreshold: null as number | null,
@@ -10904,7 +10905,28 @@ style={
     ))}
   </div>
 )}
-{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <><CoachInvitations mode="coach" /><CoachAttentionInbox onSelect={setCoachSelectedAthlete} /><CoachAthleteRoster onSelect={setCoachSelectedAthlete} selectedAthleteId={coachSelectedAthlete?.id ?? null} /><CoachAthletePerformance athlete={coachSelectedAthlete} /><CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} /></>}
+{activeNav === 'Home' && isCoachAccount && homeMode === 'coach' && <div className="azur-coach-v2">
+  <div className="azur-coach-hero"><div><span>AZUR / COACH WORKSPACE</span><h2>Coach Dashboard</h2><p>Athletes, reviews and coaching decisions in one place.</p></div></div>
+  <nav className="azur-coach-tabs" aria-label="Coach workspace">
+    <button type="button" aria-pressed={coachWorkspace==='overview'} onClick={()=>setCoachWorkspace('overview')}>Overview</button>
+    <button type="button" aria-pressed={coachWorkspace==='monitoring'} onClick={()=>setCoachWorkspace('monitoring')}>Monitoring</button>
+    <button type="button" aria-pressed={coachWorkspace==='library'} onClick={()=>setCoachWorkspace('library')}>Session library</button>
+    <button type="button" aria-pressed={coachWorkspace==='invitations'} onClick={()=>setCoachWorkspace('invitations')}>Invitations</button>
+  </nav>
+  {coachWorkspace==='overview'&&<>
+    <div className="azur-coach-intro"><h3>Assigned athletes</h3><p>Choose an athlete to inspect their benchmarks and available training records.</p></div>
+    <CoachAthleteRoster onSelect={setCoachSelectedAthlete} selectedAthleteId={coachSelectedAthlete?.id ?? null}/>
+    <CoachAthletePerformance athlete={coachSelectedAthlete}/>
+    <div className="azur-coach-shortcuts">
+      <button type="button" onClick={()=>setCoachWorkspace('monitoring')}>Training monitoring <span>View signals →</span></button>
+      <button type="button" onClick={()=>setCoachWorkspace('library')}>Cycling session review <span>Open library →</span></button>
+      <button type="button" onClick={()=>setCoachWorkspace('invitations')}>Invite athletes <span>Manage invites →</span></button>
+    </div>
+  </>}
+  {coachWorkspace==='monitoring'&&<CoachAttentionInbox onSelect={(a)=>{setCoachSelectedAthlete(a);setCoachWorkspace('overview')}}/>}
+  {coachWorkspace==='invitations'&&<CoachInvitations mode="coach"/>}
+  {coachWorkspace==='library'&&<CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null}/>}
+</div>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section
