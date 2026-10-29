@@ -8160,6 +8160,9 @@ const sessionVerdict =
        <div><small>Distance reported</small><strong>{selected.completedDistanceM == null ? 'Not recorded' : `${(selected.completedDistanceM/1000).toFixed(2)} km`}</strong></div>
        <div><small>Reported RPE</small><strong>{selected.completedRpe ?? 'Not recorded'}</strong></div>
      </div>
+     {selected.sport === 'bike' && selected.completedDistanceM != null && selected.completedDurationSec > 0 && (selected.completedDistanceM / 1000) / (selected.completedDurationSec / 3600) > 80 && (
+       <p className="azur-insight-data-warning" role="status"><strong>CHECK REPORTED DATA</strong> The distance and duration imply an unusually high average cycling speed. Please review the entries. AZUR will not interpret these values as verified performance or recommend a training change from them.</p>
+     )}
      <p className="azur-insight-observation"><strong>01 · OBSERVATION</strong> {matchCompletionPercent===null?'Completion duration unavailable.':matchCompletionPercent>=100?'The recorded duration met or exceeded the planned duration.':'The recorded duration was shorter than planned.'} This does not verify that prescribed intensity or technique targets were achieved.</p>
      <p className="azur-insight-interpretation"><strong>02 · INTERPRETATION</strong> Duration and RPE are athlete-reported; power, pace and heart rate were not measured by this entry.</p>
      <p className="azur-insight-decision"><strong>03 · COACHING DECISION</strong> No change to upcoming training is proposed from this manual record alone. Your coach can review it alongside other training and recovery evidence.</p>
