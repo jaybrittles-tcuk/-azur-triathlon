@@ -5389,3 +5389,14 @@ strong {
 .azur-manual-rpe{display:grid;gap:6px;margin:11px 0;color:#d5eefa;font-size:12px;font-weight:750}.azur-manual-rpe input{box-sizing:border-box;width:100%;background:#193e55;border:1px solid #427995;border-radius:10px;color:#fff;padding:11px}.azur-manual-completion [role=status]{color:#e4f8ff;overflow-wrap:anywhere}
 
 .azur-existing-plan-change{background:#112d43;border:1px solid #41627a;border-radius:13px;padding:14px;margin:13px 0;color:#d8effb}.azur-existing-plan-change strong{color:#5cc5f4;font-size:13px}.azur-existing-plan-change p{color:#b5d0df;font-size:12px;line-height:1.55;margin:8px 0 0}
+
+/* AZUR V3 — evidence-aware athlete reported training insights */
+.azur-manual-training-insights{background:linear-gradient(135deg,#103950,#0d2a42);border:1px solid #39758f;border-radius:16px;padding:16px;margin:14px 0;color:#dceffa}
+.azur-manual-training-insights h4{color:#f5fbff;font-size:19px;margin:8px 0 13px}
+.azur-manual-insight-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.azur-manual-insight-metrics>div{background:#173e55;border:1px solid #376881;border-radius:11px;padding:10px 8px;display:grid;gap:5px}
+.azur-manual-insight-metrics small{font-size:10px;color:#a6ccdc}
+.azur-manual-insight-metrics strong{color:#fff;font-size:16px}
+.azur-manual-training-insights p{font-size:12px;color:#bcd8e6;line-height:1.6;margin:12px 0}
+.azur-manual-training-insights p strong{color:#e3f6ff}
+@media(max-width:420px){.azur-manual-training-insights{padding:12px}.azur-manual-insight-metrics strong{font-size:13px}}
