@@ -5610,3 +5610,29 @@ strong {
 .calendar-layout .calendar-session-meta,.calendar-layout .calendar-session-target{color:#aebfd2!important}
 .calendar-layout .calendar-week-strip{background:#0e1c2e!important;border-color:#25394c!important}
 .calendar-layout .calendar-week-nav button{box-shadow:none!important}
+
+
+/* V2 refinement: compact, content-first mobile session and calendar */
+.session-detail-modal>.section-heading{margin-bottom:12px!important}
+.session-detail-modal .section-heading h3{font-weight:760!important}
+.session-detail-modal .session-detail-meta span{font-weight:570}
+.session-detail-modal .azur-manual-training-insights h4{line-height:1.24!important}
+.session-detail-modal .azur-manual-insight-metrics{gap:8px!important;margin:12px 0 16px!important}
+.session-detail-modal .azur-manual-insight-metrics>div{min-height:62px!important;padding:10px 12px!important;gap:4px!important}
+.session-detail-modal .azur-manual-insight-metrics strong{font-size:22px!important}
+.session-detail-modal .azur-manual-training-insights p.azur-insight-observation,
+.session-detail-modal .azur-manual-training-insights p.azur-insight-interpretation,
+.session-detail-modal .azur-manual-training-insights p.azur-insight-decision{font-size:13px!important;line-height:1.48!important;padding-top:10px!important;padding-bottom:10px!important}
+.session-detail-modal .azur-manual-training-insights p.azur-insight-observation strong,
+.session-detail-modal .azur-manual-training-insights p.azur-insight-interpretation strong,
+.session-detail-modal .azur-manual-training-insights p.azur-insight-decision strong{font-size:10px!important;letter-spacing:.105em!important}
+.calendar-layout .calendar-session{transition:background .16s,border-color .16s!important}
+.calendar-layout .calendar-session:hover{background:#192a42!important;transform:none!important}
+.calendar-layout .calendar-session:focus-visible{outline:2px solid #52b5ff!important;outline-offset:3px}
+.calendar-layout .calendar-session.completed .calendar-session-status{border-radius:8px}
+@media(max-width:560px){
+ .session-detail-modal .azur-manual-training-insights{padding:14px!important}
+ .session-detail-modal .azur-manual-insight-metrics strong{font-size:20px!important}
+ .session-detail-modal .session-detail-meta{gap:6px!important}
+ .session-detail-modal .session-detail-meta span{font-size:10px!important;padding:6px 8px!important}
+}
