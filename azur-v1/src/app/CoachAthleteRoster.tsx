@@ -58,24 +58,38 @@ export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { on
   }; void load();return()=>{cancelled=true;};
  },[]);
  const selected=athletes.find(a=>a.id===(selectedAthleteId ?? selectedId));
- return <section className="panel coach-cycling-review">
-  <header><h3>Assigned Athletes</h3><p>Read-only training profile overview · coach assignments only</p></header>
-  {loading&&<p>Loading assigned athletes…</p>}
-  {error&&<p role="alert">{error}</p>}
-  {!loading&&!error&&athletes.length===0&&<p>No athletes are assigned to this coach yet.</p>}
-  {athletes.length>0&&<div className="coach-cycling-columns">
-   <div className="coach-cycling-list">{athletes.map(a=><button type="button" key={a.id} className={(selectedAthleteId ?? selectedId)===a.id?'is-selected':''} onClick={()=>{setSelectedId(a.id);onSelect(a);}}>
-    <strong>{a.display_name||'Unnamed athlete'}</strong><small>{a.ftp_w ? `FTP: ${a.ftp_w} W`:'FTP not recorded'}</small>
-   </button>)}</div>
-   <div className="coach-cycling-detail">{selected ? <>
-    <h4>{selected.display_name||'Athlete profile'}</h4>
-    <p>Bike FTP: {selected.ftp_w ? `${selected.ftp_w} W`:'Not recorded'}</p>
-    <p>Run threshold: {selected.run_threshold_sec_per_km ? `${selected.run_threshold_sec_per_km} sec/km`:'Not recorded'}</p>
-    <p>Swim threshold: {selected.swim_threshold_sec_per_100m ? `${selected.swim_threshold_sec_per_100m} sec/100m`:'Not recorded'}</p>
-    <p>Normal weekly training: {selected.normal_weekly_hours == null ? 'Not recorded' : `${selected.normal_weekly_hours} hours`}</p>
-    <small>View only. Athlete-specific session assignment and calendar writes remain disabled.</small>
-    <div className="coach-prescription-audit"><strong>Coach exception review · draft only</strong><small>Up to 40 upcoming sessions. Bike approvals are checked against current coach decisions; sport benchmarks are checked from the assigned athlete profile. Swim/run templates stay unverified until their approval workflow exists. No workouts are changed.</small>{reviewError&&<p role="alert">{reviewError}</p>}{reviewLoading&&<p>Reviewing upcoming sessions…</p>}{!reviewLoading&&!reviewError&&prescriptionReviews.length===0&&<p>No missing instructions identified in reviewed upcoming sessions.</p>}{prescriptionReviews.length>0&&<ul>{prescriptionReviews.map(item=><li key={item.id}><strong>{item.planned_date} · {item.sport} · {item.title} · {item.decision.toUpperCase()}</strong><small>{[...item.gaps,...item.reasons].filter((x,i,a)=>a.indexOf(x)===i).slice(0,4).join(' · ')}</small></li>)}</ul>}</div>
-   </> : <p>Select an athlete to review their benchmark profile.</p>}</div>
-  </div>}
+ return <section className="azur-roster-v3" aria-label="Assigned athletes">
+  <div className="azur-roster-head"><div><span className="azur-coach-eyebrow">YOUR SQUAD</span><h3>Assigned athletes</h3><p>Verified coach assignments · select an athlete to review</p></div><strong className="azur-roster-total">{loading?'—':athletes.length} <small>athletes</small></strong></div>
+  {loading&&<p className="azur-roster-state">Loading assigned athletes…</p>}
+  {error&&<p role="alert" className="azur-roster-state">{error}</p>}
+  {!loading&&!error&&athletes.length===0&&<p className="azur-roster-state">No athletes assigned yet. Use Invitations to invite your first athlete.</p>}
+  {athletes.length>0&&<>
+   <div className="azur-roster-grid">{athletes.map(a=>{
+    const complete=[a.ftp_w,a.run_threshold_sec_per_km,a.swim_threshold_sec_per_100m].filter(v=>typeof v==='number'&&v>0).length;
+    const active=(selectedAthleteId??selectedId)===a.id;
+    return <button type="button" key={a.id} aria-pressed={active} className={'azur-athlete-tile'+(active?' is-selected':'')} onClick={()=>{setSelectedId(a.id);onSelect(a)}}>
+      <span className="azur-athlete-avatar" aria-hidden="true">{(a.display_name||'A').trim().slice(0,1).toUpperCase()}</span>
+      <span className="azur-athlete-info"><strong>{a.display_name||'Unnamed athlete'}</strong><small>{complete===3?'Benchmarks recorded':complete===0?'Baseline testing needed':`${complete} of 3 benchmarks recorded`}</small></span>
+      <span className={'azur-athlete-chip'+(complete===3?' is-ready':'')}>{complete===3?'Benchmarks set':'Setup'}</span>
+      <span className="azur-athlete-chevron" aria-hidden="true">›</span>
+    </button>
+   })}</div>
+   {selected&&<div className="azur-athlete-summary">
+    <div className="azur-athlete-summary-title"><div><span className="azur-coach-eyebrow">ATHLETE SNAPSHOT</span><h4>{selected.display_name||'Athlete profile'}</h4></div><span className="azur-summary-note">Read-only</span></div>
+    <div className="azur-athlete-metrics">
+      <div><small>BIKE FTP</small><strong>{selected.ftp_w ? `${selected.ftp_w} W`:'Not set'}</strong></div>
+      <div><small>RUN THRESHOLD</small><strong>{selected.run_threshold_sec_per_km ? `${selected.run_threshold_sec_per_km} s/km`:'Not set'}</strong></div>
+      <div><small>SWIM CSS</small><strong>{selected.swim_threshold_sec_per_100m ? `${selected.swim_threshold_sec_per_100m} s/100m`:'Not set'}</strong></div>
+      <div><small>WEEKLY BASELINE</small><strong>{selected.normal_weekly_hours==null?'Not set':`${selected.normal_weekly_hours} h`}</strong></div>
+    </div>
+    {(!selected.ftp_w||!selected.run_threshold_sec_per_km||!selected.swim_threshold_sec_per_100m)&&<p className="azur-athlete-next-step">Baseline assessments are still needed before the app can use personalised intensity targets. Missing values are not estimated.</p>}
+    <details className="azur-athlete-review-details"><summary>Upcoming prescription exceptions {prescriptionReviews.length>0?`(${prescriptionReviews.length})`:''}</summary>
+     <p>Read-only review of up to 40 upcoming sessions. No automatic plan edits or Garmin exports.</p>
+     {reviewLoading&&<p>Checking sessions…</p>}{reviewError&&<p role="alert">{reviewError}</p>}
+     {!reviewLoading&&!reviewError&&prescriptionReviews.length===0&&<p>No prescription exceptions identified in the records reviewed.</p>}
+     {prescriptionReviews.length>0&&<ul>{prescriptionReviews.map(item=><li key={item.id}><strong>{item.planned_date} · {item.title} · {item.decision}</strong><small>{[...item.gaps,...item.reasons].filter((v,i,a)=>a.indexOf(v)===i).slice(0,3).join(' · ')}</small></li>)}</ul>}
+    </details>
+   </div>}
+  </>}
  </section>;
 }
