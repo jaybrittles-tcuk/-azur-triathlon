@@ -7852,6 +7852,10 @@ onClick={() => {
       >
         ×
       </button>
+          <div className={`azur-v2-session-hero azur-v2-sport-${selected.sport}`}>
+            <div className="azur-v2-hero-label">AZUR / SESSION DETAIL</div>
+            <div className="azur-v2-hero-sport">{sportName(selected.sport)} · {selected.status === "completed" ? "Completed" : "Planned"}</div>
+          </div>
           <div className="section-heading">
             <div>
               <span className="eyebrow">SESSION DETAIL</span>
