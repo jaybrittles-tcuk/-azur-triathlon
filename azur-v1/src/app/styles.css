@@ -5498,3 +5498,18 @@ strong {
  .editor-panel .completed-activity-details{padding:13px!important}
  .editor-panel .completed-session-metrics{padding:10px}
 }
+
+
+/* AZUR V3.2 — progressive disclosure for session detail */
+.editor-panel details.azur-collapsible-detail{overflow:hidden}
+.editor-panel details.azur-collapsible-detail>summary{cursor:pointer;list-style:none;position:relative;padding-right:27px}
+.editor-panel details.azur-collapsible-detail>summary::-webkit-details-marker{display:none}
+.editor-panel details.azur-collapsible-detail>summary::after{content:"⌄";position:absolute;right:3px;top:50%;transform:translateY(-50%);font-size:24px;color:#168de1;transition:transform .2s}
+.editor-panel details.azur-collapsible-detail[open]>summary::after{transform:translateY(-50%) rotate(180deg)}
+.editor-panel details.azur-collapsible-detail>summary:focus-visible{outline:2px solid #48b6ff;outline-offset:4px;border-radius:6px}
+.editor-panel details.completed-activity-details:not([open]){padding-bottom:18px!important}
+.editor-panel details.completed-activity-details:not([open])>summary{margin-bottom:0}
+.editor-panel .azur-edit-summary{color:#f4fbff;font-weight:750;font-size:17px;line-height:1.3}
+.editor-panel .azur-edit-summary span{display:block;color:#accbdc;font-size:12px;font-weight:400;margin-top:5px}
+.editor-panel details.azur-manual-completion:not([open]){padding:17px 20px!important}
+.editor-panel details.azur-manual-completion[open]>.azur-edit-summary{margin-bottom:14px}
