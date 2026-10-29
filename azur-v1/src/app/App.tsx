@@ -1170,7 +1170,7 @@ export function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true';
-  const [registrationMode, setRegistrationMode] = useState(false);
+  const [registrationMode, setRegistrationMode] = useState(() => new URLSearchParams(window.location.search).get('join') === '1');
   const [registrationNotice, setRegistrationNotice] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
@@ -10354,7 +10354,7 @@ async function handleRegister(event: React.FormEvent) {
   event.preventDefault();
   if (password.length < 12) { setAuthError('Use a password of at least 12 characters.'); return; }
   setAuthLoading(true); setAuthError(''); setRegistrationNotice('');
-  const {data,error}=await supabase.auth.signUp({email:email.trim(),password});
+  const {data,error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{emailRedirectTo:window.location.origin+'/onboarding'}});
   if(error) setAuthError(error.message);
   else { setPassword(''); setRegistrationNotice(data.session ? 'Account created. Coach assignment and training-plan activation remain separate.' : 'Check your email to confirm your account, then sign in. Coach assignment follows separately.'); }
   setAuthLoading(false);
