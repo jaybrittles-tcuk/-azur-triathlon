@@ -7894,11 +7894,14 @@ onClick={() => {
             </div>;
           })()}
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
-          <div className="azur-workout-modal-summary">
- <span>{selected.rationale || 'Workout prescription and athlete targets'}</span>
- <CalendarIntensityProfile steps={(selected.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
- <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />
-</div>
+          <details className="azur-workout-modal-summary azur-v2-workout-breakdown">
+            <summary>Workout structure <span>View intensity profile and prescribed targets</span></summary>
+            <div className="azur-v2-workout-breakdown-body">
+              <p>{selected.rationale || 'Workout prescription and athlete targets'}</p>
+              <CalendarIntensityProfile steps={(selected.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
+              <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />
+            </div>
+          </details>
           <div className="editor-grid">
           <details className="session-prescription-disclosure">
             <summary><span><strong>Full workout prescription</strong><small>Warm-up · Main set · Cool-down · Fueling</small></span><span aria-hidden="true">⌄</span></summary>
