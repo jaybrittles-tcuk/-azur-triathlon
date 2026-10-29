@@ -15,14 +15,15 @@ export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { on
  const [error,setError]=useState('');
  const [prescriptionReviews,setPrescriptionReviews]=useState<Array<{id:string;title:string;sport:string;planned_date:string;gaps:string[]}>>([]);
  const [reviewError,setReviewError]=useState('');
+ const [reviewLoading,setReviewLoading]=useState(false);
  useEffect(()=>{let cancelled=false;setPrescriptionReviews([]);setReviewError('');if(!selectedAthleteId)return;
-  void (async()=>{try{const {data:{user}}=await supabase.auth.getUser();if(!user||user.app_metadata?.role!=='coach')throw new Error('Verified coach access required');
+  setReviewLoading(true);void (async()=>{try{const {data:{user}}=await supabase.auth.getUser();if(!user||user.app_metadata?.role!=='coach')throw new Error('Verified coach access required');
   const {data:assignment,error:assignmentError}=await supabase.from('coach_athlete_assignment').select('athlete_id').eq('coach_user_id',user.id).eq('athlete_id',selectedAthleteId).limit(1);
   if(assignmentError||!assignment?.length)throw new Error('No current coach assignment');
   const {data,error}=await supabase.from('planned_session').select('id,title,sport,planned_date,prescription').eq('athlete_id',selectedAthleteId).eq('is_active_version',true).gte('planned_date',new Date().toISOString().slice(0,10)).order('planned_date',{ascending:true}).limit(40);
   if(error)throw error;
-  if(!cancelled)setPrescriptionReviews((data??[]).map(item=>({id:item.id,title:item.title,sport:item.sport,planned_date:item.planned_date,gaps:auditAthleteInstructions(item.prescription).gaps.map(g=>`${g.section} block ${g.block}: ${g.missing.replaceAll('_',' ')}`)})).filter(item=>item.gaps.length));
-  }catch(e){if(!cancelled)setReviewError(e instanceof Error?e.message:'Could not audit assigned sessions');}})();return()=>{cancelled=true};
+  if(!cancelled)setPrescriptionReviews((data??[]).map(item=>({id:item.id,title:item.title,sport:item.sport,planned_date:item.planned_date,gaps:(()=>{const audit=auditAthleteInstructions(item.prescription);return audit.blockCount===0?['Structured prescription missing']:audit.gaps.map(g=>`${g.section} block ${g.block}: ${g.missing.replaceAll('_',' ')}`)})()})).filter(item=>item.gaps.length));
+  }catch(e){if(!cancelled)setReviewError(e instanceof Error?e.message:'Could not audit assigned sessions');}finally{if(!cancelled)setReviewLoading(false);}})();return()=>{cancelled=true};
  },[selectedAthleteId]);
  useEffect(()=>{
   let cancelled=false;
@@ -60,7 +61,7 @@ export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { on
     <p>Swim threshold: {selected.swim_threshold_sec_per_100m ? `${selected.swim_threshold_sec_per_100m} sec/100m`:'Not recorded'}</p>
     <p>Normal weekly training: {selected.normal_weekly_hours == null ? 'Not recorded' : `${selected.normal_weekly_hours} hours`}</p>
     <small>View only. Athlete-specific session assignment and calendar writes remain disabled.</small>
-    <div className="coach-prescription-audit"><strong>Upcoming prescription review</strong><small>Read-only quality check of up to 40 upcoming sessions; no workouts are changed.</small>{reviewError&&<p role="alert">{reviewError}</p>}{!reviewError&&prescriptionReviews.length===0&&<p>No missing instructions identified in reviewed sessions.</p>}{prescriptionReviews.length>0&&<ul>{prescriptionReviews.map(item=><li key={item.id}><strong>{item.planned_date} · {item.sport} · {item.title}</strong><small>{item.gaps.slice(0,3).join(' · ')}</small></li>)}</ul>}</div>
+    <div className="coach-prescription-audit"><strong>Upcoming prescription review</strong><small>Read-only quality check of up to 40 upcoming sessions; no workouts are changed.</small>{reviewError&&<p role="alert">{reviewError}</p>}{reviewLoading&&<p>Reviewing upcoming sessions…</p>}{!reviewLoading&&!reviewError&&prescriptionReviews.length===0&&<p>No missing instructions identified in reviewed upcoming sessions.</p>}{prescriptionReviews.length>0&&<ul>{prescriptionReviews.map(item=><li key={item.id}><strong>{item.planned_date} · {item.sport} · {item.title}</strong><small>{item.gaps.slice(0,3).join(' · ')}</small></li>)}</ul>}</div>
    </> : <p>Select an athlete to review their benchmark profile.</p>}</div>
   </div>}
  </section>;
