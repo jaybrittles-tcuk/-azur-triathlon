@@ -8145,10 +8145,18 @@ const sessionVerdict =
   );
 })()}
  {selected?.completedDurationSec && selected.completedSource === 'manual' && (
-   <div className="azur-existing-plan-change" role="status">
-     <strong>Manual session recorded</strong>
-     <p>Duration, distance and your RPE are saved as athlete-reported information. AZUR has not measured power, pace or heart rate from this entry, so it will not propose changing another workout based on this entry alone. Your coach can review the feedback alongside other evidence.</p>
-   </div>
+   <section className="azur-manual-training-insights" aria-label="AZUR training insights">
+     <span className="eyebrow">AZUR TRAINING INSIGHTS</span>
+     <h4>What your recorded session tells us</h4>
+     <div className="azur-manual-insight-metrics">
+       <div><small>Planned</small><strong>{selected.durationMin} min</strong></div>
+       <div><small>Recorded</small><strong>{Math.round(selected.completedDurationSec/60)} min</strong></div>
+       <div><small>Reported RPE</small><strong>{sessionFeedback.rpe || 'Not recorded'}</strong></div>
+     </div>
+     <p><strong>Observation:</strong> {matchCompletionPercent===null?'Completion duration unavailable.':matchCompletionPercent>=100?'The recorded duration met or exceeded the planned duration.':'The recorded duration was shorter than planned.'} This does not verify that prescribed intensity or technique targets were achieved.</p>
+     <p><strong>Interpretation:</strong> Duration and RPE are athlete-reported; power, pace and heart rate were not measured by this entry.</p>
+     <p><strong>Adaptive decision:</strong> No change to upcoming training is proposed from this manual record alone. Your coach can review it alongside other training and recovery evidence.</p>
+   </section>
  )}
  {selected?.completedDurationSec && nextPlannedSession?.prescription?.azur_adaptation?.status==='accepted' && (
    <div className="azur-existing-plan-change">
@@ -8431,7 +8439,7 @@ const sessionVerdict =
     {matchCompletionPercent == null
       ? 'Completed duration is not available.'
       : matchCompletionPercent >= 105
-        ? 'You completed slightly more than the planned training duration. The session delivered the intended aerobic volume.'
+        ? 'Recorded duration exceeded the plan. This alone does not confirm the intended intensity or training stimulus.'
         : matchCompletionPercent >= 95
           ? 'Planned training time was completed. The session delivered the intended training volume.'
           : matchCompletionPercent >= 85
@@ -10519,7 +10527,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     try{
       const {error}=await supabase.rpc(editableManualId?'athlete_edit_manual_completion':'athlete_record_manual_completion',{p_session_id:selected.id,p_duration_min:duration,p_distance_km:distance,p_rpe:rpe,p_notes:sessionFeedback.notes.trim()||null});
       if(error)throw error;
-      setWeekSessions(previous=>previous.map(session=>session.id===selected.id?{...session,status:'completed' as const,completedDurationSec:Math.round(duration*60),completedSource:'manual'}:session));
+      setWeekSessions(previous=>previous.map(session=>session.id===selected.id?{...session,status:'completed' as const,completedDurationSec:Math.round(duration*60),completedDistanceM:distance===null?undefined:distance*1000,completedSource:'manual'}:session));
       setManualMessage(editableManualId?'Manual activity changes saved.':'Workout completed and saved to your calendar.');
       if(!editableManualId){setManualDuration('');setManualDistance('');}
       const {data:{user}}=await supabase.auth.getUser();
