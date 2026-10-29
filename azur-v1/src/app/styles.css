@@ -5083,3 +5083,9 @@ strong {
 .session-detail-modal .azur-prescription-rest span{color:#eac56f}
 .session-detail-modal .azur-prescription-note{color:#b9d8e8;line-height:1.5}
 .session-detail-modal .azur-prescription-missing{color:#e5bd75}
+
+/* AZUR prescription safety notes across swim, bike and run */
+.session-detail-modal .session-prescription-warning{display:grid;gap:7px;margin:10px 0;padding:12px 13px;background:#342916;border:1px solid #8b6a30;border-radius:11px;color:#f6e7c4}
+.session-detail-modal .session-prescription-warning strong{font-size:13px;color:#ffe6a0}
+.session-detail-modal .session-prescription-warning span{font-size:12px;line-height:1.5}
+.session-detail-modal .session-prescription-warning small{font-size:11px;color:#d9be8a;line-height:1.5}
