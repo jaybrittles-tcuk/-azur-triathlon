@@ -5262,3 +5262,19 @@ strong {
 .azur-training-context{border:1px solid #315a74;border-radius:10px;background:#123249;padding:12px;margin:12px 0;color:#b9d5e4;font-size:12px}
 .azur-training-context summary{color:#6bc7f5;font-weight:750;cursor:pointer}
 @media(max-width:420px){.azur-training-facts div{padding:10px 8px}.azur-training-facts strong{font-size:18px}.azur-training-facts small{font-size:9px}}
+
+/* AZUR Coach Monitoring V2 — compact evidence-based task centre */
+.azur-coach-v2 .coach-attention-v2{max-width:none}
+.azur-coach-v2 .coach-attention-heading h3{color:#f4fbff;letter-spacing:-.025em}
+.azur-coach-v2 .coach-attention-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.azur-coach-v2 .coach-attention-stats>div{background:linear-gradient(125deg,#123951,#0d2b43);border:1px solid #335f79;border-radius:12px;padding:13px}
+.azur-coach-v2 .coach-attention-stats strong{color:#f5fbff}
+.azur-coach-v2 .coach-attention-group{background:#0e2c45;border:1px solid #315973;border-radius:14px;padding:14px;margin:11px 0}
+.azur-coach-v2 .coach-attention-group-head h4{color:#f4fbff;font-weight:800}
+.azur-coach-v2 .coach-attention-row{background:#123750;border:1px solid #2d5a75;border-radius:11px;padding:12px;margin:9px 0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.azur-coach-v2 .coach-attention-row strong{display:block;color:#f3fbff;margin:5px 0}
+.azur-coach-v2 .coach-attention-row p{color:#a9c9da;font-size:12px;line-height:1.45}
+.azur-coach-v2 .coach-attention-row button{flex-shrink:0;border-radius:9px;border:1px solid #39a9dc;background:#146f9d;color:#f4fbff;padding:9px 11px;font-size:12px;font-weight:800;cursor:pointer}
+.azur-coach-v2 .azur-monitor-actions .coach-attention-group-head>span{color:#f5c870;font-size:12px}
+.azur-coach-v2 .coach-attention-disclaimer{display:block;color:#a5c7dc;font-size:11px;line-height:1.5;padding:8px}
+@media(max-width:620px){.azur-coach-v2 .coach-attention-row{flex-wrap:wrap}.azur-coach-v2 .coach-attention-row button{margin-left:auto}.azur-coach-v2 .coach-attention-group{padding:12px}}
