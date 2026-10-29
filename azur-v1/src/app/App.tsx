@@ -1,4 +1,5 @@
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
+import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
 import CoachAttentionInbox from './CoachAttentionInbox';
 import CoachAthletePerformance from './CoachAthletePerformance';
@@ -7848,6 +7849,15 @@ onClick={() => {
             </button>
           </div>
 
+          {(() => {
+            const check = auditAthleteInstructions(selected.prescription);
+            if (check.complete) return null;
+            return <div className="session-prescription-warning" role="note">
+              <strong>Prescription needs coach clarification</strong>
+              <span>{check.blockCount === 0 ? 'Structured work intervals have not been supplied.' : check.gaps.length + ' instruction gap(s): ' + check.gaps.slice(0,3).map(g => g.section.replace('_',' ') + ' block ' + g.block + ' missing ' + g.missing.replaceAll('_',' ')).join('; ') + (check.gaps.length > 3 ? '…' : '')}</span>
+              <small>Do not infer missing targets or rest periods. Ask your coach before completing an unclear session.</small>
+            </div>;
+          })()}
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
           <div className="azur-workout-modal-summary">
  <span>{selected.rationale || 'Workout prescription and athlete targets'}</span>
