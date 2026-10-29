@@ -19,6 +19,8 @@ const coachSchedulingEnabled = import.meta.env.VITE_ENABLE_COACH_SCHEDULING === 
 
 export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athleteWeeklyHours }: { ftpWatts: number | null; athleteName: string | null; athleteWeeklyHours: number | null }) {
   const [availableMinutes, setAvailableMinutes] = useState(90);
+  const [searchTerm,setSearchTerm]=useState('');
+  const [showFullCatalogue,setShowFullCatalogue]=useState(false);
   const [selectionPhase, setSelectionPhase] = useState<Phase>('build');
   const [selectionFocus, setSelectionFocus] = useState<'threshold'|'aerobic_endurance'|'vo2max'|'strength_endurance'|'race_specific'>('threshold');
   const [maxLevel, setMaxLevel] = useState<1|2|3>(2);
@@ -107,6 +109,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
   const [selectedId, setSelectedId] = useState(allBikeWorkouts[0]?.id ?? '');
   const [drafts, setDrafts] = useState<Record<string, ReviewDraft>>({});
   const selected = useMemo(() => allBikeWorkouts.find(w => w.id === selectedId), [selectedId]);
+  const visibleWorkouts=useMemo(()=>{const query=searchTerm.toLowerCase().trim();const matches=allBikeWorkouts.filter(w=>!query || `${w.title} ${w.family} ${w.purpose}`.toLowerCase().includes(query));return showFullCatalogue||query?matches:matches.slice(0,6)},[searchTerm,showFullCatalogue]);
   const latestEvent = events.find(event=>event.workout_id===selectedId);
   const eligible = resolveCurrentBikeApprovals(events);
   const preview = selectCoachSession(eligible, {
@@ -127,10 +130,10 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
     ? `${step.minutes} min @ ${step.minFtpPct}–${step.maxFtpPct}% FTP · ${step.label}${step.cadenceRpm ? ` · ${step.cadenceRpm.join('–')} rpm` : ''}`
     : `${step.repetitions} × ${step.work.minutes} min @ ${step.work.minFtpPct}–${step.work.maxFtpPct}% FTP; ${step.recovery.minutes} min recovery between reps`;
   return (
-    <section className="panel coach-cycling-review">
-      <header><h3>AZUR Cycling Session Review</h3><p>{allBikeWorkouts.length} original library templates · coach review workspace</p></header>
-      <p className="coach-cycling-warning">Approval decisions are saved in an append-only coach history. Approval does not publish, schedule, or export any workout.</p>
-            <div className="coach-cycling-preview" aria-label="Read-only session selection preview">
+    <section className="panel coach-cycling-review azur-library-v2">
+      <header><span className="azur-coach-eyebrow">AZUR / COACH WORKSPACE</span><h3>Cycling Session Review</h3><p>{allBikeWorkouts.length} coach-authored templates · select, inspect and classify</p></header>
+      <p className="coach-cycling-warning">Coach decisions are recorded for review only. No automatic publishing, scheduling or Garmin export.</p>
+            <details className="coach-cycling-preview azur-library-preview" aria-label="Read-only session selection preview"><summary>Approved workout selection preview <span>{eligible.length} eligible</span></summary>
         <h4>Approved session selection preview</h4>
         <p>{eligible.length} workouts eligible from the latest coach decisions.</p>
         <p>Selected athlete: {athleteName ?? 'None selected'} · FTP: {ftpWatts != null && ftpWatts > 0 ? `${ftpWatts} W` : 'Unavailable'}. Weekly training baseline: {athleteWeeklyHours == null ? 'Not recorded' : `${athleteWeeklyHours} hours`}. Coach-adjustable preview for the selected athlete.</p>
@@ -166,29 +169,29 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
           {scheduleMessage && <p role="status">{scheduleMessage}</p>}
         </div>}
         <small>Nothing is added until a verified coach confirms. Garmin export remains disabled.</small>
-      </div>
+      </details>
 <div className="coach-cycling-columns">
-        <div className="coach-cycling-list" aria-label="Cycling workout catalogue">
-          {allBikeWorkouts.map(workout => (
+        <div className="azur-library-catalogue"><div className="azur-library-catalogue-head"><h4>Candidate sessions</h4><span>{allBikeWorkouts.length} templates</span></div><label className="azur-library-search">Find session <input type="search" value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} placeholder="Search by name or training focus" /></label><div className="coach-cycling-list" aria-label="Cycling workout catalogue">
+          {visibleWorkouts.map(workout => (
             <button type="button" key={workout.id} className={workout.id === selectedId ? 'is-selected' : ''}
               onClick={() => setSelectedId(workout.id)}>
               <strong>{workout.title}</strong><small>{familyName(workout.family)} · {workoutMinutes(workout)} min · {workout.status}</small>
             </button>
           ))}
-        </div>
+        </div>{!searchTerm&&allBikeWorkouts.length>6&&<button className="azur-library-more" type="button" onClick={()=>setShowFullCatalogue(v=>!v)}>{showFullCatalogue?"Show fewer sessions":"Browse all "+allBikeWorkouts.length+" sessions"}</button>}</div>
         {selected && <div className="coach-cycling-detail">
-          <h4>{selected.title}</h4>
+          <div className="azur-library-selected-head"><div><span className="azur-coach-eyebrow">SELECTED WORKOUT</span><h4>{selected.title}</h4></div><span className="azur-library-status">{latestEvent?.decision==="approved"?"Approved":selected.status}</span></div>
           <p>{selected.purpose}</p>
           <small>ID: {selected.id} · v{selected.version} · {selected.status}</small>
-          <h5>Coach-authored prescription</h5>
-          <ol>{selected.steps.map((step,index) => <li key={index}>{displayStep(step)}</li>)}</ol>
+          <h5>Prescription blocks</h5>
+          <ol className="azur-library-steps">{selected.steps.map((step,index) => <li key={index}><span>{index+1}</span><p>{displayStep(step)}</p></li>)}</ol>
           <p>{issues.length ? `Validation issues: ${issues.join('; ')}` : 'Template structure passes existing library validation.'}</p>
           <div className="coach-prescription-audit" role="status">
             <strong>{instructionAudit?.complete ? 'Athlete instructions complete' : 'Athlete instructions need review'}</strong>
             <small>Checks each block for duration, an explicit intensity target and recovery between repeated efforts. This does not replace coach approval.</small>
             {!!instructionAudit?.gaps.length && <ul>{instructionAudit.gaps.map((gap,i) => <li key={i}>{gap.section} · block {gap.block}: missing {gap.missing.replaceAll('_',' ')}</li>)}</ul>}
           </div>
-          <h5>Draft progression classification</h5>
+          <h5>Coach classification</h5>
           <label>Level <select value={draft.level} onChange={event => setDraft({ ...draft, level: Number(event.target.value) as 1 | 2 | 3 })}>
             <option value={1}>1 · Foundation</option><option value={2}>2 · Development</option><option value={3}>3 · Advanced</option>
           </select></label>
@@ -198,7 +201,7 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
           </fieldset>
           <p>Latest decision: {latestEvent ? `${latestEvent.decision} · ${new Date(latestEvent.decided_at).toLocaleString()}` : 'No approval recorded'}</p>
           <div className="coach-cycling-actions">
-            <button type="button" disabled={saving || issues.length>0 || !instructionAudit?.complete || !draft.phases.length} onClick={()=>void recordDecision('approved')}>Approve classification</button>
+            <button type="button" disabled={saving || issues.length>0 || !instructionAudit?.complete || !draft.phases.length} onClick={()=>void recordDecision('approved')}>{saving?"Saving…":"Approve classification"}</button>
             <button type="button" disabled={saving || issues.length>0 || !draft.phases.length || latestEvent?.decision!=='approved'} onClick={()=>void recordDecision('revoked')}>Revoke approval</button>
           </div>
           {feedback && <p role="status">{feedback}</p>}
