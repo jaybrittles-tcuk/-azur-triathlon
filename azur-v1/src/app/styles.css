@@ -5101,3 +5101,9 @@ strong {
 .coach-cycling-review .coach-prescription-audit small{color:#accbdc}
 .coach-performance-grid h3,.coach-performance-grid h4,.coach-athlete-performance h3,.coach-athlete-performance h4{color:#f5fbff!important}
 @media(max-width:640px){.coach-cycling-review{padding:13px!important;margin-top:9px!important}.coach-cycling-review header h3{font-size:19px!important;line-height:1.22}.coach-cycling-review header p{font-size:12px!important;margin:5px 0 10px}.coach-cycling-review .coach-cycling-warning{font-size:11px;line-height:1.4}.coach-cycling-review .coach-cycling-detail{padding:11px}.coach-cycling-review .coach-cycling-columns{gap:9px}}
+
+/* AZUR Beta onboarding: registration state, only exposed when explicitly enabled */
+.login-card .azur-auth-switch{margin-top:10px;width:100%;border:1px solid #33617c;border-radius:10px;background:#15374e;color:#b8e4fc;padding:10px 12px;font-weight:700;cursor:pointer}
+.login-card .azur-auth-switch:hover{background:#194760}
+.login-card .azur-auth-switch:focus-visible{outline:2px solid #f5c647;outline-offset:2px}
+.login-card .azur-registration-notice{margin:10px 0 0;padding:12px;background:#113b38;border:1px solid #3e8179;color:#b9f5da;border-radius:10px;font-size:12px;line-height:1.5}
