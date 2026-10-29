@@ -10596,7 +10596,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
           >
             {authLoading ? (registrationMode ? 'Creating account...' : 'Signing in...') : registrationMode ? 'Create athlete account' : 'Sign in'}
           </button>
-        <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
+        {betaRegistrationEnabled && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
           {registrationNotice && <p className="azur-registration-notice" role="status">{registrationNotice}</p>}
         </form>
         {betaRegistrationEnabled && registrationMode && <AthleteOnboardingDraft/>}
