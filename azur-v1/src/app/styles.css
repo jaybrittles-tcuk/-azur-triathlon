@@ -5089,3 +5089,15 @@ strong {
 .session-detail-modal .session-prescription-warning strong{font-size:13px;color:#ffe6a0}
 .session-detail-modal .session-prescription-warning span{font-size:12px;line-height:1.5}
 .session-detail-modal .session-prescription-warning small{font-size:11px;color:#d9be8a;line-height:1.5}
+
+/* AZUR Coach V2 — mobile contrast and compact empty states */
+.coach-cycling-review{background:#0d263d!important;color:#eaf5fc!important;border:1px solid #294961!important;border-radius:17px!important;padding:16px!important;box-shadow:none!important}
+.coach-cycling-review header h3,.coach-cycling-review h3,.coach-cycling-review h4,.coach-cycling-review h5,.coach-cycling-detail h4,.coach-cycling-detail h5{color:#f5fbff!important}
+.coach-cycling-review header p,.coach-cycling-review>p,.coach-cycling-detail p{color:#aecbde!important;line-height:1.45}
+.coach-cycling-review .coach-cycling-detail{background:#123149;border:1px solid #2c4e65}
+.coach-cycling-review .coach-cycling-warning{background:#283c4b;color:#f6d38a;border:1px solid #635b43}
+.coach-cycling-review .coach-prescription-audit{background:#102e46;color:#eaf6ff;border:1px solid #315771;border-radius:12px;padding:12px}
+.coach-cycling-review .coach-prescription-audit strong{color:#f5fbff}
+.coach-cycling-review .coach-prescription-audit small{color:#accbdc}
+.coach-performance-grid h3,.coach-performance-grid h4,.coach-athlete-performance h3,.coach-athlete-performance h4{color:#f5fbff!important}
+@media(max-width:640px){.coach-cycling-review{padding:13px!important;margin-top:9px!important}.coach-cycling-review header h3{font-size:19px!important;line-height:1.22}.coach-cycling-review header p{font-size:12px!important;margin:5px 0 10px}.coach-cycling-review .coach-cycling-warning{font-size:11px;line-height:1.4}.coach-cycling-review .coach-cycling-detail{padding:11px}.coach-cycling-review .coach-cycling-columns{gap:9px}}
