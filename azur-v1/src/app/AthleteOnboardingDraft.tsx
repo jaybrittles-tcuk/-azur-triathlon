@@ -17,6 +17,7 @@ export default function AthleteOnboardingDraft(){
  const [hours,setHours]=useState(8);
  const [experience,setExperience]=useState('first');
  const [ready,setReady]=useState(false);
+ const [displayName,setDisplayName]=useState('');
  const [userId,setUserId]=useState<string|null>(null);
  const [loading,setLoading]=useState(true);
  const [saving,setSaving]=useState(false);
@@ -30,6 +31,8 @@ export default function AthleteOnboardingDraft(){
    if(authError || !user){setMessage('Sign in to save your athlete setup.');setLoading(false);return;}
    if(user.app_metadata?.role==='coach'){setIsCoach(true);setLoading(false);return;}
    setUserId(user.id);
+   const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
+   if(!cancelled && profile?.display_name) setDisplayName(profile.display_name);
    const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,device,onboarding_step').eq('user_id',user.id).maybeSingle();
    if(cancelled)return;
    if(error)setMessage('Could not load your saved setup: '+error.message);
@@ -46,7 +49,16 @@ export default function AthleteOnboardingDraft(){
  async function save(nextStep:number){
   if(!userId){setMessage('Sign in to save your setup.');return;}
   if(!Number.isFinite(hours)||hours<2||hours>25){setMessage('Weekly hours must be between 2 and 25.');return;}
+  if(nextStep===3 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
+  if(nextStep===3){
+   const {data:existing,error:lookupError}=await supabase.from('athlete_profile').select('id').eq('user_id',userId).maybeSingle();
+   if(lookupError){setSaving(false);setMessage('Unable to check athlete profile: '+lookupError.message);return;}
+   if(!existing){
+    const {error:profileError}=await supabase.from('athlete_profile').insert({user_id:userId,display_name:displayName.trim()});
+    if(profileError){setSaving(false);setMessage('Unable to create athlete profile: '+profileError.message);return;}
+   }
+  }
   const {error}=await supabase.from('athlete_onboarding').upsert({
    user_id:userId,race_distance:race,race_date:raceDate||null,
    experience,weekly_hours:hours,device,onboarding_step:nextStep,
@@ -65,6 +77,7 @@ export default function AthleteOnboardingDraft(){
   <div className="azur-onboarding-track"><span style={{width:`${(step+1)/3*100}%`}}/></div>
   {step===0&&<div>
    <h3>Your training goal</h3>
+   <label>Your name<input type="text" maxLength={90} required value={displayName} onChange={e=>setDisplayName(e.target.value)}/></label>
    <label>Race distance<select value={race} onChange={e=>setRace(e.target.value as Race)}>
     <option value="sprint">Sprint</option><option value="olympic">Olympic</option>
     <option value="70.3">IRONMAN 70.3</option><option value="ironman">IRONMAN</option>
@@ -89,7 +102,7 @@ export default function AthleteOnboardingDraft(){
   </div>}
   <div className="azur-onboarding-actions">
    {step>0&&<button type="button" onClick={()=>{setStep(s=>s-1);setReady(false)}}>Back</button>}
-   {step<2?<button type="button" disabled={saving} onClick={()=>void save(step+1)}>Continue</button>
+   {step<2?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>Continue</button>
    :<button type="button" disabled={saving} onClick={()=>void save(3)}>Review setup</button>}
   </div>
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
