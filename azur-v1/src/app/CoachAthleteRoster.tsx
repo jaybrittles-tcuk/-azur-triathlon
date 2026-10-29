@@ -7,12 +7,13 @@ import { auditAthleteInstructions, classifyPrescriptionException } from '../lib/
 export type AssignedAthlete = {
  id: string; display_name: string | null; ftp_w: number | null;
  run_threshold_sec_per_km: number | null; swim_threshold_sec_per_100m: number | null;
- normal_weekly_hours: number | null;
+ normal_weekly_hours: number | null; user_id?:string|null;
 };
 
 export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { onSelect: (athlete: AssignedAthlete | null) => void; selectedAthleteId?: string | null }) {
  const [athletes,setAthletes]=useState<AssignedAthlete[]>([]);
  const [selectedId,setSelectedId]=useState('');
+ const [onboarding,setOnboarding]=useState<Record<string,{race_distance:string;weekly_hours:number;device:string}>>({});
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState('');
  const [prescriptionReviews,setPrescriptionReviews]=useState<Array<{id:string;title:string;sport:string;planned_date:string;gaps:string[];decision:'routine'|'review'|'blocked';reasons:string[]}>>([]);
@@ -49,9 +50,12 @@ export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { on
     const ids=(assignments??[]).map(a=>a.athlete_id);
     if(!ids.length){if(!cancelled)setAthletes([]);return;}
     const {data,error:profilesError}=await supabase.from('athlete_profile')
-      .select('id,display_name,ftp_w,run_threshold_sec_per_km,swim_threshold_sec_per_100m,normal_weekly_hours')
+      .select('id,user_id,display_name,ftp_w,run_threshold_sec_per_km,swim_threshold_sec_per_100m,normal_weekly_hours')
       .in('id',ids);
     if(profilesError) throw profilesError;
+    const idsForSetup=(data??[]).map(a=>a.user_id).filter((v):v is string=>typeof v==='string');
+    if(idsForSetup.length){const {data:setupRows}=await supabase.from('athlete_onboarding').select('user_id,race_distance,weekly_hours,device').in('user_id',idsForSetup);
+     if(!cancelled)setOnboarding(Object.fromEntries((setupRows??[]).map(row=>[row.user_id,row])));}
     if(!cancelled)setAthletes((data??[]).sort((a,b)=>(a.display_name??'').localeCompare(b.display_name??'')));
    } catch(e){if(!cancelled)setError(e instanceof Error?e.message:'Unable to load assigned athletes');}
    finally{if(!cancelled)setLoading(false);}
@@ -67,21 +71,27 @@ export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { on
    <div className="azur-roster-grid">{athletes.map(a=>{
     const complete=[a.ftp_w,a.run_threshold_sec_per_km,a.swim_threshold_sec_per_100m].filter(v=>typeof v==='number'&&v>0).length;
     const active=(selectedAthleteId??selectedId)===a.id;
+    const setup=a.user_id?onboarding[a.user_id]:null;
     return <button type="button" key={a.id} aria-pressed={active} className={'azur-athlete-tile'+(active?' is-selected':'')} onClick={()=>{setSelectedId(a.id);onSelect(a)}}>
       <span className="azur-athlete-avatar" aria-hidden="true">{(a.display_name||'A').trim().slice(0,1).toUpperCase()}</span>
-      <span className="azur-athlete-info"><strong>{a.display_name||'Unnamed athlete'}</strong><small>{complete===3?'Benchmarks recorded':complete===0?'Baseline testing needed':`${complete} of 3 benchmarks recorded`}</small></span>
-      <span className={'azur-athlete-chip'+(complete===3?' is-ready':'')}>{complete===3?'Benchmarks set':'Setup'}</span>
+      <span className="azur-athlete-info"><strong>{a.display_name||'Unnamed athlete'}</strong><small>{setup?`${setup.race_distance.toUpperCase()} · ${setup.weekly_hours} h/week`:(complete===3?'Benchmarks recorded':'Baseline tests pending')}</small></span>
+      <span className={'azur-athlete-chip'+(complete===3?' is-ready':'')}>{complete}/3 tests</span>
       <span className="azur-athlete-chevron" aria-hidden="true">›</span>
     </button>
    })}</div>
    {selected&&<div className="azur-athlete-summary">
     <div className="azur-athlete-summary-title"><div><span className="azur-coach-eyebrow">ATHLETE SNAPSHOT</span><h4>{selected.display_name||'Athlete profile'}</h4></div><span className="azur-summary-note">Read-only</span></div>
+    {selected.user_id&&onboarding[selected.user_id]&&<div className="azur-athlete-goal"><span>GOAL <strong>{onboarding[selected.user_id].race_distance.toUpperCase()}</strong></span><span>AVAILABLE <strong>{onboarding[selected.user_id].weekly_hours} h/week</strong></span><span>DEVICE <strong>{onboarding[selected.user_id].device==='none'?'Manual':onboarding[selected.user_id].device.toUpperCase()}</strong></span></div>}
+    <div className="azur-benchmark-heading"><strong>Benchmark readiness</strong><span>{[selected.ftp_w,selected.run_threshold_sec_per_km,selected.swim_threshold_sec_per_100m].filter(v=>typeof v==='number'&&v>0).length}/3 complete</span></div>
+    <div className="azur-benchmark-track"><span style={{width:String([selected.ftp_w,selected.run_threshold_sec_per_km,selected.swim_threshold_sec_per_100m].filter(v=>typeof v==='number'&&v>0).length/3*100)+'%'}}/></div>
+    <details className="azur-athlete-metric-details"><summary>Detailed benchmarks</summary>
     <div className="azur-athlete-metrics">
       <div><small>BIKE FTP</small><strong>{selected.ftp_w ? `${selected.ftp_w} W`:'Not set'}</strong></div>
       <div><small>RUN THRESHOLD</small><strong>{selected.run_threshold_sec_per_km ? `${selected.run_threshold_sec_per_km} s/km`:'Not set'}</strong></div>
       <div><small>SWIM CSS</small><strong>{selected.swim_threshold_sec_per_100m ? `${selected.swim_threshold_sec_per_100m} s/100m`:'Not set'}</strong></div>
       <div><small>WEEKLY BASELINE</small><strong>{selected.normal_weekly_hours==null?'Not set':`${selected.normal_weekly_hours} h`}</strong></div>
     </div>
+    </details>
     {(!selected.ftp_w||!selected.run_threshold_sec_per_km||!selected.swim_threshold_sec_per_100m)&&<p className="azur-athlete-next-step">Baseline assessments are still needed before the app can use personalised intensity targets. Missing values are not estimated.</p>}
     <details className="azur-athlete-review-details"><summary>Upcoming prescription exceptions {prescriptionReviews.length>0?`(${prescriptionReviews.length})`:''}</summary>
      <p>Read-only review of up to 40 upcoming sessions. No automatic plan edits or Garmin exports.</p>
