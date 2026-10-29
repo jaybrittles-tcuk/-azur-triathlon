@@ -5385,3 +5385,5 @@ strong {
 .azur-manual-fields input{width:100%;min-width:0;box-sizing:border-box;background:#193e55;border:1px solid #427995;border-radius:10px;color:#fff;padding:11px}
 .azur-manual-completion .primary-button{margin-top:10px}
 @media(max-width:480px){.azur-manual-fields{grid-template-columns:1fr}}
+
+.azur-manual-rpe{display:grid;gap:6px;margin:11px 0;color:#d5eefa;font-size:12px;font-weight:750}.azur-manual-rpe input{box-sizing:border-box;width:100%;background:#193e55;border:1px solid #427995;border-radius:10px;color:#fff;padding:11px}.azur-manual-completion [role=status]{color:#e4f8ff;overflow-wrap:anywhere}
