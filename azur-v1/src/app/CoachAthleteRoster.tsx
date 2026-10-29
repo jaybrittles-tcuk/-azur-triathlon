@@ -84,6 +84,15 @@ export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { on
     {selected.user_id&&onboarding[selected.user_id]&&<div className="azur-athlete-goal"><span>GOAL <strong>{onboarding[selected.user_id].race_distance.toUpperCase()}</strong></span><span>AVAILABLE <strong>{onboarding[selected.user_id].weekly_hours} h/week</strong></span><span>DEVICE <strong>{onboarding[selected.user_id].device==='none'?'Manual':onboarding[selected.user_id].device.toUpperCase()}</strong></span></div>}
     <div className="azur-benchmark-heading"><strong>Benchmark readiness</strong><span>{[selected.ftp_w,selected.run_threshold_sec_per_km,selected.swim_threshold_sec_per_100m].filter(v=>typeof v==='number'&&v>0).length}/3 complete</span></div>
     <div className="azur-benchmark-track"><span style={{width:String([selected.ftp_w,selected.run_threshold_sec_per_km,selected.swim_threshold_sec_per_100m].filter(v=>typeof v==='number'&&v>0).length/3*100)+'%'}}/></div>
+    <div className="azur-coach-actions-panel">
+      <div className="azur-coach-actions-title"><strong>Next coaching actions</strong><small>Based on recorded data</small></div>
+      {(!selected.ftp_w||!selected.run_threshold_sec_per_km||!selected.swim_threshold_sec_per_100m) ? <ul>
+       {!selected.ftp_w&&<li><span className="azur-action-symbol">01</span><div><strong>Establish bike FTP</strong><small>Arrange a suitable cycling benchmark before FTP-based workout targets.</small></div></li>}
+       {!selected.run_threshold_sec_per_km&&<li><span className="azur-action-symbol">02</span><div><strong>Establish run threshold</strong><small>Record a valid run benchmark to personalise pace prescriptions.</small></div></li>}
+       {!selected.swim_threshold_sec_per_100m&&<li><span className="azur-action-symbol">03</span><div><strong>Establish swim CSS</strong><small>Record a suitable swim assessment to set training paces.</small></div></li>}
+      </ul> : <p className="azur-coach-actions-complete">All three core benchmarks recorded. Review training history and context before prescribing changes.</p>}
+      {selected.user_id&&onboarding[selected.user_id]?.device==='none'&&<p className="azur-coach-manual-note">Manual training mode selected — use athlete-reported session completion and RPE, not assumed device metrics.</p>}
+    </div>
     <details className="azur-athlete-metric-details"><summary>Detailed benchmarks</summary>
     <div className="azur-athlete-metrics">
       <div><small>BIKE FTP</small><strong>{selected.ftp_w ? `${selected.ftp_w} W`:'Not set'}</strong></div>
