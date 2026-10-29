@@ -706,6 +706,7 @@ type Session = PlannedSession & {
 
   completedDurationSec?: number;
   completedDistanceM?: number;
+  completedRpe?: number;
 completedSource?: string;
   completedActivityId?: string;
 completedMatchConfidence?: number;
@@ -1648,7 +1649,7 @@ const { data: completedActivities, error: completedError } =
   await supabase
     .from('completed_activity')
     .select(
-  'id, planned_session_id, sport, start_time, duration_sec, distance_m, source, processed_metrics, raw_payload, match_confidence'
+  'id, planned_session_id, sport, start_time, duration_sec, distance_m, session_rpe, source, processed_metrics, raw_payload, match_confidence'
     )
     .eq('athlete_id', athlete.id)
     .order('start_time', { ascending: true });
@@ -1720,6 +1721,10 @@ durationMin: session.duration_min,
 completedDurationSec:
   completedBySessionId.get(session.id)?.duration_sec ?? undefined,
 
+completedRpe:
+  completedBySessionId.get(session.id)?.source === 'manual' && completedBySessionId.get(session.id)?.session_rpe != null
+    ? Number(completedBySessionId.get(session.id)?.session_rpe)
+    : undefined,
 completedDistanceM:
   completedBySessionId.get(session.id)?.distance_m != null
     ? Number(completedBySessionId.get(session.id)?.distance_m)
@@ -8151,7 +8156,8 @@ const sessionVerdict =
      <div className="azur-manual-insight-metrics">
        <div><small>Planned</small><strong>{selected.durationMin} min</strong></div>
        <div><small>Recorded</small><strong>{Math.round(selected.completedDurationSec/60)} min</strong></div>
-       <div><small>Reported RPE</small><strong>{sessionFeedback.rpe || 'Not recorded'}</strong></div>
+       <div><small>Distance reported</small><strong>{selected.completedDistanceM == null ? 'Not recorded' : `${(selected.completedDistanceM/1000).toFixed(2)} km`}</strong></div>
+       <div><small>Reported RPE</small><strong>{selected.completedRpe ?? 'Not recorded'}</strong></div>
      </div>
      <p><strong>Observation:</strong> {matchCompletionPercent===null?'Completion duration unavailable.':matchCompletionPercent>=100?'The recorded duration met or exceeded the planned duration.':'The recorded duration was shorter than planned.'} This does not verify that prescribed intensity or technique targets were achieved.</p>
      <p><strong>Interpretation:</strong> Duration and RPE are athlete-reported; power, pace and heart rate were not measured by this entry.</p>
@@ -8441,7 +8447,7 @@ const sessionVerdict =
       : matchCompletionPercent >= 105
         ? 'Recorded duration exceeded the plan. This alone does not confirm the intended intensity or training stimulus.'
         : matchCompletionPercent >= 95
-          ? 'Planned training time was completed. The session delivered the intended training volume.'
+          ? selected.completedSource === 'manual' ? 'Reported duration met the plan; intensity and training stimulus remain unverified.' : 'Planned training time was completed. Review measured intensity before confirming the intended training stimulus.'
           : matchCompletionPercent >= 85
             ? 'Most of the planned training time was completed. The session still contributed meaningfully to the intended training load.'
             : 'Completed training time was below plan. Azur will consider this alongside recovery, athlete feedback and upcoming sessions.'}
@@ -10527,7 +10533,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     try{
       const {error}=await supabase.rpc(editableManualId?'athlete_edit_manual_completion':'athlete_record_manual_completion',{p_session_id:selected.id,p_duration_min:duration,p_distance_km:distance,p_rpe:rpe,p_notes:sessionFeedback.notes.trim()||null});
       if(error)throw error;
-      setWeekSessions(previous=>previous.map(session=>session.id===selected.id?{...session,status:'completed' as const,completedDurationSec:Math.round(duration*60),completedDistanceM:distance===null?undefined:distance*1000,completedSource:'manual'}:session));
+      setWeekSessions(previous=>previous.map(session=>session.id===selected.id?{...session,status:'completed' as const,completedDurationSec:Math.round(duration*60),completedDistanceM:distance===null?undefined:distance*1000,completedRpe:rpe,completedSource:'manual'}:session));
       setManualMessage(editableManualId?'Manual activity changes saved.':'Workout completed and saved to your calendar.');
       if(!editableManualId){setManualDuration('');setManualDistance('');}
       const {data:{user}}=await supabase.auth.getUser();
