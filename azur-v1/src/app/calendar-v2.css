@@ -1,4 +1,12 @@
 /* AZUR Calendar V2 */
-.calendar-layout .calendar-session.run{border-left-color:#ff925e}
-.calendar-layout .calendar-session.bike{border-left-color:#f6c54b}
-.calendar-layout .calendar-session.swim{border-left-color:#37bdf4}
+.calendar-layout .calendar-day{background:#0d2034!important;border:1px solid #29445e!important;border-radius:15px!important;padding:10px!important}
+.calendar-layout .calendar-session{background:#132c43!important;border:1px solid #34516a!important;border-left:4px solid #37bdf4!important;border-radius:11px!important;padding:10px 11px!important;min-height:0!important}
+.calendar-layout .calendar-session.swim{border-left-color:#37bdf4!important}
+.calendar-layout .calendar-session.bike{border-left-color:#f6c54b!important}
+.calendar-layout .calendar-session.run{border-left-color:#ff925e!important}
+.calendar-layout .calendar-session.completed{background:#153446!important}
+.calendar-layout .calendar-session strong{color:#f5faff!important;font-size:13px!important}
+.calendar-layout .calendar-session-meta,.calendar-layout .calendar-session-target{color:#c1d9eb!important}
+.calendar-layout .calendar-session-purpose{background:transparent!important;color:#bfd5e7!important}
+.calendar-layout .calendar-actual-comparison{background:#0d263a!important;border:1px solid #36546b!important;border-radius:9px!important;padding:8px!important}
+@media(max-width:750px){.calendar-layout .calendar-day{padding:8px!important}.calendar-layout .calendar-session{padding:9px 10px!important}}
