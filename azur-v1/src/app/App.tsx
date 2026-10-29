@@ -7897,6 +7897,11 @@ onClick={() => {
               <small>Do not infer missing targets or rest periods. Ask your coach before completing an unclear session.</small>
             </div>;
           })()}
+          <div className="azur-v2-workout-first">
+            <span className="eyebrow">SESSION GOAL</span>
+            <p>{selected.rationale || selected.prescription?.focus || 'Follow your coach-prescribed workout targets.'}</p>
+            <CalendarIntensityProfile steps={(selected.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
+          </div>
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
           <details className="azur-workout-modal-summary azur-v2-workout-breakdown">
             <summary>Workout structure <span>View intensity profile and prescribed targets</span></summary>
