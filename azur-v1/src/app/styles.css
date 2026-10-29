@@ -5216,3 +5216,25 @@ strong {
 .azur-coach-shortcuts button{border-radius:13px;background:linear-gradient(110deg,#113750,#0b2941);border-color:#2f607c;min-height:64px}
 .azur-roster-state{font-size:13px;color:#bbd3e2}
 @media(max-width:680px){.azur-roster-v3{padding:13px}.azur-roster-grid{grid-template-columns:1fr}.azur-athlete-tile{min-height:73px}.azur-athlete-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.azur-coach-kpis{padding:13px}.azur-coach-kpis span{max-width:200px}}
+
+/* Coach V3.1 compact athlete intelligence */
+.azur-roster-v3{padding:13px!important}
+.azur-roster-head{margin-bottom:10px}
+.azur-roster-grid{gap:7px}
+.azur-athlete-tile{min-height:64px;padding:10px 12px;grid-template-columns:35px minmax(0,1fr) auto;gap:9px}
+.azur-athlete-avatar{width:34px;height:34px;font-size:15px}
+.azur-athlete-info strong{font-size:14px}
+.azur-athlete-info small{font-size:11px}
+.azur-athlete-chip{font-size:10px;padding:2px 8px}
+.azur-athlete-summary{padding:13px;margin-top:9px}
+.azur-athlete-goal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0 0 13px}
+.azur-athlete-goal span{background:#123a53;border:1px solid #2b607a;padding:9px;border-radius:9px;color:#9dc6dd;font-size:10px;display:grid;gap:5px}
+.azur-athlete-goal strong{color:#f2fbff;font-size:12px;overflow-wrap:anywhere}
+.azur-benchmark-heading{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#e8f7ff;margin-bottom:7px}
+.azur-benchmark-heading span{color:#a9c9df}
+.azur-benchmark-track{height:6px;background:#21425a;overflow:hidden;border-radius:99px;margin-bottom:12px}
+.azur-benchmark-track span{display:block;background:#29b7ef;height:100%;border-radius:99px}
+.azur-athlete-metric-details{border:1px solid #315b76;background:#12334c;border-radius:10px;padding:10px;margin:0 0 10px}
+.azur-athlete-metric-details summary{font-weight:750;color:#74cdf6;cursor:pointer;font-size:12px}
+.azur-athlete-metric-details .azur-athlete-metrics{margin-top:10px}
+@media(max-width:680px){.azur-athlete-tile{min-height:61px}.azur-roster-v3{padding:12px!important}.azur-roster-head h3{font-size:19px}.azur-athlete-next-step{font-size:11px;padding:9px}}
