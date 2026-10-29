@@ -23,3 +23,22 @@
 .calendar-layout .calendar-session.swim .calendar-session-top>span{color:#37bdf4!important}
 .calendar-layout .calendar-session.bike .calendar-session-top>span{color:#f6c54b!important}
 .calendar-layout .calendar-session.run .calendar-session-top>span{color:#ff925e!important}
+
+/* Mobile calendar: distinct days, denser workout cards and discreet actions */
+@media(max-width:750px){
+.calendar-layout .calendar-grid{display:flex!important;flex-direction:column!important;gap:10px!important}
+.calendar-layout .calendar-day{padding:9px!important;border-radius:13px!important}
+.calendar-layout .calendar-day-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;margin-bottom:8px!important;padding-bottom:8px!important;border-bottom:1px solid #37516a!important}
+.calendar-layout .calendar-day-head>div{display:flex!important;align-items:baseline!important;gap:7px!important}
+.calendar-layout .calendar-day-head strong{font-size:14px!important}
+.calendar-layout .azur-day-count{color:#a9c6dd!important;font-size:10px!important}
+.calendar-layout .day-stack{display:grid!important;gap:7px!important}
+.calendar-layout .calendar-session-wrapper{display:flex!important;flex-direction:column-reverse!important;gap:3px!important}
+.calendar-layout .calendar-session{padding:9px 10px!important;border-radius:11px!important}
+.calendar-layout .calendar-session-top{margin-bottom:2px!important}
+.calendar-layout .calendar-session strong{font-size:13px!important;line-height:1.25!important}
+.calendar-layout .calendar-session-meta{margin-top:3px!important}
+.calendar-layout .calendar-reschedule-button{align-self:flex-end!important;width:auto!important;min-height:28px!important;padding:3px 9px!important;font-size:10px!important;opacity:.85!important}
+.calendar-layout .calendar-session-purpose>span{display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
+.calendar-layout .calendar-session .calendar-session-target{font-size:10px!important}
+}
