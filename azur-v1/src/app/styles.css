@@ -5127,3 +5127,18 @@ strong {
 .azur-onboarding-recap{margin-top:13px;border:1px solid #3e8179;background:#103b37;border-radius:10px;padding:11px;color:#c4f4df}
 .azur-onboarding-recap small{color:#b2d5ca}
 @media(max-width:480px){.azur-onboarding-options{grid-template-columns:1fr}.azur-onboarding-draft{padding:12px}}
+
+/* AZUR V2 coach-led beta invitations */
+.azur-invitations{background:#0e293f;border:1px solid #34536a;border-radius:16px;padding:16px;margin:12px 0;color:#eaf5ff;max-width:100%}
+.azur-invitations h3{color:#f1faff!important;font-size:19px;margin:0 0 8px}
+.azur-invitations p{color:#a9cadd;font-size:12px;line-height:1.5}
+.azur-invite-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-top:13px}
+.azur-invite-form label{flex:1 1 200px;color:#b5d6e9;font-size:12px;display:grid;gap:5px}
+.azur-invite-form input{background:#163b53;color:#fff;border:1px solid #47718b;border-radius:9px;padding:11px;min-width:0}
+.azur-invite-form button,.azur-invite-row button{background:#107ba9;color:white;border:1px solid #46acdc;padding:10px 14px;border-radius:9px;font-weight:700;cursor:pointer}
+.azur-invite-form button:disabled,.azur-invite-row button:disabled{opacity:.45;cursor:wait}
+.azur-invite-list{display:grid;gap:8px;margin-top:12px}
+.azur-invite-row{background:#16384f;border:1px solid #335b73;border-radius:10px;padding:11px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.azur-invite-row strong{color:#f2faff;font-size:13px;overflow-wrap:anywhere}
+.azur-invite-row small{display:block;color:#a8cadb;font-size:11px;margin-top:5px}
+.azur-invitations .azur-invite-note{font-size:11px;color:#9bbfd5}
