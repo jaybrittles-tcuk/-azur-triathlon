@@ -5357,3 +5357,22 @@ strong {
 .azur-library-v2 .azur-library-preview-empty>summary span{font-size:11px;color:#8dbbd1}
 .azur-library-v2 .coach-cycling-warning{padding:9px 11px;font-size:11px}
 @media(max-width:670px){.azur-library-v2 .coach-cycling-list{gap:6px}.azur-library-v2 .coach-cycling-list button{min-height:54px!important}.azur-library-v2 .coach-cycling-detail{margin-top:0!important}}
+
+/* AZUR Athlete Dashboard & Calendar V3 */
+.azur-athlete-today-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;background:linear-gradient(115deg,#123d5b,#0a263c);border:1px solid #316583;border-radius:16px;padding:15px;margin:0 0 10px}
+.azur-athlete-today-summary>div{display:grid;gap:5px}
+.azur-athlete-today-summary span{font-size:10px;letter-spacing:.15em;color:#4fc2f6;font-weight:850}
+.azur-athlete-today-summary strong{font-size:19px;color:#f7fbff;line-height:1.2}
+.azur-athlete-today-summary small{font-size:12px;color:#a4c9dd;line-height:1.4}
+.azur-athlete-today-summary button{background:#167db0;border:1px solid #44b5e6;border-radius:10px;padding:10px 12px;font-weight:800;font-size:12px;color:white;white-space:nowrap;cursor:pointer}
+.azur-athlete-week-progress{background:#0d2c44;border:1px solid #315d78;border-radius:14px;padding:13px 15px;margin:0 0 13px;color:#f1faff}
+.azur-athlete-week-progress>div:first-child{display:flex;justify-content:space-between;gap:8px;margin-bottom:9px;align-items:center}
+.azur-athlete-week-progress strong{font-size:14px}
+.azur-athlete-week-progress span{font-size:12px;color:#adcede}
+.azur-athlete-week-progress>div[role=progressbar]{height:7px;overflow:hidden;background:#234960;border-radius:10px}
+.azur-athlete-week-progress>div[role=progressbar] span{display:block;height:100%;background:#2bb5ec;border-radius:10px}
+.azur-athlete-week-progress small{font-size:10px;color:#98b9cd;display:block;margin-top:8px}
+.azur-calendar-quickbar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.azur-calendar-quickbar strong{color:#dff4ff;font-size:10px;letter-spacing:.12em;margin-right:auto}
+.azur-calendar-quickbar button{border:1px solid #376b8c;border-radius:9px;background:#164363;color:#d9f3ff;padding:7px 11px;font-size:11px;font-weight:750;cursor:pointer}
+@media(max-width:460px){.azur-athlete-today-summary{padding:12px}.azur-athlete-today-summary strong{font-size:16px}.azur-athlete-today-summary button{padding:9px 10px}.azur-athlete-week-progress{padding:12px}}
