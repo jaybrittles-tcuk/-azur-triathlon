@@ -8160,9 +8160,9 @@ const sessionVerdict =
        <div><small>Distance reported</small><strong>{selected.completedDistanceM == null ? 'Not recorded' : `${(selected.completedDistanceM/1000).toFixed(2)} km`}</strong></div>
        <div><small>Reported RPE</small><strong>{selected.completedRpe ?? 'Not recorded'}</strong></div>
      </div>
-     <p><strong>Observation:</strong> {matchCompletionPercent===null?'Completion duration unavailable.':matchCompletionPercent>=100?'The recorded duration met or exceeded the planned duration.':'The recorded duration was shorter than planned.'} This does not verify that prescribed intensity or technique targets were achieved.</p>
-     <p><strong>Interpretation:</strong> Duration and RPE are athlete-reported; power, pace and heart rate were not measured by this entry.</p>
-     <p><strong>Adaptive decision:</strong> No change to upcoming training is proposed from this manual record alone. Your coach can review it alongside other training and recovery evidence.</p>
+     <p className="azur-insight-observation"><strong>01 · OBSERVATION</strong> {matchCompletionPercent===null?'Completion duration unavailable.':matchCompletionPercent>=100?'The recorded duration met or exceeded the planned duration.':'The recorded duration was shorter than planned.'} This does not verify that prescribed intensity or technique targets were achieved.</p>
+     <p className="azur-insight-interpretation"><strong>02 · INTERPRETATION</strong> Duration and RPE are athlete-reported; power, pace and heart rate were not measured by this entry.</p>
+     <p className="azur-insight-decision"><strong>03 · COACHING DECISION</strong> No change to upcoming training is proposed from this manual record alone. Your coach can review it alongside other training and recovery evidence.</p>
    </section>
  )}
  {selected?.completedDurationSec && nextPlannedSession?.prescription?.azur_adaptation?.status==='accepted' && (
