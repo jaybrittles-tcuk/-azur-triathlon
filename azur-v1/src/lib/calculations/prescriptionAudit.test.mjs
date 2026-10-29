@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { auditPrescription, auditAthleteInstructions } from './prescriptionAudit.ts';
+import { auditPrescription, auditAthleteInstructions, classifyPrescriptionException } from './prescriptionAudit.ts';
 test('bike numeric warmup and work are ready',()=>{
  assert.equal(auditPrescription({sport:'bike',prescription:{azurWorkout:{steps:[{type:'work',durationMin:45,targetType:'ftp',targetLow:70,targetHigh:80}]}}}).ready,true);
 });
@@ -35,4 +35,20 @@ test('structured bike repeat preserves work and recovery targets',()=>{
 });
 test('empty prescription must not pass',()=>{
  assert.equal(auditAthleteInstructions(null).complete,false);
+});
+
+test('approved complete routine session is eligible for automated use',()=>{
+ const result=classifyPrescriptionException({sport:'swim',prescription:{main_set:[{reps:4,distance_m:100,target:'CSS pace',recovery_sec:20}]},templateApproved:true,hasValidBenchmark:true});
+ assert.equal(result.status,'routine');
+ assert.equal(result.eligibleForAutomaticUse,true);
+});
+test('significant changes always require review',()=>{
+ const result=classifyPrescriptionException({sport:'run',prescription:{main_set:[{reps:3,duration_min:8,target:'Threshold',recovery_min:2}]},templateApproved:true,hasValidBenchmark:true,materialChange:true});
+ assert.equal(result.status,'review');
+ assert.equal(result.eligibleForAutomaticUse,false);
+});
+test('unapproved or missing-data sessions cannot be automated',()=>{
+ const result=classifyPrescriptionException({sport:'bike',prescription:{main_set:[{duration_min:45,target:'Easy'}]},templateApproved:false,hasValidBenchmark:false});
+ assert.equal(result.status,'blocked');
+ assert.equal(result.eligibleForAutomaticUse,false);
 });
