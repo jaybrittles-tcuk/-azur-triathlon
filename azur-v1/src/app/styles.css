@@ -5400,3 +5400,46 @@ strong {
 .azur-manual-training-insights p{font-size:12px;color:#bcd8e6;line-height:1.6;margin:12px 0}
 .azur-manual-training-insights p strong{color:#e3f6ff}
 @media(max-width:420px){.azur-manual-training-insights{padding:12px}.azur-manual-insight-metrics strong{font-size:13px}}
+
+
+/* AZUR V3 — visual hierarchy for manual training insights */
+.azur-manual-training-insights{
+  background:linear-gradient(165deg,#102b40 0%,#091e30 100%)!important;
+  border:1px solid #386782!important;
+  border-left:4px solid #208de7!important;
+  box-shadow:0 14px 32px rgba(0,8,22,.22);
+  padding:22px!important;
+}
+.azur-manual-training-insights>.eyebrow{color:#67c5ff;letter-spacing:.16em;font-size:11px}
+.azur-manual-training-insights h4{font-size:clamp(19px,4.8vw,25px)!important;line-height:1.17;letter-spacing:-.02em;margin:12px 0 20px!important;max-width:28ch}
+.azur-manual-insight-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;margin:16px 0 24px!important}
+.azur-manual-insight-metrics>div{min-height:86px;align-content:space-between;background:#183950!important;border:1px solid #315c75!important;border-radius:13px!important;padding:13px!important}
+.azur-manual-insight-metrics>div:nth-child(2){background:#12446b!important;border-color:#278edd!important}
+.azur-manual-insight-metrics>div:nth-child(2) strong{color:#79ceff}
+.azur-manual-insight-metrics small{font-size:12px!important;line-height:1.35;color:#bad4e2!important}
+.azur-manual-insight-metrics strong{font-size:clamp(19px,5vw,25px)!important;line-height:1.12;font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.azur-manual-training-insights p.azur-insight-observation,
+.azur-manual-training-insights p.azur-insight-interpretation,
+.azur-manual-training-insights p.azur-insight-decision{
+  display:grid;gap:8px;padding:16px 16px 16px 18px;border-radius:12px;
+  font-size:14px!important;line-height:1.6!important;margin:10px 0!important;
+  background:#102d43;border:1px solid #294b62;color:#d5e5ef!important;
+}
+.azur-manual-training-insights p.azur-insight-observation{border-left:3px solid #38aaff}
+.azur-manual-training-insights p.azur-insight-interpretation{background:#192f43;border-left:3px solid #e4bd59}
+.azur-manual-training-insights p.azur-insight-decision{background:#102f37;border-left:3px solid #57cca3}
+.azur-manual-training-insights p.azur-insight-observation strong,
+.azur-manual-training-insights p.azur-insight-interpretation strong,
+.azur-manual-training-insights p.azur-insight-decision strong{font-size:11px;letter-spacing:.12em;color:#f1f7fb}
+.azur-manual-training-insights p.azur-insight-observation strong{color:#71c9ff}
+.azur-manual-training-insights p.azur-insight-interpretation strong{color:#f1d18a}
+.azur-manual-training-insights p.azur-insight-decision strong{color:#7edcba}
+.editor-panel .completed-session-summary .completed-activity-details{border-color:#29465b}
+.editor-panel .completed-session-summary .activity-analysis-card{box-shadow:0 8px 26px rgba(5,20,40,.15)}
+@media(max-width:420px){
+ .azur-manual-training-insights{padding:16px!important}
+ .azur-manual-insight-metrics>div{min-height:80px;padding:11px!important}
+ .azur-manual-training-insights p.azur-insight-observation,
+ .azur-manual-training-insights p.azur-insight-interpretation,
+ .azur-manual-training-insights p.azur-insight-decision{padding:13px;font-size:13px!important}
+}
