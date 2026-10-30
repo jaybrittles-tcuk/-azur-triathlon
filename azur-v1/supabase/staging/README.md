@@ -75,3 +75,41 @@ When the test environment uses a managed HTTPS proxy, `AZUR_BROWSER_PROXY` (or `
 - All CI workflows passed on the tested functional commit: 101 calculation tests, 50 API/routing tests, builds, synthetic Chromium checks (including background Auth refresh), and real PostgreSQL safety/concurrency checks.
 - Vercel protection stayed enabled. Temporary deployment-scoped browser access was revoked after testing. The normal staging URL requires the owner's Vercel access plus a separate staging app login.
 - The Intervals response in this test is deliberately synthetic. Real Intervals OAuth client configuration, a staging callback and athlete authorisation are still required before claiming real Zwift retrieval/import is verified in staging. The focused staging schema is not a complete race/coach/product test environment.
+
+### Real Intervals OAuth (staging only)
+
+The staging Edge backend now exposes authenticated `connect` and a public OAuth
+`callback`. The callback is authenticated by an unpredictable, single-use state
+created for the signed-in athlete, with a ten-minute expiry and PKCE. It never
+accepts an athlete ID from the browser. Its state table has RLS and no browser
+privileges; default-deny advisor INFO findings are intentional, as with the token
+store. The existing leaked-password protection advisor warning remains; see
+https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection.
+
+Install `oauth_state.sql` only after setting the staging project guard. This is a
+staging supplement, not a production schema migration. CI bootstraps it separately.
+The hosted supplement was applied as `staging_intervals_oauth_state`.
+
+To enable the real connection, configure a staging Intervals OAuth application:
+
+- Register this exact redirect URI with Intervals:
+  `https://juvceqrzkeethontnezw.supabase.co/functions/v1/import-review/callback`
+- In https://supabase.com/dashboard/project/juvceqrzkeethontnezw/functions/secrets,
+  set `INTERVALS_CLIENT_ID` and `INTERVALS_CLIENT_SECRET` directly from that app.
+  Do not paste the secret in chat, commit it, copy production tokens, or expose it
+  through `VITE_` variables. Use a distinct staging client where possible.
+- Sign in with a normal staging athlete account and choose Connect Intervals.
+  Complete the provider's consent screen for `ACTIVITY:READ`.
+- Use a normal account without `app_metadata.azur_staging_test`; tagged accounts
+  intentionally continue to receive the synthetic fixture and cannot validate
+  the real provider path.
+
+The callback returns to `https://azur-staging.vercel.app/?intervals=connected`.
+Using the Edge callback lets the provider return without disabling Vercel preview
+protection. The web project proxies only the authenticated Connect request; OAuth
+codes go directly to the callback. Production redirect identity is unchanged.
+
+Local OAuth tests cover PKCE, owner binding, missing configuration, expired/reused
+state, environment isolation, provider/save errors and unauthenticated callback
+handling. These use simulated provider replies; they do not prove live provider
+registration or consent. Real consent and one actual ride remain release gates.

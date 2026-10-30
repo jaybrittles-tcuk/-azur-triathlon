@@ -80,3 +80,10 @@ API tests have moved to `tests/api/intervals` to keep the Hobby deployment below
 
 ## Hosted browser verification
 The dedicated staging app is available at https://azur-staging.vercel.app. On functional commit `0efc64638ae2a39a00829697432ad52c76c59338`, the hosted browser passed real sign-in, proxy/API/database writes, one saved 98-point score, idempotent replay and Weekly Review refresh. A background Auth/profile update regression was fixed and covered by the synthetic browser suite. All 151 calculation/API tests and all CI workflows passed. The upstream provider activity was explicitly synthetic; live Intervals OAuth remains a separate release gate. See the staging README for exact deployment/source references.
+
+OAuth staging continuation: Connect and callback now support the isolated staging
+backend, with fixed redirect identities, server-owned single-use state and PKCE.
+The staging state table is server-only. 161 local tests (101 calculations and 60
+API/router/OAuth tests) and the production build pass. The live provider exchange
+remains unverified until the staging Intervals client ID/secret are configured
+and the athlete completes consent; see the staging README for exact setup.

@@ -13,14 +13,20 @@ export function createStagingImportRouter(config:{url:string;serviceKey:string},
   if(!factory)return reply(404,{error:'Staging route not found'});
   if(!['GET','POST'].includes(request.method))return reply(405,{error:'Method not allowed'});
   const authorization=request.headers.get('Authorization')??'';
-  if(!authorization.startsWith('Bearer '))return reply(401,{error:'Sign in required'});
+  const callback=action==='callback';
+  if(callback&&request.method!=='GET')return reply(405,{error:'Method not allowed'});
+  if(!callback&&!authorization.startsWith('Bearer '))return reply(401,{error:'Sign in required'});
   try {
+   let user:any=null;
+   if(!callback) {
    const checked=await fetcher(config.url+'/auth/v1/user',{headers:{apikey:config.serviceKey,Authorization:authorization}});
    if(!checked.ok)return reply(401,{error:'Invalid session'});
-   const user=await checked.json();
+   user=await checked.json();
    if(typeof user?.id!=='string'||!user.id)return reply(401,{error:'Invalid session'});
+   }
+   // The callback is authenticated by its single-use, expiring server-created OAuth state.
    // This switch is server-controlled Auth app_metadata, never user_metadata or request data.
-   const synthetic=user.app_metadata?.azur_staging_test===true;
+   const synthetic=user?.app_metadata?.azur_staging_test===true;
    const requestFetch:typeof fetch=async(input,init)=>{
     const upstream=new URL(typeof input==='string'?input:input instanceof URL?input.href:input.url);
     if(synthetic&&upstream.origin==='https://intervals.icu'&&upstream.pathname==='/api/v1/athlete/0/activities') {
@@ -40,9 +46,12 @@ export function createStagingImportRouter(config:{url:string;serviceKey:string},
    const res={
     setHeader(key:string,value:string){headers.set(key,value);},
     status(value:number){status=value;return this;},
+    send(data:string){headers.set('Content-Type','text/plain; charset=utf-8');response=new Response(data,{status,headers});return this;},
+    redirect(code:number,location:string){headers.set('Location',location);response=new Response(null,{status:code,headers});return this;},
     json(data:unknown){response=reply(status,data);return this;},
    };
-   await factory(requestFetch)({method:request.method,headers:{authorization},body,query:Object.fromEntries(url.searchParams)},res);
+   const query=Object.fromEntries([...new Set(url.searchParams.keys())].map(key=>{const values=url.searchParams.getAll(key);return [key,values.length===1?values[0]:values];}));
+   await factory(requestFetch)({method:request.method,headers:{authorization},body,query},res);
    return response??reply(502,{error:'Staging handler returned no response'});
   }catch{return reply(502,{error:'Staging request unavailable'});}
  };
