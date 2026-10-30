@@ -21,3 +21,8 @@ Capacitor v8 configuration now exists on this branch only. No production changes
 The presence of `capacitor.config.ts` and dependencies is the first preparatory milestone. There is not yet a generated Xcode project, a signed app, an IPA, or a TestFlight build.
 
 References: https://capacitorjs.com/docs/getting-started and https://capacitorjs.com/docs/ios
+
+## Native API routing (foundation added)
+- App calls to Garmin/Intervals now use `azurApiUrl()`. Browser calls remain same-origin.
+- Native builds require build-time `VITE_AZUR_API_ORIGIN=https://azur-triathlon.vercel.app` (public API origin only, never secrets).
+- CORS / native WKWebView security, endpoint reachability, and OAuth return callbacks still require physical-device verification. Do not switch production to native mode yet.
