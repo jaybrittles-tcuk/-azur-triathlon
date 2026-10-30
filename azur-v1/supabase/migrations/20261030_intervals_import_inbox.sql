@@ -68,6 +68,18 @@ begin
           and (p_distance is null or c.distance_m is null
             or abs(c.distance_m-p_distance) <= greatest(750,p_distance*.05))) )
   ) into v_duplicate;
+  -- Distinct Intervals IDs may represent the same underlying Zwift/Garmin ride.
+  -- Quarantine overlapping inbox records instead of treating either as load eligible.
+  if not v_duplicate then
+    select exists(
+      select 1 from public.intervals_import_inbox i
+      where i.athlete_id=p_athlete_id
+        and abs(extract(epoch from (i.start_time-p_start))) <= 600
+        and abs(i.duration_sec-p_duration) <= greatest(120,p_duration*.06)
+        and (p_distance is null or i.distance_m is null
+          or abs(i.distance_m-p_distance) <= greatest(750,p_distance*.05))
+    ) into v_duplicate;
+  end if;
   insert into public.intervals_import_inbox
     (athlete_id,source_activity_id,start_time,duration_sec,distance_m,avg_power_w,normalized_power_w,source_payload,status,review_reason)
   values
