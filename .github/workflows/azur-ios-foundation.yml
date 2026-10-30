@@ -1,0 +1,24 @@
+name: AZUR native foundation build
+on:
+  pull_request:
+    paths:
+      - 'azur-v1/package.json'
+      - 'azur-v1/capacitor.config.ts'
+      - 'azur-v1/docs/ios-capacitor-setup.md'
+      - '.github/workflows/azur-ios-foundation.yml'
+jobs:
+  web-and-capacitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install packages and build
+        working-directory: azur-v1
+        run: |
+          npm install --no-package-lock
+          npm run build
+      - name: Validate Capacitor config
+        working-directory: azur-v1
+        run: npx cap config
