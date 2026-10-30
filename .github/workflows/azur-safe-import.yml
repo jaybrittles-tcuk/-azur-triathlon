@@ -5,6 +5,7 @@ on:
       - 'azur-v1/src/lib/**'
       - 'azur-v1/api/intervals/**'
       - 'azur-v1/supabase/migrations/**'
+      - 'azur-v1/supabase/tests/**'
       - '.github/workflows/azur-safe-import.yml'
   workflow_dispatch:
 jobs:
@@ -56,3 +57,5 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/migrations/20261030_intervals_import_inbox.sql
       - name: Assert database staging invariants
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_atomic_test.sql
+      - name: Verify actual concurrent staging requests
+        run: bash azur-v1/supabase/tests/intervals_concurrent_test.sh
