@@ -77,8 +77,13 @@ try {
  assert.equal(await page.getByText('Synthetic Zwift ride',{exact:true}).count(),1,'Ride review must survive a parent profile refresh');
  await page.getByRole('button',{name:'Confirm ride for review',exact:true}).click();
  await page.getByRole('button',{name:'Confirm and record ride',exact:true}).click();
+ await page.getByRole('button',{name:'Confirm training-load approval',exact:true}).waitFor();
+ assert.equal(await page.getByRole('button',{name:'Confirm ride for review',exact:true}).count(),0,'Recorded ride must not offer staging again');
+ await page.getByText('Stage: Already recorded · Training-load approval pending',{exact:true}).waitFor();
  await page.getByRole('button',{name:'Confirm training-load approval',exact:true}).click();
  await page.getByText('Approved · 98 stress points',{exact:true}).waitFor();
+ await page.getByText('Stage: Already recorded · Training load approved',{exact:true}).waitFor();
+ assert.equal(await page.getByRole('button',{name:'Confirm ride for review',exact:true}).count(),0,'Approved ride must stay recorded without refreshing');
  assert.deepEqual(commands.map(c=>c.path),['/api/intervals/stage-activity','/api/intervals/accept-activity','/api/intervals/validate-load']);
  await page.getByRole('button',{name:'Weekly Review',exact:true}).click();
  await page.getByText('98',{exact:true}).first().waitFor();
@@ -103,7 +108,7 @@ try {
  await page.waitForURL(base+'/');
  assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
  assert.equal(onboardingStep,3,'Final onboarding step must be saved');
- await page.getByText('Training Tools',{exact:true}).waitFor();
+ await page.getByRole('button',{name:'Connect Intervals.icu',exact:true}).waitFor();
  assert.deepEqual(errors,[]);
  console.log('PASS: signed-in athlete without profile → automatic onboarding → saved profile → dashboard');
 } catch(error) {

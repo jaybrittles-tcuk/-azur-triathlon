@@ -1172,7 +1172,7 @@ export function App() {
   const onboardingRedirectStarted = useRef(false);
   // Keep review state stable while background profile/session loads rerender App.
   const [intervalsPreview, setIntervalsPreview] = useState<{
-    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
+    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;loadStatus?:string;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
     stagingEnabled?:boolean;
     acceptanceEnabled?:boolean;
     loadValidationEnabled?:boolean;
@@ -10296,7 +10296,12 @@ function DataSourcesView() {
   }
   async function refreshLoadReview() {
     const data = await rideRequest('validate-load');
-    setRideLoadReview(data.activities ?? []);
+    const recorded = data.activities ?? [];
+    setRideLoadReview(recorded);
+    setIntervalsPreview(previous => previous ? {...previous, activities: previous.activities?.map(activity => {
+      const saved = recorded.find((ride:any) => String(ride.source_activity_id) === String(activity.sourceId));
+      return saved ? {...activity, alreadyImported:true, status:'already_imported', reason:undefined, loadStatus:saved.processed_metrics?.load_status} : activity;
+    })} : previous);
   }
   async function confirmRideAction(key:string, path:string, body:object) {
     if (rideAction) return;
@@ -10451,7 +10456,7 @@ function DataSourcesView() {
                         {rideAction === String(activity.sourceId) ? 'Staging…' : 'Confirm ride for review'}
                       </button>
                     )}
-                    <span className="azur-intervals-review-note">Stage: {activity.alreadyImported ? 'Already recorded' : activity.possibleCrossPlatformDuplicate ? 'Duplicate review required' : activity.status === 'candidate_match' ? 'Potential workout match' : activity.status === 'ambiguous_session' ? 'Session matching requires review' : 'Not imported'} · Training load unchanged</span>
+                    <span className="azur-intervals-review-note">Stage: {activity.alreadyImported ? 'Already recorded' : activity.possibleCrossPlatformDuplicate ? 'Duplicate review required' : activity.status === 'candidate_match' ? 'Potential workout match' : activity.status === 'ambiguous_session' ? 'Session matching requires review' : 'Not imported'} · {activity.loadStatus === 'validated' ? 'Training load approved' : activity.alreadyImported ? 'Training-load approval pending' : 'Training load unchanged'}</span>
                   </article>
                 ))}
               </div>
