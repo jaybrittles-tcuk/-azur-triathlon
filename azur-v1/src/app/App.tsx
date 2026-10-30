@@ -1169,6 +1169,7 @@ function sportName(sport: Sport) {
 export function App() {
   const [authReady, setAuthReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const onboardingRedirectStarted = useRef(false);
   // Keep review state stable while background profile/session loads rerender App.
   const [intervalsPreview, setIntervalsPreview] = useState<{
     activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
@@ -1603,7 +1604,8 @@ async function loadAthleteProfile(userId: string, isCoach = false) {
     return;
   }
 
-  if (!data && !isCoach && window.location.pathname !== '/onboarding' && window.location.pathname !== '/privacy') {
+  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/privacy') {
+    onboardingRedirectStarted.current = true;
     window.location.replace('/onboarding');
     return;
   }
