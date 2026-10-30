@@ -10330,7 +10330,7 @@ function DataSourcesView() {
             </div>
             {intervalsPreview && (
               <div className="azur-intervals-preview" aria-live="polite">
-                <strong>Intervals.icu activity preview — no import performed</strong>
+                <div className="azur-intervals-review-header"><strong>Ride review · read only</strong><span>Nothing is imported or added to training load</span></div>
                 {intervalsPreview.error && <p role="alert">{intervalsPreview.error}</p>}
                 {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>No cycling activities returned for the last seven days.</p>}
                 {intervalsPreview.activities?.map(activity => (
@@ -10345,7 +10345,7 @@ function DataSourcesView() {
                         {activity.sessionCandidates.map(candidate => <small key={candidate.id}>{candidate.title || 'Planned bike workout'}</small>)}
                       </div>
                     )}
-                    <span className="azur-intervals-review-note">Review only · No completed workout or training load will be changed.</span>
+                    <span className="azur-intervals-review-note">Stage: {activity.alreadyImported ? 'Already recorded' : activity.possibleCrossPlatformDuplicate ? 'Duplicate review required' : activity.status === 'candidate_match' ? 'Potential workout match' : activity.status === 'ambiguous_session' ? 'Session matching requires review' : 'Not imported'} · Training load unchanged</span>
                   </article>
                 ))}
               </div>
