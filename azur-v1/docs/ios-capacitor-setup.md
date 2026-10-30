@@ -26,3 +26,9 @@ References: https://capacitorjs.com/docs/getting-started and https://capacitorjs
 - App calls to Garmin/Intervals now use `azurApiUrl()`. Browser calls remain same-origin.
 - Native builds require build-time `VITE_AZUR_API_ORIGIN=https://azur-triathlon.vercel.app` (public API origin only, never secrets).
 - CORS / native WKWebView security, endpoint reachability, and OAuth return callbacks still require physical-device verification. Do not switch production to native mode yet.
+
+## Provider consent (implementation staged)
+- Native Garmin/Intervals consent now opens using the Capacitor Browser plugin, with HTTPS host allowlisting. Web retains standard redirects.
+- **Not yet a complete native OAuth callback flow.** The providers still redirect to the website; users will not return into the native WebView until universal links and server callback return routing are implemented and verified.
+- Supabase email-confirmation redirect also still points at a web URL. Native signup should not be advertised as complete before that is resolved.
+- Audit Vercel endpoint CORS for Capacitor origins before testing native API calls. Never allow wildcard origins for credentialed requests.
