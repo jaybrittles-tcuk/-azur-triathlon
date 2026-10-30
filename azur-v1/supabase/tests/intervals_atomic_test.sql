@@ -17,6 +17,8 @@ BEGIN
  IF r.outcome <> 'pending_review' THEN RAISE EXCEPTION 'Distinct ride should remain pending'; END IF;
  SELECT * INTO r FROM public.stage_intervals_activity(b,'zwift-29','2026-10-29 06:49:22+00',4026,41840,214,234,'{}');
  IF r.outcome <> 'pending_review' THEN RAISE EXCEPTION 'Athlete IDs must remain separated'; END IF;
+ SELECT * INTO r FROM public.stage_intervals_activity(a,'zwift-29-alt','2026-10-29 06:50:00+00',4029,41850,214,234,'{}');
+ IF r.outcome <> 'possible_duplicate' THEN RAISE EXCEPTION 'Overlapping staged ride with different source ID must be quarantined'; END IF;
  IF (SELECT count(*) FROM public.completed_activity) <> 1 THEN RAISE EXCEPTION 'Staging changed completed activities'; END IF;
 END $$;
 DO $$
