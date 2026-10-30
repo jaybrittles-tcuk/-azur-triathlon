@@ -76,3 +76,7 @@ The standalone `AZUR Staging` project is healthy. All four migrations and the gu
 
 ## Dedicated staging application
 API tests have moved to `tests/api/intervals` to keep the Hobby deployment below its function limit. The separate staging Vercel project uses a fixed, validated proxy to the staging `import-review` Edge Function, which performs real Auth verification and keeps managed service credentials in that runtime. A server-controlled synthetic account can exercise the hosted flow without copying production credentials or claiming a live Intervals authorisation. See `supabase/staging/README.md` for scope and the hosted browser test.
+
+
+## Hosted browser verification
+The dedicated staging app is available at https://azur-staging.vercel.app. On functional commit `0efc64638ae2a39a00829697432ad52c76c59338`, the hosted browser passed real sign-in, proxy/API/database writes, one saved 98-point score, idempotent replay and Weekly Review refresh. A background Auth/profile update regression was fixed and covered by the synthetic browser suite. All 151 calculation/API tests and all CI workflows passed. The upstream provider activity was explicitly synthetic; live Intervals OAuth remains a separate release gate. See the staging README for exact deployment/source references.

@@ -40,7 +40,7 @@ Security advisor result: no error/warning findings; one intentional server-only 
 
 ## Remaining integration work
 
-A separate staging application/API deployment must use this project's URL, publishable key and server-only service credential. Import release flags must be configured only for that staging deployment. The staging web/API deployment and authenticated hosted browser test are being prepared; live Intervals authorisation remains unverified. No production release flag or production database was changed by this setup.
+The separate staging web/API deployment is now running with the staging URL and publishable key. Managed service credentials remain inside the staging Edge runtime. Live Intervals authorisation remains unverified. No production release flag or production database was changed by this setup.
 
 ## Staging web and API deployment
 
@@ -62,3 +62,16 @@ The latest Auth advisor also reports leaked-password protection disabled. See [S
 A hosted-browser run identified review state resetting during background profile/Auth updates. Review state now lives in the persistent App owner scope and is cleared when the signed-in athlete changes. A browser regression sends a token-refresh event while the review is open and checks that the ride remains visible. Responses from a previous session are discarded.
 
 When the test environment uses a managed HTTPS proxy, `AZUR_BROWSER_PROXY` (or `HTTPS_PROXY`) configures Chromium's proxy. `AZUR_BROWSER_IGNORE_HTTPS_ERRORS=true` is an explicit test-browser-only option for a private proxy CA; it defaults to false and does not alter the deployed site's TLS or protections.
+
+
+## Hosted end-to-end result
+
+- Stable staging URL: https://azur-staging.vercel.app
+- Tested deployment: `dpl_9KRgEoj48uVMWsqWCQqTQ2T1yUqD` / https://azur-staging-6ln25m3km-jay-brittles.vercel.app
+- Tested app commit: `0efc64638ae2a39a00829697432ad52c76c59338`; deployment READY, Preview target in the separate staging project.
+- Staging Edge Function: `import-review`, version 3 (shared handler source from `54366b8374f7dd94ce28ff2c1397a88217324031`).
+- Actual hosted browser result: real Auth password sign-in → Vercel proxy → Edge handlers → hosted database → approve 98 stress points → replay returns `already_validated` with `trainingLoadChanged=false` → Weekly Review shows 98.
+- Follow-up hosted database check: one synthetic Intervals activity, `load_status=validated`, saved stress 98, FTP snapshot 250. This labelled record and its isolated synthetic account are retained for staging review; the earlier rollback-only smoke test still left no records of its own.
+- All CI workflows passed on the tested functional commit: 101 calculation tests, 50 API/routing tests, builds, synthetic Chromium checks (including background Auth refresh), and real PostgreSQL safety/concurrency checks.
+- Vercel protection stayed enabled. Temporary deployment-scoped browser access was revoked after testing. The normal staging URL requires the owner's Vercel access plus a separate staging app login.
+- The Intervals response in this test is deliberately synthetic. Real Intervals OAuth client configuration, a staging callback and athlete authorisation are still required before claiming real Zwift retrieval/import is verified in staging. The focused staging schema is not a complete race/coach/product test environment.
