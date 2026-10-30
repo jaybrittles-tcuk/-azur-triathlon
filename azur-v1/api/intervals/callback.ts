@@ -8,14 +8,13 @@ export default async function handler(req:any,res:any){
  const clientId=process.env.INTERVALS_CLIENT_ID,clientSecret=process.env.INTERVALS_CLIENT_SECRET;
  if(!url||!key||!clientId||!clientSecret)return res.status(503).send('Intervals integration not configured');
  const headers={apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'};
- const query=url+'/rest/v1/intervals_oauth_state?state=eq.'+encodeURIComponent(state)+'&select=id,athlete_id,code_verifier,expires_at&limit=1';
- const stateResult=await fetch(query,{headers});
+ // Atomically consume the one-time state. Two simultaneous callbacks cannot reuse it.
+ const stateQuery=url+'/rest/v1/intervals_oauth_state?state=eq.'+encodeURIComponent(state)+'&select=athlete_id,code_verifier,expires_at';
+ const stateResult=await fetch(stateQuery,{method:'DELETE',headers:{...headers,Prefer:'return=representation'}});
  if(!stateResult.ok)return res.status(502).send('Authorisation state lookup failed');
  const record=(await stateResult.json())?.[0];
- if(!record||Date.parse(record.expires_at)<Date.now())return res.status(400).send('Authorisation expired; please reconnect from AZUR');
- // Consume the state before exchanging the token to prevent replay.
- const deleted=await fetch(url+'/rest/v1/intervals_oauth_state?id=eq.'+encodeURIComponent(record.id),{method:'DELETE',headers});
- if(!deleted.ok)return res.status(502).send('Could not consume authorisation state');
+ if(!record||!Number.isFinite(Date.parse(record.expires_at))||Date.parse(record.expires_at)<Date.now())
+   return res.status(400).send('Authorisation expired or already used; please reconnect from AZUR');
  const tokenResponse=await fetch('https://intervals.icu/api/oauth/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:clientId,client_secret:clientSecret,code,code_verifier:record.code_verifier,redirect_uri:redirectUri})});
  if(!tokenResponse.ok)return res.status(502).send('Intervals authorisation failed');
  const tokens=await tokenResponse.json();
