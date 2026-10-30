@@ -47,7 +47,7 @@ export function reviewIntervalsActivity(activity, existingActivities = [], plann
     possibleCrossPlatformDuplicate:overlaps.length > 0,
     possibleDuplicateCount:overlaps.length,
     sessionCandidates:eligiblePlanCandidates,
-    proposedPlannedSessionId:eligiblePlanCandidates.length === 1 && !exact && !overlaps.length ? eligiblePlanCandidates[0].id : null,
+    proposedPlannedSessionId:status === 'candidate_match' ? eligiblePlanCandidates[0].id : null,
     reviewRequired:true, safeToAutoImport:false,
     trainingLoadEligible:false,
     reason:status === 'already_imported' ? 'Same Intervals source ID already exists'
