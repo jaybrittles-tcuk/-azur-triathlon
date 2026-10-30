@@ -8744,8 +8744,53 @@ const sessionVerdict =
   }
 
   function PerformanceView() {
+    const ranges = [{days:28,label:'4w'},{days:84,label:'12w'},{days:180,label:'6m'},{days:365,label:'1y'}];
+    const history = trainingLoadHistory.slice(-loadRangeDays);
+    const sufficientHistory = trainingLoadHistory.length >= 42 && trainingLoad.eligibleActivities >= 8 && history.length > 1;
+    const values = history.flatMap(point=>[point.fitness,point.fatigue]);
+    const lower = Math.min(0,...values);
+    const upper = Math.max(1,...values);
+    const graphY = (value:number) => 112-(value-lower)/Math.max(1,upper-lower)*96;
+    const series = (key:'fitness'|'fatigue')=>history.map((point,index)=>`${8+index*324/Math.max(1,history.length-1)},${graphY(point[key])}`).join(' ');
+    const sports = (['swim','bike','run'] as const).map(sport=>({
+      sport,
+      minutes:weekSessions.filter(session=>session.sport===sport&&session.status==='completed'&&session.completedDurationSec!=null).reduce((total,session)=>total+Number(session.completedDurationSec)/60,0)
+    }));
+    const totalMinutes = sports.reduce((total,item)=>total+item.minutes,0);
     return (
       <>
+        <div className="azur-v2-performance">
+          <header className="azur-v2-performance-header"><span>AZUR</span><h2>Performance</h2><p>Your training, clearly understood.</p></header>
+          <div className="azur-v2-performance-ranges" role="group" aria-label="Performance date range">
+            {ranges.map(range=><button key={range.days} type="button" aria-pressed={loadRangeDays===range.days} onClick={()=>{setLoadRangeDays(range.days);setSelectedLoadDate(null)}}>{range.label}</button>)}
+          </div>
+          <section className="azur-v2-performance-card" aria-label="Fitness and fatigue">
+            <h3>Fitness &amp; Fatigue</h3>
+            <div className="azur-v2-performance-legend"><span>● Fitness</span><span>● Fatigue</span></div>
+            {sufficientHistory ? <svg viewBox="0 0 340 128" preserveAspectRatio="none" role="img" aria-label="Estimated fitness and fatigue from eligible recorded activities">
+              {[20,65,110].map(y=><line key={y} x1="8" x2="332" y1={y} y2={y} stroke="#2a3c53" strokeDasharray="3 5"/>)}
+              <polyline fill="none" stroke="#329dff" strokeWidth="3" strokeLinejoin="round" points={series('fitness')}/>
+              <polyline fill="none" stroke="#f3bd43" strokeWidth="3" strokeLinejoin="round" points={series('fatigue')}/>
+            </svg> : <div className="azur-v2-performance-empty">Trends will appear after at least 42 days of history and eight eligible recorded activities.</div>}
+            <small>Estimated training-load indicators, not a medical readiness score. Unverified manual efforts are not assumed to be device-measured stress.</small>
+          </section>
+          <section className="azur-v2-performance-card">
+            <h3>Training Volume</h3>
+            <p className="azur-v2-performance-subtitle">Completed duration · currently loaded calendar week</p>
+            <div className="azur-v2-performance-volume"><strong>{Math.round(totalMinutes)} <small>min</small></strong><span>Recorded this week</span></div>
+            <div className="azur-v2-performance-bars">
+              {sports.map(item=><div key={item.sport}><span>{item.sport}</span><div><i style={{width:totalMinutes>0?`${item.minutes/totalMinutes*100}%`:'0%'}} /></div><strong>{Math.round(item.minutes)}m</strong></div>)}
+            </div>
+          </section>
+          <section className="azur-v2-performance-card">
+            <h3>Discipline Breakdown</h3>
+            <p className="azur-v2-performance-subtitle">Recorded completed duration in the loaded week</p>
+            <div className="azur-v2-discipline-breakdown">
+              <div className="azur-v2-discipline-ring" style={{background:totalMinutes>0?`conic-gradient(#28b7e8 0% ${sports[0].minutes/totalMinutes*100}%,#f0bb42 ${sports[0].minutes/totalMinutes*100}% ${(sports[0].minutes+sports[1].minutes)/totalMinutes*100}%,#f28e61 ${(sports[0].minutes+sports[1].minutes)/totalMinutes*100}% 100%)`:undefined}}><span><strong>{Math.round(totalMinutes)}</strong> min</span></div>
+              <div className="azur-v2-discipline-list">{sports.map(item=><div key={item.sport} className={`azur-v2-discipline-${item.sport}`}><span>{item.sport}</span><strong>{totalMinutes>0?Math.round(item.minutes/totalMinutes*100):0}%</strong></div>)}</div>
+            </div>
+          </section>
+        </div>
         <section className="hero-grid">
           <Metric
   label="FITNESS · CTL"
