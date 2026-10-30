@@ -1302,6 +1302,8 @@ const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
 const [trainingLoadHistory, setTrainingLoadHistory] = useState<ReturnType<typeof calculateTrainingLoad>>([]);
 const [loadRangeDays, setLoadRangeDays] = useState<42 | 90 | 180>(42);
 const [selectedLoadDate, setSelectedLoadDate] = useState<string | null>(null);
+const [performanceRangeDays, setPerformanceRangeDays] = useState<28 | 84 | 180 | 365>(84);
+const [performanceWeekKey, setPerformanceWeekKey] = useState<string | null>(null);
   const [completedActivityFeed, setCompletedActivityFeed] = useState<any[]>([]);
 useEffect(() => {
   if (trainingLoadActivities.length === 0) {
@@ -8744,167 +8746,46 @@ const sessionVerdict =
   }
 
   function PerformanceView() {
-    const ranges = [{days:28,label:'4w'},{days:84,label:'12w'},{days:180,label:'6m'},{days:365,label:'1y'}];
-    const history = trainingLoadHistory.slice(-loadRangeDays);
-    const sufficientHistory = trainingLoadHistory.length >= 42 && trainingLoad.eligibleActivities >= 8 && history.length > 1;
-    const values = history.flatMap(point=>[point.fitness,point.fatigue]);
-    const lower = Math.min(0,...values);
-    const upper = Math.max(1,...values);
-    const graphY = (value:number) => 112-(value-lower)/Math.max(1,upper-lower)*96;
-    const series = (key:'fitness'|'fatigue')=>history.map((point,index)=>`${8+index*324/Math.max(1,history.length-1)},${graphY(point[key])}`).join(' ');
-    const sports = (['swim','bike','run'] as const).map(sport=>({
-      sport,
-      minutes:weekSessions.filter(session=>session.sport===sport&&session.status==='completed'&&session.completedDurationSec!=null).reduce((total,session)=>total+Number(session.completedDurationSec)/60,0)
-    }));
-    const totalMinutes = sports.reduce((total,item)=>total+item.minutes,0);
-    return (
-      <>
-        <div className="azur-v2-performance">
-          <header className="azur-v2-performance-header"><span>AZUR</span><h2>Performance</h2><p>Your training, clearly understood.</p></header>
-          <div className="azur-v2-performance-ranges" role="group" aria-label="Performance date range">
-            {ranges.map(range=><button key={range.days} type="button" aria-pressed={loadRangeDays===range.days} onClick={()=>{setLoadRangeDays(range.days);setSelectedLoadDate(null)}}>{range.label}</button>)}
-          </div>
-          <section className="azur-v2-performance-card" aria-label="Fitness and fatigue">
-            <h3>Fitness &amp; Fatigue</h3>
-            <div className="azur-v2-performance-legend"><span>● Fitness</span><span>● Fatigue</span></div>
-            {sufficientHistory ? <svg viewBox="0 0 340 128" preserveAspectRatio="none" role="img" aria-label="Estimated fitness and fatigue from eligible recorded activities">
-              {[20,65,110].map(y=><line key={y} x1="8" x2="332" y1={y} y2={y} stroke="#2a3c53" strokeDasharray="3 5"/>)}
-              <polyline fill="none" stroke="#329dff" strokeWidth="3" strokeLinejoin="round" points={series('fitness')}/>
-              <polyline fill="none" stroke="#f3bd43" strokeWidth="3" strokeLinejoin="round" points={series('fatigue')}/>
-            </svg> : <div className="azur-v2-performance-empty">Trends will appear after at least 42 days of history and eight eligible recorded activities.</div>}
-            <small>Estimated training-load indicators, not a medical readiness score. Unverified manual efforts are not assumed to be device-measured stress.</small>
-          </section>
-          <section className="azur-v2-performance-card">
-            <h3>Training Volume</h3>
-            <p className="azur-v2-performance-subtitle">Completed duration · currently loaded calendar week</p>
-            <div className="azur-v2-performance-volume"><strong>{Math.round(totalMinutes)} <small>min</small></strong><span>Recorded this week</span></div>
-            <div className="azur-v2-performance-bars">
-              {sports.map(item=><div key={item.sport}><span>{item.sport}</span><div><i style={{width:totalMinutes>0?`${item.minutes/totalMinutes*100}%`:'0%'}} /></div><strong>{Math.round(item.minutes)}m</strong></div>)}
-            </div>
-          </section>
-          <section className="azur-v2-performance-card">
-            <h3>Discipline Breakdown</h3>
-            <p className="azur-v2-performance-subtitle">Recorded completed duration in the loaded week</p>
-            <div className="azur-v2-discipline-breakdown">
-              <div className="azur-v2-discipline-ring" style={{background:totalMinutes>0?`conic-gradient(#28b7e8 0% ${sports[0].minutes/totalMinutes*100}%,#f0bb42 ${sports[0].minutes/totalMinutes*100}% ${(sports[0].minutes+sports[1].minutes)/totalMinutes*100}%,#f28e61 ${(sports[0].minutes+sports[1].minutes)/totalMinutes*100}% 100%)`:undefined}}><span><strong>{Math.round(totalMinutes)}</strong> min</span></div>
-              <div className="azur-v2-discipline-list">{sports.map(item=><div key={item.sport} className={`azur-v2-discipline-${item.sport}`}><span>{item.sport}</span><strong>{totalMinutes>0?Math.round(item.minutes/totalMinutes*100):0}%</strong></div>)}</div>
-            </div>
-          </section>
-        </div>
-        <section className="hero-grid">
-          <Metric
-  label="FITNESS · CTL"
-  value={
-    trainingLoad.fitness != null
-      ? String(trainingLoad.fitness)
-      : '—'
-  }
-  hint={
-    trainingLoad.fitness != null
-      ? 'Long-term training load'
-      : 'Building history'
-  }
-/>
-
-<Metric
-  label="FATIGUE · ATL"
-  value={
-    trainingLoad.fatigue != null
-      ? String(trainingLoad.fatigue)
-      : '—'
-  }
-  hint={
-    trainingLoad.fatigue != null
-      ? 'Short-term training load'
-      : 'Building history'
-  }
-/>
-
-<Metric
-  label="FORM · TSB"
-  value={
-    trainingLoad.form != null
-      ? String(trainingLoad.form)
-      : '—'
-  }
-  hint={
-    trainingLoad.form != null
-      ? 'Fitness minus fatigue'
-      : 'Building history'
-  }
-/>
-
-<Metric
-  label="WEEKLY LOAD"
-  value={
-    trainingLoad.weeklyStress != null
-      ? String(trainingLoad.weeklyStress)
-      : '—'
-  }
-  hint={`${trainingLoad.eligibleActivities} eligible activities`}
-/>
-</section> 
-        <div className="two-column">
-          <section className="panel">
-            <span className="eyebrow">
-              DISCIPLINE READINESS
-            </span>
-
-            <h3>Current long-course profile</h3>
-
-            <div className="progress-list">
-<ProgressRow
-  label="Bike"
-  value={null}
-  text="Building history"
-/>
-
-<ProgressRow
-  label="Run"
-  value={null}
-  text="Building history"
-/>
-
-<ProgressRow
-  label="Swim"
-  value={null}
-  text="Building history"
-/>
-            </div>
-          </section>
-
-          <section className="panel">
-            <span className="eyebrow">
-              INTENSITY DISTRIBUTION
-            </span>
-
-            <h3>Planned this week</h3>
-
-<div className="distribution-grid">
-  <div>
-    <strong>—</strong>
-    <span>Easy / endurance</span>
-  </div>
-
-  <div>
-    <strong>—</strong>
-    <span>Threshold / quality</span>
-  </div>
-
-  <div>
-    <strong>—</strong>
-    <span>Race specific</span>
-  </div>
-</div>
-
-<p className="panel-note">
-  Azur will calculate your intensity distribution from your planned
-  and completed sessions once enough training data is available.
-</p>
-          </section>
-        </div>
-      </>
-    );
+    const ranges = [{days:28,label:'4w'},{days:84,label:'12w'},{days:180,label:'6m'},{days:365,label:'1y'}] as const;
+    const today = new Date(); const startDate = new Date(today.getTime()-(performanceRangeDays-1)*86400000);
+    const weekStart = (date:Date) => {const d=new Date(date);d.setHours(12,0,0,0);d.setDate(d.getDate()-(d.getDay()+6)%7);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');};
+    const weeks = new Map<string,{key:string;swim:number;bike:number;run:number;distanceKm:number;manual:number;device:number;count:number}>();
+    // Use each completed activity once; the activity feed is the canonical persisted source,
+    // not planned session totals or device stress estimates.
+    completedActivityFeed.forEach((activity:any)=>{
+      if (!activity?.start_time || !Number.isFinite(Number(activity.duration_sec)) || Number(activity.duration_sec)<=0) return;
+      const date=new Date(activity.start_time);if(Number.isNaN(date.getTime())||date<startDate||date>today)return;
+      const key=weekStart(date);const sport=activity.sport as 'swim'|'bike'|'run';
+      if(!['swim','bike','run'].includes(sport))return;
+      const row=weeks.get(key)??{key,swim:0,bike:0,run:0,distanceKm:0,manual:0,device:0,count:0};
+      row[sport]+=Number(activity.duration_sec)/60;row.distanceKm+=Math.max(0,Number(activity.distance_m)||0)/1000;
+      if(activity.source==='manual')row.manual++;else row.device++;
+      row.count++;weeks.set(key,row);
+    });
+    const historicalWeeks=Array.from(weeks.values()).sort((a,b)=>a.key.localeCompare(b.key));
+    const selectedWeek=historicalWeeks.find(w=>w.key===performanceWeekKey)??historicalWeeks[historicalWeeks.length-1]??null;
+    const sports=(['swim','bike','run'] as const).map(sport=>({sport,minutes:selectedWeek?.[sport]??0}));
+    const totalMinutes=sports.reduce((sum,item)=>sum+item.minutes,0);
+    const maxWeek=Math.max(1,...historicalWeeks.map(w=>w.swim+w.bike+w.run));
+    const loadHistory=trainingLoadHistory.slice(-performanceRangeDays);
+    const sufficientHistory=trainingLoadHistory.length>=42&&trainingLoad.eligibleActivities>=8&&loadHistory.length>1;
+    const values=loadHistory.flatMap(p=>[p.fitness,p.fatigue]);const lower=Math.min(0,...values),upper=Math.max(1,...values);
+    const graphY=(v:number)=>112-(v-lower)/Math.max(1,upper-lower)*96;
+    const series=(key:'fitness'|'fatigue')=>loadHistory.map((p,i)=>`${8+i*324/Math.max(1,loadHistory.length-1)},${graphY(p[key])}`).join(' ');
+    const formatWeek=(key:string)=>new Date(key+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    return <div className="azur-v2-performance">
+      <header className="azur-v2-performance-header"><span>AZUR</span><h2>Performance</h2><p>Your training, clearly understood.</p></header>
+      <div className="azur-v2-performance-ranges" role="group" aria-label="Performance date range">{ranges.map(r=><button type="button" key={r.days} aria-pressed={performanceRangeDays===r.days} onClick={()=>{setPerformanceRangeDays(r.days);setPerformanceWeekKey(null);}}>{r.label}</button>)}</div>
+      <section className="azur-v2-performance-card" aria-label="Fitness and fatigue"><h3>Fitness &amp; Fatigue</h3><div className="azur-v2-performance-legend"><span>● Fitness</span><span>● Fatigue</span></div>
+      {sufficientHistory?<svg viewBox="0 0 340 128" preserveAspectRatio="none" role="img" aria-label="Estimated fitness and fatigue from eligible recorded activities">{[20,65,110].map(y=><line key={y} x1="8" x2="332" y1={y} y2={y} stroke="#2a3c53" strokeDasharray="3 5"/>)}<polyline fill="none" stroke="#329dff" strokeWidth="3" strokeLinejoin="round" points={series('fitness')}/><polyline fill="none" stroke="#f3bd43" strokeWidth="3" strokeLinejoin="round" points={series('fatigue')}/></svg>:<div className="azur-v2-performance-empty">Trends need 42 days of history and eight eligible activities with calculated stress.</div>}
+      <small>Estimated training-load indicators, not verified physiological fitness or medical readiness.</small></section>
+      <section className="azur-v2-performance-card"><h3>Training Volume</h3><p className="azur-v2-performance-subtitle">Completed activity duration by week · {performanceRangeDays} days</p>
+      {historicalWeeks.length?<div className="azur-v2-weekly-chart" role="group" aria-label="Select a completed training week">{historicalWeeks.map(week=><button type="button" key={week.key} aria-pressed={selectedWeek?.key===week.key} onClick={()=>setPerformanceWeekKey(week.key)} aria-label={`Week of ${formatWeek(week.key)}: ${Math.round(week.swim+week.bike+week.run)} minutes`}><span style={{height:`${Math.max(4,(week.swim+week.bike+week.run)/maxWeek*100)}%`}}/><small>{formatWeek(week.key)}</small></button>)}</div>:<div className="azur-v2-performance-empty">No recorded completed activities in this period.</div>}
+      {selectedWeek&&<><div className="azur-v2-performance-volume"><strong>{Math.round(totalMinutes)} <small>min</small></strong><span>Week of {formatWeek(selectedWeek.key)}</span></div><div className="azur-v2-performance-bars">{sports.map(item=><div key={item.sport}><span>{item.sport}</span><div><i style={{width:totalMinutes>0?`${item.minutes/totalMinutes*100}%`:'0%'}}/></div><strong>{Math.round(item.minutes)}m</strong></div>)}</div><p className="azur-v2-performance-subtitle">{selectedWeek.distanceKm.toFixed(1)} km reported/recorded distance · {selectedWeek.count} activities</p></>}
+      </section>
+      <section className="azur-v2-performance-card"><h3>Discipline Breakdown</h3><p className="azur-v2-performance-subtitle">{selectedWeek?`Week of ${formatWeek(selectedWeek.key)}`:'Select a recorded training week'}</p><div className="azur-v2-discipline-breakdown"><div className="azur-v2-discipline-ring" style={{background:totalMinutes>0?`conic-gradient(#28b7e8 0% ${sports[0].minutes/totalMinutes*100}%,#f0bb42 ${sports[0].minutes/totalMinutes*100}% ${(sports[0].minutes+sports[1].minutes)/totalMinutes*100}%,#f28e61 ${(sports[0].minutes+sports[1].minutes)/totalMinutes*100}% 100%)`:undefined}}><span><strong>{Math.round(totalMinutes)}</strong> min</span></div><div className="azur-v2-discipline-list">{sports.map(item=><div className={`azur-v2-discipline-${item.sport}`} key={item.sport}><span>{item.sport}</span><strong>{totalMinutes?Math.round(item.minutes/totalMinutes*100):0}%</strong></div>)}</div></div>
+      {selectedWeek&&<p className="azur-v2-evidence-note">Evidence: {selectedWeek.device} device/imported and {selectedWeek.manual} athlete-reported activities. Duration is a recorded observation, not verification of intensity or training stress.</p>}</section>
+    </div>;
   }
 
   function RecoveryView() {
