@@ -5,6 +5,7 @@ on:
       - 'azur-v1/src/lib/**'
       - 'azur-v1/api/intervals/**'
       - 'azur-v1/src/app/App.tsx'
+      - 'azur-v1/src/lib/calculations/trainingLoad.ts'
       - 'azur-v1/supabase/migrations/**'
       - 'azur-v1/supabase/tests/**'
       - '.github/workflows/azur-safe-import.yml'
