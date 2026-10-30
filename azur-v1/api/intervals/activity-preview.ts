@@ -40,5 +40,5 @@ export default async function handler(req:any,res:any){
    return {alreadyImported:exact,possibleCrossPlatformDuplicate:overlap,reviewRequired:exact||overlap||!Number.isFinite(started)||elapsed<=0};
  };
  res.setHeader('Cache-Control','private, no-store');
- return res.status(200).json({mode:'preview_only',dateRange:{oldest,newest},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.average_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
+ return res.status(200).json({mode:'preview_only',dateRange:{oldest,newest},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
 }
