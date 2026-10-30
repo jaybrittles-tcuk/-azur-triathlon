@@ -25,7 +25,18 @@ export default async function handler(req:any,res:any){
  if(!upstream.ok)return res.status(502).json({error:'Intervals.icu activity read failed',upstreamStatus:upstream.status});
  const entries=await upstream.json();
  if(!Array.isArray(entries))return res.status(502).json({error:'Unexpected upstream response'});
- const rides=entries.filter((a:any)=>['Ride','VirtualRide','IndoorRide','VirtualCycling'].includes(String(a.type)));
+ const rides=entries.filter((a:any)=>['ride','virtualride','indoorride','virtualcycling'].includes(String(a.type??'').toLowerCase().replace(/[^a-z]/g,'')));
+ // Read-only review of existing activities; never change completion status here.
+ const existingResponse=await fetch(url+'/rest/v1/completed_activity?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&start_time=gte.'+encodeURIComponent(oldest+'T00:00:00Z')+'&select=source,source_activity_id,sport,start_time,duration_sec&limit=500',{headers});
+ if(!existingResponse.ok)return res.status(502).json({error:'Could not perform duplicate review'});
+ const existing=await existingResponse.json();
+ const assess=(a:any)=>{
+   const started=Date.parse(a.start_date??a.start_date_local??'');
+   const elapsed=Number(a.elapsed_time??a.moving_time??0);
+   const exact=existing.some((e:any)=>e.source==='intervals'&&String(e.source_activity_id)===String(a.id));
+   const overlap=existing.some((e:any)=>e.sport==='bike'&&Number.isFinite(started)&&Math.abs(Date.parse(e.start_time)-started)<15*60*1000&&Math.abs(Number(e.duration_sec)-elapsed)<10*60);
+   return {alreadyImported:exact,possibleCrossPlatformDuplicate:overlap,reviewRequired:exact||overlap||!Number.isFinite(started)||elapsed<=0};
+ };
  res.setHeader('Cache-Control','private, no-store');
- return res.status(200).json({mode:'preview_only',dateRange:{oldest,newest},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.average_watts??null,origin:a.source??null})),count:rides.length});
+ return res.status(200).json({mode:'preview_only',dateRange:{oldest,newest},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.average_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
 }
