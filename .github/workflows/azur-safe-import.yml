@@ -25,3 +25,34 @@ jobs:
         run: |
           npm install --no-package-lock
           npm run build
+
+  database-safety:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: azur_import_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d azur_import_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: azur_import_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create synthetic athlete tables
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_fixture.sql
+      - name: Apply migration to disposable database
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/migrations/20261030_intervals_import_inbox.sql
+      - name: Assert database staging invariants
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_atomic_test.sql
