@@ -1690,6 +1690,7 @@ const eligibleTrainingLoadActivities = (completedActivities ?? []).filter(
     isTrainingLoadEligible({
       source: activity.source,
       isTest: activity.processed_metrics?.is_test === true,
+      loadStatus: activity.processed_metrics?.load_status,
     }),
 );
 
