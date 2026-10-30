@@ -5740,3 +5740,22 @@ strong {
 .azur-v2-weekly-chart button>small{font-size:9px;white-space:nowrap;line-height:1.5}
 .azur-v2-weekly-chart button:focus-visible{outline:2px solid #75c8ff;outline-offset:2px;border-radius:5px}
 .azur-v2-evidence-note{font-size:12px;line-height:1.6;color:#a8bfd6;border-top:1px solid #2d3f55;padding-top:12px;margin-top:15px}
+
+
+/* Athlete Dashboard V2: tight mobile hierarchy, midnight palette */
+.mobile-home-hero .race-hero-card{border-radius:18px!important;box-shadow:0 15px 36px rgba(0,6,18,.38)!important}
+.azur-athlete-today-summary,.azur-athlete-week-progress{border-radius:14px!important;background:#122238!important;border:1px solid #2a3c54!important;box-shadow:none!important}
+.azur-athlete-today-summary{gap:12px!important}
+.azur-athlete-today-summary button{background:#203b59!important;border:1px solid #3b6c97!important;border-radius:9px!important;color:#eaf4ff!important}
+.azur-premium-home .azur-home-sports{gap:9px!important}
+.azur-premium-home .azur-home-sport{border:1px solid #293c54!important;background:#14243a!important;border-radius:13px!important;box-shadow:none!important}
+.azur-premium-home .azur-home-sport strong{color:#f5f9ff!important}
+.azur-premium-home .azur-home-load{background:#142238!important;border:1px solid #263b52!important;border-radius:15px!important;box-shadow:none!important}
+@media(max-width:600px){
+ .mobile-home-hero .race-hero-card{min-height:195px!important;padding:18px!important}
+ .azur-athlete-today-summary{padding:13px 14px!important}
+ .azur-athlete-week-progress{padding:13px 14px!important}
+ .azur-premium-home .azur-home-sports{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ .azur-premium-home .azur-home-sport{padding:12px 9px!important;min-width:0!important}
+ .azur-premium-home .azur-home-sport strong{font-size:20px!important}
+}
