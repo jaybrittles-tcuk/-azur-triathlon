@@ -33,7 +33,7 @@ export default async function handler(req:any,res:any){
   const activity=activities.find((a:any)=>String(a.id)===sourceId);
   if(!activity)return res.status(404).json({error:'Activity not found in authorised Intervals account'});
   const rawDate=String(activity.start_date_local??activity.start_date??'').slice(0,10);
-  if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(rawDate))return res.status(422).json({error:'Invalid activity date'});
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(rawDate))return res.status(422).json({error:'Invalid activity date'});
   const existing=await lookup('completed_activity?athlete_id=eq.'+athlete.id+'&start_time=gte.'+encodeURIComponent(rawDate+'T00:00:00Z')+'&select=source,source_activity_id,sport,start_time,duration_sec,distance_m&limit=500');
   const planned=await lookup('planned_session?athlete_id=eq.'+athlete.id+'&planned_date=eq.'+rawDate+'&select=id,sport,title,planned_date,duration_min,status,is_active_version&limit=100');
   const review=reviewIntervalsActivity(activity,existing,planned);
