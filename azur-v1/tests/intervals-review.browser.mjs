@@ -16,6 +16,8 @@ const stageId='00000000-0000-4000-8000-000000000099';
 const activityId='00000000-0000-4000-8000-000000000098';
 let staged=false,accepted=false,validated=false;
 let profileFtp=250;
+let missingProfile=false;
+let onboardingStep=0;
 const commands=[];
 const errors=[];
 const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
@@ -31,7 +33,11 @@ await context.route('https://example.supabase.co/**',async route=>{
  if(url.pathname.startsWith('/auth/v1/')) data=user;
  else if(url.pathname.endsWith('/athlete_profile')) {
   const profile={id:athlete,user_id:user.id,display_name:'Synthetic Athlete',ftp_w:profileFtp};
-  data=single?profile:[profile];
+  if(req.method()==='POST')missingProfile=false;
+  data=missingProfile?(single?null:[]):(single?profile:[profile]);
+ } else if(url.pathname.endsWith('/athlete_onboarding')) {
+  if(req.method()==='POST')onboardingStep=req.postDataJSON().onboarding_step;
+  data=single?null:[];
  } else if(url.pathname.endsWith('/completed_activity')) data=accepted?[recorded()]:[];
  const emptySingle=single&&data===null;
  await route.fulfill({status:emptySingle?406:200,contentType:'application/json',body:JSON.stringify(emptySingle?{code:'PGRST116',details:'The result contains 0 rows',message:'Cannot coerce the result to a single JSON object'}:data)});
@@ -86,6 +92,20 @@ try {
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  assert.deepEqual(errors,[]);
  console.log('PASS: standalone mobile onboarding, no sidebar or horizontal overflow');
+ missingProfile=true;
+ await page.goto(base);
+ await page.waitForURL('**/onboarding');
+ await page.getByLabel('Your name',{exact:true}).fill('New Athlete');
+ await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByRole('heading',{name:'Your training availability',exact:true}).waitFor();
+ await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByRole('button',{name:'Review setup',exact:true}).click();
+ await page.waitForURL(base+'/');
+ assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
+ assert.equal(onboardingStep,3,'Final onboarding step must be saved');
+ await page.getByRole('button',{name:'Data Sources',exact:true}).waitFor();
+ assert.deepEqual(errors,[]);
+ console.log('PASS: signed-in athlete without profile → automatic onboarding → saved profile → dashboard');
 } catch(error) {
  console.error('Browser page errors:',errors);
  console.error('Visible page:',(await page.locator('body').innerText()).slice(0,2500));

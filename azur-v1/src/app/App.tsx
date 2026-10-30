@@ -1589,17 +1589,22 @@ async function connectIntervals() {
     window.alert(error instanceof Error ? error.message : 'Intervals.icu connection failed');
   }
 }
-async function loadAthleteProfile(userId: string) {
+async function loadAthleteProfile(userId: string, isCoach = false) {
   const { data, error } = await supabase
     .from('athlete_profile')
 .select(
   'display_name, avatar_url, ftp_w, run_threshold_sec_per_km, swim_threshold_sec_per_100m, weight_kg, target_weight_kg'
 )
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Unable to load athlete profile:', error);
+    return;
+  }
+
+  if (!data && !isCoach && window.location.pathname !== '/onboarding' && window.location.pathname !== '/privacy') {
+    window.location.replace('/onboarding');
     return;
   }
 
@@ -1881,7 +1886,7 @@ useEffect(() => {
     setIsAuthenticated(!!data.session);
 
 if (data.session?.user) {
-  loadAthleteProfile(data.session.user.id);
+  loadAthleteProfile(data.session.user.id, data.session.user.app_metadata?.role === 'coach');
   loadPrimaryRace(data.session.user.id);
   loadPlannedSessions(data.session.user.id);
 }
@@ -1896,7 +1901,7 @@ if (data.session?.user) {
     setIsAuthenticated(!!session);
 
 if (session?.user) {
-  loadAthleteProfile(session.user.id);
+  loadAthleteProfile(session.user.id, session.user.app_metadata?.role === 'coach');
   loadPrimaryRace(session.user.id);
   loadPlannedSessions(session.user.id);
 }
