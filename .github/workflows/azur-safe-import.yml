@@ -24,9 +24,12 @@ jobs:
           node-version: '24'
       - name: Run import safety checks
         run: npm test
-      - name: Test authenticated acceptance handler
-        run: node --test api/intervals/accept-activity.test.mjs
+      - name: Test authenticated acceptance and load handlers
+        run: node --test api/intervals/*.test.mjs
       - name: Build app
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_local_verification
         run: |
           npm install --no-package-lock
           npm run build
@@ -61,9 +64,13 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/migrations/20261030_intervals_import_inbox.sql
       - name: Install reviewed-acceptance transaction
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/migrations/20261030_intervals_accept_reviewed.sql
+      - name: Install training-load approval
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/migrations/20261030141058_intervals_validate_load.sql
       - name: Assert database staging invariants
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_atomic_test.sql
       - name: Verify reviewed acceptance safety
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_accept_reviewed_test.sql
+      - name: Verify training-load approval
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_validate_load_test.sql
       - name: Verify actual concurrent staging requests
         run: bash azur-v1/supabase/tests/intervals_concurrent_test.sh

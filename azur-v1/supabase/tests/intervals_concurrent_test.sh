@@ -34,3 +34,18 @@ expected="$(printf 'already_imported\nimported_pending_load_review')"
 actual="$(psql -v ON_ERROR_STOP=1 -Atqc "select count(*) from public.completed_activity where athlete_id='$athlete' and source='intervals' and source_activity_id='concurrent-ride' and processed_metrics->>'load_status'='pending_validation' and planned_session_id is null")"
 [[ "$actual" == "1" ]] || { echo "Expected one quarantined accepted record, got $actual" >&2; exit 1; }
 echo 'PASS: concurrent acceptance produced one quarantined completed activity.'
+# Load approval must update that same row once under the same athlete lock.
+activity_id="$(psql -v ON_ERROR_STOP=1 -Atqc "select id from public.completed_activity where athlete_id='$athlete' and source='intervals' and source_activity_id='concurrent-ride'")"
+load_sql="select outcome from public.validate_intervals_training_load('$athlete','$activity_id',true)"
+psql -v ON_ERROR_STOP=1 -Atqc "$load_sql" > /tmp/azur_load_one.txt &
+p1=$!
+psql -v ON_ERROR_STOP=1 -Atqc "$load_sql" > /tmp/azur_load_two.txt &
+p2=$!
+wait "$p1"
+wait "$p2"
+combined="$(cat /tmp/azur_load_one.txt /tmp/azur_load_two.txt | sort)"
+expected="$(printf 'already_validated\nvalidated')"
+[[ "$combined" == "$expected" ]] || { echo "Unexpected load-validation outcomes: $combined" >&2; exit 1; }
+actual="$(psql -v ON_ERROR_STOP=1 -Atqc "select count(*) from public.completed_activity where athlete_id='$athlete' and source='intervals' and source_activity_id='concurrent-ride' and processed_metrics->>'load_status'='validated' and planned_session_id is null")"
+[[ "$actual" == "1" ]] || { echo "Expected one validated activity, got $actual" >&2; exit 1; }
+echo 'PASS: concurrent load approval retained one activity and one saved stress score.'

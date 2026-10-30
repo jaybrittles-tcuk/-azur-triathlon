@@ -29,7 +29,7 @@ begin
  insert into public.completed_activity
  (athlete_id,planned_session_id,sport,source,source_activity_id,start_time,duration_sec,distance_m,raw_payload,processed_metrics,duplicate_group_key)
  values (p_athlete_id,null,'bike','intervals',v.source_activity_id,v.start_time,v.duration_sec,v.distance_m,
- v.source_payload,jsonb_build_object('average_watts',v.avg_power_w,'normalized_watts',v.normalized_power_w,
+ v.source_payload,jsonb_build_object('average_watts',v.avg_power_w,'normalized_watts',v.normalized_power_w,'normalized_power',v.normalized_power_w,
  'load_status','pending_validation'),'intervals:'||v.source_activity_id)
  returning id into inserted_id;
  -- Crucially does NOT set workout completed or award calculated stress.

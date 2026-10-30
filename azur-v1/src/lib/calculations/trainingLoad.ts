@@ -140,3 +140,18 @@ export function calculateSwimTrainingStress(args: {
     intensityFactor,
   };
 }
+
+// Reviewed Intervals rides use a saved score and FTP snapshot, never today's FTP.
+export function getValidatedIntervalsTrainingStress(activity: {
+  source?: string;
+  processed_metrics?: Record<string, unknown> | null;
+}) {
+  const metrics = activity.processed_metrics;
+  if (activity.source !== 'intervals' || metrics?.load_status !== 'validated' ||
+      metrics.load_validation_version !== 1 || metrics.is_test === true || metrics.test_fixture === true) return null;
+  const stress = metrics.training_stress;
+  const intensityFactor = metrics.intensity_factor;
+  if (typeof stress !== 'number' || !Number.isFinite(stress) || stress < 0 ||
+      typeof intensityFactor !== 'number' || !Number.isFinite(intensityFactor) || intensityFactor <= 0) return null;
+  return {stress, intensityFactor};
+}

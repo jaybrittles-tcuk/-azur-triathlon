@@ -5,7 +5,7 @@ create role anon nologin;
 create role service_role nologin bypassrls;
 create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
 create schema if not exists public;
-create table public.athlete_profile(id uuid primary key, user_id uuid not null);
+create table public.athlete_profile(id uuid primary key, user_id uuid not null, ftp_w numeric);
 create type public.sport_type as enum ('swim','bike','run');
 create table public.completed_activity(
  id uuid primary key default gen_random_uuid(),
