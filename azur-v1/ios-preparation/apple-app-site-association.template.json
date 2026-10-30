@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TEAM_ID_PLACEHOLDER.com.azurtriathlon.training"],
+        "components": [
+          { "/": "/", "?": { "garmin": "connected" }, "comment": "Garmin result only" },
+          { "/": "/", "?": { "intervals": "connected" }, "comment": "Intervals result only" },
+          { "/": "/onboarding", "comment": "Onboarding route" }
+        ]
+      }
+    ]
+  }
+}
