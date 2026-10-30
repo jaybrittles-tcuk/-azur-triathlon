@@ -40,4 +40,20 @@ Security advisor result: no error/warning findings; one intentional server-only 
 
 ## Remaining integration work
 
-A separate staging application/API deployment must use this project's URL, publishable key and server-only service credential. Import release flags must be configured only for that staging deployment. No staging app URL, authenticated browser-to-server flow or live Intervals authorisation has been verified yet. No production release flag or production database was changed by this setup.
+A separate staging application/API deployment must use this project's URL, publishable key and server-only service credential. Import release flags must be configured only for that staging deployment. The staging web/API deployment and authenticated hosted browser test are being prepared; live Intervals authorisation remains unverified. No production release flag or production database was changed by this setup.
+
+## Staging web and API deployment
+
+The dedicated Vercel project is `azur-staging` (`prj_gJNvJq96Ijn1ijVxcj1j1ftIItBI`) in the existing Jay Brittles team. It uses Node 24, the staging Supabase URL/publishable key, a visible staging banner and a narrowly validated `AZUR_STAGING_BACKEND_URL`. The live project receives no environment-variable changes.
+
+The `import-review` Supabase Edge Function wraps the same preview, staging, acceptance and load handlers as the app. Its server credentials come from the staging runtime. Gateway JWT verification is disabled because the router performs real Auth `/user` validation for every data route; the selected handlers also verify the user. Only a non-sensitive `/health` response is public. Unknown routes and mismatched project URLs fail closed.
+
+Preview/staging handlers accept a request-scoped fetch dependency. A fixture Intervals response is supplied only for a real authenticated account with the server-controlled `app_metadata.azur_staging_test=true` flag. User metadata and request data cannot enable this mode. The ride is explicitly named **AZUR STAGING — synthetic Zwift ride**. All Auth, profile, inbox, accepted-activity and load writes still use the hosted staging services. This does not verify live Intervals OAuth or retrieve real athlete rides.
+
+One isolated synthetic staging Auth account has been provisioned for the hosted browser test, with a random private password and a placeholder integration record containing no provider credential. No invitation or verification emails were sent. Credentials and sessions are stored outside the repository and must never be committed.
+
+API unit tests live under `tests/api/intervals`, outside Vercel's deployable `/api` directory. The earlier location caused test files to count as serverless functions and exceeded the Hobby plan's 12-function limit. The app now has 10 deployable API files. CI rejects API test files under `/api`.
+
+`tests/staging-live.browser.mjs` exercises the hosted sign-in → web proxy → Edge handlers → database → saved score and replay → Weekly Review flow. Set `AZUR_TEST_URL`, `AZUR_STAGING_AUTH_FILE` and, when needed, an ephemeral Vercel access-link file via `AZUR_STAGING_ACCESS_FILE`. Private credentials are runtime-only; this test must not run against production.
+
+The latest Auth advisor also reports leaked-password protection disabled. See [Supabase password security](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). No Auth protection settings were changed for testing.

@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import handler from './accept-activity.ts';
+import handler from '../../../api/intervals/accept-activity.ts';
 const stageId='00000000-0000-4000-8000-000000000099';
 async function request(t,{method='POST',body={stageId,confirm:true},auth='Bearer athlete-session',enabled=true,replies=[]}={}) {
  const originalFetch=globalThis.fetch;
  const saved={...process.env};
  t.after(()=>{globalThis.fetch=originalFetch;process.env=saved;});
  process.env.INTERVALS_ACCEPTANCE_ENABLED=String(enabled);
+ delete process.env.AZUR_STAGING_BACKEND_URL;
  process.env.VITE_SUPABASE_URL='https://example.invalid';
  process.env.SUPABASE_SERVICE_ROLE_KEY='server-secret';
  const calls=[];

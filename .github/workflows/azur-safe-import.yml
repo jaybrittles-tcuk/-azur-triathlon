@@ -8,6 +8,8 @@ on:
       - 'azur-v1/src/app/styles.css'
       - 'azur-v1/src/app/AthleteOnboardingDraft.tsx'
       - 'azur-v1/src/app/App.tsx'
+      - 'azur-v1/src/main.tsx'
+      - 'azur-v1/supabase/functions/**'
       - 'azur-v1/src/lib/calculations/trainingLoad.ts'
       - 'azur-v1/supabase/migrations/**'
       - 'azur-v1/supabase/tests/**'
@@ -26,10 +28,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Keep API tests out of deployable function routes
+        run: |
+          if find api -name '*.test.*' | grep -q .; then
+            echo 'API tests must live under tests/api, outside deployed routes' >&2
+            exit 1
+          fi
       - name: Run import safety checks
         run: npm test
       - name: Test authenticated acceptance and load handlers
-        run: node --test api/intervals/*.test.mjs
+        run: node --test tests/api/intervals/*.test.mjs
       - name: Build app
         env:
           VITE_SUPABASE_URL: https://example.supabase.co

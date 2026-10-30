@@ -1,5 +1,7 @@
+import { proxyStagingImport } from '../../src/lib/stagingImportProxy.ts';
 // Validates load on an existing reviewed ride; never creates another activity.
 export default async function handler(req:any,res:any) {
+ if(await proxyStagingImport(req,res,'validate-load'))return;
  res.setHeader('Cache-Control','private, no-store');
  if (!['GET','POST'].includes(req.method)) return res.status(405).json({error:'Method not allowed'});
  if(process.env.INTERVALS_LOAD_VALIDATION_ENABLED!=='true') return res.status(503).json({error:'Training-load validation is not enabled'});

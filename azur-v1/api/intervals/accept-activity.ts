@@ -1,5 +1,7 @@
+import { proxyStagingImport } from '../../src/lib/stagingImportProxy.ts';
 // Acceptance records a ride only. Load validation and plan completion are separate.
 export default async function handler(req:any,res:any) {
+ if(await proxyStagingImport(req,res,'accept-activity'))return;
  res.setHeader('Cache-Control','private, no-store');
  if (!['GET','POST'].includes(req.method)) return res.status(405).json({error:'Method not allowed'});
  if(process.env.INTERVALS_ACCEPTANCE_ENABLED!=='true') return res.status(503).json({error:'Reviewed imports are not enabled'});

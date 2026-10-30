@@ -5865,3 +5865,5 @@ strong {
 .azur-onboarding-page-footer{width:100%;max-width:660px;margin-top:22px;display:grid;gap:14px}
 .azur-onboarding-exit{justify-self:center;color:#b9dbef;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:600px){.azur-onboarding-page{padding:20px 14px 40px}.azur-onboarding-page-header{gap:14px;margin-bottom:20px}.azur-onboarding-page-header img{width:64px;height:64px}.azur-onboarding-page-header h1{font-size:26px}.azur-onboarding-page-header p{font-size:13px}.azur-onboarding-page .azur-onboarding-draft{max-width:none;padding:20px 16px}.azur-onboarding-page .azur-onboarding-actions button{min-height:46px}.azur-onboarding-page .azur-onboarding-options{grid-template-columns:1fr}}
+
+.azur-staging-banner{padding:10px 16px;background:#f4b43c;color:#071525;text-align:center;font-size:12px;font-weight:800;letter-spacing:.07em;position:relative;z-index:100}

@@ -73,3 +73,6 @@ Cross-platform duplicate detection is heuristic. Do not automatically merge, mat
 
 ## Hosted staging setup
 The standalone `AZUR Staging` project is healthy. All four migrations and the guarded import baseline are installed. Required-schema preflight checks pass. A hosted transaction smoke test passed through staging, acceptance and saved-score validation to 98 stress points, then rolled back every synthetic record. The hosted database has zero test profiles, activities and inbox rows after verification. See `supabase/staging/README.md` for installation history, scope and remaining authenticated application/integration checks.
+
+## Dedicated staging application
+API tests have moved to `tests/api/intervals` to keep the Hobby deployment below its function limit. The separate staging Vercel project uses a fixed, validated proxy to the staging `import-review` Edge Function, which performs real Auth verification and keeps managed service credentials in that runtime. A server-controlled synthetic account can exercise the hosted flow without copying production credentials or claiming a live Intervals authorisation. See `supabase/staging/README.md` for scope and the hosted browser test.

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import handler from './stage-activity.ts';
+import handler from '../../../api/intervals/stage-activity.ts';
 const sourceId='zwift-authorised';
 const ride=()=>({id:sourceId,type:'VirtualRide',start_date:'2026-10-29T06:49:22Z',start_date_local:'2026-10-29T06:49:22',elapsed_time:4026,distance:41840,icu_average_watts:214,icu_weighted_avg_watts:234});
 const verified=(activity=ride(),existing=[],plans=[])=>[
@@ -15,6 +15,7 @@ async function request(t,{method='POST',auth='Bearer user-session',body={sourceI
  const originalFetch=globalThis.fetch,saved={...process.env};
  t.after(()=>{globalThis.fetch=originalFetch;process.env=saved;});
  process.env.INTERVALS_STAGING_ENABLED=String(enabled);
+ delete process.env.AZUR_STAGING_BACKEND_URL;
  process.env.VITE_SUPABASE_URL='https://example.invalid';
  process.env.SUPABASE_SERVICE_ROLE_KEY='server-secret';
  const calls=[];
