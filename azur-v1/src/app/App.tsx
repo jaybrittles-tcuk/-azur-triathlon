@@ -6152,8 +6152,9 @@ padding: '11px 16px',
     cursor: garminConnected ? 'default' : 'pointer',
   }}
 >
-  {garminConnected ? 'Garmin Connected ✓' : 'Connect Garmin'}
+  {garminConnected ? 'Garmin linked ✓' : 'Connect Garmin'}
 </button>
+{garminConnected && <p className="azur-garmin-import-disclosure">Garmin account linked. Zwift and other third-party rides may not be forwarded by Garmin; import their original FIT file separately.</p>}
     <button
       type="button"
       onClick={() =>
