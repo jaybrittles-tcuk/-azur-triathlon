@@ -103,7 +103,7 @@ try {
  await page.waitForURL(base+'/');
  assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
  assert.equal(onboardingStep,3,'Final onboarding step must be saved');
- await page.getByRole('button',{name:'Data Sources',exact:true}).waitFor();
+ await page.getByText('Training Tools',{exact:true}).waitFor();
  assert.deepEqual(errors,[]);
  console.log('PASS: signed-in athlete without profile → automatic onboarding → saved profile → dashboard');
 } catch(error) {
