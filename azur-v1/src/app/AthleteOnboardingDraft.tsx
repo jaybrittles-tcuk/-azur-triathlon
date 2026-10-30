@@ -67,7 +67,7 @@ export default function AthleteOnboardingDraft(){
   setSaving(false);
   if(error){setMessage('Unable to save setup: '+error.message);return;}
   setStep(Math.min(2,nextStep));
-  if(nextStep===3){setReady(true);setMessage('Your preferences have been saved. A coach assignment and training plan are separate steps.');}
+  if(nextStep===3){if(window.location.pathname==='/onboarding'){window.location.assign('/');return;}setReady(true);setMessage('Your preferences have been saved. A coach assignment and training plan are separate steps.');}
   else setMessage('Progress saved.');
  }
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;

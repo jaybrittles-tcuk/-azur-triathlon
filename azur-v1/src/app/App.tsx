@@ -53,6 +53,7 @@ import {
   calculateSwimTrainingStress,
   calculateTrainingLoad,
   isTrainingLoadEligible,
+  getValidatedIntervalsTrainingStress,
 } from '../lib/calculations/trainingLoad';
 type RoutePoint = {
   lat: number;
@@ -1168,6 +1169,28 @@ function sportName(sport: Sport) {
 export function App() {
   const [authReady, setAuthReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const onboardingRedirectStarted = useRef(false);
+  // Keep review state stable while background profile/session loads rerender App.
+  const [intervalsPreview, setIntervalsPreview] = useState<{
+    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;loadStatus?:string;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
+    stagingEnabled?:boolean;
+    acceptanceEnabled?:boolean;
+    loadValidationEnabled?:boolean;
+    error?:string;
+  } | null>(null);
+  const [intervalsLoading, setIntervalsLoading] = useState(false);
+  const [rideAction, setRideAction] = useState<string | null>(null);
+  const [rideMessage, setRideMessage] = useState('');
+  const [rideInbox, setRideInbox] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;status:string}>>([]);
+  const [rideLoadReview, setRideLoadReview] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;processed_metrics?:{load_status?:string;training_stress?:number}}>>([]);
+  const intervalsReviewOwner = useRef<string | null>(null);
+  function syncIntervalsReviewOwner(userId:string|null) {
+    if (intervalsReviewOwner.current === userId) return;
+    intervalsReviewOwner.current = userId;
+    setIntervalsPreview(null); setIntervalsLoading(false);
+    setRideAction(null); setRideMessage(''); setRideInbox([]); setRideLoadReview([]);
+  }
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true';
@@ -1299,6 +1322,14 @@ const [garminConnected, setGarminConnected] = useState(false);
 });
 
 const [trainingLoadActivities, setTrainingLoadActivities] = useState<any[]>([]);
+const importedActivitiesNeedRefresh = useRef(false);
+useEffect(() => {
+  if (!importedActivitiesNeedRefresh.current || activeNav === 'Data Sources') return;
+  importedActivitiesNeedRefresh.current = false;
+  void supabase.auth.getSession().then(async ({data:{session}}) => {
+    if (session?.user.id) await loadPlannedSessions(session.user.id);
+  }).catch(() => { importedActivitiesNeedRefresh.current = true; });
+}, [activeNav]);
 const [trainingLoadHistory, setTrainingLoadHistory] = useState<ReturnType<typeof calculateTrainingLoad>>([]);
 const [loadRangeDays, setLoadRangeDays] = useState<42 | 90 | 180>(42);
 const [selectedLoadDate, setSelectedLoadDate] = useState<string | null>(null);
@@ -1316,7 +1347,9 @@ useEffect(() => {
     .map((activity) => {
       let result = null;
 
-      if (
+      if (activity.source === 'intervals') {
+        result = getValidatedIntervalsTrainingStress(activity);
+      } else if (
         activity.sport === 'bike' &&
         athleteProfile.ftp &&
         activity.duration_sec > 0 &&
@@ -1557,17 +1590,23 @@ async function connectIntervals() {
     window.alert(error instanceof Error ? error.message : 'Intervals.icu connection failed');
   }
 }
-async function loadAthleteProfile(userId: string) {
+async function loadAthleteProfile(userId: string, isCoach = false) {
   const { data, error } = await supabase
     .from('athlete_profile')
 .select(
   'display_name, avatar_url, ftp_w, run_threshold_sec_per_km, swim_threshold_sec_per_100m, weight_kg, target_weight_kg'
 )
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Unable to load athlete profile:', error);
+    return;
+  }
+
+  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/privacy') {
+    onboardingRedirectStarted.current = true;
+    window.location.replace('/onboarding');
     return;
   }
 
@@ -1661,12 +1700,6 @@ async function loadPlannedSessions(userId: string) {
     return;
   }
 
-if (!data || data.length === 0) {
-  setWeekSessions([]);
-  setSelectedId('');
-  return;
-}
-
 const { data: completedActivities, error: completedError } =
   await supabase
     .from('completed_activity')
@@ -1690,6 +1723,7 @@ const eligibleTrainingLoadActivities = (completedActivities ?? []).filter(
     isTrainingLoadEligible({
       source: activity.source,
       isTest: activity.processed_metrics?.is_test === true,
+      loadStatus: activity.processed_metrics?.load_status,
     }),
 );
 
@@ -1730,7 +1764,7 @@ console.log(
   'AZUR completed activity map:',
   Array.from(completedBySessionId.entries()),
 );
-  const liveSessions: Session[] = data.map((session) => ({
+  const liveSessions: Session[] = (data ?? []).map((session) => ({
     id: session.id,
     seasonWeekId: '',
     plannedDate: session.planned_date,
@@ -1844,16 +1878,17 @@ targets: session.targets ?? {},
   }));
 
   setWeekSessions(liveSessions);
-  setSelectedId(liveSessions[0].id);
+  setSelectedId(liveSessions[0]?.id ?? '');
 }
 
 
 useEffect(() => {
   supabase.auth.getSession().then(({ data }) => {
+    syncIntervalsReviewOwner(data.session?.user.id ?? null);
     setIsAuthenticated(!!data.session);
 
 if (data.session?.user) {
-  loadAthleteProfile(data.session.user.id);
+  loadAthleteProfile(data.session.user.id, data.session.user.app_metadata?.role === 'coach');
   loadPrimaryRace(data.session.user.id);
   loadPlannedSessions(data.session.user.id);
 }
@@ -1864,10 +1899,11 @@ if (data.session?.user) {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange((_event, session) => {
+    syncIntervalsReviewOwner(session?.user.id ?? null);
     setIsAuthenticated(!!session);
 
 if (session?.user) {
-  loadAthleteProfile(session.user.id);
+  loadAthleteProfile(session.user.id, session.user.app_metadata?.role === 'coach');
   loadPrimaryRace(session.user.id);
   loadPlannedSessions(session.user.id);
 }
@@ -10241,11 +10277,51 @@ routePoints.length
 }
 
 function DataSourcesView() {
-  const [intervalsPreview, setIntervalsPreview] = useState<{
-    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean}>;
-    error?:string;
-  } | null>(null);
-  const [intervalsLoading, setIntervalsLoading] = useState(false);
+  async function rideRequest(path:string, body?:object) {
+    const {data:{session}} = await supabase.auth.getSession();
+    if (!session?.access_token) throw new Error('Please sign in again.');
+    const response = await fetch('/api/intervals/' + path, {
+      method:body ? 'POST' : 'GET',
+      headers:{Authorization:`Bearer ${session.access_token}`, ...(body ? {'Content-Type':'application/json'} : {})},
+      ...(body ? {body:JSON.stringify(body)} : {}),
+    });
+    const data = await response.json();
+    if (intervalsReviewOwner.current !== session.user.id) throw new Error('Your session changed. Reopen ride review.');
+    if (!response.ok) throw new Error(data?.error ?? 'Ride review unavailable');
+    return data;
+  }
+  async function refreshRideInbox() {
+    const data = await rideRequest('accept-activity');
+    setRideInbox(data.activities ?? []);
+  }
+  async function refreshLoadReview() {
+    const data = await rideRequest('validate-load');
+    const recorded = data.activities ?? [];
+    setRideLoadReview(recorded);
+    setIntervalsPreview(previous => previous ? {...previous, activities: previous.activities?.map(activity => {
+      const saved = recorded.find((ride:any) => String(ride.source_activity_id) === String(activity.sourceId));
+      return saved ? {...activity, alreadyImported:true, status:'already_imported', reason:undefined, loadStatus:saved.processed_metrics?.load_status} : activity;
+    })} : previous);
+  }
+  async function confirmRideAction(key:string, path:string, body:object) {
+    if (rideAction) return;
+    setRideAction(key);
+    setRideMessage('');
+    try {
+      const data = await rideRequest(path, body);
+      if (path !== 'stage-activity') importedActivitiesNeedRefresh.current = true;
+      setRideMessage(path === 'validate-load'
+        ? data.outcome === 'already_validated' ? 'Training load was already approved. No extra credit was added.' : `Training load approved: ${data.trainingStress} stress points. Open your dashboard to view the updated load.`
+        : path === 'stage-activity'
+        ? 'Ride staged for review. Training load is unchanged.'
+        : data.outcome === 'already_imported' ? 'Ride already recorded. No duplicate was created.'
+        : 'Ride recorded. Training-load validation is still pending.');
+      if (intervalsPreview?.acceptanceEnabled) await refreshRideInbox();
+      if (intervalsPreview?.loadValidationEnabled) await refreshLoadReview();
+    } catch (error) {
+      setRideMessage(error instanceof Error ? error.message : 'Ride confirmation failed');
+    } finally { setRideAction(null); }
+  }
   async function previewIntervals() {
     setIntervalsLoading(true);
     setIntervalsPreview(null);
@@ -10256,8 +10332,11 @@ function DataSourcesView() {
         headers: {Authorization: `Bearer ${session.access_token}`},
       });
       const data = await response.json();
+      if (intervalsReviewOwner.current !== session.user.id) return;
       if (!response.ok) throw new Error(data?.error ?? 'Unable to retrieve activities');
-      setIntervalsPreview({activities: data.activities ?? []});
+      setIntervalsPreview({activities: data.activities ?? [],stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true,loadValidationEnabled:data.loadValidationEnabled===true});
+      if (data.acceptanceEnabled===true) await refreshRideInbox();
+      if (data.loadValidationEnabled===true) await refreshLoadReview();
     } catch (error) {
       setIntervalsPreview({error: error instanceof Error ? error.message : 'Preview failed'});
     } finally {
@@ -10330,15 +10409,54 @@ function DataSourcesView() {
             </div>
             {intervalsPreview && (
               <div className="azur-intervals-preview" aria-live="polite">
-                <strong>Intervals.icu activity preview — no import performed</strong>
+                <div className="azur-intervals-review-header"><strong>Ride review</strong><span>Previewing rides leaves your training load unchanged</span></div>
                 {intervalsPreview.error && <p role="alert">{intervalsPreview.error}</p>}
                 {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>No cycling activities returned for the last seven days.</p>}
+                {rideMessage && <p role="status">{rideMessage}</p>}
+                {intervalsPreview.acceptanceEnabled && rideInbox.length > 0 && (
+                  <section aria-label="Staged rides awaiting review">
+                    <h4>Staged rides</h4>
+                    <p>Confirming records the ride. Training-load validation and planned workout completion remain pending.</p>
+                    {rideInbox.filter(ride => !rideLoadReview.some(record => record.source_activity_id === ride.source_activity_id)).map(ride => (
+                      <article className="azur-intervals-preview-ride" key={ride.id}>
+                        <strong>{ride.start_time} · {Math.round(ride.duration_sec / 60)} min</strong>
+                        <small>{ride.status === 'possible_duplicate' ? 'Possible duplicate — further review required' : ride.status === 'rejected' ? 'Rejected' : 'Awaiting acceptance or training-load validation'}</small>
+                        {['pending_review','reviewed'].includes(ride.status) && <button type="button" className="primary-button" disabled={rideAction !== null} onClick={() => void confirmRideAction(ride.id,'accept-activity',{stageId:ride.id,confirm:true})}>{rideAction === ride.id ? 'Confirming…' : 'Confirm and record ride'}</button>}
+                      </article>
+                    ))}
+                  </section>
+                )}
+                {intervalsPreview.loadValidationEnabled && rideLoadReview.length > 0 && (
+                  <section aria-label="Recorded rides and training load">
+                    <h4>Recorded rides · training load</h4>
+                    <p>Approval uses the ride’s normalised power and your current FTP. Planned workouts remain unchanged.</p>
+                    {rideLoadReview.map(ride => (
+                      <article className="azur-intervals-preview-ride" key={ride.id}>
+                        <strong>{ride.start_time} · {Math.round(ride.duration_sec / 60)} min</strong>
+                        <small>{ride.processed_metrics?.load_status === 'validated' ? `Approved · ${ride.processed_metrics.training_stress ?? '—'} stress points` : 'Training-load validation pending'}</small>
+                        {ride.processed_metrics?.load_status === 'pending_validation' && <button type="button" className="primary-button" disabled={rideAction !== null} onClick={() => void confirmRideAction(ride.id,'validate-load',{activityId:ride.id,confirm:true})}>{rideAction === ride.id ? 'Validating…' : 'Confirm training-load approval'}</button>}
+                      </article>
+                    ))}
+                  </section>
+                )}
                 {intervalsPreview.activities?.map(activity => (
                   <article className="azur-intervals-preview-ride" key={String(activity.sourceId)}>
                     <strong>{activity.name || 'Cycling activity'}</strong>
                     <span>{activity.start || 'Unknown start'} · {activity.type || 'Ride'}</span>
                     <span>{activity.durationSec != null ? `${Math.round(activity.durationSec / 60)} min` : 'Duration unavailable'} · {activity.distanceMeters != null ? `${(activity.distanceMeters / 1000).toFixed(2)} km` : 'Distance unavailable'} · {activity.averageWatts != null ? `${activity.averageWatts} W avg` : 'Average power unavailable'}{activity.normalizedWatts != null ? ` · ${activity.normalizedWatts} W normalised` : ''}</span>
-                    <small>{activity.alreadyImported ? 'Already imported' : activity.possibleCrossPlatformDuplicate ? 'Potential duplicate — review' : activity.reviewRequired ? 'Requires review' : 'Not imported — eligible for review'}</small>
+                    <small>{activity.status === 'candidate_match' ? 'Possible planned-session match — review required' : activity.status === 'already_imported' ? 'Already imported' : activity.status === 'possible_duplicate' ? 'Potential duplicate — review required' : activity.status === 'ambiguous_session' ? 'Multiple planned sessions — review required' : activity.status === 'unmatched_activity' ? 'Unmatched activity — review required' : 'Requires review'}{activity.reason ? ` · ${activity.reason}` : ''}</small>
+                    {activity.sessionCandidates && activity.sessionCandidates.length > 0 && (
+                      <div className="azur-intervals-review-candidates">
+                        <span>Scheduled ride candidates ({activity.sessionCandidates.length}):</span>
+                        {activity.sessionCandidates.map(candidate => <small key={candidate.id}>{candidate.title || 'Planned bike workout'}</small>)}
+                      </div>
+                    )}
+                    {intervalsPreview.stagingEnabled && ['candidate_match','unmatched_activity'].includes(activity.status ?? '') && (
+                      <button type="button" className="primary-button" disabled={rideAction !== null} onClick={() => void confirmRideAction(String(activity.sourceId),'stage-activity',{sourceId:String(activity.sourceId),plannedSessionId:activity.proposedPlannedSessionId ?? null,confirm:true})}>
+                        {rideAction === String(activity.sourceId) ? 'Staging…' : 'Confirm ride for review'}
+                      </button>
+                    )}
+                    <span className="azur-intervals-review-note">Stage: {activity.alreadyImported ? 'Already recorded' : activity.possibleCrossPlatformDuplicate ? 'Duplicate review required' : activity.status === 'candidate_match' ? 'Potential workout match' : activity.status === 'ambiguous_session' ? 'Session matching requires review' : 'Not imported'} · {activity.loadStatus === 'validated' ? 'Training load approved' : activity.alreadyImported ? 'Training-load approval pending' : 'Training load unchanged'}</span>
                   </article>
                 ))}
               </div>

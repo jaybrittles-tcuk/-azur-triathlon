@@ -16,6 +16,9 @@ jobs:
           node-version: '24'
       - name: Install and compile AZUR
         working-directory: azur-v1
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_local_verification
         run: |
           npm install --no-package-lock
           npm run build
