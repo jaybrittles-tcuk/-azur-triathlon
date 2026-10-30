@@ -5680,12 +5680,14 @@ color:
 };
 function HomeView() {
 const homeWeek = weekSessions.filter(session => {
-  const date = new Date(session.plannedDate + 'T12:00:00');
-  const now = new Date();
+  const now = new Date(todayKey + 'T12:00:00');
   const day = (now.getDay() + 6) % 7;
-  const monday = new Date(now.getFullYear(),now.getMonth(),now.getDate()-day);
-  const sunday = new Date(monday);sunday.setDate(sunday.getDate()+6);
-  return date >= monday && date <= sunday;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - day);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const key = (date: Date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  return session.plannedDate >= key(monday) && session.plannedDate <= key(sunday);
 });
 const homeMinutes = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport).reduce((sum,s)=>sum+(Number(s.durationMin)||0),0);
 const homeCount = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport).length;
