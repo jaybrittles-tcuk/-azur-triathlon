@@ -10224,6 +10224,29 @@ routePoints.length
 }
 
 function DataSourcesView() {
+  const [intervalsPreview, setIntervalsPreview] = useState<{
+    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean}>;
+    error?:string;
+  } | null>(null);
+  const [intervalsLoading, setIntervalsLoading] = useState(false);
+  async function previewIntervals() {
+    setIntervalsLoading(true);
+    setIntervalsPreview(null);
+    try {
+      const {data:{session}} = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Please sign in again.');
+      const response = await fetch('/api/intervals/activity-preview?days=7', {
+        headers: {Authorization: `Bearer ${session.access_token}`},
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error ?? 'Unable to retrieve activities');
+      setIntervalsPreview({activities: data.activities ?? []});
+    } catch (error) {
+      setIntervalsPreview({error: error instanceof Error ? error.message : 'Preview failed'});
+    } finally {
+      setIntervalsLoading(false);
+    }
+  }
   return (
     <>
       <section className="panel">
@@ -10282,13 +10305,27 @@ function DataSourcesView() {
             <div className="source-row">
               <div>
                 <strong>Intervals.icu</strong>
-                <small>Secondary analysis source</small>
+                <small>Zwift activity connection · read-only validation</small>
               </div>
-
-              <span className="source-state">Optional</span>
-
-              <small>Not connected</small>
+              <button type="button" className="primary-button" disabled={intervalsLoading} onClick={() => void previewIntervals()}>
+                {intervalsLoading ? 'Checking…' : 'Preview rides'}
+              </button>
             </div>
+            {intervalsPreview && (
+              <div className="azur-intervals-preview" aria-live="polite">
+                <strong>Intervals.icu activity preview — no import performed</strong>
+                {intervalsPreview.error && <p role="alert">{intervalsPreview.error}</p>}
+                {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>No cycling activities returned for the last seven days.</p>}
+                {intervalsPreview.activities?.map(activity => (
+                  <article className="azur-intervals-preview-ride" key={String(activity.sourceId)}>
+                    <strong>{activity.name || 'Cycling activity'}</strong>
+                    <span>{activity.start || 'Unknown start'} · {activity.type || 'Ride'}</span>
+                    <span>{activity.durationSec != null ? `${Math.round(activity.durationSec / 60)} min` : 'Duration unavailable'} · {activity.distanceMeters != null ? `${(activity.distanceMeters / 1000).toFixed(2)} km` : 'Distance unavailable'} · {activity.averageWatts != null ? `${activity.averageWatts} W avg` : 'Power unavailable'}</span>
+                    <small>{activity.alreadyImported ? 'Already imported' : activity.possibleCrossPlatformDuplicate ? 'Potential duplicate — review' : activity.reviewRequired ? 'Requires review' : 'Not imported — eligible for review'}</small>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
