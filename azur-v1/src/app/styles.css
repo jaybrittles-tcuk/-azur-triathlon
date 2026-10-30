@@ -5693,3 +5693,40 @@ strong {
 .session-detail-modal .azur-v2-workout-first p{font-size:15px;line-height:1.5;color:#e4effb;margin:8px 0 14px}
 .session-detail-modal .azur-v2-workout-first .workout-shape{margin:8px 0 0}
 @media(max-width:560px){.session-detail-modal .azur-v2-workout-first{padding:14px}.session-detail-modal .azur-v2-workout-first p{font-size:14px}}
+
+
+/* AZUR Performance V2 — premium midnight charts */
+.azur-v2-performance{display:grid;gap:15px;max-width:900px;margin:0 auto 24px;color:#f3f7ff}
+.azur-v2-performance-header{padding:8px 3px 3px}
+.azur-v2-performance-header>span{font-weight:750;letter-spacing:.18em;color:#60b9ff;font-size:12px}
+.azur-v2-performance-header h2{font-size:clamp(27px,5vw,38px);letter-spacing:-.035em;margin:5px 0;color:#fff}
+.azur-v2-performance-header p,.azur-v2-performance-subtitle{font-size:12px;color:#9cb1c9;margin:5px 0 12px}
+.azur-v2-performance-ranges{display:grid;grid-template-columns:repeat(4,1fr);background:#14243a;border:1px solid #25364e;padding:4px;border-radius:13px;gap:4px}
+.azur-v2-performance-ranges button{border:0;border-radius:9px;padding:10px 4px;background:transparent;color:#b7c8dd;font-weight:650;cursor:pointer}
+.azur-v2-performance-ranges button[aria-pressed=true]{background:#248ff0;color:#fff;box-shadow:0 3px 10px #020b1f55}
+.azur-v2-performance-card{background:#142238;border:1px solid #283a50;border-radius:17px;padding:19px 18px;min-width:0}
+.azur-v2-performance-card h3{color:#fff;font-size:17px;letter-spacing:-.02em;margin:0 0 14px}
+.azur-v2-performance-card svg{width:100%;height:180px;margin:12px 0}
+.azur-v2-performance-card>small{display:block;color:#8fa7bf;font-size:11px;line-height:1.5}
+.azur-v2-performance-legend{display:flex;gap:17px;font-size:12px;color:#b9cbe0}
+.azur-v2-performance-legend span:first-child{color:#55b4ff}.azur-v2-performance-legend span:last-child{color:#f3c65d}
+.azur-v2-performance-empty{border:1px dashed #3a4b62;border-radius:12px;padding:24px 15px;margin:13px 0;color:#a9bfd5;line-height:1.5;font-size:13px}
+.azur-v2-performance-volume{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0 18px}
+.azur-v2-performance-volume strong{font-size:32px;letter-spacing:-.04em}.azur-v2-performance-volume strong small{font-size:15px;color:#b7c8dd}
+.azur-v2-performance-volume span{font-size:11px;color:#a4b9d1}
+.azur-v2-performance-bars{display:grid;gap:14px}
+.azur-v2-performance-bars>div{display:grid;grid-template-columns:43px 1fr 45px;gap:10px;align-items:center}
+.azur-v2-performance-bars span{text-transform:capitalize;color:#b6c9e0;font-size:12px}
+.azur-v2-performance-bars strong{font-size:12px;text-align:right}
+.azur-v2-performance-bars>div>div{background:#25364e;border-radius:8px;height:12px;overflow:hidden}
+.azur-v2-performance-bars i{display:block;height:100%;border-radius:8px;background:#28b7e8}
+.azur-v2-performance-bars>div:nth-child(2) i{background:#f0bb42}.azur-v2-performance-bars>div:nth-child(3) i{background:#f28e61}
+.azur-v2-discipline-breakdown{display:flex;align-items:center;gap:25px}
+.azur-v2-discipline-ring{flex:none;width:142px;height:142px;border-radius:50%;background:#27364a;display:grid;place-items:center}
+.azur-v2-discipline-ring>span{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;width:94px;height:94px;background:#142238;color:#a8bfd6;font-size:12px}
+.azur-v2-discipline-ring strong{font-size:25px;color:#fff}
+.azur-v2-discipline-list{flex:1;display:grid;gap:12px}
+.azur-v2-discipline-list>div{display:flex;justify-content:space-between;gap:9px;color:#d9e5f3;text-transform:capitalize;font-size:13px}
+.azur-v2-discipline-list span:before{content:"●";margin-right:9px}
+.azur-v2-discipline-swim span:before{color:#28b7e8}.azur-v2-discipline-bike span:before{color:#f0bb42}.azur-v2-discipline-run span:before{color:#f28e61}
+@media(max-width:410px){.azur-v2-performance-card{padding:15px}.azur-v2-discipline-ring{width:120px;height:120px}.azur-v2-discipline-ring>span{width:78px;height:78px}.azur-v2-discipline-breakdown{gap:15px}}
