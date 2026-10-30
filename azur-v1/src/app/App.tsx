@@ -10339,6 +10339,13 @@ function DataSourcesView() {
                     <span>{activity.start || 'Unknown start'} · {activity.type || 'Ride'}</span>
                     <span>{activity.durationSec != null ? `${Math.round(activity.durationSec / 60)} min` : 'Duration unavailable'} · {activity.distanceMeters != null ? `${(activity.distanceMeters / 1000).toFixed(2)} km` : 'Distance unavailable'} · {activity.averageWatts != null ? `${activity.averageWatts} W avg` : 'Average power unavailable'}{activity.normalizedWatts != null ? ` · ${activity.normalizedWatts} W normalised` : ''}</span>
                     <small>{activity.status === 'candidate_match' ? 'Possible planned-session match — review required' : activity.status === 'already_imported' ? 'Already imported' : activity.status === 'possible_duplicate' ? 'Potential duplicate — review required' : activity.status === 'ambiguous_session' ? 'Multiple planned sessions — review required' : activity.status === 'unmatched_activity' ? 'Unmatched activity — review required' : 'Requires review'}{activity.reason ? ` · ${activity.reason}` : ''}</small>
+                    {activity.sessionCandidates && activity.sessionCandidates.length > 0 && (
+                      <div className="azur-intervals-review-candidates">
+                        <span>Scheduled ride candidates ({activity.sessionCandidates.length}):</span>
+                        {activity.sessionCandidates.map(candidate => <small key={candidate.id}>{candidate.title || 'Planned bike workout'}</small>)}
+                      </div>
+                    )}
+                    <span className="azur-intervals-review-note">Review only · No completed workout or training load will be changed.</span>
                   </article>
                 ))}
               </div>
