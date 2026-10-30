@@ -5773,3 +5773,5 @@ strong {
  .azur-premium-home .azur-home-load .azur-load-chart{margin-top:10px}
  .azur-premium-home .azur-home-load .azur-home-section-heading{margin-bottom:10px}
 }
+
+.azur-garmin-import-disclosure{grid-column:1/-1;font-size:11px;line-height:1.5;color:#abc4dc;margin:3px 0 8px;padding:9px 12px;background:#132c42;border:1px solid #32516d;border-radius:10px}
