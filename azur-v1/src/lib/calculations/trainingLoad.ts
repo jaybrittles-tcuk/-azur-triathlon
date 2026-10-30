@@ -66,7 +66,11 @@ export function calculateBikeTrainingStress(args: {
 export function isTrainingLoadEligible(args: {
   source?: string;
   isTest?: boolean;
+  loadStatus?: string | null;
 }) {
+  if (args.loadStatus === 'pending_validation' || args.loadStatus === 'rejected') {
+    return false;
+  }
   if (args.isTest === true) {
     return false;
   }
