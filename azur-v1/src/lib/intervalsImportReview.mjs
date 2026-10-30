@@ -11,6 +11,7 @@ export function reviewIntervalsActivity(activity, existingActivities = [], plann
   const startText = String(activity?.start_date ?? activity?.start_date_local ?? '');
   const start = Date.parse(startText);
   const duration = numeric(activity?.elapsed_time ?? activity?.moving_time);
+  const day = String(activity?.start_date_local ?? activity?.start_date ?? '').slice(0,10);
   const distance = numeric(activity?.distance);
   const isBike = sportName(activity?.type) === 'bike';
   const exact = Boolean(id) && existingActivities.some(e =>
@@ -32,22 +33,22 @@ export function reviewIntervalsActivity(activity, existingActivities = [], plann
     if (p.status === 'completed' || p.status === 'cancelled' || p.status === 'skipped') return false;
     const date = String(p.planned_date ?? '');
     // Local start is authoritative for training calendar day when available.
-    const day = String(activity.start_date_local ?? activity.start_date ?? '').slice(0,10);
     return day && date === day;
   }).map(p => ({id:p.id,title:p.title,plannedDate:p.planned_date,plannedDurationMin:p.duration_min}));
+  const closerCandidates = eligiblePlanCandidates.filter(p => duration !== null && numeric(p.plannedDurationMin) !== null && Math.abs(Number(p.plannedDurationMin) * 60 - duration) <= Math.max(900,duration * .35));
   let status = 'review_required';
   if (exact) status = 'already_imported';
   else if (overlaps.length) status = 'possible_duplicate';
   else if (!id || !isBike || !Number.isFinite(start) || duration === null || duration <= 0) status = 'invalid_activity';
-  else if (eligiblePlanCandidates.length === 1) status = 'candidate_match';
-  else if (eligiblePlanCandidates.length > 1) status = 'ambiguous_session';
+  else if (closerCandidates.length === 1) status = 'candidate_match';
+  else if (eligiblePlanCandidates.length > 0) status = 'ambiguous_session';
   else status = 'unmatched_activity';
   return {
     sourceId:id, status, alreadyImported:exact,
     possibleCrossPlatformDuplicate:overlaps.length > 0,
     possibleDuplicateCount:overlaps.length,
     sessionCandidates:eligiblePlanCandidates,
-    proposedPlannedSessionId:status === 'candidate_match' ? eligiblePlanCandidates[0].id : null,
+    proposedPlannedSessionId:status === 'candidate_match' ? closerCandidates[0].id : null,
     reviewRequired:true, safeToAutoImport:false,
     trainingLoadEligible:false,
     reason:status === 'already_imported' ? 'Same Intervals source ID already exists'
