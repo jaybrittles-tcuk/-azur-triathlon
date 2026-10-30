@@ -10439,7 +10439,7 @@ async function handleRegister(event: React.FormEvent) {
   setAuthLoading(true); setAuthError(''); setRegistrationNotice('');
   const {data,error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{emailRedirectTo:window.location.origin+'/onboarding'}});
   if(error) setAuthError(error.message);
-  else { setPassword(''); setRegistrationNotice(data.session ? 'Account created. Coach assignment and training-plan activation remain separate.' : 'Check your email to confirm your account, then sign in. Coach assignment follows separately.'); }
+  else { setPassword(''); if(data.session){window.location.assign('/onboarding');return;} setRegistrationNotice('Check your email to confirm your account. After confirmation, sign in to complete onboarding in its own full-screen view.'); }
   setAuthLoading(false);
 }
 async function handleSignOut() {
@@ -10707,13 +10707,13 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
         {betaRegistrationEnabled && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
           {registrationNotice && <p className="azur-registration-notice" role="status">{registrationNotice}</p>}
         </form>
-        {betaRegistrationEnabled && registrationMode && <AthleteOnboardingDraft/>}
+
       </div>
     );
   }
 
   if (window.location.pathname === '/onboarding') {
-    return <div className="login-screen"><div><AthleteOnboardingDraft /><CoachInvitations mode="athlete" /></div></div>;
+    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer"><CoachInvitations mode="athlete" /><a href="/" className="azur-onboarding-exit">Go to dashboard</a></div></main>
   }
 
   return (
