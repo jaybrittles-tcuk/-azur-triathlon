@@ -32,3 +32,10 @@ References: https://capacitorjs.com/docs/getting-started and https://capacitorjs
 - **Not yet a complete native OAuth callback flow.** The providers still redirect to the website; users will not return into the native WebView until universal links and server callback return routing are implemented and verified.
 - Supabase email-confirmation redirect also still points at a web URL. Native signup should not be advertised as complete before that is resolved.
 - Audit Vercel endpoint CORS for Capacitor origins before testing native API calls. Never allow wildcard origins for credentialed requests.
+
+## Native universal-link listener (foundation)
+- Capacitor App plugin now listens for appUrlOpen events and accepts only HTTPS links on azur-triathlon.vercel.app for `/` and `/onboarding`.
+- Links containing OAuth codes, tokens or fragments are deliberately rejected: this is not an OAuth token exchange implementation.
+- Configure Apple Associated Domains entitlement and an apple-app-site-association file served from the exact verified HTTPS domain before expecting these links to reach the app.
+- Garmin and Intervals provider callbacks still land on web server routes. Add a server-issued one-time return ticket tied to the athlete/oauth state before creating a native return link. Never place provider tokens in universal-link query strings.
+- Supabase email verification and native session restoration must be separately tested; do not mark native auth production-ready yet.
