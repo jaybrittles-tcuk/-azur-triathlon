@@ -10242,7 +10242,7 @@ routePoints.length
 
 function DataSourcesView() {
   const [intervalsPreview, setIntervalsPreview] = useState<{
-    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean}>;
+    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean}>;
     error?:string;
   } | null>(null);
   const [intervalsLoading, setIntervalsLoading] = useState(false);
@@ -10337,7 +10337,7 @@ function DataSourcesView() {
                   <article className="azur-intervals-preview-ride" key={String(activity.sourceId)}>
                     <strong>{activity.name || 'Cycling activity'}</strong>
                     <span>{activity.start || 'Unknown start'} · {activity.type || 'Ride'}</span>
-                    <span>{activity.durationSec != null ? `${Math.round(activity.durationSec / 60)} min` : 'Duration unavailable'} · {activity.distanceMeters != null ? `${(activity.distanceMeters / 1000).toFixed(2)} km` : 'Distance unavailable'} · {activity.averageWatts != null ? `${activity.averageWatts} W avg` : 'Power unavailable'}</span>
+                    <span>{activity.durationSec != null ? `${Math.round(activity.durationSec / 60)} min` : 'Duration unavailable'} · {activity.distanceMeters != null ? `${(activity.distanceMeters / 1000).toFixed(2)} km` : 'Distance unavailable'} · {activity.averageWatts != null ? `${activity.averageWatts} W avg` : 'Average power unavailable'}{activity.normalizedWatts != null ? ` · ${activity.normalizedWatts} W normalised` : ''}</span>
                     <small>{activity.alreadyImported ? 'Already imported' : activity.possibleCrossPlatformDuplicate ? 'Potential duplicate — review' : activity.reviewRequired ? 'Requires review' : 'Not imported — eligible for review'}</small>
                   </article>
                 ))}
