@@ -9301,6 +9301,23 @@ const sessionVerdict =
 function ProfileView() {
   return (
     <>
+      <section className="panel" aria-label="More tools and connected services">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">MORE</span>
+            <h3>Tools & connections</h3>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setActiveNav('Data Sources')}
+          style={{width:'100%',textAlign:'left',padding:'14px 16px',borderRadius:'12px'}}
+        >
+          Data Sources · Intervals.icu activity preview →
+        </button>
+        <p className="panel-note">View connected services and inspect cycling activities without importing them.</p>
+      </section>
       <section className="panel">
         <div className="profile-header">
           <div className="profile-avatar-large">
