@@ -11,6 +11,7 @@ on:
       - 'azur-v1/src/lib/calculations/trainingLoad.ts'
       - 'azur-v1/supabase/migrations/**'
       - 'azur-v1/supabase/tests/**'
+      - 'azur-v1/supabase/staging/**'
       - '.github/workflows/azur-safe-import.yml'
   workflow_dispatch:
 jobs:
@@ -81,6 +82,17 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_write_protection_test.sql
       - name: Verify actual concurrent staging requests
         run: bash azur-v1/supabase/tests/intervals_concurrent_test.sh
+      - name: Verify standalone staging bootstrap and rolled-back smoke test
+        run: |
+          createdb azur_staging_schema
+          psql -d azur_staging_schema -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/staging_managed_auth_fixture.sql
+          psql -d azur_staging_schema -v ON_ERROR_STOP=1 -c "set azur.staging_project_ref='juvceqrzkeethontnezw'" -f azur-v1/supabase/staging/import_baseline.sql
+          for migration in azur-v1/supabase/migrations/*.sql; do
+            psql -d azur_staging_schema -v ON_ERROR_STOP=1 -f "$migration"
+          done
+          psql -d azur_staging_schema -v ON_ERROR_STOP=1 -c "set azur.staging_project_ref='juvceqrzkeethontnezw'" -f azur-v1/supabase/staging/transaction_smoke.sql
+          remaining=$(psql -d azur_staging_schema -v ON_ERROR_STOP=1 -Atqc 'select (select count(*) from public.athlete_profile)+(select count(*) from public.completed_activity)+(select count(*) from public.intervals_import_inbox)')
+          test "$remaining" = "0"
 
 
   browser-review:

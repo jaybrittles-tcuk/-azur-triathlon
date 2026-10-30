@@ -1,7 +1,7 @@
 # Intervals.icu import staging — rollout gate
 
 ## Current status
-The migration `20261030152435_intervals_import_inbox.sql` is STAGED in GitHub only.
+The four import migrations are committed in GitHub and installed in the separate AZUR Staging project; they remain unapplied to production.
 Authenticated staging, acceptance and load-approval handlers are implemented behind separate server release flags. Do not deploy/apply until the remaining release checks pass.
 No automatic activity ingestion is enabled.
 
@@ -33,7 +33,7 @@ Cross-platform duplicate detection is heuristic. Do not automatically merge, mat
 - `GET /api/intervals/accept-activity` resolves the athlete from the verified session and returns only their inbox metadata.
 - `POST /api/intervals/accept-activity` requires `{stageId, confirm:true}`; client athlete IDs, metrics and validation flags are ignored.
 - The acceptance transaction records consent and inserts the activity atomically under the athlete lock. Duplicate/rejected inbox rows are blocked; repeated acceptance returns the existing activity.
-- The acceptance migration is still unapplied. Its development signature now includes `p_confirm boolean default false`; recheck migration history before deployment.
+- The acceptance migration remains unapplied to production. Its development signature now includes `p_confirm boolean default false`; recheck migration history before deployment.
 - Local verification: 101 calculation tests, 38 mocked API tests, full Vite production build with placeholder configuration, and fixture/migration/transaction/RLS SQL tests in embedded PostgreSQL (PGlite).
 - Independent-connection concurrency checks are implemented in CI but have not been executed locally; PGlite verification does not establish that guarantee.
 - Still required: live authenticated staging QA, real PostgreSQL concurrency results, complete browser workflow, and verification of the separately gated training-load approval path.
@@ -68,4 +68,8 @@ Cross-platform duplicate detection is heuristic. Do not automatically merge, mat
 - New adversarial database tests verify forged validation, source relabelling, imported deletion, source spoofing, cross-athlete reads and manual create/edit/delete behaviour.
 - All four unapplied migrations have been regenerated with valid, ordered CLI timestamps. No migration already present in production history was renamed.
 - `supabase/release/intervals_preflight.sql` is a reusable metadata-only compatibility/installation report. Compatible base columns do not mean the import migrations are installed or the release flags are enabled.
-- A paid isolated Supabase branch may be needed for live staging; branch provisioning requires Supabase's cost confirmation. No production schema or athlete data has been modified by this audit.
+- A standalone Free-plan AZUR Staging project has now been created instead of a paid branch. See `supabase/staging/README.md` for its scope and verification. No production schema or athlete data has been modified by this audit.
+
+
+## Hosted staging setup
+The standalone `AZUR Staging` project is healthy. All four migrations and the guarded import baseline are installed. Required-schema preflight checks pass. A hosted transaction smoke test passed through staging, acceptance and saved-score validation to 98 stress points, then rolled back every synthetic record. The hosted database has zero test profiles, activities and inbox rows after verification. See `supabase/staging/README.md` for installation history, scope and remaining authenticated application/integration checks.
