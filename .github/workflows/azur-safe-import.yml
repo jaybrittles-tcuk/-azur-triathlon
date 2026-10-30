@@ -23,5 +23,5 @@ jobs:
         run: node --test src/lib/calculations/intervalsImportReview.test.mjs src/lib/calculations/intervalsImportGate.test.mjs
       - name: Build app
         run: |
-          npm ci
+          npm install --no-package-lock
           npm run build
