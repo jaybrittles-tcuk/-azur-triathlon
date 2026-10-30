@@ -1,3 +1,11 @@
+# Current release status — 30 October 2026
+
+Real staging OAuth and Zwift import are verified: one validated ride, 62 points at FTP 315 W, shown in Weekly Review. All checks pass at `a8f6ae804731b4bcc78a56e9f7be210ac52116e8`. Read-only production compatibility and existing-record duplicate checks are complete. Production remains awaiting release approval.
+
+The authoritative current deployment and rollback plan is [intervals-production-release.md](intervals-production-release.md). The sections below retain historical implementation notes; their earlier “remaining” gates and test counts describe those earlier checkpoints, not the present release status.
+
+---
+
 # Intervals.icu import staging — rollout gate
 
 ## Current status
