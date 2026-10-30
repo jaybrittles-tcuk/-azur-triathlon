@@ -1537,6 +1537,26 @@ console.log('Azur latest combined training load:', latestLoad);
 
   window.location.href = data.authorizationUrl;
 }
+async function connectIntervals() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    window.alert('Please sign in to AZUR before connecting Intervals.icu.');
+    return;
+  }
+  try {
+    const response = await fetch('/api/intervals/connect', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    const data = await response.json();
+    if (!response.ok || !data?.authorizationUrl) {
+      throw new Error(data?.error ?? 'Unable to start Intervals.icu connection');
+    }
+    window.location.assign(data.authorizationUrl);
+  } catch (error) {
+    window.alert(error instanceof Error ? error.message : 'Intervals.icu connection failed');
+  }
+}
 async function loadAthleteProfile(userId: string) {
   const { data, error } = await supabase
     .from('athlete_profile')
@@ -6155,6 +6175,22 @@ padding: '11px 16px',
   {garminConnected ? 'Garmin linked ✓' : 'Connect Garmin'}
 </button>
 {garminConnected && <p className="azur-garmin-import-disclosure">Garmin account linked. Zwift and other third-party rides may not be forwarded by Garmin; import their original FIT file separately.</p>}
+<button
+  type="button"
+  onClick={() => { void connectIntervals(); }}
+  style={{
+    padding: '11px 8px',
+    borderRadius: '12px',
+    border: '1px solid rgba(80, 155, 202, 0.45)',
+    background: '#16344D',
+    color: '#F6FBFF',
+    fontSize: '12px',
+    fontWeight: 700,
+    cursor: 'pointer',
+  }}
+>
+  Connect Intervals.icu
+</button>
     <button
       type="button"
       onClick={() =>
