@@ -11230,10 +11230,10 @@ left: 0,
 right: 0,
 bottom: 0,
 padding: '5px 8px calc(5px + env(safe-area-inset-bottom))',
-background: 'rgba(255,255,255,0.96)',
-border: '1px solid rgba(12,48,76,0.10)',
-borderRadius: '14px 14px 0 0',
-boxShadow: '0 -6px 24px rgba(4, 18, 31, 0.10)',
+background: 'rgba(12,27,45,0.97)',
+border: '1px solid rgba(91,143,185,0.26)',
+borderRadius: '18px 18px 0 0',
+boxShadow: '0 -10px 30px rgba(0, 4, 13, 0.38)',
 backdropFilter: 'blur(18px)',
   }}
 >
@@ -11263,16 +11263,16 @@ backdropFilter: 'blur(18px)',
   borderRadius: '12px',
 
   background: isActive
-    ? '#EEF6FB'
+    ? 'rgba(30, 107, 155, 0.27)'
     : 'transparent',
 
   boxShadow: isActive
-    ? 'inset 0 0 0 1px rgba(10,53,86,0.06)'
+    ? 'inset 0 0 0 1px rgba(58,173,229,0.34)'
     : 'none',
 
   color: isActive
-    ? '#0A3556'
-    : '#8192A2',
+    ? '#81D3FF'
+    : '#A3B8CD',
 
   display: 'flex',
   flexDirection: 'column',
