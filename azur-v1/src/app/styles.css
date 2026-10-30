@@ -5836,3 +5836,11 @@ strong {
 @media(prefers-reduced-motion:reduce) {
   .calendar-layout .calendar-session { transition: none !important; }
 }
+
+/* Intervals.icu safe review panel — no training records modified */
+.azur-intervals-preview{grid-column:1/-1;display:grid;gap:10px;padding:15px;border:1px solid #31536b;border-radius:14px;background:#102439;color:#f6fbff}
+.azur-intervals-preview>strong{font-size:14px}
+.azur-intervals-preview-ride{display:grid;gap:5px;padding:12px;border:1px solid #29445a;border-radius:12px;background:#142e43;min-width:0}
+.azur-intervals-preview-ride strong{font-size:14px;color:#f6fbff;overflow-wrap:anywhere}
+.azur-intervals-preview-ride span{font-size:12px;color:#b6d0e4;overflow-wrap:anywhere}
+.azur-intervals-preview-ride small{font-size:11px;color:#f4b43c;font-weight:700}
