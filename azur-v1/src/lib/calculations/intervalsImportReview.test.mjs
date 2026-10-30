@@ -31,3 +31,15 @@ test('invalid ride cannot propose a plan even when calendar day matches',()=>{
  assert.equal(x.proposedPlannedSessionId,null);
  assert.equal(x.trainingLoadEligible,false);
 });
+
+test('only plausible-duration session is proposed when two rides scheduled',()=>{
+ const x=reviewIntervalsActivity(ride,[],[plan,{...plan,id:'long-ride',duration_min:180}]);
+ assert.equal(x.status,'candidate_match');
+ assert.equal(x.proposedPlannedSessionId,'session-1');
+ assert.equal(x.trainingLoadEligible,false);
+});
+test('implausible duration never links an arbitrary session',()=>{
+ const x=reviewIntervalsActivity(ride,[],[{...plan,duration_min:180}]);
+ assert.equal(x.status,'ambiguous_session');
+ assert.equal(x.proposedPlannedSessionId,null);
+});
