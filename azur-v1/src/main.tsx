@@ -1,3 +1,4 @@
+import { registerAzurAppLinks } from './lib/nativeAppLinks';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './app/App';
@@ -14,3 +15,5 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => undefined);
   });
 }
+
+void registerAzurAppLinks().catch(() => undefined);
