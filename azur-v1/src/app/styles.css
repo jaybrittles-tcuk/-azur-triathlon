@@ -5844,3 +5844,18 @@ strong {
 .azur-intervals-preview-ride strong{font-size:14px;color:#f6fbff;overflow-wrap:anywhere}
 .azur-intervals-preview-ride span{font-size:12px;color:#b6d0e4;overflow-wrap:anywhere}
 .azur-intervals-preview-ride small{font-size:11px;color:#f4b43c;font-weight:700}
+
+
+/* Dedicated onboarding view: one scrollable screen, never a split login layout. */
+.azur-onboarding-page{min-height:100dvh;width:100%;box-sizing:border-box;background:linear-gradient(160deg,#071725 0%,#0b2538 65%,#071a29 100%);color:#eaf7ff;padding:clamp(18px,4vw,48px) 16px 48px;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+.azur-onboarding-page-header{width:100%;max-width:660px;display:flex;align-items:center;gap:22px;margin:0 auto 22px}
+.azur-onboarding-page-header img{width:94px;height:94px;object-fit:contain;flex-shrink:0}
+.azur-onboarding-page-header h1{font-size:clamp(25px,4vw,36px);line-height:1.12;margin:7px 0 8px;color:#fff}
+.azur-onboarding-page-header p{color:#bdd5e4;margin:0;line-height:1.5}
+.azur-onboarding-page .azur-onboarding-draft{width:100%;max-width:660px;box-sizing:border-box;margin:0;padding:clamp(20px,4vw,32px);background:#0d2a41;border-color:#28516c;box-shadow:0 20px 60px rgba(0,0,0,.24)}
+.azur-onboarding-page .azur-onboarding-draft h3{font-size:23px}
+.azur-onboarding-page .azur-onboarding-draft label{font-size:14px}
+.azur-onboarding-page .azur-onboarding-draft input:not([type=radio]),.azur-onboarding-page .azur-onboarding-draft select{min-height:46px;font-size:16px}
+.azur-onboarding-page-footer{width:100%;max-width:660px;margin-top:22px;display:grid;gap:14px}
+.azur-onboarding-exit{justify-self:center;color:#b9dbef;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:600px){.azur-onboarding-page{padding:20px 14px 40px}.azur-onboarding-page-header{gap:14px;margin-bottom:20px}.azur-onboarding-page-header img{width:64px;height:64px}.azur-onboarding-page-header h1{font-size:26px}.azur-onboarding-page-header p{font-size:13px}.azur-onboarding-page .azur-onboarding-draft{max-width:none;padding:20px 16px}.azur-onboarding-page .azur-onboarding-actions button{min-height:46px}.azur-onboarding-page .azur-onboarding-options{grid-template-columns:1fr}}
