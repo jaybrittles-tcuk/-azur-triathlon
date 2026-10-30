@@ -11,12 +11,13 @@ export default async function handler(req:any,res:any){
  if(!url||!key)return res.status(503).json({error:'Backend unavailable'});
  const auth=String(req.headers.authorization||'');
  if(!auth.startsWith('Bearer '))return res.status(401).json({error:'Sign in required'});
+ try{
  const userResponse=await fetch(url+'/auth/v1/user',{headers:{apikey:key,Authorization:auth}});
  if(!userResponse.ok)return res.status(401).json({error:'Invalid session'});
  const user=await userResponse.json();
+ if(typeof user?.id!=='string'||!user.id)return res.status(401).json({error:'Invalid session'});
  const headers=jsonHeaders(key);
  const lookup=async(path:string)=>{const result=await fetch(url+'/rest/v1/'+path,{headers});if(!result.ok)throw Error('Database read failed');return result.json();};
- try{
   const athlete=(await lookup('athlete_profile?user_id=eq.'+encodeURIComponent(user.id)+'&select=id&limit=1'))[0];
   if(!athlete)return res.status(404).json({error:'Athlete profile not found'});
   const sourceId=String(req.body?.sourceId??'');
@@ -41,15 +42,19 @@ export default async function handler(req:any,res:any){
   if(!gate.allowed)return res.status(409).json({error:'Activity requires further review',reason:gate.reason,reviewStatus:review.status});
   const duration=Number(activity.elapsed_time??activity.moving_time);
   const distance=activity.distance==null?null:Number(activity.distance);
-  const average=activity.icu_average_watts??activity.average_watts??null;
-  const weighted=activity.icu_weighted_avg_watts??null;
+  const rawAverage=activity.icu_average_watts??activity.average_watts;
+  const average=rawAverage==null?null:Number(rawAverage);
+  const weighted=activity.icu_weighted_avg_watts==null?null:Number(activity.icu_weighted_avg_watts);
+  if(!Number.isSafeInteger(duration)||duration<=0||[distance,average,weighted].some(value=>value!==null&&(!Number.isFinite(value)||value<0)))
+   return res.status(422).json({error:'Invalid upstream activity metrics'});
   const result=await fetch(url+'/rest/v1/rpc/stage_intervals_activity',{method:'POST',headers,body:JSON.stringify({
    p_athlete_id:athlete.id,p_source_id:sourceId,p_start:activity.start_date??activity.start_date_local,
    p_duration:duration,p_distance:distance,p_avg_power:average,p_normalized_power:weighted,
    p_source_payload:{source:'intervals',id:sourceId,type:activity.type,name:activity.name}
   })});
   if(!result.ok)return res.status(502).json({error:'Staging transaction failed'});
-  const staged=await result.json();
-  return res.status(200).json({stage:'review_inbox_only',outcome:staged?.[0]?.outcome??'unknown',trainingLoadChanged:false,sessionCompleted:false});
+  const staged=(await result.json())?.[0];
+  if(!staged?.stage_id||!['pending_review','possible_duplicate','already_staged'].includes(staged.outcome))return res.status(502).json({error:'Invalid staging transaction result'});
+  return res.status(200).json({stage:'review_inbox_only',stageId:staged.stage_id,outcome:staged.outcome,trainingLoadChanged:false,sessionCompleted:false});
  }catch(error){return res.status(502).json({error:'Staging verification unavailable'});}
 }

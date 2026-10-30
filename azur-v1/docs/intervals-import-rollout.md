@@ -34,7 +34,7 @@ Cross-platform duplicate detection is heuristic. Do not automatically merge, mat
 - `POST /api/intervals/accept-activity` requires `{stageId, confirm:true}`; client athlete IDs, metrics and validation flags are ignored.
 - The acceptance transaction records consent and inserts the activity atomically under the athlete lock. Duplicate/rejected inbox rows are blocked; repeated acceptance returns the existing activity.
 - The acceptance migration is still unapplied. Its development signature now includes `p_confirm boolean default false`; recheck migration history before deployment.
-- Local verification: 101 calculation tests, 23 mocked API tests, full Vite production build with placeholder configuration, and fixture/migration/transaction/RLS SQL tests in embedded PostgreSQL (PGlite).
+- Local verification: 101 calculation tests, 38 mocked API tests, full Vite production build with placeholder configuration, and fixture/migration/transaction/RLS SQL tests in embedded PostgreSQL (PGlite).
 - Independent-connection concurrency checks are implemented in CI but have not been executed locally; PGlite verification does not establish that guarantee.
 - Still required: live authenticated staging QA, real PostgreSQL concurrency results, complete browser workflow, and verification of the separately gated training-load approval path.
 
@@ -48,3 +48,13 @@ Cross-platform duplicate detection is heuristic. Do not automatically merge, mat
 - Five additional score-consumption tests and 12 approval-handler tests cover missing validation, malformed scores, athlete ownership, disabled flags, consent and replay. Database tests cover missing FTP/NP, late duplicates, test exclusion, immutable replay and role permissions.
 - The full build is now checked with harmless Supabase configuration placeholders: a build without these can optimise away app code after the missing-configuration throw.
 - Remaining release work: live authenticated/browser QA, independent-connection PostgreSQL concurrency results, deployed-schema/permission review, and reconciling this draft branch with main. Saved-score idempotence does not prove concurrency across every external ingestion provider.
+
+
+## Browser and branch verification
+- The safe-import branch includes main's standalone mobile onboarding journey; both onboarding and ride-review CSS are preserved.
+- Staging now handles auth network errors, rejects invalid upstream metrics, and requires a valid staging RPC result. Fifteen direct staging API tests cover disabled flags, ownership, provenance, duplicate/session review, consent, replay and malformed results.
+- `tests/intervals-review.browser.mjs` exercises the UI against synthetic intercepted API and Supabase responses. It checks preview → staging → acceptance → load approval → refreshed weekly load with no planned sessions, plus mobile onboarding isolation and overflow.
+- Run locally with the placeholder Supabase URL/key above, install `playwright@1.62.1` and its Chromium binary, start Vite, then run `node tests/intervals-review.browser.mjs`. An existing Playwright installation can be selected with `AZUR_PLAYWRIGHT_MODULE`; a packaged Chromium alternative can be selected with `AZUR_CHROMIUM_MODULE`.
+- This is a browser contract test with synthetic responses, not proof of live backend or real PostgreSQL concurrency. The CI browser job runs separately from the database concurrency job.
+
+- Current local results after reconciliation: 139 calculation/API tests passed; full Vite build passed; Chromium browser contract and standalone mobile onboarding checks passed. The Chromium test uses synthetic intercepted responses and does not replace the live staging release checks.

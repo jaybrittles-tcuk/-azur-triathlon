@@ -4,6 +4,9 @@ on:
     paths:
       - 'azur-v1/src/lib/**'
       - 'azur-v1/api/intervals/**'
+      - 'azur-v1/tests/**'
+      - 'azur-v1/src/app/styles.css'
+      - 'azur-v1/src/app/AthleteOnboardingDraft.tsx'
       - 'azur-v1/src/app/App.tsx'
       - 'azur-v1/src/lib/calculations/trainingLoad.ts'
       - 'azur-v1/supabase/migrations/**'
@@ -74,3 +77,33 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_validate_load_test.sql
       - name: Verify actual concurrent staging requests
         run: bash azur-v1/supabase/tests/intervals_concurrent_test.sh
+
+
+  browser-review:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: azur-v1
+    env:
+      VITE_SUPABASE_URL: https://example.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_local_verification
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install browser test tools
+        run: |
+          npm install --no-package-lock
+          npm install --no-save --no-package-lock playwright@1.62.1
+          npx playwright install --with-deps chromium
+      - name: Verify synthetic ride review and mobile onboarding in Chromium
+        run: |
+          npm run dev -- --host 127.0.0.1 > /tmp/azur-browser-vite.log 2>&1 &
+          vite_pid=$!
+          trap 'kill "$vite_pid"' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:5173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node tests/intervals-review.browser.mjs
