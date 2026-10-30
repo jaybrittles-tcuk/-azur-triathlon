@@ -37,8 +37,8 @@ export default async function handler(req:any,res:any){
    const exact=existing.some((e:any)=>e.source==='intervals'&&String(e.source_activity_id)===String(a.id));
    // These are candidate matches only; never auto-import or auto-complete based on time proximity.
    const overlap=existing.some((e:any)=>['bike','cycling'].includes(String(e.sport??'').toLowerCase())&&Number.isFinite(started)&&Math.abs(Date.parse(e.start_time)-started)<15*60*1000&&Math.abs(Number(e.duration_sec)-elapsed)<10*60);
-   return {alreadyImported:exact,possibleCrossPlatformDuplicate:overlap,reviewRequired:exact||overlap||!Number.isFinite(started)||elapsed<=0};
+   return {alreadyImported:exact,possibleCrossPlatformDuplicate:overlap,reviewRequired:exact||overlap||!Number.isFinite(started)||elapsed<=0,duplicateReview:'heuristic_only',safeToAutoImport:false};
  };
  res.setHeader('Cache-Control','private, no-store');
- return res.status(200).json({mode:'preview_only',dateRange:{oldest,newest},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.average_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
+ return res.status(200).json({mode:'preview_only',dateRange:{oldest,newest},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
 }
