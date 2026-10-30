@@ -5815,7 +5815,7 @@ height: '58px',
         }}
       >
         <span>
-        {currentMacrocycleWeek?.phase || 'Base 1'}
+        {currentMacrocycleWeek?.phase || 'Training phase not set'}
         </span>
 
         <span style={{ opacity: 0.4 }}>
@@ -5823,10 +5823,10 @@ height: '58px',
         </span>
 
         <span>
-          {daysToRace} days to race day
+          {homeRaceDays == null ? 'Race date not set' : homeRaceDays === 0 ? 'Race day' : `${homeRaceDays} days to race day`}
         </span>
         <span style={{ opacity: 0.7 }}>
-  • {currentMacrocycleWeek?.weeksToRace ?? 0} weeks to race
+  • {homeRaceDays == null ? 'Set your race date in Profile' : `${Math.ceil(homeRaceDays/7)} weeks to race`}
 </span>
       </div>
     </div>
@@ -5982,7 +5982,7 @@ min
 
     <button
       type="button"
-      onClick={() => setActiveNav("Calendar")}
+      onClick={() => {setSelectedId(todaySession.id);setSessionDetailOpen(true);}}
       style={{
        width: 'auto',
         minWidth: '140px',
@@ -5997,7 +5997,7 @@ padding: '11px 16px',
         cursor: 'pointer',
       }}
     >
-      View session →
+      Open session details →
     </button>
   </section>
 )}
