@@ -5,7 +5,6 @@ const config: CapacitorConfig = {
   appId: 'com.azurtriathlon.training',
   appName: 'AZUR Training',
   webDir: 'dist',
-  bundledWebRuntime: false,
   ios: { contentInset: 'automatic' }
 };
 
