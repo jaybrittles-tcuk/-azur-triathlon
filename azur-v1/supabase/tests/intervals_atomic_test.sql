@@ -42,3 +42,14 @@ DO $$ BEGIN
  END;
 END $$;
 select 'PASS: idempotency, Garmin overlap, different rides, athlete isolation, privileges, invalid data' as result;
+
+-- Exercise RLS using a client role with a real synthetic JWT subject.
+grant usage on schema public,auth to authenticated;
+grant select on public.athlete_profile to authenticated;
+set role authenticated;
+set request.jwt.claim.sub='00000000-0000-4000-8000-000000000011';
+DO $$ BEGIN
+ IF NOT EXISTS (select 1 from public.intervals_import_inbox) THEN RAISE EXCEPTION 'Own inbox unreadable'; END IF;
+ IF EXISTS (select 1 from public.intervals_import_inbox where athlete_id <> '00000000-0000-4000-8000-000000000001') THEN RAISE EXCEPTION 'Another athlete inbox exposed'; END IF;
+END $$;
+reset role;

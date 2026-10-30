@@ -1,6 +1,6 @@
 -- Isolated acceptance step. Server service-role only; no session auto-completion.
 -- Must be applied after 20261030_intervals_import_inbox.sql.
-create or replace function public.accept_staged_intervals_ride(p_athlete_id uuid,p_stage_id uuid)
+create or replace function public.accept_staged_intervals_ride(p_athlete_id uuid,p_stage_id uuid,p_confirm boolean default false)
 returns table(activity_id uuid,outcome text)
 language plpgsql security invoker set search_path=public
 as $$
@@ -13,8 +13,12 @@ begin
  select * into v from public.intervals_import_inbox where id=p_stage_id and athlete_id=p_athlete_id for update;
  if not found then raise exception 'Staged ride not found'; end if;
  select id into existing_id from public.completed_activity
- where source='intervals' and source_activity_id=v.source_activity_id;
+ where athlete_id=p_athlete_id and source='intervals' and source_activity_id=v.source_activity_id;
  if found then return query select existing_id,'already_imported'::text; return; end if;
+ if p_confirm is true and v.status='pending_review' then
+  update public.intervals_import_inbox set status='reviewed',reviewed_at=now(),review_reason='Explicit athlete confirmation' where id=v.id;
+  v.status:='reviewed';
+ end if;
  if v.status <> 'reviewed' then raise exception 'Explicit human review required'; end if;
  if exists(select 1 from public.completed_activity c where c.athlete_id=p_athlete_id
    and c.sport='bike' and abs(extract(epoch from(c.start_time-v.start_time))) <= 600
@@ -32,5 +36,5 @@ begin
  return query select inserted_id,'imported_pending_load_review'::text;
 end;
 $$;
-revoke all on function public.accept_staged_intervals_ride(uuid,uuid) from public,anon,authenticated;
-grant execute on function public.accept_staged_intervals_ride(uuid,uuid) to service_role;
+revoke all on function public.accept_staged_intervals_ride(uuid,uuid,boolean) from public,anon,authenticated;
+grant execute on function public.accept_staged_intervals_ride(uuid,uuid,boolean) to service_role;

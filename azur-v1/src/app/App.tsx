@@ -10243,10 +10243,46 @@ routePoints.length
 
 function DataSourcesView() {
   const [intervalsPreview, setIntervalsPreview] = useState<{
-    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean}>;
+    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
+    stagingEnabled?:boolean;
+    acceptanceEnabled?:boolean;
     error?:string;
   } | null>(null);
   const [intervalsLoading, setIntervalsLoading] = useState(false);
+  const [rideAction, setRideAction] = useState<string | null>(null);
+  const [rideMessage, setRideMessage] = useState('');
+  const [rideInbox, setRideInbox] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;status:string}>>([]);
+  async function rideRequest(path:string, body?:object) {
+    const {data:{session}} = await supabase.auth.getSession();
+    if (!session?.access_token) throw new Error('Please sign in again.');
+    const response = await fetch('/api/intervals/' + path, {
+      method:body ? 'POST' : 'GET',
+      headers:{Authorization:`Bearer ${session.access_token}`, ...(body ? {'Content-Type':'application/json'} : {})},
+      ...(body ? {body:JSON.stringify(body)} : {}),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data?.error ?? 'Ride review unavailable');
+    return data;
+  }
+  async function refreshRideInbox() {
+    const data = await rideRequest('accept-activity');
+    setRideInbox(data.activities ?? []);
+  }
+  async function confirmRideAction(key:string, path:string, body:object) {
+    if (rideAction) return;
+    setRideAction(key);
+    setRideMessage('');
+    try {
+      const data = await rideRequest(path, body);
+      setRideMessage(path === 'stage-activity'
+        ? 'Ride staged for review. Training load is unchanged.'
+        : data.outcome === 'already_imported' ? 'Ride already recorded. No duplicate was created.'
+        : 'Ride recorded. Training-load validation is still pending.');
+      if (intervalsPreview?.acceptanceEnabled) await refreshRideInbox();
+    } catch (error) {
+      setRideMessage(error instanceof Error ? error.message : 'Ride confirmation failed');
+    } finally { setRideAction(null); }
+  }
   async function previewIntervals() {
     setIntervalsLoading(true);
     setIntervalsPreview(null);
@@ -10258,7 +10294,8 @@ function DataSourcesView() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.error ?? 'Unable to retrieve activities');
-      setIntervalsPreview({activities: data.activities ?? []});
+      setIntervalsPreview({activities: data.activities ?? [],stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true});
+      if (data.acceptanceEnabled===true) await refreshRideInbox();
     } catch (error) {
       setIntervalsPreview({error: error instanceof Error ? error.message : 'Preview failed'});
     } finally {
@@ -10331,9 +10368,23 @@ function DataSourcesView() {
             </div>
             {intervalsPreview && (
               <div className="azur-intervals-preview" aria-live="polite">
-                <div className="azur-intervals-review-header"><strong>Ride review · read only</strong><span>Nothing is imported or added to training load</span></div>
+                <div className="azur-intervals-review-header"><strong>Ride review</strong><span>Previewing rides leaves your training load unchanged</span></div>
                 {intervalsPreview.error && <p role="alert">{intervalsPreview.error}</p>}
                 {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>No cycling activities returned for the last seven days.</p>}
+                {rideMessage && <p role="status">{rideMessage}</p>}
+                {intervalsPreview.acceptanceEnabled && rideInbox.length > 0 && (
+                  <section aria-label="Staged rides awaiting review">
+                    <h4>Staged rides</h4>
+                    <p>Confirming records the ride. Training-load validation and planned workout completion remain pending.</p>
+                    {rideInbox.map(ride => (
+                      <article className="azur-intervals-preview-ride" key={ride.id}>
+                        <strong>{ride.start_time} · {Math.round(ride.duration_sec / 60)} min</strong>
+                        <small>{ride.status === 'possible_duplicate' ? 'Possible duplicate — further review required' : ride.status === 'rejected' ? 'Rejected' : 'Awaiting acceptance or training-load validation'}</small>
+                        {['pending_review','reviewed'].includes(ride.status) && <button type="button" className="primary-button" disabled={rideAction !== null} onClick={() => void confirmRideAction(ride.id,'accept-activity',{stageId:ride.id,confirm:true})}>{rideAction === ride.id ? 'Confirming…' : 'Confirm and record ride'}</button>}
+                      </article>
+                    ))}
+                  </section>
+                )}
                 {intervalsPreview.activities?.map(activity => (
                   <article className="azur-intervals-preview-ride" key={String(activity.sourceId)}>
                     <strong>{activity.name || 'Cycling activity'}</strong>
@@ -10345,6 +10396,11 @@ function DataSourcesView() {
                         <span>Scheduled ride candidates ({activity.sessionCandidates.length}):</span>
                         {activity.sessionCandidates.map(candidate => <small key={candidate.id}>{candidate.title || 'Planned bike workout'}</small>)}
                       </div>
+                    )}
+                    {intervalsPreview.stagingEnabled && ['candidate_match','unmatched_activity'].includes(activity.status ?? '') && (
+                      <button type="button" className="primary-button" disabled={rideAction !== null} onClick={() => void confirmRideAction(String(activity.sourceId),'stage-activity',{sourceId:String(activity.sourceId),plannedSessionId:activity.proposedPlannedSessionId ?? null,confirm:true})}>
+                        {rideAction === String(activity.sourceId) ? 'Staging…' : 'Confirm ride for review'}
+                      </button>
                     )}
                     <span className="azur-intervals-review-note">Stage: {activity.alreadyImported ? 'Already recorded' : activity.possibleCrossPlatformDuplicate ? 'Duplicate review required' : activity.status === 'candidate_match' ? 'Potential workout match' : activity.status === 'ambiguous_session' ? 'Session matching requires review' : 'Not imported'} · Training load unchanged</span>
                   </article>

@@ -22,6 +22,7 @@ alter table public.intervals_import_inbox enable row level security;
 revoke all on public.intervals_import_inbox from public, anon, authenticated;
 -- Read-only per-athlete access for signed-in users; writes remain server-only.
 grant select on public.intervals_import_inbox to authenticated;
+grant select, insert, update on public.intervals_import_inbox to service_role;
 create policy "athletes can read their own inbox" on public.intervals_import_inbox
   for select to authenticated using (
     exists (select 1 from public.athlete_profile p where p.id=athlete_id and p.user_id=auth.uid())

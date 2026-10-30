@@ -23,7 +23,9 @@ jobs:
         with:
           node-version: '24'
       - name: Run import safety checks
-        run: node --test src/lib/calculations/intervalsImportReview.test.mjs src/lib/calculations/intervalsImportGate.test.mjs
+        run: npm test
+      - name: Test authenticated acceptance handler
+        run: node --test api/intervals/accept-activity.test.mjs
       - name: Build app
         run: |
           npm install --no-package-lock

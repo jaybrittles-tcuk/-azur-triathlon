@@ -18,3 +18,19 @@ fi
 actual="$(psql -v ON_ERROR_STOP=1 -Atqc "select count(*) from public.intervals_import_inbox where athlete_id='$athlete' and source_activity_id='concurrent-ride'")"
 [[ "$actual" == "1" ]] || { echo "Expected one staged row, got $actual" >&2; exit 1; }
 echo 'PASS: two concurrent independent connections produced one staged record.'
+# Accept the same staged ride from independent connections. The athlete lock
+# must yield one insert and one idempotent replay, never two activity records.
+stage_id="$(psql -v ON_ERROR_STOP=1 -Atqc "select id from public.intervals_import_inbox where athlete_id='$athlete' and source_activity_id='concurrent-ride'")"
+accept_sql="select outcome from public.accept_staged_intervals_ride('$athlete','$stage_id',true)"
+psql -v ON_ERROR_STOP=1 -Atqc "$accept_sql" > /tmp/azur_accept_one.txt &
+p1=$!
+psql -v ON_ERROR_STOP=1 -Atqc "$accept_sql" > /tmp/azur_accept_two.txt &
+p2=$!
+wait "$p1"
+wait "$p2"
+combined="$(cat /tmp/azur_accept_one.txt /tmp/azur_accept_two.txt | sort)"
+expected="$(printf 'already_imported\nimported_pending_load_review')"
+[[ "$combined" == "$expected" ]] || { echo "Unexpected acceptance outcomes: $combined" >&2; exit 1; }
+actual="$(psql -v ON_ERROR_STOP=1 -Atqc "select count(*) from public.completed_activity where athlete_id='$athlete' and source='intervals' and source_activity_id='concurrent-ride' and processed_metrics->>'load_status'='pending_validation' and planned_session_id is null")"
+[[ "$actual" == "1" ]] || { echo "Expected one quarantined accepted record, got $actual" >&2; exit 1; }
+echo 'PASS: concurrent acceptance produced one quarantined completed activity.'
