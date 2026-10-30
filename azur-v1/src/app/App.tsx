@@ -10054,6 +10054,9 @@ const sportMap: Record<string, 'swim' | 'bike' | 'run'> = {
   indoor_bike: 'bike',
   virtual_ride: 'bike',
   virtualride: 'bike',
+  virtual_cycling: 'bike',
+  indoorcyclingactivity: 'bike',
+  indoor_cycle: 'bike',
   spinning: 'bike',
   trainer: 'bike',
   swimming: 'swim',
@@ -10061,7 +10064,7 @@ const sportMap: Record<string, 'swim' | 'bike' | 'run'> = {
 };
 
 const mappedSport =
-  sportMap[String(firstSession?.sport ?? '').toLowerCase()];
+  sportMap[String(firstSession?.sport ?? '').toLowerCase().replace(/[\\s-]+/g, '_')];
     if (!mappedSport || !startTime || durationSec <= 0) {
   throw new Error('FIT activity is missing required activity data.');
 }
