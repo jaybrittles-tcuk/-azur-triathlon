@@ -1169,6 +1169,27 @@ function sportName(sport: Sport) {
 export function App() {
   const [authReady, setAuthReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Keep review state stable while background profile/session loads rerender App.
+  const [intervalsPreview, setIntervalsPreview] = useState<{
+    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
+    stagingEnabled?:boolean;
+    acceptanceEnabled?:boolean;
+    loadValidationEnabled?:boolean;
+    error?:string;
+  } | null>(null);
+  const [intervalsLoading, setIntervalsLoading] = useState(false);
+  const [rideAction, setRideAction] = useState<string | null>(null);
+  const [rideMessage, setRideMessage] = useState('');
+  const [rideInbox, setRideInbox] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;status:string}>>([]);
+  const [rideLoadReview, setRideLoadReview] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;processed_metrics?:{load_status?:string;training_stress?:number}}>>([]);
+  const intervalsReviewOwner = useRef<string | null>(null);
+  function syncIntervalsReviewOwner(userId:string|null) {
+    if (intervalsReviewOwner.current === userId) return;
+    intervalsReviewOwner.current = userId;
+    setIntervalsPreview(null); setIntervalsLoading(false);
+    setRideAction(null); setRideMessage(''); setRideInbox([]); setRideLoadReview([]);
+  }
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true';
@@ -1856,6 +1877,7 @@ targets: session.targets ?? {},
 
 useEffect(() => {
   supabase.auth.getSession().then(({ data }) => {
+    syncIntervalsReviewOwner(data.session?.user.id ?? null);
     setIsAuthenticated(!!data.session);
 
 if (data.session?.user) {
@@ -1870,6 +1892,7 @@ if (data.session?.user) {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange((_event, session) => {
+    syncIntervalsReviewOwner(session?.user.id ?? null);
     setIsAuthenticated(!!session);
 
 if (session?.user) {
@@ -10247,18 +10270,6 @@ routePoints.length
 }
 
 function DataSourcesView() {
-  const [intervalsPreview, setIntervalsPreview] = useState<{
-    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
-    stagingEnabled?:boolean;
-    acceptanceEnabled?:boolean;
-    loadValidationEnabled?:boolean;
-    error?:string;
-  } | null>(null);
-  const [intervalsLoading, setIntervalsLoading] = useState(false);
-  const [rideAction, setRideAction] = useState<string | null>(null);
-  const [rideMessage, setRideMessage] = useState('');
-  const [rideInbox, setRideInbox] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;status:string}>>([]);
-  const [rideLoadReview, setRideLoadReview] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;processed_metrics?:{load_status?:string;training_stress?:number}}>>([]);
   async function rideRequest(path:string, body?:object) {
     const {data:{session}} = await supabase.auth.getSession();
     if (!session?.access_token) throw new Error('Please sign in again.');
@@ -10268,6 +10279,7 @@ function DataSourcesView() {
       ...(body ? {body:JSON.stringify(body)} : {}),
     });
     const data = await response.json();
+    if (intervalsReviewOwner.current !== session.user.id) throw new Error('Your session changed. Reopen ride review.');
     if (!response.ok) throw new Error(data?.error ?? 'Ride review unavailable');
     return data;
   }
@@ -10308,6 +10320,7 @@ function DataSourcesView() {
         headers: {Authorization: `Bearer ${session.access_token}`},
       });
       const data = await response.json();
+      if (intervalsReviewOwner.current !== session.user.id) return;
       if (!response.ok) throw new Error(data?.error ?? 'Unable to retrieve activities');
       setIntervalsPreview({activities: data.activities ?? [],stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true,loadValidationEnabled:data.loadValidationEnabled===true});
       if (data.acceptanceEnabled===true) await refreshRideInbox();

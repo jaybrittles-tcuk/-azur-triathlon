@@ -15,6 +15,7 @@ const rideStart=rideDay+'T06:49:22Z';
 const stageId='00000000-0000-4000-8000-000000000099';
 const activityId='00000000-0000-4000-8000-000000000098';
 let staged=false,accepted=false,validated=false;
+let profileFtp=250;
 const commands=[];
 const errors=[];
 const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
@@ -29,7 +30,7 @@ await context.route('https://example.supabase.co/**',async route=>{
  let data=single?null:[];
  if(url.pathname.startsWith('/auth/v1/')) data=user;
  else if(url.pathname.endsWith('/athlete_profile')) {
-  const profile={id:athlete,user_id:user.id,display_name:'Synthetic Athlete',ftp_w:250};
+  const profile={id:athlete,user_id:user.id,display_name:'Synthetic Athlete',ftp_w:profileFtp};
   data=single?profile:[profile];
  } else if(url.pathname.endsWith('/completed_activity')) data=accepted?[recorded()]:[];
  const emptySingle=single&&data===null;
@@ -56,6 +57,18 @@ try {
  await page.getByRole('button',{name:'Data Sources',exact:true}).click();
  await page.getByRole('button',{name:'Preview rides',exact:true}).click();
  await page.getByText('Synthetic Zwift ride',{exact:true}).waitFor();
+ // A token refresh reloads the parent profile. The open review must survive it.
+ profileFtp=251;
+ const profileRefresh=page.waitForResponse(response=>response.url().includes('/athlete_profile')&&response.url().includes('ftp_w'));
+ await page.evaluate(()=>{
+  const key='sb-example-auth-token';
+  const channel=new BroadcastChannel(key);
+  channel.postMessage({event:'TOKEN_REFRESHED',session:JSON.parse(localStorage.getItem(key))});
+  setTimeout(()=>channel.close(),100);
+ });
+ await (await profileRefresh).finished();
+ await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+ assert.equal(await page.getByText('Synthetic Zwift ride',{exact:true}).count(),1,'Ride review must survive a parent profile refresh');
  await page.getByRole('button',{name:'Confirm ride for review',exact:true}).click();
  await page.getByRole('button',{name:'Confirm and record ride',exact:true}).click();
  await page.getByRole('button',{name:'Confirm training-load approval',exact:true}).click();

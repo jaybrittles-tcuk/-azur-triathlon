@@ -57,3 +57,8 @@ API unit tests live under `tests/api/intervals`, outside Vercel's deployable `/a
 `tests/staging-live.browser.mjs` exercises the hosted sign-in → web proxy → Edge handlers → database → saved score and replay → Weekly Review flow. Set `AZUR_TEST_URL`, `AZUR_STAGING_AUTH_FILE` and, when needed, an ephemeral Vercel access-link file via `AZUR_STAGING_ACCESS_FILE`. Private credentials are runtime-only; this test must not run against production.
 
 The latest Auth advisor also reports leaked-password protection disabled. See [Supabase password security](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). No Auth protection settings were changed for testing.
+
+
+A hosted-browser run identified review state resetting during background profile/Auth updates. Review state now lives in the persistent App owner scope and is cleared when the signed-in athlete changes. A browser regression sends a token-refresh event while the review is open and checks that the ride remains visible. Responses from a previous session are discarded.
+
+When the test environment uses a managed HTTPS proxy, `AZUR_BROWSER_PROXY` (or `HTTPS_PROXY`) configures Chromium's proxy. `AZUR_BROWSER_IGNORE_HTTPS_ERRORS=true` is an explicit test-browser-only option for a private proxy CA; it defaults to false and does not alter the deployed site's TLS or protections.
