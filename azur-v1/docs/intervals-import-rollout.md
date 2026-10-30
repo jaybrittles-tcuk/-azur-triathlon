@@ -1,7 +1,7 @@
 # Intervals.icu import staging — rollout gate
 
 ## Current status
-The migration `20261030_intervals_import_inbox.sql` is STAGED in GitHub only.
+The migration `20261030152435_intervals_import_inbox.sql` is STAGED in GitHub only.
 Authenticated staging, acceptance and load-approval handlers are implemented behind separate server release flags. Do not deploy/apply until the remaining release checks pass.
 No automatic activity ingestion is enabled.
 
@@ -41,7 +41,7 @@ Cross-platform duplicate detection is heuristic. Do not automatically merge, mat
 
 ## Training-load approval (development only)
 - `INTERVALS_LOAD_VALIDATION_ENABLED=true` exposes recorded rides and the explicit training-load approval action; it defaults to disabled.
-- Apply `20261030141058_intervals_validate_load.sql` after BOTH existing staging and acceptance migrations. Do not rely on lexical ordering of the older nonstandard development filenames. These migrations remain unapplied to production.
+- Apply `20261030152448_intervals_validate_load.sql` after BOTH existing staging and acceptance migrations. All four unapplied migrations now use valid, ordered CLI-generated timestamps. These migrations remain unapplied to production.
 - The server resolves ownership from the verified athlete session. The transaction requires a reviewed inbox record matching the accepted activity, positive finite normalised power and current athlete FTP, and no overlapping recorded bike ride.
 - Approval updates the existing activity with canonical normalised power, FTP snapshot, calculated stress, intensity factor, version and approval timestamp. Repeated approval returns the saved score without rewriting it or creating another activity.
 - The dashboard consumes that saved Intervals score; a later FTP change does not recalculate it. Recorded rides load even when there are no planned sessions, and leaving Data Sources after an import/approval refreshes dashboard activities.
@@ -58,3 +58,14 @@ Cross-platform duplicate detection is heuristic. Do not automatically merge, mat
 - This is a browser contract test with synthetic responses, not proof of live backend or real PostgreSQL concurrency. The CI browser job runs separately from the database concurrency job.
 
 - Current local results after reconciliation: 139 calculation/API tests passed; full Vite build passed; Chromium browser contract and standalone mobile onboarding checks passed. The Chromium test uses synthetic intercepted responses and does not replace the live staging release checks.
+
+
+## Live schema audit and write protection (30 October 2026)
+- Read-only checks against the AZUR project confirmed the required activity columns, global source/source-ID uniqueness, RLS and server grants. The import migrations are absent from live migration history; there is no separate development database branch yet.
+- Live athlete ownership policies permit direct completed-activity INSERT/UPDATE. A new restrictive policy layer blocks browser INSERT/UPDATE/DELETE of Intervals records, including source relabelling and case/space variants. It preserves ownership-based reads, existing manual activity workflows and service-role transactions.
+- Existing manual completion RPC definitions were reviewed: they insert or edit `source=manual`, not imported records.
+- The disposable fixture now models the live integer FTP, required display name and permissive ownership policies, so security tests cannot pass just because all athlete writes are denied.
+- New adversarial database tests verify forged validation, source relabelling, imported deletion, source spoofing, cross-athlete reads and manual create/edit/delete behaviour.
+- All four unapplied migrations have been regenerated with valid, ordered CLI timestamps. No migration already present in production history was renamed.
+- `supabase/release/intervals_preflight.sql` is a reusable metadata-only compatibility/installation report. Compatible base columns do not mean the import migrations are installed or the release flags are enabled.
+- A paid isolated Supabase branch may be needed for live staging; branch provisioning requires Supabase's cost confirmation. No production schema or athlete data has been modified by this audit.

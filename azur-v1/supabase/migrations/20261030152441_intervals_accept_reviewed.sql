@@ -1,5 +1,5 @@
 -- Isolated acceptance step. Server service-role only; no session auto-completion.
--- Must be applied after 20261030_intervals_import_inbox.sql.
+-- Must be applied after 20261030152435_intervals_import_inbox.sql.
 create or replace function public.accept_staged_intervals_ride(p_athlete_id uuid,p_stage_id uuid,p_confirm boolean default false)
 returns table(activity_id uuid,outcome text)
 language plpgsql security invoker set search_path=public
