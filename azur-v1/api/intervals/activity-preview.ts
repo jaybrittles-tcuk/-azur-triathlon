@@ -1,3 +1,4 @@
+import { reviewIntervalsActivity } from '../../src/lib/intervalsImportReview.mjs';
 // Read-only preflight: no athlete activities are written or plans altered.
 export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
@@ -30,15 +31,10 @@ export default async function handler(req:any,res:any){
  const existingResponse=await fetch(url+'/rest/v1/completed_activity?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&start_time=gte.'+encodeURIComponent(oldest+'T00:00:00Z')+'&select=source,source_activity_id,sport,start_time,duration_sec&limit=500',{headers});
  if(!existingResponse.ok)return res.status(502).json({error:'Could not perform duplicate review'});
  const existing=await existingResponse.json();
- const assess=(a:any)=>{
-   const rawStart=String(a.start_date??a.start_date_local??'');
-   const started=Date.parse(rawStart);
-   const elapsed=Number(a.elapsed_time??a.moving_time??0);
-   const exact=existing.some((e:any)=>e.source==='intervals'&&String(e.source_activity_id)===String(a.id));
-   // These are candidate matches only; never auto-import or auto-complete based on time proximity.
-   const overlap=existing.some((e:any)=>['bike','cycling'].includes(String(e.sport??'').toLowerCase())&&Number.isFinite(started)&&Math.abs(Date.parse(e.start_time)-started)<15*60*1000&&Math.abs(Number(e.duration_sec)-elapsed)<10*60);
-   return {alreadyImported:exact,possibleCrossPlatformDuplicate:overlap,reviewRequired:exact||overlap||!Number.isFinite(started)||elapsed<=0,duplicateReview:'heuristic_only',safeToAutoImport:false};
- };
+ const plannedResponse=await fetch(url+'/rest/v1/planned_session?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&planned_date=gte.'+oldest+'&planned_date=lte.'+newest+'&select=id,sport,title,planned_date,duration_min,status,is_active_version&limit=500',{headers});
+ if(!plannedResponse.ok)return res.status(502).json({error:'Could not review planned sessions'});
+ const plans=await plannedResponse.json();
+ const assess=(a:any)=>reviewIntervalsActivity(a,existing,plans);
  res.setHeader('Cache-Control','private, no-store');
  return res.status(200).json({mode:'preview_only',dateRange:{oldest,newest},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
 }
