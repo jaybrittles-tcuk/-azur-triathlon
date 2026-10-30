@@ -5730,3 +5730,13 @@ strong {
 .azur-v2-discipline-list span:before{content:"●";margin-right:9px}
 .azur-v2-discipline-swim span:before{color:#28b7e8}.azur-v2-discipline-bike span:before{color:#f0bb42}.azur-v2-discipline-run span:before{color:#f28e61}
 @media(max-width:410px){.azur-v2-performance-card{padding:15px}.azur-v2-discipline-ring{width:120px;height:120px}.azur-v2-discipline-ring>span{width:78px;height:78px}.azur-v2-discipline-breakdown{gap:15px}}
+
+
+/* Performance V2 historical timeline and provenance */
+.azur-v2-weekly-chart{height:152px;display:flex;align-items:stretch;gap:5px;overflow-x:auto;padding:11px 2px 4px;margin:8px 0 17px;border-bottom:1px solid #304056}
+.azur-v2-weekly-chart button{flex:1 0 26px;min-width:26px;max-width:62px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;padding:0;cursor:pointer;color:#a7bad0}
+.azur-v2-weekly-chart button>span{display:block;width:75%;min-height:4px;background:linear-gradient(180deg,#3bb7ff,#2164bd);border-radius:5px 5px 2px 2px;transition:filter .15s}
+.azur-v2-weekly-chart button[aria-pressed=true]>span{background:linear-gradient(180deg,#f3c962,#d8a13b);filter:drop-shadow(0 0 5px #e3a74255)}
+.azur-v2-weekly-chart button>small{font-size:9px;white-space:nowrap;line-height:1.5}
+.azur-v2-weekly-chart button:focus-visible{outline:2px solid #75c8ff;outline-offset:2px;border-radius:5px}
+.azur-v2-evidence-note{font-size:12px;line-height:1.6;color:#a8bfd6;border-top:1px solid #2d3f55;padding-top:12px;margin-top:15px}
