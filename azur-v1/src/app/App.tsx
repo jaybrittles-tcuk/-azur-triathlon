@@ -1,3 +1,4 @@
+import { openProviderAuthorization } from '../lib/openProviderAuthorization';
 import { azurApiUrl } from '../lib/azurApiUrl';
 import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
@@ -1536,7 +1537,7 @@ console.log('Azur latest combined training load:', latestLoad);
     return;
   }
 
-  window.location.href = data.authorizationUrl;
+  await openProviderAuthorization(data.authorizationUrl);
 }
 async function connectIntervals() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -1553,7 +1554,7 @@ async function connectIntervals() {
     if (!response.ok || !data?.authorizationUrl) {
       throw new Error(data?.error ?? 'Unable to start Intervals.icu connection');
     }
-    window.location.assign(data.authorizationUrl);
+    await openProviderAuthorization(data.authorizationUrl);
   } catch (error) {
     window.alert(error instanceof Error ? error.message : 'Intervals.icu connection failed');
   }
