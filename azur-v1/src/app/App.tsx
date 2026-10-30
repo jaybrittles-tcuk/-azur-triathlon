@@ -10064,7 +10064,7 @@ const sportMap: Record<string, 'swim' | 'bike' | 'run'> = {
 };
 
 const mappedSport =
-  sportMap[String(firstSession?.sport ?? '').toLowerCase().replace(/[\\s-]+/g, '_')];
+  sportMap[String(firstSession?.sport ?? '').toLowerCase().replace(/[\s-]+/g, '_')];
     if (!mappedSport || !startTime || durationSec <= 0) {
   throw new Error('FIT activity is missing required activity data.');
 }
