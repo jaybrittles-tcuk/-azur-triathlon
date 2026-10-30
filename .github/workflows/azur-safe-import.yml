@@ -1,0 +1,27 @@
+name: AZUR safe import checks
+on:
+  pull_request:
+    paths:
+      - 'azur-v1/src/lib/**'
+      - 'azur-v1/api/intervals/**'
+      - 'azur-v1/supabase/migrations/**'
+      - '.github/workflows/azur-safe-import.yml'
+  workflow_dispatch:
+jobs:
+  import-safety:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: azur-v1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node version
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run import safety checks
+        run: node --test src/lib/calculations/intervalsImportReview.test.mjs src/lib/calculations/intervalsImportGate.test.mjs
+      - name: Build app
+        run: |
+          npm ci
+          npm run build
