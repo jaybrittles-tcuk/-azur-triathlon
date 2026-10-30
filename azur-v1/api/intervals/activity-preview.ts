@@ -28,7 +28,7 @@ export default async function handler(req:any,res:any){
  if(!Array.isArray(entries))return res.status(502).json({error:'Unexpected upstream response'});
  const rides=entries.filter((a:any)=>['ride','virtualride','indoorride','virtualcycling'].includes(String(a.type??'').toLowerCase().replace(/[^a-z]/g,'')));
  // Read-only review of existing activities; never change completion status here.
- const existingResponse=await fetch(url+'/rest/v1/completed_activity?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&start_time=gte.'+encodeURIComponent(oldest+'T00:00:00Z')+'&select=source,source_activity_id,sport,start_time,duration_sec&limit=500',{headers});
+ const existingResponse=await fetch(url+'/rest/v1/completed_activity?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&start_time=gte.'+encodeURIComponent(oldest+'T00:00:00Z')+'&select=source,source_activity_id,sport,start_time,duration_sec,distance_m&limit=500',{headers});
  if(!existingResponse.ok)return res.status(502).json({error:'Could not perform duplicate review'});
  const existing=await existingResponse.json();
  const plannedResponse=await fetch(url+'/rest/v1/planned_session?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&planned_date=gte.'+oldest+'&planned_date=lte.'+newest+'&select=id,sport,title,planned_date,duration_min,status,is_active_version&limit=500',{headers});
