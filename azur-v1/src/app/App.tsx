@@ -1,3 +1,5 @@
+import { openProviderAuthorization } from '../lib/openProviderAuthorization';
+import { azurApiUrl } from '../lib/azurApiUrl';
 import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
@@ -1513,7 +1515,7 @@ console.log('Azur latest combined training load:', latestLoad);
     return;
   }
 
-  const response = await fetch('/api/garmin/connect', {
+  const response = await fetch(azurApiUrl('/api/garmin/connect'), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -1535,7 +1537,7 @@ console.log('Azur latest combined training load:', latestLoad);
     return;
   }
 
-  window.location.href = data.authorizationUrl;
+  await openProviderAuthorization(data.authorizationUrl);
 }
 async function connectIntervals() {
   const { data: { session } } = await supabase.auth.getSession();
@@ -1544,7 +1546,7 @@ async function connectIntervals() {
     return;
   }
   try {
-    const response = await fetch('/api/intervals/connect', {
+    const response = await fetch(azurApiUrl('/api/intervals/connect'), {
       method: 'POST',
       headers: { Authorization: `Bearer ${session.access_token}` },
     });
@@ -1552,7 +1554,7 @@ async function connectIntervals() {
     if (!response.ok || !data?.authorizationUrl) {
       throw new Error(data?.error ?? 'Unable to start Intervals.icu connection');
     }
-    window.location.assign(data.authorizationUrl);
+    await openProviderAuthorization(data.authorizationUrl);
   } catch (error) {
     window.alert(error instanceof Error ? error.message : 'Intervals.icu connection failed');
   }
@@ -10252,7 +10254,7 @@ function DataSourcesView() {
     try {
       const {data:{session}} = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Please sign in again.');
-      const response = await fetch('/api/intervals/activity-preview?days=7', {
+      const response = await fetch(azurApiUrl('/api/intervals/activity-preview?days=7'), {
         headers: {Authorization: `Bearer ${session.access_token}`},
       });
       const data = await response.json();

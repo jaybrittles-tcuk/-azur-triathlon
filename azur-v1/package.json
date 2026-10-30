@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test src/lib/calculations/*.test.mjs"
+    "test": "node --experimental-strip-types --test src/lib/calculations/*.test.mjs",
+    "ios:sync": "npm run build && cap sync ios",
+    "ios:open": "cap open ios"
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",
@@ -18,11 +20,16 @@
     "typescript": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "lucide-react": "latest"
+    "lucide-react": "latest",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
+    "@capacitor/browser": "^8.0.0",
+    "@capacitor/app": "^8.0.0"
   },
   "devDependencies": {
     "@types/leaflet": "latest",
     "@types/react": "latest",
-    "@types/react-dom": "latest"
+    "@types/react-dom": "latest",
+    "@capacitor/cli": "^8.0.0"
   }
 }
