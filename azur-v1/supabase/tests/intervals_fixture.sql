@@ -11,6 +11,10 @@ create table public.completed_activity(
  id uuid primary key default gen_random_uuid(),
  athlete_id uuid not null references public.athlete_profile(id),
  sport public.sport_type not null,
+ planned_session_id uuid,
+ raw_payload jsonb not null default '{}'::jsonb,
+ processed_metrics jsonb not null default '{}'::jsonb,
+ duplicate_group_key text,
  source text not null,source_activity_id text,
  start_time timestamptz not null,duration_sec integer not null,distance_m numeric,
  unique(source,source_activity_id)
