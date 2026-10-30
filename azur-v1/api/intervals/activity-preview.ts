@@ -20,7 +20,7 @@ export default async function handler(req:any,res:any){
  const days=Math.max(1,Math.min(31,Number(req.query.days)||7));
  const oldest=new Date(Date.now()-(days-1)*86400000).toISOString().slice(0,10);
  const newest=new Date().toISOString().slice(0,10);
- const endpoint='https://intervals.icu/api/v1/athlete/0/activities?oldest='+oldest+'&newest='+newest+'&limit=100';
+ const endpoint='https://intervals.icu/api/v1/athlete/0/activities?oldest='+oldest+'&newest='+newest;
  const upstream=await fetch(endpoint,{headers:{Authorization:'Bearer '+integration.access_token,Accept:'application/json'}});
  if(!upstream.ok)return res.status(502).json({error:'Intervals.icu activity read failed',upstreamStatus:upstream.status});
  const entries=await upstream.json();
@@ -31,10 +31,12 @@ export default async function handler(req:any,res:any){
  if(!existingResponse.ok)return res.status(502).json({error:'Could not perform duplicate review'});
  const existing=await existingResponse.json();
  const assess=(a:any)=>{
-   const started=Date.parse(a.start_date??a.start_date_local??'');
+   const rawStart=String(a.start_date??a.start_date_local??'');
+   const started=Date.parse(rawStart);
    const elapsed=Number(a.elapsed_time??a.moving_time??0);
    const exact=existing.some((e:any)=>e.source==='intervals'&&String(e.source_activity_id)===String(a.id));
-   const overlap=existing.some((e:any)=>e.sport==='bike'&&Number.isFinite(started)&&Math.abs(Date.parse(e.start_time)-started)<15*60*1000&&Math.abs(Number(e.duration_sec)-elapsed)<10*60);
+   // These are candidate matches only; never auto-import or auto-complete based on time proximity.
+   const overlap=existing.some((e:any)=>['bike','cycling'].includes(String(e.sport??'').toLowerCase())&&Number.isFinite(started)&&Math.abs(Date.parse(e.start_time)-started)<15*60*1000&&Math.abs(Number(e.duration_sec)-elapsed)<10*60);
    return {alreadyImported:exact,possibleCrossPlatformDuplicate:overlap,reviewRequired:exact||overlap||!Number.isFinite(started)||elapsed<=0};
  };
  res.setHeader('Cache-Control','private, no-store');
