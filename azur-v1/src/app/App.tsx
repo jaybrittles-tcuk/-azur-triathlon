@@ -10242,7 +10242,7 @@ routePoints.length
 
 function DataSourcesView() {
   const [intervalsPreview, setIntervalsPreview] = useState<{
-    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean}>;
+    activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean}>;
     error?:string;
   } | null>(null);
   const [intervalsLoading, setIntervalsLoading] = useState(false);
@@ -10338,7 +10338,7 @@ function DataSourcesView() {
                     <strong>{activity.name || 'Cycling activity'}</strong>
                     <span>{activity.start || 'Unknown start'} · {activity.type || 'Ride'}</span>
                     <span>{activity.durationSec != null ? `${Math.round(activity.durationSec / 60)} min` : 'Duration unavailable'} · {activity.distanceMeters != null ? `${(activity.distanceMeters / 1000).toFixed(2)} km` : 'Distance unavailable'} · {activity.averageWatts != null ? `${activity.averageWatts} W avg` : 'Average power unavailable'}{activity.normalizedWatts != null ? ` · ${activity.normalizedWatts} W normalised` : ''}</span>
-                    <small>{activity.alreadyImported ? 'Already imported' : activity.possibleCrossPlatformDuplicate ? 'Potential duplicate — review' : activity.reviewRequired ? 'Requires review' : 'Not imported — eligible for review'}</small>
+                    <small>{activity.status === 'candidate_match' ? 'Possible planned-session match — review required' : activity.status === 'already_imported' ? 'Already imported' : activity.status === 'possible_duplicate' ? 'Potential duplicate — review required' : activity.status === 'ambiguous_session' ? 'Multiple planned sessions — review required' : activity.status === 'unmatched_activity' ? 'Unmatched activity — review required' : 'Requires review'}{activity.reason ? ` · ${activity.reason}` : ''}</small>
                   </article>
                 ))}
               </div>
