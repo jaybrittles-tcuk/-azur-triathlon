@@ -5775,3 +5775,64 @@ strong {
 }
 
 .azur-garmin-import-disclosure{grid-column:1/-1;font-size:11px;line-height:1.5;color:#abc4dc;margin:3px 0 8px;padding:9px 12px;background:#132c42;border:1px solid #32516d;border-radius:10px}
+
+
+/* AZUR V2 Figma-aligned tokens and athlete-facing component polish.
+   Presentation only: session completion, import provenance and coach approvals remain unchanged. */
+:root {
+  --azur-v2-bg: #071524;
+  --azur-v2-card: #142238;
+  --azur-v2-elevated: #1c344a;
+  --azur-v2-blue: #168dce;
+  --azur-v2-sky: #28b7e8;
+  --azur-v2-gold: #f4b43c;
+  --azur-v2-ink: #f6fbff;
+  --azur-v2-subtle: #a5bcd1;
+  --azur-v2-outline: #2c425a;
+}
+.azur-premium-home .azur-home-sport,
+.azur-premium-home .azur-home-load,
+.azur-athlete-today-summary,
+.azur-athlete-week-progress {
+  border-radius: 16px !important;
+  background: var(--azur-v2-card) !important;
+  border: 1px solid var(--azur-v2-outline) !important;
+  box-shadow: 0 10px 24px rgba(1,9,22,.13) !important;
+}
+.azur-premium-home .azur-home-sport:focus-within,
+.calendar-layout .calendar-session:focus-visible {
+  outline: 2px solid var(--azur-v2-sky);
+  outline-offset: 3px;
+}
+.calendar-layout .calendar-session {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px !important;
+  border: 1px solid var(--azur-v2-outline) !important;
+  background: var(--azur-v2-card) !important;
+  color: var(--azur-v2-ink) !important;
+  box-shadow: none !important;
+}
+.calendar-layout .calendar-session.swim { border-left: 5px solid var(--azur-v2-sky) !important; }
+.calendar-layout .calendar-session.bike { border-left: 5px solid var(--azur-v2-blue) !important; }
+.calendar-layout .calendar-session.run { border-left: 5px solid var(--azur-v2-gold) !important; }
+.calendar-layout .calendar-session strong { color: var(--azur-v2-ink) !important; font-weight: 750; }
+.calendar-layout .calendar-session small,
+.calendar-layout .calendar-session-meta span { color: var(--azur-v2-subtle) !important; }
+.calendar-layout .calendar-session.selected {
+  border-color: var(--azur-v2-sky) !important;
+  box-shadow: 0 0 0 2px rgba(40,183,232,.16) !important;
+}
+.calendar-layout .calendar-session-status > span {
+  background: var(--azur-v2-elevated) !important;
+  border-color: var(--azur-v2-outline) !important;
+  color: var(--azur-v2-ink) !important;
+}
+@media(max-width:600px) {
+  .calendar-layout .calendar-session { padding: 13px !important; }
+  .calendar-layout .calendar-session strong { font-size: 14px !important; }
+  .azur-premium-home .azur-home-sport { min-height: 83px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .calendar-layout .calendar-session { transition: none !important; }
+}
