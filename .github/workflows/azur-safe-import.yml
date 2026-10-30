@@ -56,7 +56,11 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_fixture.sql
       - name: Apply migration to disposable database
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/migrations/20261030_intervals_import_inbox.sql
+      - name: Install reviewed-acceptance transaction
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/migrations/20261030_intervals_accept_reviewed.sql
       - name: Assert database staging invariants
         run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_atomic_test.sql
+      - name: Verify reviewed acceptance safety
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/intervals_accept_reviewed_test.sql
       - name: Verify actual concurrent staging requests
         run: bash azur-v1/supabase/tests/intervals_concurrent_test.sh
