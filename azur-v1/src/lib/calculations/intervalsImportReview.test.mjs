@@ -24,3 +24,10 @@ test('invalid time and missing id cannot auto-import',()=>{
 test('completed or inactive plans are never offered',()=>{
  const x=reviewIntervalsActivity(ride,[],[{...plan,status:'completed'},{...plan,id:'other',is_active_version:false}]);assert.equal(x.status,'unmatched_activity');
 });
+
+test('invalid ride cannot propose a plan even when calendar day matches',()=>{
+ const x=reviewIntervalsActivity({...ride,id:null,elapsed_time:0},[],[plan]);
+ assert.equal(x.status,'invalid_activity');
+ assert.equal(x.proposedPlannedSessionId,null);
+ assert.equal(x.trainingLoadEligible,false);
+});
