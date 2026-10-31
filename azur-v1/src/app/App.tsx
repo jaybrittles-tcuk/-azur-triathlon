@@ -1,3 +1,4 @@
+import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
@@ -663,6 +664,11 @@ const navigation = [
   [Database, 'Data Sources'],
   [RefreshCw, 'Strava Feed'],
 ] as const;
+const moreGroups = [
+  {title: 'Training', links: [[Activity, 'Weekly Review', 'Training load and completed sessions'], [HeartPulse, 'Recovery', 'Check in and review readiness'], [Medal, 'Races', 'Race dates and goals'], [Gauge, 'Benchmarks', 'Swim, bike and run tests']]},
+  {title: 'Connections', links: [[Database, 'Data Sources', 'Connected services and activity imports'], [RefreshCw, 'Strava Feed', 'View your Strava activities']]},
+] as const;
+
 const mobileNavigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
@@ -4902,22 +4908,6 @@ const [planPreview, setPlanPreview] =
 }, [previewWeekOffset]);
   const [showMacrocyclePreview, setShowMacrocyclePreview] =
   useState(false);
-const [chatMessage, setChatMessage] = useState('');
-
-const [chatMessages, setChatMessages] = useState<
-  Array<{
-    id: number;
-    role: 'user' | 'assistant';
-    text: string;
-  }>
->([
-  {
-    id: 1,
-    role: 'assistant',
-    text:
-      'Hi. I can help with your training, recovery, pacing, race preparation and your current Azur plan.',
-  },
-]);
   const [expandedPreviewSession, setExpandedPreviewSession] =
   useState<number | null>(null);
 const [planPreviewInsights, setPlanPreviewInsights] =
@@ -5586,523 +5576,9 @@ color:
   </>
 );
 }
-  const getAzurChatReply = (question: string) => {
-  const text = question.toLowerCase();
-
-  const todayKey = new Date().toISOString().slice(0, 10);
-
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowKey = tomorrowDate.toISOString().slice(0, 10);
-
-  const sessionDate = (session: any) =>
-    session.plannedDate ??
-    session.planned_date ??
-    '';
-
-  const sessionDuration = (session: any) =>
-    session.durationMin ??
-    session.duration_min ??
-    session.duration_minutes ??
-    0;
-
-  const todaySession = weekSessions.find(
-    (session: any) =>
-      sessionDate(session) === todayKey,
-  );
-
-  const tomorrowSession = weekSessions.find(
-    (session: any) =>
-      sessionDate(session) === tomorrowKey,
-  );
-
-  const saturdayRide = weekSessions.find(
-    (session: any) => {
-      const dateValue = sessionDate(session);
-
-      if (!dateValue || session.sport !== 'bike') {
-        return false;
-      }
-
-      const date = new Date(`${dateValue}T12:00:00`);
-
-      return date.getDay() === 6;
-    },
-  );
-
-  if (
-    text.includes('today') &&
-    (
-      text.includes('change') ||
-      text.includes('changed') ||
-      text.includes('session')
-    )
-  ) {
-    if (!todaySession) {
-      return (
-        'There is no structured session scheduled for today. ' +
-        'That may be intentional recovery within your current training week.'
-      );
-    }
-
-    return (
-      `Today you have ${todaySession.title} for ` +
-      `${sessionDuration(todaySession)} minutes. ` +
-      `${todaySession.rationale ?? ''} ` +
-      (
-        recoveryReadiness
-          ? recoveryReadiness.implication === 'proceed_as_planned'
-            ? 'Your current recovery signals support completing it as planned.'
-            : recoveryReadiness.implication === 'hold_or_trim_cost'
-              ? 'Your recovery data suggests keeping the session controlled and being prepared to trim the workload.'
-              : 'Your recovery data currently supports reducing training stress.'
-          : 'I do not yet have enough recovery data to recommend changing it.'
-      )
-    ).trim();
-  }
-
-  if (
-    text.includes('fuel') ||
-    text.includes('nutrition')
-  ) {
-    if (!saturdayRide) {
-      return (
-        'I cannot currently see a Saturday bike session in your plan. ' +
-        'Once one is scheduled I can give you session-specific fuelling guidance.'
-      );
-    }
-
-    const minutes = sessionDuration(saturdayRide);
-
-    const carbs =
-      minutes >= 150
-        ? '70–90g of carbohydrate per hour'
-        : minutes >= 90
-          ? '50–70g of carbohydrate per hour'
-          : '30–50g of carbohydrate per hour';
-
-    return (
-      `Your Saturday ride is ${minutes} minutes. ` +
-      `A practical starting point would be ${carbs}, ` +
-      'around 500–750ml of fluid per hour, and electrolytes adjusted for conditions. ' +
-      'For longer race-specific rides, this is also a good opportunity to practise your planned race nutrition.'
-    );
-  }
-
-  if (
-    text.includes('move') ||
-    text.includes('reschedule')
-  ) {
-    if (!tomorrowSession) {
-      return (
-        'There is no structured session scheduled for tomorrow, so there is nothing that currently needs moving.'
-      );
-    }
-
-    return (
-      `Tomorrow is currently ${tomorrowSession.title} for ` +
-      `${sessionDuration(tomorrowSession)} minutes. ` +
-      'Moving one session can be reasonable, but Azur should also protect the spacing between harder sessions and your long training. ' +
-      'For now I can explain the impact; next we can let this chat actually propose and apply a safe reschedule.'
-    );
-  }
-
-  if (
-    text.includes('training load') ||
-    text.includes('fitness') ||
-    text.includes('fatigue') ||
-    text.includes('form')
-  ) {
-    return (
-      `Your current training load shows fitness ${
-        trainingLoad.fitness ?? '—'
-      }, fatigue ${
-        trainingLoad.fatigue ?? '—'
-      } and form ${
-        trainingLoad.form ?? '—'
-      }. ` +
-      'Azur uses these together rather than treating one number in isolation: fitness reflects longer-term load, fatigue reflects shorter-term load, and form shows the balance between them.'
-    );
-  }
-
-  return (
-    `I can see your current Azur plan${
-      primaryRace?.name
-        ? ` and your target race, ${primaryRace.name}`
-        : ''
-    }. ` +
-    'Ask me about a specific session, your weekly plan, recovery, training load, pacing, fuelling or race preparation and I can use that context in my answer.'
-  );
-};
 function HomeView() {
-const homeWeek = weekSessions.filter(session => {
-  const now = new Date(todayKey + 'T12:00:00');
-  const day = (now.getDay() + 6) % 7;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - day);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  const key = (date: Date) => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-  return session.plannedDate >= key(monday) && session.plannedDate <= key(sunday);
-});
-const homeMinutes = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport).reduce((sum,s)=>sum+(Number(s.durationMin)||0),0);
-const homeCount = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport).length;
-const homeCompleted = (sport: 'swim'|'bike'|'run') => homeWeek.filter(s=>s.sport===sport && s.status==='completed').length;
-const homeDateLabel = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-const homeCompletedTotal=homeWeek.filter(s=>s.status==='completed').length;
-const homePlannedTotal=homeWeek.length;
-const todaySessions=weekSessions.filter(s=>s.plannedDate===todayKey);
-const homeTodayLabel=todaySessions.length?String(todaySessions.length)+' scheduled session'+(todaySessions.length===1?'':'s'):'No workout scheduled';
-const homeProgressPercent=homePlannedTotal?Math.round(homeCompletedTotal/homePlannedTotal*100):0;
-
-const homeRaceDays = primaryRace.raceDate ? Math.max(0,Math.ceil((new Date(primaryRace.raceDate+'T12:00:00').getTime()-Date.now())/86400000)) : null;
-const homeMinutesLabel = (mins:number) => mins >= 60 ? `${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m` : `${mins}m`;
-const todaySession = weekSessions.find(
-  (session: any) =>
-    session.plannedDate === todayKey,
-);
-
-  return (
-      <>
-<section
-  className="mobile-home-hero"
-  style={{
-    marginBottom: '14px',
-  }}
->
-  <div
-    className="race-hero-card"
-    style={{
-      minHeight: '210px',
-      padding: '22px 20px',
-      position: 'relative',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-end',
-      borderRadius: '20px',
-      border: '1px solid rgba(68, 151, 205, 0.32)',
-      boxShadow: '0 16px 32px rgba(1, 9, 20, 0.24)',
-     backgroundImage:
-  "linear-gradient(180deg, rgba(7,21,36,0.72) 0%, rgba(7,21,36,0.32) 32%, rgba(7,21,36,0.92) 82%, #071524 100%), url('/race-images/roth.jpg')",
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-    }}
-  >
-    <button
-      type="button"
-      onClick={() => setActiveNav('Profile')}
-      style={{
-        position: 'absolute',
-        top: '16px',
-right: '16px',
-        width: '58px',
-height: '58px',
-        padding: 0,
-        borderRadius: '50%',
-        border: '2px solid rgba(255,255,255,0.95)',
-        background: '#0A3556',
-        boxShadow: '0 0 0 2px rgba(32,143,208,0.85)',
-        overflow: 'hidden',
-        cursor: 'pointer',
-      }}
-    >
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt={`${athleteName} profile`}
-          style={{
-  width: '100%',
-  height: '100%',
-  objectFit: 'contain',
-  objectPosition: 'center',
-  display: 'block',
-  background: '#071524',
-}}
-        />
-      ) : (
-        <User
-          size={20}
-          color="#FFFFFF"
-        />
-      )}
-    </button>
-
-    <div
-      style={{
-        position: 'relative',
-        zIndex: 1,
-      }}
-    >
-      <div
-        style={{
-          marginBottom: '5px',
-          color: 'rgba(255,255,255,0.72)',
-          fontSize: '11px',
-          fontWeight: 700,
-          letterSpacing: '0.10em',
-          textTransform: 'uppercase',
-        }}
-      >
-        YOUR A RACE
-      </div>
-
-      <h1
-        style={{
-          margin: 0,
-          color: '#FFFFFF',
-          fontSize: '30px',
-          fontWeight: 800,
-          lineHeight: 1.1,
-          letterSpacing: '-0.025em',
-        }}
-      >
-        {primaryRace.name || 'Primary Race'}
-      </h1>
-
-      <div
-        style={{
-          marginTop: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '7px',
-          color: 'rgba(255,255,255,0.86)',
-          fontSize: '14px',
-          fontWeight: 500,
-        }}
-      >
-        <span>
-        {currentMacrocycleWeek?.phase || 'Training phase not set'}
-        </span>
-
-        <span style={{ opacity: 0.4 }}>
-          •
-        </span>
-
-        <span>
-          {homeRaceDays == null ? 'Race date not set' : homeRaceDays === 0 ? 'Race day' : `${homeRaceDays} days to race day`}
-        </span>
-        <span style={{ opacity: 0.7 }}>
-  • {homeRaceDays == null ? 'Set your race date in Profile' : `${Math.ceil(homeRaceDays/7)} weeks to race`}
-</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section className="azur-athlete-today-summary"><div><span>TODAY'S TRAINING</span><strong>{homeTodayLabel}</strong><small>{todaySessions.length ? String(todaySessions.filter(s=>s.status==='completed').length)+' recorded complete today' : 'No sessions on the calendar today.'}</small></div><button type="button" onClick={()=>setActiveNav('Calendar')}>View calendar →</button></section>
-<section className="azur-athlete-week-progress"><div><strong>This week</strong><span>{homeCompletedTotal} of {homePlannedTotal} recorded complete</span></div><div role="progressbar" aria-label="Recorded session completion" aria-valuenow={homeCompletedTotal} aria-valuemin={0} aria-valuemax={homePlannedTotal||1}><span style={{width:String(homeProgressPercent)+'%'}}/></div><small>Completion is based on recorded status, not training quality.</small></section>
-{todaySession && (
-  <section
-    style={{
-      marginBottom: '14px',
-     padding: '16px',
-      background: 'linear-gradient(145deg, #10283F 0%, #071827 100%)',
-      border: '1px solid rgba(68, 151, 205, 0.30)',
-      boxShadow: '0 16px 32px rgba(1, 9, 20, 0.25)',
-      color: '#F6FBFF',
-      borderRadius: '20px',
-    }}
-  >
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '14px',
-      }}
-    >
-      <span
-        style={{
-          color: '#91BCD8',
-          fontSize: '11px',
-          fontWeight: 700,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-        }}
-      >
-        Today&apos;s Session
-      </span>
-
-      <span
-        style={{
-          padding: '5px 9px',
-          borderRadius: '20px',
-          background: '#EEF8F1',
-          color: '#2F8A57',
-          fontSize: '11px',
-          fontWeight: 700,
-        }}
-      >
-        {todaySession.status==='completed'?'Completed':todaySession.status==='planned'?'Planned':'Updated'}
-      </span>
-    </div>
-
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-      }}
-    >
-      <div
-        style={{
-          width: '42px',
-          height: '42px',
-          flexShrink: 0,
-          borderRadius: '50%',
-          background:
-            todaySession.sport === 'bike'
-              ? '#FFF4D8'
-              : todaySession.sport === 'run'
-                ? '#EAF7EF'
-                : '#EAF5FC',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '18px',
-        }}
-      >
-        {todaySession.sport === 'bike'
-          ? '🚴'
-          : todaySession.sport === 'run'
-            ? '🏃'
-            : '🏊'}
-      </div>
-
-      <div>
-        <div
-          style={{
-            color: '#FFFFFF',
-            fontSize: '18px',
-            fontWeight: 700,
-            lineHeight: 1.25,
-          }}
-        >
-          {todaySession.title}
-        </div>
-
-        <div
-          style={{
-            marginTop: '4px',
-            color: '#1673AE',
-            fontSize: '13px',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-          }}
-        >
-      {todaySession.sport} ·{' '}
-{todaySession.duration_min ??
-  todaySession.durationMin ??
-  todaySession.duration_minutes ??
-  0}{' '}
-min
-        </div>
-      </div>
-    </div>
-
-<div
-  style={{
-    marginTop: '14px',
-    height: '42px',
-    display: 'flex',
-    alignItems: 'flex-end',
-    gap: '4px',
-  }}
->
-  {[42, 58, 72, 54, 80, 64, 48, 70, 56, 38].map(
-    (height, index) => (
-      <div
-        key={index}
-        style={{
-          flex: 1,
-          height: `${height}%`,
-          minHeight: '10px',
-          borderRadius: '4px 4px 2px 2px',
-          background:
-            todaySession.sport === 'bike'
-              ? index > 2 && index < 7
-                ? '#F4B43C'
-                : '#F4E4B5'
-              : todaySession.sport === 'run'
-                ? index > 2 && index < 7
-                  ? '#35A96B'
-                  : '#B8E0C8'
-                : index > 2 && index < 7
-                  ? '#208FD0'
-                  : '#B7D8ED',
-        }}
-      />
-    ),
-  )}
-</div>
-
-    <button
-      type="button"
-      onClick={() => {setSelectedId(todaySession.id);setSessionDetailOpen(true);}}
-      style={{
-       width: 'auto',
-        minWidth: '140px',
-     marginTop: '12px',
-padding: '11px 16px',
-        border: 'none',
-        borderRadius: '10px',
-        background: '#168DCE',
-        color: '#FFFFFF',
-        fontSize: '14px',
-        fontWeight: 700,
-        cursor: 'pointer',
-      }}
-    >
-      Open session details →
-    </button>
-  </section>
-)}
-<section className="azur-premium-home" aria-label="AZUR athlete home">
-  
-  <div className="azur-home-section-heading"><span>YOUR TRAINING WEEK</span><button type="button" onClick={()=>setActiveNav('Calendar')}>Calendar →</button></div>
-  <div className="azur-home-sports">
-    {(['swim','bike','run'] as const).map(sport=><div className={`azur-home-sport ${sport}`} key={sport}>
-      <span className="azur-sport-symbol">{sport==='swim'?'≈':sport==='bike'?'◉':'↗'}</span>
-      <span className="azur-home-sport-name">{sport[0].toUpperCase()+sport.slice(1)}</span>
-      <strong>{homeCompleted(sport)} / {homeCount(sport)}</strong>
-      <small>{homeMinutesLabel(homeMinutes(sport))} planned</small>
-      <div className="azur-home-progress"><span style={{width:homeCount(sport)?`${Math.min(100,100*homeCompleted(sport)/homeCount(sport))}%`:'0%'}} /></div>
-    </div>)}
-  </div>
-  <div className="azur-home-load">
-    <div className="azur-home-section-heading"><span>FITNESS · FATIGUE · FORM</span><span>Recorded training data</span></div>
-    <div className="azur-home-load-grid">
-      {([{label:'Fitness',value:trainingLoad.fitness},{label:'Fatigue',value:trainingLoad.fatigue},{label:'Form',value:trainingLoad.form}] as const).map(metric=><div key={metric.label}><small>{metric.label}</small><strong>{typeof metric.value==='number'&&Number.isFinite(metric.value)?Math.round(metric.value):'—'}</strong></div>)}
-    </div>
-    {trainingLoadHistory.length >= 42 && trainingLoad.eligibleActivities >= 8 ? (() => {
-      const points = trainingLoadHistory.slice(-loadRangeDays);
-      const values = points.flatMap(p => [p.fitness, p.fatigue, p.form]);
-      const min = Math.min(0, ...values);
-      const max = Math.max(1, ...values);
-      const y = (n:number) => 108 - (n-min)/Math.max(1,max-min)*94;
-      const selected = points.find(p => p.date === selectedLoadDate) ?? points[points.length-1];
-      return <div className="azur-load-chart">
-        <div className="azur-load-range" role="group" aria-label="Training load chart date range">
-          {([42,90,180] as const).map(days => <button type="button" key={days} aria-pressed={loadRangeDays===days} onClick={()=>{setLoadRangeDays(days);setSelectedLoadDate(null);}}>{days===42?'6W':days===90?'3M':'6M'}</button>)}
-        </div>
-        <svg viewBox="0 0 340 124" preserveAspectRatio="none" role="img" aria-label="Fitness, fatigue and form history, select a day using buttons below">
-          {[0,0.5,1].map((fraction,i)=><line key={i} x1="5" x2="335" y1={12+fraction*96} y2={12+fraction*96} stroke="#28475e" strokeDasharray="3 5" />)}
-          {([{key:'fitness',color:'#24b9f2'},{key:'fatigue',color:'#f5c544'},{key:'form',color:'#62d9a3'}] as const).map(s=><polyline key={s.key} fill="none" stroke={s.color} strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" points={points.map((p,i)=>`${5+i*330/Math.max(1,points.length-1)},${y(p[s.key])}`).join(' ')} />)}
-          {selected && <line x1={5+Math.max(0,points.findIndex(p=>p.date===selected.date))*330/Math.max(1,points.length-1)} x2={5+Math.max(0,points.findIndex(p=>p.date===selected.date))*330/Math.max(1,points.length-1)} y1="8" y2="110" stroke="#e9f7ff" strokeDasharray="3 3" opacity=".6"/>}
-        </svg>
-        <input className="azur-load-scrubber" type="range" min={0} max={Math.max(0,points.length-1)} value={Math.max(0,points.findIndex(p=>p.date===selected?.date))} onChange={event=>setSelectedLoadDate(points[Number(event.target.value)]?.date ?? null)} aria-label="Select training load date" />
-        {selected && <div className="azur-load-details"><strong>{new Date(selected.date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</strong><span>Fitness {Math.round(selected.fitness)}</span><span>Fatigue {Math.round(selected.fatigue)}</span><span>Form {Math.round(selected.form)}</span></div>}
-        <div className="azur-load-chart-legend"><span>● Fitness</span><span>● Fatigue</span><span>● Form</span></div>
-        <small>{points.length} days of recorded estimates · fitness reflects longer-term load, fatigue shorter-term load; form is their difference before today's stress update.</small>
-      </div>;
-    })() : <p className="azur-load-history-empty">Training-load trends become available after at least 42 days of history and 8 eligible activities with calculated stress.</p>}
-    <p>{trainingLoad.eligibleActivities>0 ? `Based on ${trainingLoad.eligibleActivities} eligible recorded activities. These indicators are not a medical readiness assessment.` : 'Connect and record eligible workouts to build your training-load history.'}</p>
-  </div>
-</section>
-
-<div className="azur-home-tools"
+ return <><AthleteDashboard name={athleteName} avatar={avatarUrl} race={primaryRace} phase={currentMacrocycleWeek?.phase} today={todayKey} sessions={weekSessions} readiness={recoveryReadiness} weeklyStress={trainingLoad.weeklyStress} onSession={id=>{setSelectedId(id);setSessionDetailOpen(true);setActiveNav('Calendar');}} onNavigate={page=>setActiveNav(page as any)} />
+ <details className="awd-advanced"><summary>Training settings & plan tools</summary><div className="azur-home-tools"
   style={{
     display: 'grid',
     gridTemplateColumns: 'minmax(0, 1fr)',
@@ -7120,294 +6596,8 @@ color:
     </p>
   </section>
 )}
-<section
-  style={{
-    marginBottom: '14px',
-    padding: '14px 16px',
-    background: 'linear-gradient(145deg, #102B43, #071C30)',
-    border: '1px solid rgba(72,153,201,0.32)',
-    borderRadius: '20px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '14px',
-  }}
->
-  <div
-    style={{
-      width: '42px',
-      height: '42px',
-      flexShrink: 0,
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background:
-        recoveryReadiness?.color === 'green'
-          ? '#EAF7EF'
-          : recoveryReadiness?.color === 'amber'
-            ? '#FFF6DF'
-            : recoveryReadiness?.color === 'red'
-              ? '#FDECEC'
-              : '#1A3951',
-    }}
-  >
-    <div
-      style={{
-        width: '12px',
-        height: '12px',
-        borderRadius: '50%',
-        background:
-          recoveryReadiness?.color === 'green'
-            ? '#35A96B'
-            : recoveryReadiness?.color === 'amber'
-              ? '#E7A528'
-              : recoveryReadiness?.color === 'red'
-                ? '#D85A5A'
-                : '#A8B5C1',
-      }}
-    />
-  </div>
-
-  <div style={{ flex: 1 }}>
-    <div
-      style={{
-        color: '#79C9F4',
-        fontSize: '11px',
-        fontWeight: 700,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-      }}
-    >
-      Daily Readiness
-    </div>
-
-    <div
-      style={{
-        marginTop: '3px',
-        color: '#F6FBFF',
-        fontSize: '15px',
-        fontWeight: 700,
-      }}
-    >
-      {recoveryReadiness
-        ? recoveryReadiness.color === 'green'
-          ? 'Good to go'
-          : recoveryReadiness.color === 'amber'
-            ? 'Proceed with care'
-            : 'Recovery priority'
-        : 'Readiness unavailable'}
-    </div>
-
-    <div
-      style={{
-        marginTop: '2px',
-        color: '#A9C6D9',
-        fontSize: '13px',
-        lineHeight: 1.4,
-      }}
-    >
-      {recoveryReadiness
-        ? recoveryReadiness.implication === 'proceed_as_planned'
-          ? 'Recovery supports your planned training today.'
-          : recoveryReadiness.implication === 'hold_or_trim_cost'
-            ? 'Consider slightly reducing training load today.'
-            : 'Reduce training stress and prioritise recovery.'
-        : 'Add recovery data to generate today’s guidance.'}
-    </div>
-  </div>
-
-  <button
-    type="button"
-    onClick={() => setActiveNav('Recovery')}
-    style={{
-      padding: 0,
-      border: 'none',
-      background: 'transparent',
-      color: '#1673AE',
-      fontSize: '20px',
-      cursor: 'pointer',
-    }}
-  >
-    ›
-  </button>
-</section>
-        
-       <section
-  style={{
-    marginBottom: '16px',
-    padding: '18px',
-    background: 'linear-gradient(145deg,#102B43,#071C30)',
-    border: '1px solid rgba(72,153,201,0.32)',
-    borderRadius: '20px',
-  }}
->
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '12px',
-      marginBottom: '12px',
-    }}
-  >
-    <span
-      style={{
-        color: '#58C3F6',
-        fontSize: '11px',
-        fontWeight: 800,
-        letterSpacing: '0.09em',
-        textTransform: 'uppercase',
-      }}
-    >
-      Azur Coach Insight
-    </span>
-
-    <span
-      style={{
-        padding: '4px 8px',
-        borderRadius: '20px',
-        background: '#EAF7EF',
-        color: '#2F8A57',
-        fontSize: '10px',
-        fontWeight: 800,
-        letterSpacing: '0.05em',
-        textTransform: 'uppercase',
-      }}
-    >
-      Coaching focus
-    </span>
-  </div>
-
-  <h3
-    style={{
-      margin: 0,
-      color: '#F6FBFF',
-      fontSize: '19px',
-      fontWeight: 700,
-    }}
-  >
-    Why today matters
-  </h3>
-
-  <p
-    style={{
-      margin: '8px 0 14px',
-      color: '#AAC7D9',
-      fontSize: '14px',
-      lineHeight: 1.55,
-    }}
-  >
-    {todaySession
-      ? todaySession.rationale ||
-        `Today's ${sportName(
-          todaySession.sport,
-        ).toLowerCase()} session supports your current training focus.`
-      : 'Today is a recovery day. Recovery supports adaptation from recent training.'}
-  </p>
-
-  <div
-    style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '10px',
-      marginBottom: '14px',
-    }}
-  >
-    <div
-      style={{
-        padding: '10px 12px',
-        borderRadius: '10px',
-        background: '#14344E',
-        border: '1px solid #28516C',
-      }}
-    >
-      <div
-        style={{
-          color: '#82B5D0',
-          fontSize: '10px',
-          fontWeight: 800,
-          letterSpacing: '0.07em',
-          textTransform: 'uppercase',
-        }}
-      >
-        Focus
-      </div>
-
-      <div
-        style={{
-          marginTop: '4px',
-          color: '#F6FBFF',
-          fontSize: '14px',
-          fontWeight: 700,
-          textTransform: 'capitalize',
-        }}
-      >
-        {todaySession
-          ? todaySession.sessionClass
-          : 'Recovery'}
-      </div>
-    </div>
-
-    <div
-      style={{
-        padding: '10px 12px',
-        borderRadius: '10px',
-        background: '#14344E',
-        border: '1px solid #28516C',
-      }}
-    >
-      <div
-        style={{
-          color: '#82B5D0',
-          fontSize: '10px',
-          fontWeight: 800,
-          letterSpacing: '0.07em',
-          textTransform: 'uppercase',
-        }}
-      >
-        Long-term benefit
-      </div>
-
-      <div
-        style={{
-          marginTop: '4px',
-          color: '#F6FBFF',
-          fontSize: '14px',
-          fontWeight: 700,
-        }}
-      >
-        {todaySession
-          ? todaySession.sport === 'bike'
-            ? 'Bike durability'
-            : todaySession.sport === 'run'
-              ? 'Run durability'
-              : todaySession.sport === 'swim'
-                ? 'Swim efficiency'
-                : 'Training adaptation'
-          : 'Recovery and adaptation'}
-      </div>
-    </div>
-  </div>
-
-  <button
-    type="button"
-    onClick={() => setActiveNav('Weekly Review')}
-    style={{
-      padding: 0,
-      border: 'none',
-      background: 'transparent',
-      color: '#58C3F6',
-      fontSize: '13px',
-      fontWeight: 700,
-      cursor: 'pointer',
-    }}
-  >
-    View coaching rationale →
-  </button>
-</section>
-      </>
-    );
-  }
+</details></>;
+ }
 
   function calendarMoveSpacingWarnings(session: Session, targetDate: string): string[] {
     const date = new Date(`${targetDate}T12:00:00`);
@@ -7526,20 +6716,26 @@ color:
       (session) => session.status === 'completed',
     ).length;
     const focusedDay = calendarFocusedDate === 'all' ? null : (calendarWeekDates.find(d => d.dateKey === calendarFocusedDate) ?? calendarWeekDates.find(d => d.dateKey === todayKey) ?? calendarWeekDates[0]);
+    const gridWeekOffset = Math.floor(calendarWeekOffset / 4) * 4;
+    const gridStart = new Date(calendarWeekDates[0].date);
+    gridStart.setDate(gridStart.getDate() + (gridWeekOffset - calendarWeekOffset) * 7);
+    const dateGrid = Array.from({length: 28}, (_, index) => {
+      const date = new Date(gridStart);
+      date.setDate(date.getDate() + index);
+      const key = [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
+      const sports = new Set([
+        ...weekSessions.filter(session => session.plannedDate === key).map(session => session.sport),
+        ...completedActivityFeed.filter(activity => !activity.planned_session_id && new Date(activity.start_time).toDateString() === date.toDateString()).map(activity => activity.sport),
+      ]);
+      return {date, key, sports};
+    });
     const plannedCount = calendarWeekSessions.filter(
       (session) => session.status === 'planned' || session.status === 'edited',
     ).length;
     return (
-      <div className="calendar-layout">
+      <div className="calendar-layout athlete-agenda">
         <div>
-<details className="calendar-stress-disclosure">
-  <summary><span><strong>Planned training load</strong><small>Sport-specific estimates · view analysis</small></span><span aria-hidden="true">⌄</span></summary>
-  <MultisportPlannedStress
-    sessions={calendarWeekSessions}
-    runThreshold={athleteProfile.runThreshold}
-    swimCss={athleteProfile.swimThreshold}
-  />
-</details>
+
 {movingSessionId && (
   <section className="calendar-move-panel" aria-label="Reschedule workout">
     <strong>Reschedule {weekSessions.find((item) => item.id === movingSessionId)?.title}</strong>
@@ -7583,83 +6779,24 @@ color:
   </section>
 )}
 {moveMessage && <p role="status" className="calendar-move-message">{moveMessage}</p>}
-<section className="panel calendar-toolbar calendar-week-strip"><div className="azur-calendar-quickbar"><strong>YOUR TRAINING WEEK</strong><button type="button" onClick={()=>{setCalendarWeekOffset(0);setCalendarFocusedDate(todayKey)}}>Today</button><button type="button" onClick={()=>setCalendarFocusedDate('all')}>Full week</button></div>
-  <div className="calendar-strip-top">
-    <button
-      type="button"
-      onClick={() =>
-        { setCalendarFocusedDate(null); setCalendarWeekOffset((current) => current - 1); }
-      }
-      aria-label="Previous week"
-    >
-      ‹
-    </button>
-
-    <div>
-      <span className="eyebrow">TRAINING CALENDAR</span>
-
-      <h3>
-        {calendarWeekDates[0]?.date.toLocaleDateString(
-          'en-GB',
-          {
-            month: 'long',
-            year: 'numeric',
-          },
-        )}
-      </h3>
-    </div>
-
-    <button
-      type="button"
-      onClick={() =>
-        { setCalendarFocusedDate(null); setCalendarWeekOffset((current) => current + 1); }
-      }
-      aria-label="Next week"
-    >
-      ›
-    </button>
+<section className="panel calendar-toolbar calendar-week-strip"><div className="agenda-date-nav">
+    <button aria-label="Previous four weeks" onClick={() => {setCalendarWeekOffset(gridWeekOffset-4);setCalendarFocusedDate(null)}}>‹</button>
+    <strong>{gridStart.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – {dateGrid[27].date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</strong>
+    <button aria-label="Next four weeks" onClick={() => {setCalendarWeekOffset(gridWeekOffset+4);setCalendarFocusedDate(null)}}>›</button>
+    <button onClick={() => {setCalendarWeekOffset(0);setCalendarFocusedDate(todayKey)}}>Today</button>
   </div>
-
-  <div className="calendar-strip-days">
-    {calendarWeekDates.map((day) => {
-      const sessionsForDate =
-        calendarWeekSessions.filter(
-          (session) =>
-            session.plannedDate === day.dateKey,
-        );
-
-      return (
-        <button
-          type="button"
-          key={day.dateKey}
-          aria-pressed={focusedDay?.dateKey === day.dateKey}
-          aria-label={`View workouts for ${day.dayLabel} ${day.dayNumber}`}
-          onClick={() => setCalendarFocusedDate(day.dateKey)}
-          className={`calendar-strip-day ${day.dateKey === todayKey ? 'today' : ''} ${focusedDay?.dateKey === day.dateKey ? 'focused' : ''}`}
-        >
-          <span>{day.dayLabel.slice(0, 1)}</span>
-
-          <strong>{day.dayNumber}</strong>
-
-          <div className="calendar-strip-dots" aria-label={sessionsForDate.length ? `${sessionsForDate.filter((session) => session.status === 'completed').length} of ${sessionsForDate.length} sessions completed` : 'Rest day'}>
-            {sessionsForDate.length === 0 ? (
-              <span className="calendar-rest-indicator" title="Rest day">—</span>
-            ) : sessionsForDate.slice(0, 3).map((session) => (
-              <i
-                key={session.id}
-                className={`${session.sport} ${session.status === 'completed' ? 'done' : session.status === 'edited' ? 'adjusted' : ''}`}
-                title={`${sportName(session.sport)}: ${session.status === 'completed' ? 'Completed' : session.status === 'edited' ? 'Adjusted' : 'Planned'}`}
-              />
-            ))}
-          </div>
-        </button>
-      );
-    })}
+  <div className="agenda-dates" role="group" aria-label="Four-week calendar">
+    {days.map(day => <small key={day} aria-hidden="true">{day[0]}</small>)}
+    {dateGrid.map(({date,key,sports},index) => <button key={key} type="button"
+      aria-label={date.toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long',year:'numeric'}) + (sports.size ? ', '+[...sports].join(', ') : '')}
+      aria-current={key===todayKey?'date':undefined} aria-pressed={focusedDay?.dateKey===key}
+      onClick={()=>{setCalendarWeekOffset(gridWeekOffset+Math.floor(index/7));setCalendarFocusedDate(key)}}>
+      {date.getDate()}<span aria-hidden="true">{[...sports].map(sport=><i className={sport} key={sport}/>)}</span>
+    </button>)}
   </div>
-
   <div className="calendar-strip-footer">
     <small>
-      {calendarWeekSessions.length} sessions · {completedCount} completed · {plannedCount} planned ·{' '}
+      Selected week · {calendarWeekSessions.length} {calendarWeekSessions.length === 1 ? 'session' : 'sessions'} · {completedCount} completed · {plannedCount} planned ·{' '}
       {(
         calendarWeekSessions.reduce(
           (total, session) =>
@@ -7682,35 +6819,16 @@ color:
 </section>
 
 <div className="calendar-focus-toolbar">
-  <div><strong>{focusedDay ? focusedDay.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}) : 'Full training week'}</strong><small>{focusedDay ? 'Tap another date to view its sessions' : 'All seven training days'}</small></div>
+  <div><strong>{focusedDay ? focusedDay.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}) : 'Full training week'}</strong></div>
   <button type="button" onClick={() => setCalendarFocusedDate(focusedDay ? 'all' : null)}>{focusedDay ? 'Full week' : 'Focus day'}</button>
 </div>
-<section className="panel calendar-grid">
-  {calendarWeekSessions.length === 0 ? (
-    <div className="calendar-empty-state">
-      <span className="eyebrow">NO SESSIONS</span>
-
-      <h3>No structured training planned</h3>
-
-      <p>
-        There are no planned sessions in this week yet.
-        Use the week controls above to browse your training calendar.
-      </p>
-
-      {calendarWeekOffset !== 0 && (
-        <button
-          type="button"
-          onClick={() => setCalendarWeekOffset(0)}
-        >
-          Return to this week
-        </button>
-      )}
-    </div>
-  ) : (
+<section className={`panel calendar-grid ${focusedDay ? 'focused-day' : 'full-week'}`}>
+  {
     days.map((day) => {
              const daySessions = calendarWeekSessions.filter(
                 (session) => session.dayLabel === day,
               );
+      if (focusedDay && focusedDay.dayLabel !== day) return null;
       const calendarDay = calendarWeekDates.find(
   (calendarDate) => calendarDate.dayLabel === day,
 );
@@ -7761,8 +6879,9 @@ const dayCompletedActivities = completedActivityFeed.filter(
 </div>
 
                   <div className="day-stack">
+                    {!daySessions.length && !dayCompletedActivities.length && <small className="agenda-empty-day">No workout scheduled</small>}
                     {daySessions.map((session) => (
-                      <div className="calendar-session-wrapper">
+                      <div className="calendar-session-wrapper" key={session.id}>
                       {!session.locked && (session.status === 'planned' || session.status === 'edited') && (
                         <button className="calendar-reschedule-button" type="button" onClick={() => {setMovingSessionId(session.id); setMoveTargetDate(session.plannedDate); setMoveMessage('');}}>Move session</button>
                       )}
@@ -7810,8 +6929,6 @@ onClick={() => {
 
                         <strong>{session.title}</strong>
 <CalendarIntensityProfile steps={(session.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
-<CalendarPrescriptionSteps prescription={session.prescription} />
-<WorkoutTargetDetails prescription={session.prescription} ftpWatts={athleteProfile.ftp} compact />
 <div className="calendar-session-purpose">
   {session.status === 'completed' && session.completedDurationSec != null ? (
     <div className="calendar-actual-comparison">
@@ -7909,8 +7026,16 @@ onClick={() => {
                 </div>
               );
     })
-  )}
+  }
 </section>
+<details className="calendar-stress-disclosure">
+  <summary><span><strong>Planned training load</strong><small>Sport-specific estimates · view analysis</small></span><span aria-hidden="true">⌄</span></summary>
+  <MultisportPlannedStress
+    sessions={calendarWeekSessions}
+    runThreshold={athleteProfile.runThreshold}
+    swimCss={athleteProfile.swimThreshold}
+  />
+</details>
         </div>
 
 {sessionDetailOpen && (
@@ -7930,12 +7055,12 @@ onClick={() => {
         ×
       </button>
           <div className={`azur-v2-session-hero azur-v2-sport-${selected.sport}`}>
-            <div className="azur-v2-hero-label">AZUR / SESSION DETAIL</div>
+            <div className="azur-v2-hero-label">SESSION DETAILS</div>
             <div className="azur-v2-hero-sport">{sportName(selected.sport)} · {selected.status === "completed" ? "Completed" : "Planned"}</div>
           </div>
           <div className="section-heading">
             <div>
-              <span className="eyebrow">SESSION DETAIL</span>
+
               <h3>{selected.title}</h3>
               <div className="session-detail-meta">
   <span>{sportName(selected.sport)}</span>
@@ -7974,17 +7099,11 @@ onClick={() => {
               <small>Do not infer missing targets or rest periods. Ask your coach before completing an unclear session.</small>
             </div>;
           })()}
-          <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
-          <details className="azur-workout-modal-summary azur-v2-workout-breakdown">
-            <summary>Workout structure <span>View intensity profile and prescribed targets</span></summary>
-            <div className="azur-v2-workout-breakdown-body">
-              <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />
-            </div>
-          </details>
-          <div className="editor-grid">
-          <details className="session-prescription-disclosure">
-            <summary><span><strong>Full workout prescription</strong><small>Warm-up · Main set · Cool-down · Fueling</small></span><span aria-hidden="true">⌄</span></summary>
+          {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || selected.prescription?.focus ? (
+<details open key={selected.id} className="session-prescription-disclosure">
+            <summary><span><strong>Workout prescription</strong><small>Warm-up · Main set · Cool-down · Fueling</small></span><span aria-hidden="true">⌄</span></summary>
             <div className="session-prescription-sections">
+            <details><summary>View workout timeline</summary><CalendarPrescriptionSteps prescription={selected.prescription} /></details>
             {selected.prescription?.focus && (
  <div className="wide session-block">
     <span className="eyebrow">FOCUS</span>
@@ -8123,6 +7242,10 @@ onClick={() => {
 
 </div>
           </details>
+          ) : <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />}
+          <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
+          <div className="editor-grid">
+
 
 <div className="session-block">
   <span className="eyebrow">DURATION</span>
@@ -8849,7 +7972,6 @@ const sessionVerdict =
     const series=(key:'fitness'|'fatigue')=>loadHistory.map((p,i)=>`${8+i*324/Math.max(1,loadHistory.length-1)},${graphY(p[key])}`).join(' ');
     const formatWeek=(key:string)=>new Date(key+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     return <div className="azur-v2-performance">
-      <header className="azur-v2-performance-header"><span>AZUR</span><h2>Performance</h2><p>Your training, clearly understood.</p></header>
       <div className="azur-v2-performance-ranges" role="group" aria-label="Performance date range">{ranges.map(r=><button type="button" key={r.days} aria-pressed={performanceRangeDays===r.days} onClick={()=>{setPerformanceRangeDays(r.days);setPerformanceWeekKey(null);}}>{r.label}</button>)}</div>
       <section className="azur-v2-performance-card" aria-label="Fitness and fatigue"><h3>Fitness &amp; Fatigue</h3><div className="azur-v2-performance-legend"><span>● Fitness</span><span>● Fatigue</span></div>
       {sufficientHistory?<svg viewBox="0 0 340 128" preserveAspectRatio="none" role="img" aria-label="Estimated fitness and fatigue from eligible recorded activities">{[20,65,110].map(y=><line key={y} x1="8" x2="332" y1={y} y2={y} stroke="#2a3c53" strokeDasharray="3 5"/>)}<polyline fill="none" stroke="#329dff" strokeWidth="3" strokeLinejoin="round" points={series('fitness')}/><polyline fill="none" stroke="#f3bd43" strokeWidth="3" strokeLinejoin="round" points={series('fatigue')}/></svg>:<div className="azur-v2-performance-empty">Trends need 42 days of history and eight eligible activities with calculated stress.</div>}
@@ -10944,23 +10066,7 @@ style={
     : undefined
 }
 >
-         {activeNav !== 'Home' && activeNav !== 'Chat' && (
-  <div>
-    <span className="eyebrow">
-      {activeNav === 'Strava Feed'
-        ? 'INTEGRATIONS'
-        : 'WEEK 1 · BASE 1'}
-    </span>
-
-    <h2>{activeNav}</h2>
-
-    <p>
-      {activeNav === 'Strava Feed'
-        ? 'Recent activities and sync status'
-        : 'Aerobic consistency + durability'}
-    </p>
-  </div>
-)}
+  {activeNav !== 'Home' && activeNav !== 'Chat' && <h2 id="athlete-page-title">{activeNav}</h2>}
 
 <div
   className="topbar-actions"
@@ -10976,18 +10082,7 @@ style={
 >
   {activeNav === 'Home' && HomeView()}
   
-{activeNav !== 'Home' && activeNav !== 'Chat' && (
-  <div className="race-countdown">
-    <span className="eyebrow">
-      DAYS TO{' '}
-      {primaryRace.name
-        ? primaryRace.name.toUpperCase()
-        : 'A RACE'}
-    </span>
 
-    <strong>{daysToRace}</strong>
-  </div>
-)}
 
   <div
   className="account-menu"
@@ -11153,262 +10248,13 @@ style={
 </div>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
-  <section
-    style={{
-      minHeight: 'calc(100vh - 90px)',
-      padding: 0,
-      paddingBottom: '88px',
-      background: '#F5F8FB',
-    }}
-  >
-    <div
-      style={{
-        padding: '18px 18px 16px',
-        background: '#071524',
-        color: '#FFFFFF',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-      }}
-    >
-     <div
-  style={{
-    width: '42px',
-    height: '42px',
-    borderRadius: '50%',
-    overflow: 'hidden',
-    background: '#FFFFFF',
-    border: '1px solid rgba(255,255,255,0.18)',
-    flexShrink: 0,
-  }}
->
-  <img
-    src="/brand/azur-logo.png"
-    alt="Azur"
-    style={{
-      width: '100%',
-      height: '100%',
-      objectFit: 'contain',
-      display: 'block',
-    }}
-  />
-</div>
-
-      <div>
-        <div
-          style={{
-            fontSize: '17px',
-            fontWeight: 700,
-          }}
-        >
-          Ask Azur
-        </div>
-
-        <div
-          style={{
-            marginTop: '2px',
-            fontSize: '11px',
-            color: '#5FD08A',
-            fontWeight: 700,
-          }}
-        >
-          ● Online
-        </div>
-      </div>
-    </div>
-
-    <div
-      style={{
-        padding: '18px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-      }}
-    >
-      {chatMessages.map((message) => (
-        <div
-          key={message.id}
-          style={{
-            display: 'flex',
-            justifyContent:
-              message.role === 'user'
-                ? 'flex-end'
-                : 'flex-start',
-          }}
-        >
-          <div
-            style={{
-              maxWidth: '82%',
-              padding: '11px 13px',
-              borderRadius:
-                message.role === 'user'
-                  ? '16px 16px 4px 16px'
-                  : '16px 16px 16px 4px',
-              background:
-                message.role === 'user'
-                  ? '#0A3556'
-                  : '#FFFFFF',
-              color:
-                message.role === 'user'
-                  ? '#FFFFFF'
-                  : '#17324D',
-              border:
-                message.role === 'user'
-                  ? 'none'
-                  : '1px solid #E2EAF0',
-              fontSize: '14px',
-              lineHeight: 1.5,
-            }}
-          >
-            {message.text}
-          </div>
-        </div>
-      ))}
-
-      {chatMessages.length === 1 && (
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px',
-            marginTop: '4px',
-          }}
-        >
-          {[
-            "Why has today's session changed?",
-            "How should I fuel Saturday's ride?",
-            "Can I move tomorrow's run?",
-            'Explain my training load',
-          ].map((question) => (
-            <button
-              key={question}
-              type="button"
-              onClick={() => setChatMessage(question)}
-              style={{
-                padding: '8px 10px',
-                borderRadius: '18px',
-                border: '1px solid #CFE0EC',
-                background: '#FFFFFF',
-                color: '#1673AE',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              {question}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-
-    <div
-      style={{
-        position: 'fixed',
-        left: 0,
-        right: 0,
-        bottom: '72px',
-        padding: '10px 12px',
-        background: 'rgba(255,255,255,0.96)',
-        borderTop: '1px solid #E1E8EF',
-        backdropFilter: 'blur(14px)',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          maxWidth: '900px',
-          margin: '0 auto',
-        }}
-      >
-        <input
-          value={chatMessage}
-          onChange={(event) =>
-            setChatMessage(event.target.value)
-          }
-          onKeyDown={(event) => {
-            if (
-              event.key === 'Enter' &&
-              chatMessage.trim()
-            ) {
-              const message = chatMessage.trim();
-
-              setChatMessages((current) => [
-                ...current,
-                {
-                  id: Date.now(),
-                  role: 'user',
-                  text: message,
-                },
-                {
-                  id: Date.now() + 1,
-                  role: 'assistant',
-                  text:
-                  getAzurChatReply(message)
-                },
-              ]);
-
-              setChatMessage('');
-            }
-          }}
-          placeholder="Ask Azur..."
-          style={{
-            flex: 1,
-            height: '44px',
-            padding: '0 14px',
-            borderRadius: '22px',
-            border: '1px solid #D8E3EB',
-            background: '#F7FAFC',
-            color: '#17324D',
-            fontSize: '14px',
-            outline: 'none',
-          }}
-        />
-
-        <button
-          type="button"
-          onClick={() => {
-            const message = chatMessage.trim();
-
-            if (!message) {
-              return;
-            }
-
-            setChatMessages((current) => [
-              ...current,
-              {
-                id: Date.now(),
-                role: 'user',
-                text: message,
-              },
-              {
-                id: Date.now() + 1,
-                role: 'assistant',
-                text:
-                  getAzurChatReply(message)
-              },
-            ]);
-
-            setChatMessage('');
-          }}
-          style={{
-            width: '44px',
-            height: '44px',
-            flexShrink: 0,
-            borderRadius: '50%',
-            border: 'none',
-            background: '#1673AE',
-            color: '#FFFFFF',
-            fontSize: '18px',
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >
-          ↑
-        </button>
-      </div>
+  <section className="azur-chat-coming-soon" aria-labelledby="chat-coming-soon-title">
+    <header><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /></header>
+    <div className="azur-chat-coming-soon-body">
+      <span className="azur-chat-soon-badge">Coming soon</span>
+      <h1 id="chat-coming-soon-title">Chat</h1>
+      <p>For now, contact your coach in your usual way.</p>
+      <button type="button" onClick={()=>setActiveNav('Calendar')}>View your training <span aria-hidden="true">→</span></button>
     </div>
   </section>
 )}
@@ -11417,6 +10263,24 @@ style={
         {activeNav === 'Recovery' && <RecoveryView />}
         {activeNav === 'Races' && <RacesView />}
 {activeNav === 'Benchmarks' && <BenchmarksView />}
+{
+  activeNav === 'More' && (
+    <section className="athlete-more" aria-labelledby="athlete-page-title">
+      <button className="more-profile" onClick={() => setActiveNav('Profile')}>
+        {avatarUrl ? <img src={avatarUrl} alt="" /> : <User aria-hidden="true" />}
+        <span><strong>{athleteName || 'Athlete profile'}</strong><small>Profile &amp; thresholds</small></span><ChevronRight aria-hidden="true" />
+      </button>
+      {moreGroups.map(group => <section key={group.title}>
+        <h2>{group.title}</h2>
+        <div className="more-list">{group.links.map(([Icon, page, hint]) =>
+          <button key={page} onClick={() => setActiveNav(page)}>
+            <Icon aria-hidden="true" /><span><strong>{page}</strong><small>{hint}</small></span><ChevronRight aria-hidden="true" />
+          </button>
+        )}</div>
+      </section>)}
+    </section>
+  )
+}
 {activeNav === 'Profile' && <ProfileView />}
 {activeNav === 'Weekly Review' && <WeeklyReviewView />}
         {activeNav === 'Data Sources' && <DataSourcesView />}
@@ -11425,7 +10289,7 @@ style={
     </div>
 
     <nav
-      className="mobile-bottom-nav"
+      className={`mobile-bottom-nav ${(activeNav === 'More' || activeNav === 'Calendar' || (activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete'))) ? 'awd-navigation' : ''}`}
   style={{
   position: 'fixed',
 left: 0,
@@ -11446,10 +10310,7 @@ backdropFilter: 'blur(18px)',
   }}
 >
   {mobileNavigation.map(([Icon, label]) => {
-    const targetNav =
-      label === 'More'
-        ? 'Profile'
-        : label;
+    const targetNav = label;
 
     const isActive =
       activeNav === targetNav ||
