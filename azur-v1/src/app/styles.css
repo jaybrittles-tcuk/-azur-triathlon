@@ -5944,3 +5944,13 @@ strong {
 .athlete-agenda .session-prescription-sections>details {color:#264c64}
 .athlete-agenda .calendar-day.empty-day:not(.mobile-unfocused) {display:block}
 .athlete-agenda .agenda-empty-day {color:#506a7d}
+
+.athlete-agenda .calendar-day-head {background:#f1f6f9;border-bottom-color:#d7e4ec;padding-inline:10px}
+.athlete-agenda .calendar-day-head.today {background:#dff1fa}
+.athlete-agenda .calendar-session.completed {background:var(--azur-v2-card)!important}
+.athlete-agenda .calendar-session .calendar-session-top>span {color:#37556c}
+.athlete-agenda .calendar-session.bike .calendar-session-top>span {color:#795700}
+.athlete-agenda .calendar-session.swim .calendar-session-top>span {color:#006488}
+.athlete-agenda .calendar-session.run .calendar-session-top>span {color:#93440d}
+.athlete-agenda .calendar-session.completed .calendar-session-status {color:#146345}
+.athlete-agenda .calendar-session.completed .calendar-session-status>span {color:#146345!important;background:#e4f5ed!important;border-color:#abd5bf!important}

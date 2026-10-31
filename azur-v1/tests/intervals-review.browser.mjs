@@ -40,7 +40,7 @@ await context.route('https://example.supabase.co/**',async route=>{
   if(req.method()==='POST')onboardingStep=req.postDataJSON().onboarding_step;
   data=single?null:[];
  } else if(url.pathname.endsWith('/planned_session')) data=demoSessions;
- else if(url.pathname.endsWith('/completed_activity')) data=accepted?[recorded()]:[];
+ else if(url.pathname.endsWith('/completed_activity')) data=accepted?[{...recorded(),...(demoSessions.length?{start_time:new Date().toISOString()}: {})}]:[];
  const emptySingle=single&&data===null;
  await route.fulfill({status:emptySingle?406:200,contentType:'application/json',body:JSON.stringify(emptySingle?{code:'PGRST116',details:'The result contains 0 rows',message:'Cannot coerce the result to a single JSON object'}:data)});
 });
@@ -155,6 +155,11 @@ try {
  await calendar.getByRole('button',{name:'Today',exact:true}).click();
  await calendar.getByRole('button',{name:'Full week',exact:true}).first().click();
  assert.equal(await calendar.locator('.calendar-day-head:visible').count(),7);
+ const surface=locator=>locator.evaluate(el=>getComputedStyle(el).backgroundColor);
+ assert.equal(await surface(calendar.locator('.calendar-day-head:not(.today)').first()),'rgb(241, 246, 249)');
+ const completedRide=calendar.locator('.calendar-session.completed').filter({hasText:'Unplanned Bike'});
+ assert.equal(await surface(completedRide),'rgb(255, 255, 255)');
+ assert.equal(await completedRide.locator('strong').evaluate(el=>getComputedStyle(el).color),'rgb(20, 46, 67)');
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  await calendar.locator('.calendar-session').filter({hasText:'Long Aerobic Ride'}).click();
  await sheet.waitFor();
