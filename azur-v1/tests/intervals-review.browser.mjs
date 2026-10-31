@@ -116,7 +116,7 @@ try {
  assert.deepEqual(errors,[]);
  console.log('PASS: signed-in athlete without profile → automatic onboarding → saved profile → dashboard');
  await page.getByRole('button',{name:'Chat',exact:true}).click();
- await page.getByRole('heading',{name:/Your coaching/ }).waitFor();
+ await page.getByRole('heading',{name:'Chat',exact:true }).waitFor();
  await page.getByText('Coming soon',{exact:true}).waitFor();
  assert.equal(await page.getByRole('textbox').count(),0,'Unavailable chat must not accept messages');
  await page.getByRole('button',{name:'View your training',exact:false}).click();
@@ -126,6 +126,7 @@ try {
  for (const label of ['Profile & thresholds','Weekly Review','Recovery','Races','Benchmarks','Data Sources','Strava Feed']) {
   await moreTab.click();
   const menu=page.getByRole('region',{name:'More',exact:true});
+  assert.equal(await page.getByRole('heading',{name:'More',exact:true}).count(),1);
   await menu.getByRole('heading',{name:'Connections'}).waitFor();
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await menu.getByRole('button',{name:new RegExp(label)}).click();

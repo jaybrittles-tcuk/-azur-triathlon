@@ -6819,7 +6819,7 @@ color:
 </section>
 
 <div className="calendar-focus-toolbar">
-  <div><strong>{focusedDay ? focusedDay.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}) : 'Full training week'}</strong><small>{focusedDay ? 'Tap another date to view its sessions' : 'All seven training days'}</small></div>
+  <div><strong>{focusedDay ? focusedDay.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}) : 'Full training week'}</strong></div>
   <button type="button" onClick={() => setCalendarFocusedDate(focusedDay ? 'all' : null)}>{focusedDay ? 'Full week' : 'Focus day'}</button>
 </div>
 <section className={`panel calendar-grid ${focusedDay ? 'focused-day' : 'full-week'}`}>
@@ -7972,7 +7972,6 @@ const sessionVerdict =
     const series=(key:'fitness'|'fatigue')=>loadHistory.map((p,i)=>`${8+i*324/Math.max(1,loadHistory.length-1)},${graphY(p[key])}`).join(' ');
     const formatWeek=(key:string)=>new Date(key+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     return <div className="azur-v2-performance">
-      <header className="azur-v2-performance-header"><span>AZUR</span><h2>Performance</h2><p>Your training, clearly understood.</p></header>
       <div className="azur-v2-performance-ranges" role="group" aria-label="Performance date range">{ranges.map(r=><button type="button" key={r.days} aria-pressed={performanceRangeDays===r.days} onClick={()=>{setPerformanceRangeDays(r.days);setPerformanceWeekKey(null);}}>{r.label}</button>)}</div>
       <section className="azur-v2-performance-card" aria-label="Fitness and fatigue"><h3>Fitness &amp; Fatigue</h3><div className="azur-v2-performance-legend"><span>● Fitness</span><span>● Fatigue</span></div>
       {sufficientHistory?<svg viewBox="0 0 340 128" preserveAspectRatio="none" role="img" aria-label="Estimated fitness and fatigue from eligible recorded activities">{[20,65,110].map(y=><line key={y} x1="8" x2="332" y1={y} y2={y} stroke="#2a3c53" strokeDasharray="3 5"/>)}<polyline fill="none" stroke="#329dff" strokeWidth="3" strokeLinejoin="round" points={series('fitness')}/><polyline fill="none" stroke="#f3bd43" strokeWidth="3" strokeLinejoin="round" points={series('fatigue')}/></svg>:<div className="azur-v2-performance-empty">Trends need 42 days of history and eight eligible activities with calculated stress.</div>}
@@ -10067,23 +10066,7 @@ style={
     : undefined
 }
 >
-         {activeNav !== 'Home' && activeNav !== 'Chat' && (
-  <div>
-    <span className="eyebrow">
-      {activeNav === 'Strava Feed'
-        ? 'INTEGRATIONS'
-        : 'WEEK 1 · BASE 1'}
-    </span>
-
-    <h2>{activeNav}</h2>
-
-    <p>
-      {activeNav === 'Strava Feed'
-        ? 'Recent activities and sync status'
-        : 'Aerobic consistency + durability'}
-    </p>
-  </div>
-)}
+  {activeNav !== 'Home' && activeNav !== 'Chat' && <h2 id="athlete-page-title">{activeNav}</h2>}
 
 <div
   className="topbar-actions"
@@ -10099,18 +10082,7 @@ style={
 >
   {activeNav === 'Home' && HomeView()}
   
-{activeNav !== 'Home' && activeNav !== 'Chat' && (
-  <div className="race-countdown">
-    <span className="eyebrow">
-      DAYS TO{' '}
-      {primaryRace.name
-        ? primaryRace.name.toUpperCase()
-        : 'A RACE'}
-    </span>
 
-    <strong>{daysToRace}</strong>
-  </div>
-)}
 
   <div
   className="account-menu"
@@ -10277,12 +10249,11 @@ style={
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
 {activeNav === 'Chat' && (
   <section className="azur-chat-coming-soon" aria-labelledby="chat-coming-soon-title">
-    <header><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><span>CHAT</span></header>
+    <header><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /></header>
     <div className="azur-chat-coming-soon-body">
       <span className="azur-chat-soon-badge">Coming soon</span>
-      <h1 id="chat-coming-soon-title">Your coaching.<br />A conversation away.</h1>
-      <p>We’re building a place to ask about your training and stay in touch with your coach.</p>
-      <small>Chat isn’t available yet. Keep using your usual way of contacting your coach.</small>
+      <h1 id="chat-coming-soon-title">Chat</h1>
+      <p>For now, contact your coach in your usual way.</p>
       <button type="button" onClick={()=>setActiveNav('Calendar')}>View your training <span aria-hidden="true">→</span></button>
     </div>
   </section>
@@ -10294,8 +10265,7 @@ style={
 {activeNav === 'Benchmarks' && <BenchmarksView />}
 {
   activeNav === 'More' && (
-    <section className="athlete-more" aria-labelledby="more-title">
-      <header><span>ATHLETE TOOLS</span><h1 id="more-title">More</h1></header>
+    <section className="athlete-more" aria-labelledby="athlete-page-title">
       <button className="more-profile" onClick={() => setActiveNav('Profile')}>
         {avatarUrl ? <img src={avatarUrl} alt="" /> : <User aria-hidden="true" />}
         <span><strong>{athleteName || 'Athlete profile'}</strong><small>Profile &amp; thresholds</small></span><ChevronRight aria-hidden="true" />
