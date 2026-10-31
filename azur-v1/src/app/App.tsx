@@ -1,3 +1,4 @@
+import TodayCoachingFocus from './TodayCoachingFocus';
 import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
@@ -5895,6 +5896,7 @@ height: '58px',
 <section className="azur-athlete-week-progress"><div><strong>This week</strong><span>{homeCompletedTotal} of {homePlannedTotal} recorded complete</span></div><div role="progressbar" aria-label="Recorded session completion" aria-valuenow={homeCompletedTotal} aria-valuemin={0} aria-valuemax={homePlannedTotal||1}><span style={{width:String(homeProgressPercent)+'%'}}/></div><small>Completion is based on recorded status, not training quality.</small></section>
 {todaySession && (
   <section
+    className="azur-dashboard-session"
     style={{
       marginBottom: '14px',
      padding: '16px',
@@ -6002,41 +6004,7 @@ min
       </div>
     </div>
 
-<div
-  style={{
-    marginTop: '14px',
-    height: '42px',
-    display: 'flex',
-    alignItems: 'flex-end',
-    gap: '4px',
-  }}
->
-  {[42, 58, 72, 54, 80, 64, 48, 70, 56, 38].map(
-    (height, index) => (
-      <div
-        key={index}
-        style={{
-          flex: 1,
-          height: `${height}%`,
-          minHeight: '10px',
-          borderRadius: '4px 4px 2px 2px',
-          background:
-            todaySession.sport === 'bike'
-              ? index > 2 && index < 7
-                ? '#F4B43C'
-                : '#F4E4B5'
-              : todaySession.sport === 'run'
-                ? index > 2 && index < 7
-                  ? '#35A96B'
-                  : '#B8E0C8'
-                : index > 2 && index < 7
-                  ? '#208FD0'
-                  : '#B7D8ED',
-        }}
-      />
-    ),
-  )}
-</div>
+<div className="azur-session-duration"><strong>{todaySession.duration_min ?? todaySession.durationMin ?? 0}<small> min</small></strong><span>Planned duration<br />See session details for the full prescription</span></div>
 
     <button
       type="button"
@@ -6059,6 +6027,7 @@ padding: '11px 16px',
     </button>
   </section>
 )}
+<TodayCoachingFocus session={todaySession} onOpen={() => {if(todaySession){setSelectedId(todaySession.id);setSessionDetailOpen(true);}}} onCalendar={() => setActiveNav('Calendar')} />
 <section className="azur-premium-home" aria-label="AZUR athlete home">
   
   <div className="azur-home-section-heading"><span>YOUR TRAINING WEEK</span><button type="button" onClick={()=>setActiveNav('Calendar')}>Calendar →</button></div>
@@ -7232,179 +7201,7 @@ color:
   </button>
 </section>
         
-       <section
-  style={{
-    marginBottom: '16px',
-    padding: '18px',
-    background: 'linear-gradient(145deg,#102B43,#071C30)',
-    border: '1px solid rgba(72,153,201,0.32)',
-    borderRadius: '20px',
-  }}
->
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '12px',
-      marginBottom: '12px',
-    }}
-  >
-    <span
-      style={{
-        color: '#58C3F6',
-        fontSize: '11px',
-        fontWeight: 800,
-        letterSpacing: '0.09em',
-        textTransform: 'uppercase',
-      }}
-    >
-      Azur Coach Insight
-    </span>
 
-    <span
-      style={{
-        padding: '4px 8px',
-        borderRadius: '20px',
-        background: '#EAF7EF',
-        color: '#2F8A57',
-        fontSize: '10px',
-        fontWeight: 800,
-        letterSpacing: '0.05em',
-        textTransform: 'uppercase',
-      }}
-    >
-      Coaching focus
-    </span>
-  </div>
-
-  <h3
-    style={{
-      margin: 0,
-      color: '#F6FBFF',
-      fontSize: '19px',
-      fontWeight: 700,
-    }}
-  >
-    Why today matters
-  </h3>
-
-  <p
-    style={{
-      margin: '8px 0 14px',
-      color: '#AAC7D9',
-      fontSize: '14px',
-      lineHeight: 1.55,
-    }}
-  >
-    {todaySession
-      ? todaySession.rationale ||
-        `Today's ${sportName(
-          todaySession.sport,
-        ).toLowerCase()} session supports your current training focus.`
-      : 'Today is a recovery day. Recovery supports adaptation from recent training.'}
-  </p>
-
-  <div
-    style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '10px',
-      marginBottom: '14px',
-    }}
-  >
-    <div
-      style={{
-        padding: '10px 12px',
-        borderRadius: '10px',
-        background: '#14344E',
-        border: '1px solid #28516C',
-      }}
-    >
-      <div
-        style={{
-          color: '#82B5D0',
-          fontSize: '10px',
-          fontWeight: 800,
-          letterSpacing: '0.07em',
-          textTransform: 'uppercase',
-        }}
-      >
-        Focus
-      </div>
-
-      <div
-        style={{
-          marginTop: '4px',
-          color: '#F6FBFF',
-          fontSize: '14px',
-          fontWeight: 700,
-          textTransform: 'capitalize',
-        }}
-      >
-        {todaySession
-          ? todaySession.sessionClass
-          : 'Recovery'}
-      </div>
-    </div>
-
-    <div
-      style={{
-        padding: '10px 12px',
-        borderRadius: '10px',
-        background: '#14344E',
-        border: '1px solid #28516C',
-      }}
-    >
-      <div
-        style={{
-          color: '#82B5D0',
-          fontSize: '10px',
-          fontWeight: 800,
-          letterSpacing: '0.07em',
-          textTransform: 'uppercase',
-        }}
-      >
-        Long-term benefit
-      </div>
-
-      <div
-        style={{
-          marginTop: '4px',
-          color: '#F6FBFF',
-          fontSize: '14px',
-          fontWeight: 700,
-        }}
-      >
-        {todaySession
-          ? todaySession.sport === 'bike'
-            ? 'Bike durability'
-            : todaySession.sport === 'run'
-              ? 'Run durability'
-              : todaySession.sport === 'swim'
-                ? 'Swim efficiency'
-                : 'Training adaptation'
-          : 'Recovery and adaptation'}
-      </div>
-    </div>
-  </div>
-
-  <button
-    type="button"
-    onClick={() => setActiveNav('Weekly Review')}
-    style={{
-      padding: 0,
-      border: 'none',
-      background: 'transparent',
-      color: '#58C3F6',
-      fontSize: '13px',
-      fontWeight: 700,
-      cursor: 'pointer',
-    }}
-  >
-    View coaching rationale →
-  </button>
-</section>
       </>
     );
   }

@@ -60,6 +60,9 @@ await context.route('**/api/**',async route=>{
 const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
 try {
  await page.goto(base);
+ await page.getByRole('heading',{name:'Why today matters',exact:true}).waitFor();
+ await page.getByText('There is no session scheduled today.',{exact:false}).waitFor();
+ assert.equal(await page.getByText('Today is a recovery day.',{exact:false}).count(),0);
  await page.getByRole('button',{name:'Data Sources',exact:true}).click();
  await page.getByRole('button',{name:'Preview rides',exact:true}).click();
  await page.getByText('Synthetic Zwift ride',{exact:true}).waitFor();

@@ -5867,3 +5867,22 @@ strong {
 @media(max-width:600px){.azur-onboarding-page{padding:20px 14px 40px}.azur-onboarding-page-header{gap:14px;margin-bottom:20px}.azur-onboarding-page-header img{width:64px;height:64px}.azur-onboarding-page-header h1{font-size:26px}.azur-onboarding-page-header p{font-size:13px}.azur-onboarding-page .azur-onboarding-draft{max-width:none;padding:20px 16px}.azur-onboarding-page .azur-onboarding-actions button{min-height:46px}.azur-onboarding-page .azur-onboarding-options{grid-template-columns:1fr}}
 
 .azur-staging-banner{padding:10px 16px;background:#f4b43c;color:#071525;text-align:center;font-size:12px;font-weight:800;letter-spacing:.07em;position:relative;z-index:100}
+
+/* Athlete home: a clear session, coaching purpose and quieter supporting data. */
+.azur-dashboard-session {border-radius:24px!important;padding:22px!important;position:relative;border-top:3px solid #f6c747!important}
+.azur-session-duration{display:flex;align-items:center;gap:20px;padding:18px 0 6px;border-top:1px solid #244158;margin-top:20px}
+.azur-session-duration strong{font-size:40px;line-height:1;color:#fff;font-weight:650;letter-spacing:-.04em}
+.azur-session-duration small{font-size:15px;letter-spacing:0;color:#b5c9d8}.azur-session-duration>span{font-size:11px;color:#a4bdce;line-height:1.6}
+.azur-today-coaching{padding:24px 22px;margin:0 0 22px;background:linear-gradient(125deg,#153d56,#0b2234 75%);border:1px solid #325268;border-left:3px solid #f4cd59;border-radius:4px 22px 22px 4px;color:#eff8ff}
+.azur-today-coaching-kicker{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:#a3c5d8}.azur-today-coaching-kicker>span:first-child{color:#f4cd59;font-weight:800;letter-spacing:.17em}
+.azur-today-coaching h2{font-size:14px;font-weight:500;color:#aac8da;margin:20px 0 8px}.azur-today-coaching h3{font-size:clamp(24px,3vw,32px);line-height:1.15;letter-spacing:-.035em;color:#fff;margin:0 0 15px;max-width:24ch}
+.azur-today-coaching p{font-size:14px;line-height:1.7;color:#c3d5e2;margin:0;max-width:65ch}
+.azur-coaching-cue{margin:20px 0;padding-top:16px;border-top:1px solid #365268}.azur-coaching-cue>span{font-size:9px;font-weight:800;letter-spacing:.13em;color:#69c8ef}.azur-coaching-cue p{margin-top:7px;color:#f2f7fa}
+.azur-today-coaching details{font-size:12px;color:#b0c8d8;margin:12px 0}.azur-today-coaching summary{cursor:pointer;padding:8px 0}.azur-today-coaching details p{font-size:12px;padding:8px 0}
+.azur-today-coaching>button{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;border:0;border-top:1px solid #365268;border-radius:0;background:transparent;padding:15px 0 0;margin-top:18px;color:#80d6fc;font-size:13px;font-weight:750;cursor:pointer}
+.azur-today-coaching button:focus-visible,.azur-today-coaching summary:focus-visible{outline:2px solid #f4cd59;outline-offset:5px}
+.azur-athlete-week-progress{background:transparent!important;border:0!important;padding:8px 2px 18px!important;margin-bottom:0!important}.azur-athlete-week-progress small{font-size:10px}
+.azur-home-sport{background:transparent;border:0;border-right:1px solid #294456;border-radius:0;padding:8px 12px}.azur-home-sport:last-child{border-right:0}.azur-home-sport strong{font-size:27px;letter-spacing:-.035em}
+.azur-home-load{background:transparent;border:0;border-top:1px solid #294456;border-radius:0;padding:20px 0 0}.azur-home-load .azur-load-history-empty{font-size:12px;line-height:1.6}
+.azur-home-tools{box-shadow:none!important;background:transparent!important;border:0!important;border-top:1px solid #294456!important;border-radius:0!important;padding:20px 4px!important}
+@media(max-width:460px){.azur-today-coaching{padding:21px 18px}.azur-dashboard-session{padding:18px!important}.azur-home-sport{padding:5px 8px}.azur-home-sport small{font-size:10px}}
