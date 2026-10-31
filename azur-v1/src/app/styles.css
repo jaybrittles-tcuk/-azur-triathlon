@@ -5887,3 +5887,23 @@ strong {
 @media(min-width:760px){.awd-body{grid-template-columns:1.4fr 1fr;align-items:start;gap:16px;padding:0 22px 22px}.awd-session{grid-row:span 2}.awd-insight{grid-column:1/-1}.awd-more-link{grid-column:1/-1}.awd-hero{padding:24px 30px 40px;min-height:230px}}
 
 .mobile-bottom-nav.awd-navigation{background:#fff!important;border-color:#dce7ef!important;box-shadow:0 -4px 20px #16374e0a!important}.mobile-bottom-nav.awd-navigation button{color:#6d8496!important;background:transparent!important;border-color:transparent!important}.mobile-bottom-nav.awd-navigation button.active{color:#147eb3!important;background:#eaf5fc!important;border-color:#d4e9f6!important}
+
+.athlete-more {max-width:780px;margin:0 auto;padding:20px clamp(14px,4vw,32px) 32px;background:#f3f7fa;color:#152d42;border-radius:20px}
+.athlete-more header {padding:6px 0 16px}
+.athlete-more header span {color:#256b91;font-size:.71rem;font-weight:750;letter-spacing:.14em}
+.athlete-more h1 {margin:3px 0 0;font-size:2rem;color:#10293e}
+.athlete-more h2 {margin:20px 2px 8px;font-size:1rem;color:#233e52}
+.athlete-more button {display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:10px 14px;text-align:left;border:0;background:white;color:#142e43;cursor:pointer;font:inherit}
+.athlete-more button span {flex:1;min-width:0;overflow-wrap:anywhere}
+.athlete-more strong,.athlete-more small {display:block}
+.athlete-more small {margin-top:2px;font-size:.82rem;color:#496176}
+.athlete-more button svg:first-child,.athlete-more button img {box-sizing:border-box;width:36px;height:36px;flex:none;border-radius:11px}
+.athlete-more button svg:first-child {background:#e9f4fb;color:#167fae;padding:8px}
+.athlete-more button img {object-fit:cover}
+.athlete-more button svg:last-child {width:16px;color:#55758b;flex:none}
+.athlete-more .more-profile {background:#112f49;color:white;border-radius:14px;min-height:70px}
+.athlete-more .more-profile small,.athlete-more .more-profile svg:last-child {color:#c0dae9}
+.athlete-more .more-list {overflow:hidden;border:1px solid #dce7ef;border-radius:14px}
+.athlete-more .more-list button+button {border-top:1px solid #e4ecf2}
+.athlete-more .more-list button:hover {background:#eff7fb}
+.athlete-more button:focus-visible {outline:3px solid #168bc9;outline-offset:-3px}

@@ -122,6 +122,17 @@ try {
  await page.getByRole('button',{name:'View your training',exact:false}).click();
  await page.getByRole('button',{name:'Chat',exact:true}).waitFor();
  console.log('PASS: coming-soon chat has no message input and opens calendar');
+ const moreTab=page.locator('.mobile-bottom-nav').getByRole('button',{name:'More',exact:true});
+ for (const label of ['Profile & thresholds','Weekly Review','Recovery','Races','Benchmarks','Data Sources','Strava Feed']) {
+  await moreTab.click();
+  const menu=page.getByRole('region',{name:'More',exact:true});
+  await menu.getByRole('heading',{name:'Connections'}).waitFor();
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await menu.getByRole('button',{name:new RegExp(label)}).click();
+  await menu.waitFor({state:'hidden'});
+ }
+ assert.deepEqual(errors,[]);
+ console.log('PASS: mobile More opens profile and all six training and connection destinations');
  demoSessions=[{id:'demo-bike',planned_date:new Date().toISOString().slice(0,10),sport:'bike',title:'Long Aerobic Ride',session_class:'endurance',priority:1,duration_min:144,status:'planned',rationale:'Build aerobic durability with a controlled sustained effort.',prescription:{warmup:[{duration_min:12,target:'55–65% FTP'}],main_set:[{duration_min:120,target:'65–75% FTP'}],cooldown:[{duration_min:12,target:'<65% FTP'}]}}];
  await page.goto(base);
  const home=page.locator('.azur-white-dashboard:visible');

@@ -664,6 +664,11 @@ const navigation = [
   [Database, 'Data Sources'],
   [RefreshCw, 'Strava Feed'],
 ] as const;
+const moreGroups = [
+  {title: 'Training', links: [[Activity, 'Weekly Review', 'Training load and completed sessions'], [HeartPulse, 'Recovery', 'Check in and review readiness'], [Medal, 'Races', 'Race dates and goals'], [Gauge, 'Benchmarks', 'Swim, bike and run tests']]},
+  {title: 'Connections', links: [[Database, 'Data Sources', 'Connected services and activity imports'], [RefreshCw, 'Strava Feed', 'View your Strava activities']]},
+] as const;
+
 const mobileNavigation = [
   [Home, 'Home'],
   [CalendarDays, 'Calendar'],
@@ -10354,6 +10359,25 @@ style={
         {activeNav === 'Recovery' && <RecoveryView />}
         {activeNav === 'Races' && <RacesView />}
 {activeNav === 'Benchmarks' && <BenchmarksView />}
+{
+  activeNav === 'More' && (
+    <section className="athlete-more" aria-labelledby="more-title">
+      <header><span>ATHLETE TOOLS</span><h1 id="more-title">More</h1></header>
+      <button className="more-profile" onClick={() => setActiveNav('Profile')}>
+        {avatarUrl ? <img src={avatarUrl} alt="" /> : <User aria-hidden="true" />}
+        <span><strong>{athleteName || 'Athlete profile'}</strong><small>Profile &amp; thresholds</small></span><ChevronRight aria-hidden="true" />
+      </button>
+      {moreGroups.map(group => <section key={group.title}>
+        <h2>{group.title}</h2>
+        <div className="more-list">{group.links.map(([Icon, page, hint]) =>
+          <button key={page} onClick={() => setActiveNav(page)}>
+            <Icon aria-hidden="true" /><span><strong>{page}</strong><small>{hint}</small></span><ChevronRight aria-hidden="true" />
+          </button>
+        )}</div>
+      </section>)}
+    </section>
+  )
+}
 {activeNav === 'Profile' && <ProfileView />}
 {activeNav === 'Weekly Review' && <WeeklyReviewView />}
         {activeNav === 'Data Sources' && <DataSourcesView />}
@@ -10362,7 +10386,7 @@ style={
     </div>
 
     <nav
-      className={`mobile-bottom-nav ${activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') ? 'awd-navigation' : ''}`}
+      className={`mobile-bottom-nav ${(activeNav === 'More' || (activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete'))) ? 'awd-navigation' : ''}`}
   style={{
   position: 'fixed',
 left: 0,
@@ -10383,10 +10407,7 @@ backdropFilter: 'blur(18px)',
   }}
 >
   {mobileNavigation.map(([Icon, label]) => {
-    const targetNav =
-      label === 'More'
-        ? 'Profile'
-        : label;
+    const targetNav = label;
 
     const isActive =
       activeNav === targetNav ||
