@@ -170,7 +170,11 @@ try {
  assert.equal(await surface(completedRide),'rgb(255, 255, 255)');
  assert.equal(await completedRide.locator('strong').evaluate(el=>getComputedStyle(el).color),'rgb(20, 46, 67)');
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
- await calendar.locator('.calendar-session').filter({hasText:'Long Aerobic Ride'}).click();
+ const plannedRide=calendar.locator('.calendar-session').filter({hasText:'Long Aerobic Ride'});
+ await plannedRide.hover();
+ assert.equal(await surface(plannedRide),'rgb(255, 255, 255)','Hover must preserve the light calendar card');
+ await plannedRide.click();
+
  await sheet.waitFor();
  assert.deepEqual(errors,[]);
  console.log('PASS: white-panel mobile dashboard renders real prescription, rationale and opens session details');

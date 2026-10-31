@@ -5989,3 +5989,11 @@ strong {
 .awd-brand>img {width:70px;height:70px;object-fit:contain;border-radius:50%;background:white;border:2px solid #ffffffd9;box-shadow:0 3px 14px #061b3480}
 .awd-brand {align-items:flex-start;margin-bottom:20px}
 @media(max-width:420px) {.awd-brand>img {width:58px;height:58px}}
+
+/* Keep light calendar cards readable through pointer and touch hover states. */
+.athlete-agenda .calendar-session,
+.athlete-agenda .calendar-session:hover,
+.athlete-agenda .calendar-session:focus,
+.athlete-agenda .calendar-session:active {background:#fff!important;color:#142e43!important}
+.athlete-agenda .calendar-session .calendar-session-meta {color:#476174!important}
+.athlete-agenda .calendar-reschedule-button {background:#eef6fb;color:#245775;border-color:#c2d9e7}
