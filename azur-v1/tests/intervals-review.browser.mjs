@@ -111,6 +111,13 @@ try {
  await page.getByRole('button',{name:'Connect Intervals.icu',exact:true}).waitFor();
  assert.deepEqual(errors,[]);
  console.log('PASS: signed-in athlete without profile → automatic onboarding → saved profile → dashboard');
+ await page.getByRole('button',{name:'Chat',exact:true}).click();
+ await page.getByRole('heading',{name:/Your coaching/ }).waitFor();
+ await page.getByText('Coming soon',{exact:true}).waitFor();
+ assert.equal(await page.getByRole('textbox').count(),0,'Unavailable chat must not accept messages');
+ await page.getByRole('button',{name:'View your training',exact:false}).click();
+ await page.getByRole('button',{name:'Chat',exact:true}).waitFor();
+ console.log('PASS: coming-soon chat has no message input and opens calendar');
 } catch(error) {
  console.error('Browser page errors:',errors);
  console.error('Visible page:',(await page.locator('body').innerText()).slice(0,2500));
