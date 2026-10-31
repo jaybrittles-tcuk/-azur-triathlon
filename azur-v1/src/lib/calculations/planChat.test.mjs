@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {explainPlanQuestion} from './planChat.mjs';
+const s={id:'one',title:'Long Ride',plannedDate:'2026-10-31',sport:'bike',durationMin:144,status:'planned',rationale:'Build aerobic durability.',prescription:{main_set:[{duration_min:120,target:'65–75% FTP',rpe:'4–5'}]}};
+const context={today:'2026-10-31',sessions:[s]};
+test('session explanation uses saved rationale and targets without mutating plan',()=>{const before=JSON.stringify(context);const r=explainPlanQuestion('Why this session?',context);assert.match(r,/144 minutes/);assert.match(r,/Build aerobic durability/);assert.match(r,/65–75% FTP/);assert.equal(JSON.stringify(context),before);});
+test('no scheduled session is not inferred recovery',()=>{const r=explainPlanQuestion('Explain today',{...context,sessions:[]});assert.match(r,/cannot find/);assert.doesNotMatch(r,/recovery day/);});
+test('multiple sessions require disambiguation',()=>assert.match(explainPlanQuestion('Explain today',{...context,sessions:[s,{...s,id:'two'}]}),/more than one/));
+test('selected session binds explanation and stale selection fails closed',()=>{assert.match(explainPlanQuestion('Explain targets',{...context,selectedId:'one'}),/Long Ride/);assert.match(explainPlanQuestion('Explain targets',{...context,selectedId:'missing'}),/cannot find/);});
+test('change requests never claim a change happened',()=>assert.match(explainPlanQuestion('Why did today change?',context),/do not have a verified change history/));
+test('reschedule and shortening requests remain read-only',()=>{assert.match(explainPlanQuestion('Move my run',context),/Nothing has been changed/);assert.match(explainPlanQuestion('I only have 45 minutes',context),/cannot move or shorten/);});
+test('missing rationale and targets are explicit',()=>assert.match(explainPlanQuestion('Explain session',{...context,sessions:[{...s,rationale:null,prescription:null}]}),/No coaching rationale/));
+test('completion is not treated as successful execution',()=>assert.match(explainPlanQuestion('Explain session',{...context,sessions:[{...s,status:'completed'}]}),/does not establish how well/));
+test('health and unsupported advice are not personalised',()=>{assert.match(explainPlanQuestion('I have chest pain',context),/cannot assess/);assert.match(explainPlanQuestion('How should I fuel?',context),/outside this session-explanation beta/);});
+test('tomorrow resolves on correct calendar date',()=>assert.match(explainPlanQuestion('Explain tomorrow',{...context,today:'2026-10-30'}),/Long Ride/));

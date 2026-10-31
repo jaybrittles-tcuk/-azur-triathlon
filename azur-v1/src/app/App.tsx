@@ -1,3 +1,4 @@
+import {explainPlanQuestion, planChatWelcome} from '../lib/calculations/planChat.mjs';
 import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
@@ -1189,6 +1190,7 @@ export function App() {
     intervalsReviewOwner.current = userId;
     setIntervalsPreview(null); setIntervalsLoading(false);
     setRideAction(null); setRideMessage(''); setRideInbox([]); setRideLoadReview([]);
+    setChatMessage('');setChatSessionId('');setCoachDraft('');setChatMessages([{id:1,role:'assistant',text:planChatWelcome}]);
   }
 
   const [email, setEmail] = useState('');
@@ -4903,6 +4905,8 @@ const [planPreview, setPlanPreview] =
   const [showMacrocyclePreview, setShowMacrocyclePreview] =
   useState(false);
 const [chatMessage, setChatMessage] = useState('');
+const [chatSessionId,setChatSessionId]=useState('');
+const [coachDraft,setCoachDraft]=useState('');
 
 const [chatMessages, setChatMessages] = useState<
   Array<{
@@ -4915,7 +4919,7 @@ const [chatMessages, setChatMessages] = useState<
     id: 1,
     role: 'assistant',
     text:
-      'Hi. I can help with your training, recovery, pacing, race preparation and your current Azur plan.',
+      planChatWelcome,
   },
 ]);
   const [expandedPreviewSession, setExpandedPreviewSession] =
@@ -5586,154 +5590,7 @@ color:
   </>
 );
 }
-  const getAzurChatReply = (question: string) => {
-  const text = question.toLowerCase();
-
-  const todayKey = new Date().toISOString().slice(0, 10);
-
-  const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowKey = tomorrowDate.toISOString().slice(0, 10);
-
-  const sessionDate = (session: any) =>
-    session.plannedDate ??
-    session.planned_date ??
-    '';
-
-  const sessionDuration = (session: any) =>
-    session.durationMin ??
-    session.duration_min ??
-    session.duration_minutes ??
-    0;
-
-  const todaySession = weekSessions.find(
-    (session: any) =>
-      sessionDate(session) === todayKey,
-  );
-
-  const tomorrowSession = weekSessions.find(
-    (session: any) =>
-      sessionDate(session) === tomorrowKey,
-  );
-
-  const saturdayRide = weekSessions.find(
-    (session: any) => {
-      const dateValue = sessionDate(session);
-
-      if (!dateValue || session.sport !== 'bike') {
-        return false;
-      }
-
-      const date = new Date(`${dateValue}T12:00:00`);
-
-      return date.getDay() === 6;
-    },
-  );
-
-  if (
-    text.includes('today') &&
-    (
-      text.includes('change') ||
-      text.includes('changed') ||
-      text.includes('session')
-    )
-  ) {
-    if (!todaySession) {
-      return (
-        'There is no structured session scheduled for today. ' +
-        'That may be intentional recovery within your current training week.'
-      );
-    }
-
-    return (
-      `Today you have ${todaySession.title} for ` +
-      `${sessionDuration(todaySession)} minutes. ` +
-      `${todaySession.rationale ?? ''} ` +
-      (
-        recoveryReadiness
-          ? recoveryReadiness.implication === 'proceed_as_planned'
-            ? 'Your current recovery signals support completing it as planned.'
-            : recoveryReadiness.implication === 'hold_or_trim_cost'
-              ? 'Your recovery data suggests keeping the session controlled and being prepared to trim the workload.'
-              : 'Your recovery data currently supports reducing training stress.'
-          : 'I do not yet have enough recovery data to recommend changing it.'
-      )
-    ).trim();
-  }
-
-  if (
-    text.includes('fuel') ||
-    text.includes('nutrition')
-  ) {
-    if (!saturdayRide) {
-      return (
-        'I cannot currently see a Saturday bike session in your plan. ' +
-        'Once one is scheduled I can give you session-specific fuelling guidance.'
-      );
-    }
-
-    const minutes = sessionDuration(saturdayRide);
-
-    const carbs =
-      minutes >= 150
-        ? '70–90g of carbohydrate per hour'
-        : minutes >= 90
-          ? '50–70g of carbohydrate per hour'
-          : '30–50g of carbohydrate per hour';
-
-    return (
-      `Your Saturday ride is ${minutes} minutes. ` +
-      `A practical starting point would be ${carbs}, ` +
-      'around 500–750ml of fluid per hour, and electrolytes adjusted for conditions. ' +
-      'For longer race-specific rides, this is also a good opportunity to practise your planned race nutrition.'
-    );
-  }
-
-  if (
-    text.includes('move') ||
-    text.includes('reschedule')
-  ) {
-    if (!tomorrowSession) {
-      return (
-        'There is no structured session scheduled for tomorrow, so there is nothing that currently needs moving.'
-      );
-    }
-
-    return (
-      `Tomorrow is currently ${tomorrowSession.title} for ` +
-      `${sessionDuration(tomorrowSession)} minutes. ` +
-      'Moving one session can be reasonable, but Azur should also protect the spacing between harder sessions and your long training. ' +
-      'For now I can explain the impact; next we can let this chat actually propose and apply a safe reschedule.'
-    );
-  }
-
-  if (
-    text.includes('training load') ||
-    text.includes('fitness') ||
-    text.includes('fatigue') ||
-    text.includes('form')
-  ) {
-    return (
-      `Your current training load shows fitness ${
-        trainingLoad.fitness ?? '—'
-      }, fatigue ${
-        trainingLoad.fatigue ?? '—'
-      } and form ${
-        trainingLoad.form ?? '—'
-      }. ` +
-      'Azur uses these together rather than treating one number in isolation: fitness reflects longer-term load, fatigue reflects shorter-term load, and form shows the balance between them.'
-    );
-  }
-
-  return (
-    `I can see your current Azur plan${
-      primaryRace?.name
-        ? ` and your target race, ${primaryRace.name}`
-        : ''
-    }. ` +
-    'Ask me about a specific session, your weekly plan, recovery, training load, pacing, fuelling or race preparation and I can use that context in my answer.'
-  );
-};
+  const getAzurChatReply = (question: string) => explainPlanQuestion(question,{sessions:weekSessions,selectedId:chatSessionId,today:new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())});
 function HomeView() {
 const homeWeek = weekSessions.filter(session => {
   const now = new Date(todayKey + 'T12:00:00');
@@ -11212,7 +11069,7 @@ style={
             fontWeight: 700,
           }}
         >
-          ● Online
+          Automated plan guide · read-only beta
         </div>
       </div>
     </div>
@@ -11225,6 +11082,7 @@ style={
         gap: '12px',
       }}
     >
+      <div className="azur-chat-context"><label>Session to discuss<select value={chatSessionId} onChange={event=>setChatSessionId(event.target.value)}><option value="">Find today / tomorrow from my question</option>{weekSessions.map(session=><option key={session.id} value={session.id}>{session.plannedDate} · {session.title}</option>)}</select></label><div><button type="button" onClick={()=>setActiveNav('Calendar')}>View calendar</button><button type="button" onClick={()=>{const session=weekSessions.find(item=>item.id===chatSessionId);if(session){setSelectedId(session.id);setSessionDetailOpen(true);}else setActiveNav('Calendar');}}>Open session</button><button type="button" onClick={()=>setCoachDraft(`Question for Jay${chatSessionId?' about '+weekSessions.find(item=>item.id===chatSessionId)?.title:''}: ${chatMessage.trim()||'Please review my planned session.'}`)}>Prepare question for Jay</button></div>{coachDraft&&<div><p>Draft only — nothing has been sent. Copy this into your usual conversation with Jay.</p><textarea aria-label="Question draft for Jay" value={coachDraft} onChange={event=>setCoachDraft(event.target.value)}/></div>}</div>
       {chatMessages.map((message) => (
         <div
           key={message.id}
@@ -11258,6 +11116,7 @@ style={
                   : '1px solid #E2EAF0',
               fontSize: '14px',
               lineHeight: 1.5,
+              whiteSpace:'pre-line',
             }}
           >
             {message.text}
@@ -11275,10 +11134,9 @@ style={
           }}
         >
           {[
-            "Why has today's session changed?",
-            "How should I fuel Saturday's ride?",
-            "Can I move tomorrow's run?",
-            'Explain my training load',
+            'Why am I doing this session?',
+            'Explain the prescribed targets',
+            'What is planned tomorrow?',
           ].map((question) => (
             <button
               key={question}
@@ -11353,7 +11211,9 @@ style={
               setChatMessage('');
             }
           }}
-          placeholder="Ask Azur..."
+          aria-label="Ask AZUR about your plan"
+          maxLength={1200}
+          placeholder="Ask about your session…"
           style={{
             flex: 1,
             height: '44px',

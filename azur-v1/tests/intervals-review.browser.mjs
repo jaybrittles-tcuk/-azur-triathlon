@@ -111,6 +111,15 @@ try {
  await page.getByRole('button',{name:'Connect Intervals.icu',exact:true}).waitFor();
  assert.deepEqual(errors,[]);
  console.log('PASS: signed-in athlete without profile → automatic onboarding → saved profile → dashboard');
+ await page.getByRole('button',{name:'Chat',exact:true}).click();
+ const input=page.getByRole('textbox',{name:'Ask AZUR about your plan'});
+ await input.fill('Explain today');await input.press('Enter');
+ await page.getByText('I cannot find a matching saved session.',{exact:false}).waitFor();
+ await input.fill('Please review my workout');
+ await page.getByRole('button',{name:'Prepare question for Jay',exact:true}).click();
+ assert.match(await page.getByRole('textbox',{name:'Question draft for Jay'}).inputValue(),/Please review my workout/);
+ await page.getByText('Draft only — nothing has been sent.',{exact:false}).waitFor();
+ console.log('PASS: read-only plan chat and explicit unsent coach draft');
 } catch(error) {
  console.error('Browser page errors:',errors);
  console.error('Visible page:',(await page.locator('body').innerText()).slice(0,2500));
