@@ -6720,16 +6720,9 @@ color:
       (session) => session.status === 'planned' || session.status === 'edited',
     ).length;
     return (
-      <div className="calendar-layout">
+      <div className="calendar-layout athlete-agenda">
         <div>
-<details className="calendar-stress-disclosure">
-  <summary><span><strong>Planned training load</strong><small>Sport-specific estimates · view analysis</small></span><span aria-hidden="true">⌄</span></summary>
-  <MultisportPlannedStress
-    sessions={calendarWeekSessions}
-    runThreshold={athleteProfile.runThreshold}
-    swimCss={athleteProfile.swimThreshold}
-  />
-</details>
+
 {movingSessionId && (
   <section className="calendar-move-panel" aria-label="Reschedule workout">
     <strong>Reschedule {weekSessions.find((item) => item.id === movingSessionId)?.title}</strong>
@@ -6773,7 +6766,7 @@ color:
   </section>
 )}
 {moveMessage && <p role="status" className="calendar-move-message">{moveMessage}</p>}
-<section className="panel calendar-toolbar calendar-week-strip"><div className="azur-calendar-quickbar"><strong>YOUR TRAINING WEEK</strong><button type="button" onClick={()=>{setCalendarWeekOffset(0);setCalendarFocusedDate(todayKey)}}>Today</button><button type="button" onClick={()=>setCalendarFocusedDate('all')}>Full week</button></div>
+<section className="panel calendar-toolbar calendar-week-strip"><div className="azur-calendar-quickbar"><strong>Training calendar</strong><button type="button" onClick={()=>{setCalendarWeekOffset(0);setCalendarFocusedDate(todayKey)}}>Today</button><button type="button" onClick={()=>setCalendarFocusedDate('all')}>Full week</button></div>
   <div className="calendar-strip-top">
     <button
       type="button"
@@ -6786,16 +6779,10 @@ color:
     </button>
 
     <div>
-      <span className="eyebrow">TRAINING CALENDAR</span>
+
 
       <h3>
-        {calendarWeekDates[0]?.date.toLocaleDateString(
-          'en-GB',
-          {
-            month: 'long',
-            year: 'numeric',
-          },
-        )}
+        {calendarWeekDates[0]?.date.toLocaleDateString('en-GB', {day:'numeric', month:'short'})} – {calendarWeekDates[6]?.date.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}
       </h3>
     </div>
 
@@ -6849,7 +6836,7 @@ color:
 
   <div className="calendar-strip-footer">
     <small>
-      {calendarWeekSessions.length} sessions · {completedCount} completed · {plannedCount} planned ·{' '}
+      {calendarWeekSessions.length} {calendarWeekSessions.length === 1 ? 'session' : 'sessions'} · {completedCount} completed · {plannedCount} planned ·{' '}
       {(
         calendarWeekSessions.reduce(
           (total, session) =>
@@ -6875,8 +6862,8 @@ color:
   <div><strong>{focusedDay ? focusedDay.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}) : 'Full training week'}</strong><small>{focusedDay ? 'Tap another date to view its sessions' : 'All seven training days'}</small></div>
   <button type="button" onClick={() => setCalendarFocusedDate(focusedDay ? 'all' : null)}>{focusedDay ? 'Full week' : 'Focus day'}</button>
 </div>
-<section className="panel calendar-grid">
-  {calendarWeekSessions.length === 0 ? (
+<section className={`panel calendar-grid ${focusedDay ? 'focused-day' : 'full-week'}`}>
+  {calendarWeekSessions.length === 0 && focusedDay && !completedActivityFeed.some(activity => !activity.planned_session_id && new Date(activity.start_time).toDateString() === focusedDay.date.toDateString()) ? (
     <div className="calendar-empty-state">
       <span className="eyebrow">NO SESSIONS</span>
 
@@ -6951,8 +6938,9 @@ const dayCompletedActivities = completedActivityFeed.filter(
 </div>
 
                   <div className="day-stack">
+                    {!daySessions.length && !dayCompletedActivities.length && <small className="agenda-empty-day">No workout scheduled</small>}
                     {daySessions.map((session) => (
-                      <div className="calendar-session-wrapper">
+                      <div className="calendar-session-wrapper" key={session.id}>
                       {!session.locked && (session.status === 'planned' || session.status === 'edited') && (
                         <button className="calendar-reschedule-button" type="button" onClick={() => {setMovingSessionId(session.id); setMoveTargetDate(session.plannedDate); setMoveMessage('');}}>Move session</button>
                       )}
@@ -7000,8 +6988,6 @@ onClick={() => {
 
                         <strong>{session.title}</strong>
 <CalendarIntensityProfile steps={(session.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
-<CalendarPrescriptionSteps prescription={session.prescription} />
-<WorkoutTargetDetails prescription={session.prescription} ftpWatts={athleteProfile.ftp} compact />
 <div className="calendar-session-purpose">
   {session.status === 'completed' && session.completedDurationSec != null ? (
     <div className="calendar-actual-comparison">
@@ -7101,6 +7087,14 @@ onClick={() => {
     })
   )}
 </section>
+<details className="calendar-stress-disclosure">
+  <summary><span><strong>Planned training load</strong><small>Sport-specific estimates · view analysis</small></span><span aria-hidden="true">⌄</span></summary>
+  <MultisportPlannedStress
+    sessions={calendarWeekSessions}
+    runThreshold={athleteProfile.runThreshold}
+    swimCss={athleteProfile.swimThreshold}
+  />
+</details>
         </div>
 
 {sessionDetailOpen && (
@@ -7120,12 +7114,12 @@ onClick={() => {
         ×
       </button>
           <div className={`azur-v2-session-hero azur-v2-sport-${selected.sport}`}>
-            <div className="azur-v2-hero-label">AZUR / SESSION DETAIL</div>
+            <div className="azur-v2-hero-label">SESSION DETAILS</div>
             <div className="azur-v2-hero-sport">{sportName(selected.sport)} · {selected.status === "completed" ? "Completed" : "Planned"}</div>
           </div>
           <div className="section-heading">
             <div>
-              <span className="eyebrow">SESSION DETAIL</span>
+
               <h3>{selected.title}</h3>
               <div className="session-detail-meta">
   <span>{sportName(selected.sport)}</span>
@@ -7164,17 +7158,11 @@ onClick={() => {
               <small>Do not infer missing targets or rest periods. Ask your coach before completing an unclear session.</small>
             </div>;
           })()}
-          <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
-          <details className="azur-workout-modal-summary azur-v2-workout-breakdown">
-            <summary>Workout structure <span>View intensity profile and prescribed targets</span></summary>
-            <div className="azur-v2-workout-breakdown-body">
-              <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />
-            </div>
-          </details>
-          <div className="editor-grid">
-          <details className="session-prescription-disclosure">
-            <summary><span><strong>Full workout prescription</strong><small>Warm-up · Main set · Cool-down · Fueling</small></span><span aria-hidden="true">⌄</span></summary>
+          {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || selected.prescription?.focus ? (
+<details open key={selected.id} className="session-prescription-disclosure">
+            <summary><span><strong>Workout prescription</strong><small>Warm-up · Main set · Cool-down · Fueling</small></span><span aria-hidden="true">⌄</span></summary>
             <div className="session-prescription-sections">
+            <details><summary>View workout timeline</summary><CalendarPrescriptionSteps prescription={selected.prescription} /></details>
             {selected.prescription?.focus && (
  <div className="wide session-block">
     <span className="eyebrow">FOCUS</span>
@@ -7313,6 +7301,10 @@ onClick={() => {
 
 </div>
           </details>
+          ) : <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />}
+          <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
+          <div className="editor-grid">
+
 
 <div className="session-block">
   <span className="eyebrow">DURATION</span>
@@ -10386,7 +10378,7 @@ style={
     </div>
 
     <nav
-      className={`mobile-bottom-nav ${(activeNav === 'More' || (activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete'))) ? 'awd-navigation' : ''}`}
+      className={`mobile-bottom-nav ${(activeNav === 'More' || activeNav === 'Calendar' || (activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete'))) ? 'awd-navigation' : ''}`}
   style={{
   position: 'fixed',
 left: 0,

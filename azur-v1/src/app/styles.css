@@ -5907,3 +5907,40 @@ strong {
 .athlete-more .more-list button+button {border-top:1px solid #e4ecf2}
 .athlete-more .more-list button:hover {background:#eff7fb}
 .athlete-more button:focus-visible {outline:3px solid #168bc9;outline-offset:-3px}
+
+/* Athlete agenda uses the same paper surface and ink as the More menu. */
+.calendar-layout.athlete-agenda {
+  --azur-v2-card:#fff; --azur-v2-ink:#142e43; --azur-v2-outline:#cddde7;
+  --azur-v2-elevated:#e9f3f9; --azur-v2-subtle:#476174;
+  min-width:0; background:#f3f7fa; border-radius:18px; padding:clamp(8px,2vw,18px)
+}
+.athlete-agenda .calendar-week-strip,.athlete-agenda .calendar-grid,
+.athlete-agenda .calendar-day {background:#fff!important;border-color:#dbe6ed!important;color:#152f44}
+.athlete-agenda .calendar-strip-top h3,.athlete-agenda .azur-calendar-quickbar strong,
+.athlete-agenda .calendar-focus-toolbar strong,.athlete-agenda .calendar-day-head strong,
+.athlete-agenda .calendar-empty-state h3 {color:#16364b!important}
+.athlete-agenda .calendar-strip-footer small,.athlete-agenda .calendar-empty-state p,
+.athlete-agenda .calendar-focus-toolbar small,.athlete-agenda .calendar-day-head span,
+.athlete-agenda .calendar-session-purpose,.athlete-agenda .calendar-session-purpose span {color:#49667a}
+.athlete-agenda .calendar-strip-day {background:#eff5f8;border-color:#d7e4ec;color:#183449}
+.athlete-agenda .calendar-strip-day>strong,.athlete-agenda .calendar-strip-day>span {color:inherit}
+.athlete-agenda .calendar-strip-day.today {background:#e2f4fd;border-color:#168bc9}
+.athlete-agenda .calendar-strip-day.focused {background:#113c59;border-color:#113c59;color:white}
+.athlete-agenda .calendar-stress-disclosure {margin-top:14px}
+.athlete-agenda .session-detail-modal .azur-v2-session-hero {min-height:0;padding:14px 54px 20px 16px}
+.athlete-agenda .session-detail-modal>.section-heading {margin:0;background:#fff!important;border:0;border-radius:0;padding:14px;color:#16364b}
+.athlete-agenda .session-detail-modal>.section-heading h3 {color:#142e43}
+.athlete-agenda .session-prescription-disclosure {background:white;border-color:#cfdee8;margin:10px 0}
+.athlete-agenda .session-prescription-disclosure summary strong,
+.athlete-agenda .session-prescription-disclosure .session-block strong {color:#17364d}
+.athlete-agenda .session-prescription-disclosure summary small,
+.athlete-agenda .session-prescription-disclosure .eyebrow,
+.athlete-agenda .session-prescription-disclosure .session-block small {color:#416479}
+.athlete-agenda .session-prescription-sections .session-block {background:#f5f8fa;border-color:#d4e2ea;color:#253f51}
+.athlete-agenda .session-prescription-sections .azur-prescription-step {background:white;border-color:#d6e3eb;color:#203c50}
+.athlete-agenda .azur-prescription-targets>div,.athlete-agenda .azur-prescription-rest {background:#eaf4f9;border-color:#ccdee8}
+.athlete-agenda .azur-prescription-targets span,.athlete-agenda .azur-prescription-rest span {color:#466275}
+@media(max-width:700px){.athlete-agenda .full-week .calendar-day>.calendar-day-head {display:flex}}
+.athlete-agenda .session-prescription-sections>details {color:#264c64}
+.athlete-agenda .calendar-day.empty-day:not(.mobile-unfocused) {display:block}
+.athlete-agenda .agenda-empty-day {color:#506a7d}

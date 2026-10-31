@@ -133,7 +133,7 @@ try {
  }
  assert.deepEqual(errors,[]);
  console.log('PASS: mobile More opens profile and all six training and connection destinations');
- demoSessions=[{id:'demo-bike',planned_date:new Date().toISOString().slice(0,10),sport:'bike',title:'Long Aerobic Ride',session_class:'endurance',priority:1,duration_min:144,status:'planned',rationale:'Build aerobic durability with a controlled sustained effort.',prescription:{warmup:[{duration_min:12,target:'55–65% FTP'}],main_set:[{duration_min:120,target:'65–75% FTP'}],cooldown:[{duration_min:12,target:'<65% FTP'}]}}];
+ demoSessions=[{id:'demo-bike',planned_date:new Date().toISOString().slice(0,10),sport:'bike',title:'Long Aerobic Ride',session_class:'endurance',priority:1,duration_min:144,status:'planned',rationale:'Build aerobic durability with a controlled sustained effort.',prescription:{warmup:[{duration_min:12,target:'55–65% FTP'}],main_set:[{reps:2,duration_min:58,recovery_min:4,target:'65–75% FTP'}],cooldown:[{duration_min:12,target:'<65% FTP'}]}}];
  await page.goto(base);
  const home=page.locator('.azur-white-dashboard:visible');
  await home.getByRole('heading',{name:'Long Aerobic Ride',exact:true}).waitFor();
@@ -145,6 +145,19 @@ try {
  await home.getByRole('button',{name:'Open session targets',exact:false}).waitFor();
  await home.getByRole('button',{name:'View session',exact:true}).click();
  await page.locator('.session-detail-modal:visible').waitFor();
+ const sheet=page.locator('.session-detail-modal:visible');
+ for(const label of ['WARM-UP','MAIN SET','Recovery between efforts','4 min','COOL-DOWN','65–75% FTP']){
+  await sheet.locator('.session-prescription-sections').getByText(label,{exact:true}).first().waitFor();
+ }
+ await sheet.getByRole('button',{name:'Close session detail'}).click();
+ const calendar=page.locator('.athlete-agenda:visible');
+ await calendar.getByRole('button',{name:'Next week'}).click();
+ await calendar.getByRole('button',{name:'Today',exact:true}).click();
+ await calendar.getByRole('button',{name:'Full week',exact:true}).first().click();
+ assert.equal(await calendar.locator('.calendar-day-head:visible').count(),7);
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+ await calendar.locator('.calendar-session').filter({hasText:'Long Aerobic Ride'}).click();
+ await sheet.waitFor();
  assert.deepEqual(errors,[]);
  console.log('PASS: white-panel mobile dashboard renders real prescription, rationale and opens session details');
 } catch(error) {
