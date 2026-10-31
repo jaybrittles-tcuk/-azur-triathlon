@@ -5954,3 +5954,19 @@ strong {
 .athlete-agenda .calendar-session.run .calendar-session-top>span {color:#93440d}
 .athlete-agenda .calendar-session.completed .calendar-session-status {color:#146345}
 .athlete-agenda .calendar-session.completed .calendar-session-status>span {color:#146345!important;background:#e4f5ed!important;border-color:#abd5bf!important}
+
+.athlete-agenda .agenda-date-nav {display:flex;align-items:center;justify-content:center;gap:10px;color:#17354d}
+.agenda-date-nav strong {font-size:1rem}
+.agenda-date-nav button {min-height:36px;min-width:36px;background:#eef5fa;border:0;border-radius:9px;color:#125579;font-weight:700}
+.agenda-date-nav button:last-child {margin-left:auto;padding-inline:12px}
+.agenda-dates {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;margin-top:10px;text-align:center}
+.agenda-dates small {color:#506477;font-weight:700}
+.agenda-dates button {height:44px;min-width:0;display:grid;align-content:center;justify-items:center;gap:2px;padding:0;border:2px solid transparent;border-radius:10px;background:white;color:#17354d;font:inherit}
+.agenda-dates button[aria-current=date] {background:#e7f4fb}
+.agenda-dates button[aria-pressed=true] {border-color:#1779ab;font-weight:750}
+.agenda-dates button>span {display:flex;gap:2px;min-height:5px}
+.agenda-dates i {width:5px;height:5px;border-radius:100%;background:#697885}
+.agenda-dates .swim {background:#1696c7}.agenda-dates .bike {background:#ad7600}.agenda-dates .run {background:#c35b22}
+.athlete-agenda .focused-day.calendar-grid {display:block}
+.athlete-agenda .focused-day .calendar-session {border-radius:6px!important;box-shadow:none!important}
+.athlete-agenda .focused-day .calendar-session-meta {margin-top:4px!important}

@@ -151,7 +151,11 @@ try {
  }
  await sheet.getByRole('button',{name:'Close session detail'}).click();
  const calendar=page.locator('.athlete-agenda:visible');
- await calendar.getByRole('button',{name:'Next week'}).click();
+ const dates=calendar.getByRole('group',{name:'Four-week calendar'});
+ assert.equal(await dates.getByRole('button').count(),28);
+ await dates.getByRole('button').nth(14).click();
+ assert.equal(await dates.getByRole('button').nth(14).getAttribute('aria-pressed'),'true');
+ await calendar.getByRole('button',{name:'Next four weeks'}).click();
  await calendar.getByRole('button',{name:'Today',exact:true}).click();
  await calendar.getByRole('button',{name:'Full week',exact:true}).first().click();
  assert.equal(await calendar.locator('.calendar-day-head:visible').count(),7);

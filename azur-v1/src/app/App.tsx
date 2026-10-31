@@ -6716,6 +6716,19 @@ color:
       (session) => session.status === 'completed',
     ).length;
     const focusedDay = calendarFocusedDate === 'all' ? null : (calendarWeekDates.find(d => d.dateKey === calendarFocusedDate) ?? calendarWeekDates.find(d => d.dateKey === todayKey) ?? calendarWeekDates[0]);
+    const gridWeekOffset = Math.floor(calendarWeekOffset / 4) * 4;
+    const gridStart = new Date(calendarWeekDates[0].date);
+    gridStart.setDate(gridStart.getDate() + (gridWeekOffset - calendarWeekOffset) * 7);
+    const dateGrid = Array.from({length: 28}, (_, index) => {
+      const date = new Date(gridStart);
+      date.setDate(date.getDate() + index);
+      const key = [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
+      const sports = new Set([
+        ...weekSessions.filter(session => session.plannedDate === key).map(session => session.sport),
+        ...completedActivityFeed.filter(activity => !activity.planned_session_id && new Date(activity.start_time).toDateString() === date.toDateString()).map(activity => activity.sport),
+      ]);
+      return {date, key, sports};
+    });
     const plannedCount = calendarWeekSessions.filter(
       (session) => session.status === 'planned' || session.status === 'edited',
     ).length;
@@ -6766,77 +6779,24 @@ color:
   </section>
 )}
 {moveMessage && <p role="status" className="calendar-move-message">{moveMessage}</p>}
-<section className="panel calendar-toolbar calendar-week-strip"><div className="azur-calendar-quickbar"><strong>Training calendar</strong><button type="button" onClick={()=>{setCalendarWeekOffset(0);setCalendarFocusedDate(todayKey)}}>Today</button><button type="button" onClick={()=>setCalendarFocusedDate('all')}>Full week</button></div>
-  <div className="calendar-strip-top">
-    <button
-      type="button"
-      onClick={() =>
-        { setCalendarFocusedDate(null); setCalendarWeekOffset((current) => current - 1); }
-      }
-      aria-label="Previous week"
-    >
-      ‹
-    </button>
-
-    <div>
-
-
-      <h3>
-        {calendarWeekDates[0]?.date.toLocaleDateString('en-GB', {day:'numeric', month:'short'})} – {calendarWeekDates[6]?.date.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}
-      </h3>
-    </div>
-
-    <button
-      type="button"
-      onClick={() =>
-        { setCalendarFocusedDate(null); setCalendarWeekOffset((current) => current + 1); }
-      }
-      aria-label="Next week"
-    >
-      ›
-    </button>
+<section className="panel calendar-toolbar calendar-week-strip"><div className="agenda-date-nav">
+    <button aria-label="Previous four weeks" onClick={() => {setCalendarWeekOffset(gridWeekOffset-4);setCalendarFocusedDate(null)}}>‹</button>
+    <strong>{gridStart.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – {dateGrid[27].date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</strong>
+    <button aria-label="Next four weeks" onClick={() => {setCalendarWeekOffset(gridWeekOffset+4);setCalendarFocusedDate(null)}}>›</button>
+    <button onClick={() => {setCalendarWeekOffset(0);setCalendarFocusedDate(todayKey)}}>Today</button>
   </div>
-
-  <div className="calendar-strip-days">
-    {calendarWeekDates.map((day) => {
-      const sessionsForDate =
-        calendarWeekSessions.filter(
-          (session) =>
-            session.plannedDate === day.dateKey,
-        );
-
-      return (
-        <button
-          type="button"
-          key={day.dateKey}
-          aria-pressed={focusedDay?.dateKey === day.dateKey}
-          aria-label={`View workouts for ${day.dayLabel} ${day.dayNumber}`}
-          onClick={() => setCalendarFocusedDate(day.dateKey)}
-          className={`calendar-strip-day ${day.dateKey === todayKey ? 'today' : ''} ${focusedDay?.dateKey === day.dateKey ? 'focused' : ''}`}
-        >
-          <span>{day.dayLabel.slice(0, 1)}</span>
-
-          <strong>{day.dayNumber}</strong>
-
-          <div className="calendar-strip-dots" aria-label={sessionsForDate.length ? `${sessionsForDate.filter((session) => session.status === 'completed').length} of ${sessionsForDate.length} sessions completed` : 'Rest day'}>
-            {sessionsForDate.length === 0 ? (
-              <span className="calendar-rest-indicator" title="Rest day">—</span>
-            ) : sessionsForDate.slice(0, 3).map((session) => (
-              <i
-                key={session.id}
-                className={`${session.sport} ${session.status === 'completed' ? 'done' : session.status === 'edited' ? 'adjusted' : ''}`}
-                title={`${sportName(session.sport)}: ${session.status === 'completed' ? 'Completed' : session.status === 'edited' ? 'Adjusted' : 'Planned'}`}
-              />
-            ))}
-          </div>
-        </button>
-      );
-    })}
+  <div className="agenda-dates" role="group" aria-label="Four-week calendar">
+    {days.map(day => <small key={day} aria-hidden="true">{day[0]}</small>)}
+    {dateGrid.map(({date,key,sports},index) => <button key={key} type="button"
+      aria-label={date.toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long',year:'numeric'}) + (sports.size ? ', '+[...sports].join(', ') : '')}
+      aria-current={key===todayKey?'date':undefined} aria-pressed={focusedDay?.dateKey===key}
+      onClick={()=>{setCalendarWeekOffset(gridWeekOffset+Math.floor(index/7));setCalendarFocusedDate(key)}}>
+      {date.getDate()}<span aria-hidden="true">{[...sports].map(sport=><i className={sport} key={sport}/>)}</span>
+    </button>)}
   </div>
-
   <div className="calendar-strip-footer">
     <small>
-      {calendarWeekSessions.length} {calendarWeekSessions.length === 1 ? 'session' : 'sessions'} · {completedCount} completed · {plannedCount} planned ·{' '}
+      Selected week · {calendarWeekSessions.length} {calendarWeekSessions.length === 1 ? 'session' : 'sessions'} · {completedCount} completed · {plannedCount} planned ·{' '}
       {(
         calendarWeekSessions.reduce(
           (total, session) =>
@@ -6863,31 +6823,12 @@ color:
   <button type="button" onClick={() => setCalendarFocusedDate(focusedDay ? 'all' : null)}>{focusedDay ? 'Full week' : 'Focus day'}</button>
 </div>
 <section className={`panel calendar-grid ${focusedDay ? 'focused-day' : 'full-week'}`}>
-  {calendarWeekSessions.length === 0 && focusedDay && !completedActivityFeed.some(activity => !activity.planned_session_id && new Date(activity.start_time).toDateString() === focusedDay.date.toDateString()) ? (
-    <div className="calendar-empty-state">
-      <span className="eyebrow">NO SESSIONS</span>
-
-      <h3>No structured training planned</h3>
-
-      <p>
-        There are no planned sessions in this week yet.
-        Use the week controls above to browse your training calendar.
-      </p>
-
-      {calendarWeekOffset !== 0 && (
-        <button
-          type="button"
-          onClick={() => setCalendarWeekOffset(0)}
-        >
-          Return to this week
-        </button>
-      )}
-    </div>
-  ) : (
+  {
     days.map((day) => {
              const daySessions = calendarWeekSessions.filter(
                 (session) => session.dayLabel === day,
               );
+      if (focusedDay && focusedDay.dayLabel !== day) return null;
       const calendarDay = calendarWeekDates.find(
   (calendarDate) => calendarDate.dayLabel === day,
 );
@@ -7085,7 +7026,7 @@ onClick={() => {
                 </div>
               );
     })
-  )}
+  }
 </section>
 <details className="calendar-stress-disclosure">
   <summary><span><strong>Planned training load</strong><small>Sport-specific estimates · view analysis</small></span><span aria-hidden="true">⌄</span></summary>
