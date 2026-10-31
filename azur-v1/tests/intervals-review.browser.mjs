@@ -150,6 +150,10 @@ try {
  for(const label of ['WARM-UP','MAIN SET','Recovery between efforts','4 min','COOL-DOWN','65–75% FTP']){
   await sheet.locator('.session-prescription-sections').getByText(label,{exact:true}).first().waitFor();
  }
+ const target=sheet.locator('.azur-prescription-targets strong').first();
+ assert.equal(await target.evaluate(el=>getComputedStyle(el).color),'rgb(23, 53, 75)','Prescription target must remain readable on light blue');
+ assert.equal(await sheet.locator('.session-prescription-sections>.session-block').first().evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(243, 247, 250)');
+ if(process.env.AZUR_VISUAL_OUTPUT_DIR)await page.screenshot({path:process.env.AZUR_VISUAL_OUTPUT_DIR+'/AZUR-session-colours.png'});
  await sheet.getByRole('button',{name:'Close session detail'}).click();
  const calendar=page.locator('.athlete-agenda:visible');
  const dates=calendar.getByRole('group',{name:'Four-week calendar'});

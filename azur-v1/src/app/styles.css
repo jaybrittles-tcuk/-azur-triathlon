@@ -5970,3 +5970,22 @@ strong {
 .athlete-agenda .focused-day.calendar-grid {display:block}
 .athlete-agenda .focused-day .calendar-session {border-radius:6px!important;box-shadow:none!important}
 .athlete-agenda .focused-day .calendar-session-meta {margin-top:4px!important}
+
+/* Light workout sheet. Override the legacy editor's dark surface rules. */
+.athlete-agenda .session-detail-modal {background:#f1f6fa!important;color:#17354b}
+.athlete-agenda .session-detail-modal .session-detail-meta span {background:#e9f2f8!important;border-color:#ccdee9!important;color:#294c64!important}
+.athlete-agenda .session-detail-modal .session-prescription-disclosure>summary {color:#17354b;border-bottom-color:#d6e3ec}
+.athlete-agenda .session-detail-modal .session-prescription-sections {display:flex;flex-direction:column;gap:12px;padding:14px}
+.athlete-agenda .session-detail-modal .session-prescription-sections>.session-block {background:#f3f7fa!important;border:1px solid #d4e2eb!important;border-radius:12px;padding:14px;min-height:0;color:#17354b}
+.athlete-agenda .session-detail-modal .session-prescription-sections .session-block-item {background:transparent!important;min-height:0;margin:0;padding:12px 0}
+.athlete-agenda .session-detail-modal .session-prescription-sections strong,
+.athlete-agenda .session-detail-modal .session-prescription-sections .session-block-item div {color:#17354b!important}
+.athlete-agenda .session-detail-modal .session-prescription-sections small {color:#456579!important}
+.athlete-agenda .session-detail-modal .session-prescription-sections .eyebrow {color:#34647f!important}
+.athlete-agenda .session-detail-modal .azur-prescription-targets>div {background:#e4f2fa!important;border-color:#bfd9e8!important}
+.athlete-agenda .session-detail-modal .azur-prescription-rest {background:#fff3d9!important;border-color:#e1c483!important}
+.athlete-agenda .session-detail-modal .session-prescription-sections .azur-prescription-targets span {color:#375a70}
+.athlete-agenda .session-detail-modal .azur-prescription-rest span {color:#785613}
+.awd-brand>img {width:70px;height:70px;object-fit:contain;border-radius:50%;background:white;border:2px solid #ffffffd9;box-shadow:0 3px 14px #061b3480}
+.awd-brand {align-items:flex-start;margin-bottom:20px}
+@media(max-width:420px) {.awd-brand>img {width:58px;height:58px}}
