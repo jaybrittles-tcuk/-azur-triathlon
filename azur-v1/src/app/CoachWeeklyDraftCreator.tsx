@@ -37,7 +37,7 @@ export default function CoachWeeklyDraftCreator({onSaved}:{onSaved:()=>void}){
     supabase.from('coach_workout_approval_event').select('id,workout_id,workout_version,decision,level,phases,decided_at').order('decided_at',{ascending:false}).limit(500)
    ]);
    if(planError||approvalError)throw new Error(planError?.message||approvalError?.message);
-   const library=resolveCurrentBikeApprovals(approvalRows??[]);
+   const library=resolveCurrentBikeApprovals((approvalRows??[]).filter(row=>row.decision==='approved'||row.decision==='revoked').map(row=>({...row,decision:row.decision as 'approved'|'revoked'})));
    // A fixed triathlon structure is a conservative first check. Missing approved
    // swim/run workouts block persistence rather than generate a misleading plan.
    const proposal=draftApprovedTrainingWeek({
