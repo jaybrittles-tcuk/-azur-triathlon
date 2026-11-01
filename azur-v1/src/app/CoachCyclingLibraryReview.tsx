@@ -14,7 +14,7 @@ const phases = ['base', 'build', 'peak', 'taper', 'recovery'] as const;
 type Phase = typeof phases[number];
 type ReviewDraft = { level: 1 | 2 | 3; phases: Phase[] };
 const familyName = (family: string) => family.replaceAll('_', ' ');
-// Fail closed until end-to-end scheduling acceptance checks pass.
+// Deployment flag controls the verified coach scheduling entry point.
 const coachSchedulingEnabled = import.meta.env.VITE_ENABLE_COACH_SCHEDULING === 'true';
 
 export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athleteWeeklyHours, athleteId }: { ftpWatts: number | null; athleteName: string | null; athleteWeeklyHours: number | null; athleteId: string | null }) {
@@ -27,6 +27,8 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
   const [events, setEvents] = useState<Array<{id:string;workout_id:string;workout_version:number;decision:'approved'|'revoked';level:number;phases:string[];decided_at:string}>>([]);
   const [feedback, setFeedback] = useState('');
   const [saving, setSaving] = useState(false);
+  const [weekHours,setWeekHours]=useState(athleteWeeklyHours?.toString()??'');
+  useEffect(()=>{setWeekHours(athleteWeeklyHours?.toString()??'');setScheduleDate('');setScheduleMessage('')},[athleteId]);
   const [scheduleDate, setScheduleDate] = useState('');
   const [scheduleSaving, setScheduleSaving] = useState(false);
   const [scheduleMessage, setScheduleMessage] = useState('');
@@ -56,17 +58,19 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
     finally {setSaving(false);}
   }
   async function confirmSchedule() {
-    if(!coachSchedulingEnabled){setScheduleMessage('Coach scheduling is still feature-gated.');return;}
+    if(!coachSchedulingEnabled){setScheduleMessage('Scheduling is unavailable in this environment.');return;}
     if(!athleteId||!personalisedDraft||!ftpWatts||!scheduleDate||scheduleSaving||preview.status!=='selected')return;
     if(!Number.isInteger(personalisedDraft.durationMin)){setScheduleMessage('This template has a fractional-minute duration and cannot yet be saved into the integer-minute calendar.');return;}
     setScheduleSaving(true);setScheduleMessage('');
     try{
       if(!/^\d{4}-\d{2}-\d{2}$/.test(scheduleDate))throw new Error('Choose a valid date.');
+      if(!Number.isFinite(Number(weekHours))||Number(weekHours)<2||Number(weekHours)>25)throw new Error('Confirm weekly hours between 2 and 25.');
       const prescription=createLibraryBikePrescription(personalisedDraft,ftpWatts);
-      const {data,error}=await supabase.rpc('coach_schedule_approved_bike_session',{
+      const {data,error}=await supabase.rpc('coach_schedule_bike_with_week',{
         p_athlete_id:athleteId,p_date:scheduleDate,p_workout_id:personalisedDraft.workoutId,
         p_workout_version:personalisedDraft.version,p_title:personalisedDraft.title,
-        p_duration_min:Math.round(personalisedDraft.durationMin),p_prescription:prescription,p_rationale:personalisedDraft.purpose
+        p_duration_min:Math.round(personalisedDraft.durationMin),p_prescription:prescription,p_rationale:personalisedDraft.purpose,
+        p_week_phase:selectionPhase,p_week_hours:Number(weekHours)
       });
       if(error)throw error;
       setScheduleMessage(data?'Workout added to the assigned athlete calendar.':'No session was created.');
@@ -132,8 +136,10 @@ export default function CoachCyclingLibraryReview({ ftpWatts, athleteName, athle
         )}
         {personalisedDraft && <div className="coach-cycling-schedule">
           <label>Schedule for assigned athlete <input aria-label="Workout date" type="date" value={scheduleDate} onChange={e=>setScheduleDate(e.target.value)} /></label>
+          <label>Weekly training budget (hours)<input aria-label="Weekly training budget (hours)" type="number" min="2" max="25" step="0.5" value={weekHours} onChange={e=>setWeekHours(e.target.value)}/></label>
+          <p>New training weeks use the phase selected above and this weekly budget. Review the workout and date before confirming.</p>
           <button type="button" disabled={!coachSchedulingEnabled || !athleteId || !scheduleDate || scheduleSaving || !Number.isInteger(personalisedDraft.durationMin)} onClick={()=>void confirmSchedule()}>{scheduleSaving?'Saving…':'Confirm and add to calendar'}</button>
-          <small>{coachSchedulingEnabled ? 'Checks coach assignment, approval, current FTP, an unlocked training week and existing calendar entries.' : 'Scheduling disabled until an approved workout and a real assigned-athlete acceptance test are verified.'}</small>
+          <small>{coachSchedulingEnabled ? 'Scheduling checks your assignment, approved template, current FTP and available date.' : 'Scheduling is unavailable in this environment.'}</small>
           {scheduleMessage && <p role="status">{scheduleMessage}</p>}
         </div>}
         <small>Nothing is added until a verified coach confirms. Garmin export remains disabled.</small>

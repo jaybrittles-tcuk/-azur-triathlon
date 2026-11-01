@@ -11,6 +11,7 @@ export type AssignedAthlete = {
 };
 
 export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { onSelect: (athlete: AssignedAthlete | null) => void; selectedAthleteId?: string | null }) {
+ const [refreshKey,setRefreshKey]=useState(0);
  const [athletes,setAthletes]=useState<AssignedAthlete[]>([]);
  const [selectedId,setSelectedId]=useState('');
  const [onboarding,setOnboarding]=useState<Record<string,{race_distance:string;weekly_hours:number;device:string}>>({});
@@ -42,6 +43,7 @@ export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { on
  useEffect(()=>{
   let cancelled=false;
   const load=async()=>{
+   setLoading(true);setError('');
    try {
     const {data:{user},error:authError}=await supabase.auth.getUser();
     if(authError || !user || user.app_metadata?.role!=='coach') throw new Error('Verified coach access required');
@@ -60,10 +62,11 @@ export default function CoachAthleteRoster({ onSelect, selectedAthleteId }: { on
    } catch(e){if(!cancelled)setError(e instanceof Error?e.message:'Unable to load assigned athletes');}
    finally{if(!cancelled)setLoading(false);}
   }; void load();return()=>{cancelled=true;};
- },[]);
+ },[refreshKey]);
  const selected=athletes.find(a=>a.id===(selectedAthleteId ?? selectedId));
  return <section className="azur-roster-v3" aria-label="Assigned athletes">
   <div className="azur-roster-head"><div><span className="azur-coach-eyebrow">YOUR SQUAD</span><h3>Assigned athletes</h3><p>Verified coach assignments · select an athlete to review</p></div><strong className="azur-roster-total">{loading?'—':athletes.length} <small>athletes</small></strong></div>
+  <button type="button" disabled={loading} onClick={()=>setRefreshKey(key=>key+1)}>Refresh athletes</button>
   {loading&&<p className="azur-roster-state">Loading assigned athletes…</p>}
   {error&&<p role="alert" className="azur-roster-state">{error}</p>}
   {!loading&&!error&&athletes.length===0&&<p className="azur-roster-state">No athletes assigned yet. Use Invitations to invite your first athlete.</p>}
