@@ -7635,6 +7635,18 @@ const sessionVerdict =
       )}
     </div>
   )}
+{selected?.status === 'completed' && matchCompletionPercent != null && (
+  <div className="wide session-block azur-coach-review-cue" role="note">
+    <span className="eyebrow">COACH REVIEW SIGNAL</span>
+    <strong>{matchCompletionPercent < 85 ? 'Shorter than planned — review context' : matchCompletionPercent > 115 ? 'Longer than planned — review context' : 'Duration recorded — evaluate training quality'}</strong>
+    <p>{matchCompletionPercent < 85
+      ? 'Check why this session ended early and review athlete feedback before considering future workout changes.'
+      : matchCompletionPercent > 115
+        ? 'Recorded time was substantially above plan. Check whether this reflects extra training, rests or recording differences.'
+        : 'Compare athlete feedback and any verified training metrics with the prescribed targets. Duration alone does not establish session quality.'}</p>
+    <small>{selected.completedSource === 'manual' ? 'Athlete-reported workout · no device verification' : 'Recorded activity · intensity and technique require separate assessment'} · Informational only; no automatic schedule changes.</small>
+  </div>
+)}
 {selectedExecution && selected.completedSource !== 'manual' && (
   <div className="wide session-block session-analysis-card">
     <span className="eyebrow">AZUR COACHING INSIGHT</span>
