@@ -7246,18 +7246,18 @@ onClick={() => {
           <div className="editor-grid">
 
 
-<div className="session-block">
-  <span className="eyebrow">DURATION</span>
+{selected.status !== 'completed' && <div className="session-block">
+  <span className="eyebrow">PLANNED DURATION</span>
   <strong>{formatDuration(selected.durationMin)}</strong>
-</div>
+</div>}
 {selected.status === 'completed' &&
   selected.completedDurationSec && (
-    <div className="wide session-block completed-session-summary">
+    <div className="wide session-block completed-session-summary session-analysis-v3-summary">
       <div className="completed-session-heading">
         <div>
           <span className="eyebrow">SESSION COMPLETE</span>
           <strong>Completed activity{selected.completedSource === 'garmin' ? ' · Garmin' : selected.completedSource === 'manual_fit' ? ' · FIT upload' : ''}</strong>
-          <small>Planned {formatDuration(selected.durationMin)} · Actual {formatDuration(Math.round(selected.completedDurationSec / 60))} · {selected.durationMin > 0 ? Math.round(selected.completedDurationSec / 60 / selected.durationMin * 100) + '% duration adherence' : 'Duration recorded'}</small>
+          <small>Planned {formatDuration(selected.durationMin)} · Actual {formatDuration(Math.round(selected.completedDurationSec / 60))} · {selected.durationMin > 0 ? Math.round(selected.completedDurationSec / 60 / selected.durationMin * 100) + '% of planned time' : 'Duration recorded'}</small>
         </div>
 
         <span className="completed-check">✓</span>
@@ -7637,11 +7637,11 @@ const sessionVerdict =
   )}
 {selectedExecution && selected.completedSource !== 'manual' && (
   <div className="wide session-block session-analysis-card">
-    <span className="eyebrow">AZUR SESSION ANALYSIS</span>
+    <span className="eyebrow">AZUR COACHING INSIGHT</span>
 
 <div className="session-analysis-row">
   <div>
-    <span>DURATION COMPLETION</span>
+    <span>TIME COMPLETED VS PLAN</span>
     <strong>
       {matchCompletionPercent != null
         ? `${matchCompletionPercent}%`
@@ -7657,8 +7657,8 @@ const sessionVerdict =
         : matchCompletionPercent >= 95
           ? selected.completedSource === 'manual' ? 'Reported duration was within 5% of the plan; prescribed intensity and training stimulus remain unverified.' : 'Planned training time was completed. Review measured intensity before confirming the intended training stimulus.'
           : matchCompletionPercent >= 85
-            ? 'Most of the planned training time was completed. The session still contributed meaningfully to the intended training load.'
-            : 'Completed training time was below plan. Azur will consider this alongside recovery, athlete feedback and upcoming sessions.'}
+            ? 'Most of the planned training time was completed. Duration alone cannot verify intensity, technique or the intended training effect.'
+            : 'Recorded training time was below plan. Review why the workout was shortened and the athlete’s feedback before considering changes.'}
   </p>
     </div>
    
@@ -7762,7 +7762,7 @@ const sessionVerdict =
   {selected.rationale && <p>{selected.rationale}</p>}
 </div>
 {(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2" open={Boolean(editableManualId)}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
-<div className="wide session-block">
+<div className="wide session-block session-analysis-v3-feedback">
   <span className="eyebrow">ATHLETE FEEDBACK</span>
 
   <div className="session-block-item">
