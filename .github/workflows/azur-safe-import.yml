@@ -42,7 +42,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: https://example.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_local_verification
-      VITE_ENABLE_COACH_SCHEDULING: "true"
+          VITE_ENABLE_COACH_SCHEDULING: "true"
         run: |
           npm install --no-package-lock
           npm run build
