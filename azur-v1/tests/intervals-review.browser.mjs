@@ -260,7 +260,8 @@ try {
  await reviews.getByText('Felt controlled after warm-up',{exact:true}).waitFor();
  await reviews.getByText('Reported effort · 6/10',{exact:true}).waitFor();
  await reviews.getByText('45 min recorded',{exact:true}).waitFor();
- await page.locator('.session-completion-v2 > summary').click();
+ const editAccordion=page.locator('.session-completion-v2');
+ if(!(await editAccordion.getAttribute('open')) && !(await editAccordion.evaluate(el=>el.open))) await editAccordion.locator('summary').click();
  await page.getByLabel('Actual duration (minutes)',{exact:true}).fill('50');
  await page.getByLabel('Distance (km, optional)',{exact:true}).fill('22');
  await page.getByLabel('Session effort (RPE 1–10)',{exact:true}).fill('5');
