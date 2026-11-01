@@ -22,6 +22,7 @@ let onboardingStep=0;
 const commands=[];
 const errors=[];
 let coachDebugPage=null;
+const monitoringReceipts=[];
 let pilot=false,invitationAccepted=false,coachPlan=null,manualActivity=null,athleteFeedback=null;
 const pilotSession='b3730000-0000-4000-8000-000000000001';
 const invitation={id:'b3720000-0000-4000-8000-000000000001',invitee_email:user.email,coach_user_id:'b3700000-0000-4000-8000-000000000001',created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),accepted_at:null,email_sent_at:null};
@@ -54,16 +55,20 @@ const mockSupabase=async (route,coach=false)=>{
   }
   else if(url.pathname.endsWith('/planned_session'))data=coachPlan?[coachPlan]:[];
   else if(url.pathname.endsWith('/completed_activity'))data=manualActivity?[manualActivity]:[];
+  else if(url.pathname.endsWith('/coach_monitoring_review')){
+   if(req.method()==='POST'){monitoringReceipts.push(req.postDataJSON());data=null;}
+   else data=monitoringReceipts;
+  }
   else if(url.pathname.endsWith('/session_feedback'))data=athleteFeedback?[athleteFeedback]:[];
   else if(url.pathname.includes('/rpc/athlete_')){
    const body=req.postDataJSON();
    if(url.pathname.endsWith('/athlete_save_session_feedback')){
-    athleteFeedback={...athleteFeedback,planned_session_id:pilotSession,session_rpe:body.p_rpe,notes:body.p_notes,updated_at:new Date().toISOString()};
+    athleteFeedback={...athleteFeedback,athlete_id:athlete,planned_session_id:pilotSession,session_rpe:body.p_rpe,notes:body.p_notes,updated_at:new Date().toISOString()};
     if(manualActivity)Object.assign(manualActivity,{session_rpe:body.p_rpe,notes:body.p_notes});
    }else{
     manualActivity={id:activityId,athlete_id:athlete,planned_session_id:pilotSession,source:'manual',sport:'bike',start_time:new Date().toISOString(),duration_sec:body.p_duration_min*60,distance_m:body.p_distance_km==null?null:body.p_distance_km*1000,session_rpe:body.p_rpe,notes:body.p_notes,processed_metrics:{}};
     coachPlan.status='completed';
-    athleteFeedback={planned_session_id:pilotSession,session_rpe:body.p_rpe,notes:body.p_notes,updated_at:new Date().toISOString()};
+    athleteFeedback={athlete_id:athlete,planned_session_id:pilotSession,session_rpe:body.p_rpe,notes:body.p_notes,updated_at:new Date().toISOString()};
    }
    data=activityId;
   }
@@ -265,6 +270,17 @@ try {
  await reviews.getByText('50 min recorded',{exact:true}).waitFor();
  await reviews.getByText('Reported effort · 5/10',{exact:true}).waitFor();
  await reviews.getByText('Updated after checking my recording',{exact:true}).waitFor();
+ await coachPage.getByRole('button',{name:'Monitoring',exact:true}).click();
+ const inbox=coachPage.getByRole('region',{name:'Needs your attention'});
+ await inbox.getByText('Updated after checking my recording',{exact:true}).waitFor();
+ await inbox.getByRole('button',{name:'Mark reviewed'}).click();
+ await inbox.getByText('You’re up to date on the records checked.').waitFor();
+ await coachPage.getByRole('button',{name:/Refresh/}).click();
+ await inbox.getByText('You’re up to date on the records checked.').waitFor();
+ athleteFeedback={...athleteFeedback,notes:'Legs felt heavy today',updated_at:new Date(Date.now()+1000).toISOString()};
+ await coachPage.getByRole('button',{name:/Refresh/}).click();
+ await inbox.getByText('Legs felt heavy today',{exact:true}).waitFor();
+ console.log('PASS: reviewed notes survive refresh and revised feedback returns to the coach queue');
  console.log('PASS: athlete accepts invitation → coach schedules → athlete completes and changes feedback → coach sees latest records');
  assert.deepEqual(errors,[]);
  console.log('PASS: white-panel mobile dashboard renders real prescription, rationale and opens session details');

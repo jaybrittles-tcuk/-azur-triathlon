@@ -6004,3 +6004,5 @@ strong {
 .coach-workout-reviews h5 {font-size:16px;margin:0 0 6px;color:#f2f8fd}
 .coach-workout-reviews p {line-height:1.5}
 .coach-feedback-notes {white-space:pre-wrap;overflow-wrap:anywhere;color:#d1e5f3}
+.coach-attention-v2 .coach-feedback-notes {margin:5px 0;padding:8px 12px;border-left:3px solid #5dbfea;color:#e1f2fd;line-height:1.5}
+.coach-attention-v2 .coach-attention-group>summary {cursor:pointer;font-weight:700}
