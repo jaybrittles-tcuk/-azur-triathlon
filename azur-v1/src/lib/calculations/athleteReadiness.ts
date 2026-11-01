@@ -23,7 +23,6 @@ export type AthleteReadiness = {
   automaticPlanChangesAllowed: false;
   disclaimer: string;
 };
-const daysBetween = (a:string,b:string) => (Date.parse(a+'T00:00:00Z')-Date.parse(b+'T00:00:00Z'))/86400000;
 function byMetric(values: HealthBaseline[],metric:HealthMetric):HealthBaseline|undefined {
  return values.find(v=>v.metric===metric);
 }
