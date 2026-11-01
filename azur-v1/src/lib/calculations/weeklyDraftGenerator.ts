@@ -21,6 +21,7 @@ export function draftApprovedTrainingWeek(input:{
   weekStart:string; slots:readonly DraftSlot[]; library:readonly SessionEntry[];
   phase:SessionEntry['phases'][number]; weeklyLimitMinutes:number;
   existingActiveSessions:number; athleteProfileReady:boolean;
+  recentSessionIds?:readonly string[];
 }):DraftResult {
   const reasons:string[]=[];
   if(mondayOf(input.weekStart)!==input.weekStart)reasons.push('Week must start on Monday');
@@ -38,7 +39,9 @@ export function draftApprovedTrainingWeek(input:{
     const result=selectCoachSession(input.library,{
       sport:slot.sport,family:slot.family,phase:input.phase,
       maxMinutes:Math.min(slot.maxMinutes,input.weeklyLimitMinutes-totalMinutes),
-      maxLevel:slot.maxLevel,excludeIds:used
+      maxLevel:slot.maxLevel,excludeIds:used,
+      recentIds:input.recentSessionIds,
+      rotationIndex:Math.floor(Date.parse(input.weekStart+'T12:00:00Z')/604800000)
     });
     if(result.status==='unavailable'){
       reasons.push('Missing approved '+slot.sport+' '+slot.family+' workout for day '+(slot.day+1));continue;
