@@ -1,7 +1,7 @@
 import type { SessionEntry } from './sessionSelection.ts';
 
 export type StructuredStep = {
- name:string; repeats:number; workSeconds:number; recoverySeconds:number; distanceMeters?:number;
+ name:string; repeats:number; workSeconds:number; recoverySeconds:number; distanceMeters?:number; drillIds?:string[];
  target:{type:'rpe'|'css_pace'|'run_threshold_pace'; min:number;max:number};
  instruction:string;
 };
@@ -16,7 +16,7 @@ const steps=(name:string,repeats:number,workSeconds:number,recoverySeconds:numbe
 export const structuredSwimRunDrafts:StructuredSwimRun[]=[
  {id:'swim-technique-v1',sport:'swim',title:'Catch and balance skills',family:'technique',phases:['base','recovery'],level:1,approval:'coach_review_required',steps:[
   {...steps('Easy swim',1,600,0,2,3,'Relaxed strokes'),distanceMeters:300},
-  {...steps('Drill 25m / easy swim 25m, repeat',8,120,30,2,3,'Technique quality first; rest 30s between 50m repetitions'),distanceMeters:50},
+  {...steps('Drill 25m / easy swim 25m, repeat',8,120,30,2,3,'Technique quality first; rest 30s between 50m repetitions'),distanceMeters:50,drillIds:['sculling','fist-swim']},
   {...steps('Easy swimming',1,600,0,2,3,'Smooth relaxed stroke'),distanceMeters:200}]},
  {id:'swim-aerobic-v1',sport:'swim',title:'Aerobic swim repeats',family:'aerobic_endurance',phases:['base','build'],level:1,approval:'coach_review_required',steps:[
   {...steps('Warm-up',1,600,0,2,3,'Easy swimming'),distanceMeters:300},
