@@ -6039,3 +6039,16 @@ strong {
  .azur-performance-health-grid { grid-template-columns:1fr; }
  .azur-performance-health-heading { flex-wrap:wrap; }
 }
+
+
+/* Benchmark training zones — compact mobile-first display. */
+.azur-training-zones {display:grid;gap:1rem;min-width:0}
+.azur-zone-switch {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+.azur-zone-switch button {border:1px solid rgba(115,155,193,.45);border-radius:12px;padding:.7rem .5rem;background:transparent;color:inherit;font-weight:700}
+.azur-zone-switch button[aria-pressed="true"] {background:#124e75;color:#fff;border-color:#45a2db}
+.azur-zone-list {display:grid;gap:.5rem}
+.azur-zone-row {display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:1rem;border-radius:12px;background:rgba(88,155,198,.09);min-width:0}
+.azur-zone-row>div {display:grid;gap:.3rem;min-width:0}
+.azur-zone-row small {opacity:.75;line-height:1.3}
+.azur-zone-range {text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:430px){.azur-zone-row {padding:.85rem .65rem}.azur-zone-row strong {font-size:.9rem}.azur-zone-range {font-size:.87rem}}
