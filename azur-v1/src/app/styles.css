@@ -6063,3 +6063,35 @@ strong {
 .azur-benchmark-history-form label {display:grid;gap:.35rem;font-size:.9rem}
 .azur-benchmark-history-form input,.azur-benchmark-history-form select {width:100%;min-width:0;border-radius:9px;border:1px solid rgba(99,156,202,.45);padding:.75rem;background:var(--surface,#fff);color:var(--text,#10253a)}
 @media(max-width:430px){.azur-benchmark-history .azur-zone-switch button{font-size:.78rem;padding:.65rem .3rem}}
+
+
+/* Benchmarks accessibility fix: explicit light card colours regardless of inherited panel text. */
+.azur-training-zones .azur-zone-switch button,
+.azur-benchmark-history .azur-zone-switch button {
+  background:#ffffff;
+  color:#10253a;
+  border:1px solid #bfd4e6;
+}
+.azur-training-zones .azur-zone-switch button[aria-pressed="true"],
+.azur-benchmark-history .azur-zone-switch button[aria-pressed="true"] {
+  background:#145a86;
+  color:#ffffff;
+  border-color:#145a86;
+}
+.azur-zone-switch button:focus-visible {outline:3px solid #f3bd43;outline-offset:2px}
+.azur-training-zones .azur-zone-row {
+  background:#f4f8fc;
+  border:1px solid #d7e6f2;
+  color:#10253a;
+}
+.azur-training-zones .azur-zone-row strong {color:#10253a}
+.azur-training-zones .azur-zone-row small {color:#526b82;opacity:1}
+.azur-training-zones .azur-zone-row .azur-zone-range {color:#0e5a8a;font-weight:750}
+.azur-benchmark-history .azur-benchmark-history-items>div {
+  background:#f4f8fc;color:#10253a;border:1px solid #d7e6f2;
+}
+.azur-benchmark-history .azur-benchmark-history-items span {color:#526b82;opacity:1}
+.azur-benchmark-history .azur-benchmark-history-items strong {color:#0e5a8a}
+.azur-benchmark-history .azur-benchmark-history-form {background:#f8fbfd;color:#10253a;border-color:#d7e6f2}
+.azur-benchmark-history .azur-benchmark-history-form input,
+.azur-benchmark-history .azur-benchmark-history-form select {background:#fff;color:#10253a;border-color:#bfd4e6}
