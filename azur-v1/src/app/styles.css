@@ -6024,3 +6024,18 @@ strong {
   .calendar-week-overview-stats > div { padding: .55rem; }
   .calendar-week-overview-stats strong { font-size: 1rem; }
 }
+
+
+/* Performance health summary: additive to existing training graphs. */
+.azur-performance-health-heading { display:flex;justify-content:space-between;align-items:flex-start;gap:1rem; }
+.azur-performance-health-heading h3 { margin:0 0 .35rem; }
+.azur-performance-health-heading button { border:1px solid rgba(100,168,216,.35);border-radius:10px;background:transparent;color:inherit;padding:.55rem .7rem;cursor:pointer;white-space:nowrap; }
+.azur-performance-health-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin:1rem 0; }
+.azur-performance-health-metric { display:grid;gap:.35rem;min-width:0;padding:1rem;border-radius:12px;background:rgba(91,158,205,.09); }
+.azur-performance-health-metric span { font-size:.85rem; }
+.azur-performance-health-metric strong { font-size:1.5rem;line-height:1.25; }
+.azur-performance-health-metric small { opacity:.75;line-height:1.35; }
+@media(max-width:620px) {
+ .azur-performance-health-grid { grid-template-columns:1fr; }
+ .azur-performance-health-heading { flex-wrap:wrap; }
+}
