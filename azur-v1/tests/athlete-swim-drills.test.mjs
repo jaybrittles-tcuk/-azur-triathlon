@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {recommendAthleteSwimDrills} from '../src/lib/calculations/athleteSwimDrillSelection.ts';
+const referenceDate='2026-11-01';
+test('coach-identified catch weakness selects catch drills',()=>{const x=recommendAthleteSwimDrills([{focus:'catch',source:'coach_assessment',observedAt:'2026-10-28'}],300,referenceDate);assert.equal(x.status,'coach_review_required');assert.equal(x.focus,'catch');assert.ok(x.drills.every(d=>d.focus==='catch'));});
+test('athlete report alone does not become verified technical assessment',()=>assert.equal(recommendAthleteSwimDrills([{focus:'breathing',source:'athlete_report',observedAt:'2026-10-29'}],300,referenceDate).status,'needs_assessment'));
+test('stale coaching observation requires reassessment',()=>assert.equal(recommendAthleteSwimDrills([{focus:'rotation',source:'coach_assessment',observedAt:'2026-01-01'}],300,referenceDate).status,'needs_assessment'));
+test('distance budget and unknown drills never create arbitrary sessions',()=>assert.equal(recommendAthleteSwimDrills([{focus:'catch',source:'coach_assessment',observedAt:'2026-10-29'}],25,referenceDate).status,'needs_assessment'));
