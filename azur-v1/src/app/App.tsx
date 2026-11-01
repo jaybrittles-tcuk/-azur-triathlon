@@ -1,3 +1,4 @@
+import BenchmarkTrainingZones from './BenchmarkTrainingZones';
 import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
@@ -8383,88 +8384,11 @@ const sessionVerdict =
   />
 </section>
 
-        <section className="panel">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">
-                BENCHMARK CYCLE
-              </span>
-
-              <h3>Current coaching interpretation</h3>
-            </div>
-
-            <span className="status-pill">
-              8-WEEK CYCLE
-            </span>
-          </div>
-
-          <div className="benchmark-table">
-            <div className="benchmark-head">
-              <span>Metric</span>
-              <span>Current</span>
-              <span>Direction</span>
-              <span>Interpretation</span>
-            </div>
-
-            <div>
-              <strong>Bike FTP</strong>
-              <span>
-  {athleteProfile.ftp
-    ? `${athleteProfile.ftp} W`
-    : '—'}
-</span>
-              <span className="good-text">
-                Maintain / build
-              </span>
-              <small>
-                Extend durability rather than chasing FTP alone.
-              </small>
-            </div>
-
-            <div>
-              <strong>Run threshold</strong>
-              <span>
-  {athleteProfile.runThreshold
-    ? `${Math.floor(athleteProfile.runThreshold / 60)}:${String(
-        athleteProfile.runThreshold % 60
-      ).padStart(2, '0')}/km`
-    : '—'}
-</span>
-              <span className="good-text">Maintain</span>
-              <small>
-                Bigger opportunity exists in long-course durability.
-              </small>
-            </div>
-
-            <div>
-              <strong>Swim threshold</strong>
-              <span>
-  {athleteProfile.swimThreshold
-    ? `${Math.floor(athleteProfile.swimThreshold / 60)}:${String(
-        athleteProfile.swimThreshold % 60
-      ).padStart(2, '0')}/100m`
-    : '—'}
-</span>
-              <span>Build economy</span>
-              <small>
-                Improve repeatability and relaxed aerobic speed.
-              </small>
-            </div>
-
-            <div>
-              <strong>Weight</strong>
-              <span>
-  {athleteProfile.weight
-    ? `${athleteProfile.weight} kg`
-    : '—'}
-</span>
-              <span>Context only</span>
-              <small>
-                Track trend without compromising recovery.
-              </small>
-            </div>
-          </div>
-        </section>
+        <BenchmarkTrainingZones
+          ftp={athleteProfile.ftp}
+          runThreshold={athleteProfile.runThreshold}
+          swimCss={athleteProfile.swimThreshold}
+        />
       </>
     );
   }
