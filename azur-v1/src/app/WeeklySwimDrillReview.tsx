@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import {supabase} from '../lib/supabase';
 import {recommendSwimBlockForWeek} from '../lib/calculations/swimWeekAssessmentBridge';
 import type {StoredSwimAssessment} from '../lib/calculations/swimWeekAssessmentBridge';
-import type {DraftResult} from '../lib/calculations/weeklyDraftGenerator';
+import type {DraftResult,DraftItem} from '../lib/calculations/weeklyDraftGenerator';
 
 export default function WeeklySwimDrillReview({athleteId,weekStart,sessions}:{athleteId:string;weekStart:string;sessions:unknown}){
  const [assessments,setAssessments]=useState<StoredSwimAssessment[]>([]);
@@ -19,7 +19,7 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions}:{at
   return (entry.session?.sport??entry.sport)==='swim';
  };
  const draft:DraftResult={status:'ready_for_coach_review',weekStart,sessions:records.filter(isSwim).map((item)=>({
-  date:weekStart,reason:'Existing coach-created weekly draft',session:{sport:'swim'} as DraftResult extends never?never:any
+  date:weekStart,reason:'Existing coach-created weekly draft',session:{sport:'swim'} as DraftItem['session']
  })),totalMinutes:0};
  const review=recommendSwimBlockForWeek({draft,assessments,referenceDate:weekStart});
  return <div className="coach-feedback-notes">
