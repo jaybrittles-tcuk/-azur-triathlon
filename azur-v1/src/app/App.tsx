@@ -10175,7 +10175,7 @@ style={
       <button type="button" onClick={()=>setCoachWorkspace('invitations')}>Invite athletes <span>Manage invites →</span></button>
     </div>
   </>}
-  {coachWorkspace==='monitoring'&&<>{import.meta.env.VITE_ENABLE_WEEKLY_REVIEW === 'true' && <CoachWeeklyReview/>}<CoachSwimFocusReview/><CoachAttentionInbox onSelect={(a)=>{setCoachSelectedAthlete(a);setCoachWorkspace('overview')}}/></>}
+  {coachWorkspace==='monitoring'&&<>{import.meta.env.VITE_ENABLE_WEEKLY_REVIEW === 'true' && <CoachWeeklyReview/>}{import.meta.env.VITE_ENABLE_SWIM_ASSESSMENTS === 'true' && <CoachSwimFocusReview/>}<CoachAttentionInbox onSelect={(a)=>{setCoachSelectedAthlete(a);setCoachWorkspace('overview')}}/></>}
   {coachWorkspace==='invitations'&&<CoachInvitations mode="coach"/>}
   {coachWorkspace==='library'&&<CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} athleteId={coachSelectedAthlete?.id ?? null}/>}
 </div>}
