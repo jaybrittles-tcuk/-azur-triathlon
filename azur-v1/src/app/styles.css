@@ -6006,3 +6006,21 @@ strong {
 .coach-feedback-notes {white-space:pre-wrap;overflow-wrap:anywhere;color:#d1e5f3}
 .coach-attention-v2 .coach-feedback-notes {margin:5px 0;padding:8px 12px;border-left:3px solid #5dbfea;color:#e1f2fd;line-height:1.5}
 .coach-attention-v2 .coach-attention-group>summary {cursor:pointer;font-weight:700}
+
+
+/* Athlete-facing weekly calendar overview: descriptive, not experimental load scoring. */
+.calendar-week-overview { display: grid; gap: 1rem; }
+.calendar-week-overview-heading { display: grid; gap: .25rem; }
+.calendar-week-overview-heading > strong { font-size: 1.05rem; }
+.calendar-week-overview-heading > small,
+.calendar-week-overview-stats small { color: var(--muted, #86a8c4); }
+.calendar-week-overview-stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .6rem; }
+.calendar-week-overview-stats > div { min-width: 0; display: grid; gap: .3rem; padding: .8rem; border-radius: 12px; background: rgba(83,153,199,.12); }
+.calendar-week-overview-stats strong { font-size: 1.2rem; }
+.calendar-week-overview-note, .calendar-week-overview-empty p { margin: 0; line-height: 1.5; }
+.calendar-week-overview-empty { display: grid; gap: .5rem; }
+@media (max-width: 380px) {
+  .calendar-week-overview-stats { gap: .35rem; }
+  .calendar-week-overview-stats > div { padding: .55rem; }
+  .calendar-week-overview-stats strong { font-size: 1rem; }
+}
