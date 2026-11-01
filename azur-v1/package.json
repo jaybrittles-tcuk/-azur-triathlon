@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test src/lib/calculations/*.test.mjs"
+    "test": "node --experimental-strip-types --test src/lib/calculations/*.test.mjs tests/apply-swim-drill-block.test.mjs tests/validate-drill-enhanced-swim.test.mjs tests/swim-drill-volume-policy.test.mjs tests/replace-easy-swim-drills.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",

@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {resolveSwimDrillVolume} from '../src/lib/calculations/swimDrillVolumePolicy.ts';
+const base={phase:'build',isTechniqueWeek:false,baseMeters:2000,drillMeters:200,weeklySwimPlannedMeters:5000,weeklySwimLimitMeters:5500,plannedSessionMinutes:60,estimatedRevisedMinutes:64,coachApprovedExtraVolume:true};
+test('build phase may add controlled coach-authorised drill volume',()=>{const x=resolveSwimDrillVolume(base);assert.equal(x.status,'extra_allowed');assert.equal(x.extraMeters,200)});
+test('recovery and technique weeks replace existing metres',()=>{for(const x of [{...base,phase:'recovery'},{...base,isTechniqueWeek:true},{...base,phase:'taper'}]){const y=resolveSwimDrillVolume(x);assert.equal(y.status,'replace');assert.equal(y.replaceMeters,200);}});
+test('build week without coach permission does not increase volume',()=>assert.equal(resolveSwimDrillVolume({...base,coachApprovedExtraVolume:false}).status,'replace'));
+test('weekly budget, time budget and oversized blocks block additions',()=>{for(const x of [{...base,weeklySwimLimitMeters:5100},{...base,estimatedRevisedMinutes:70},{...base,drillMeters:250}])assert.notEqual(resolveSwimDrillVolume(x).status,'extra_allowed')});
+test('missing verified limits fail closed',()=>assert.equal(resolveSwimDrillVolume({...base,weeklySwimLimitMeters:NaN}).status,'blocked'));

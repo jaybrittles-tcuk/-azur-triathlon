@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {validateDrillEnhancedSwim} from '../src/lib/calculations/validateDrillEnhancedSwim.ts';
+const session={session:{sport:'swim',durationMin:50,prescription:{poolSegments:[{distanceMeters:400,repeats:1,restSeconds:0,target:'RPE 3'},{distanceMeters:200,repeats:4,restSeconds:20,target:'CSS'}],coachDrillBlock:{totalMeters:200,drills:[{distanceMeters:25,repeats:4,restSeconds:20},{distanceMeters:25,repeats:4,restSeconds:20}]}}}};
+test('structured pool total and time are validated',()=>{const v=validateDrillEnhancedSwim(session,90);assert.equal(v.status,'valid');assert.equal(v.totalMeters,1400);});
+test('missing benchmark blocks instead of inventing targets',()=>assert.equal(validateDrillEnhancedSwim(session,null).status,'blocked'));
+test('legacy free text swim cannot silently accept added drills',()=>assert.equal(validateDrillEnhancedSwim({session:{sport:'swim',durationMin:45,prescription:{warmup:'400m',coachDrillBlock:session.session.prescription.coachDrillBlock}}},90).status,'blocked'));
+test('invalid distances and mismatched drill totals blocked',()=>{const x=structuredClone(session);x.session.prescription.coachDrillBlock.totalMeters=150;assert.equal(validateDrillEnhancedSwim(x,90).status,'blocked');});
