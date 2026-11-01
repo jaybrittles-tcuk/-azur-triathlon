@@ -7971,6 +7971,24 @@ const sessionVerdict =
       <section className="azur-v2-performance-card" aria-label="Fitness and fatigue"><h3>Fitness &amp; Fatigue</h3><div className="azur-v2-performance-legend"><span>● Fitness</span><span>● Fatigue</span></div>
       {sufficientHistory?<svg viewBox="0 0 340 128" preserveAspectRatio="none" role="img" aria-label="Estimated fitness and fatigue from eligible recorded activities">{[20,65,110].map(y=><line key={y} x1="8" x2="332" y1={y} y2={y} stroke="#2a3c53" strokeDasharray="3 5"/>)}<polyline fill="none" stroke="#329dff" strokeWidth="3" strokeLinejoin="round" points={series('fitness')}/><polyline fill="none" stroke="#f3bd43" strokeWidth="3" strokeLinejoin="round" points={series('fatigue')}/></svg>:<div className="azur-v2-performance-empty">Trends need 42 days of history and eight eligible activities with calculated stress.</div>}
       <small>Estimated training-load indicators, not verified physiological fitness or medical readiness.</small></section>
+      <section className="azur-v2-performance-card azur-performance-health" aria-label="Health and recovery trends">
+        <div className="azur-performance-health-heading">
+          <div><h3>Health &amp; Recovery</h3><p className="azur-v2-performance-subtitle">Your personal recovery trends, alongside training fitness.</p></div>
+          <button type="button" onClick={() => setActiveNav('Recovery')}>Explore recovery</button>
+        </div>
+        <div className="azur-performance-health-grid">
+          {([
+            {name:'HRV',value:recoveryContext.hrvVs30dPct,unit:'%',hint:'Versus personal 30-day reference'},
+            {name:'Resting heart rate',value:recoveryContext.rhrVs30dPct,unit:'%',hint:'Versus personal 30-day reference'},
+            {name:'Sleep',value:recoveryContext.sleepVs30dPct,unit:'%',hint:'Versus personal 30-day reference'},
+          ] as const).map(metric=><div className="azur-performance-health-metric" key={metric.name}>
+            <span>{metric.name}</span>
+            <strong>{metric.value == null ? '—' : `${metric.value > 0 ? '+' : ''}${metric.value}${metric.unit}`}</strong>
+            <small>{metric.value == null ? 'Awaiting a recorded baseline' : metric.hint}</small>
+          </div>)}
+        </div>
+        <p className="azur-v2-evidence-note">Available values reflect existing recorded recovery context, not a verified Garmin Health API import. Missing measurements are not scored as poor recovery. These trends do not automatically modify training.</p>
+      </section>
       <section className="azur-v2-performance-card"><h3>Training Volume</h3><p className="azur-v2-performance-subtitle">Completed activity duration by week · {performanceRangeDays} days</p>
       {historicalWeeks.length?<div className="azur-v2-weekly-chart" role="group" aria-label="Select a completed training week">{historicalWeeks.map(week=><button type="button" key={week.key} aria-pressed={selectedWeek?.key===week.key} onClick={()=>setPerformanceWeekKey(week.key)} aria-label={`Week of ${formatWeek(week.key)}: ${Math.round(week.swim+week.bike+week.run)} minutes`}><span style={{height:`${Math.max(4,(week.swim+week.bike+week.run)/maxWeek*100)}%`}}/><small>{formatWeek(week.key)}</small></button>)}</div>:<div className="azur-v2-performance-empty">No recorded completed activities in this period.</div>}
       {selectedWeek&&<><div className="azur-v2-performance-volume"><strong>{Math.round(totalMinutes)} <small>min</small></strong><span>Week of {formatWeek(selectedWeek.key)}</span></div><div className="azur-v2-performance-bars">{sports.map(item=><div key={item.sport}><span>{item.sport}</span><div><i style={{width:totalMinutes>0?`${item.minutes/totalMinutes*100}%`:'0%'}}/></div><strong>{Math.round(item.minutes)}m</strong></div>)}</div><p className="azur-v2-performance-subtitle">{selectedWeek.distanceKm.toFixed(1)} km reported/recorded distance · {selectedWeek.count} activities</p></>}
