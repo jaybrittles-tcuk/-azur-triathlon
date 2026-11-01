@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {recommendSwimBlockForWeek} from '../src/lib/calculations/swimWeekAssessmentBridge.ts';
+const draft={status:'ready_for_coach_review',weekStart:'2026-11-02',totalMinutes:45,sessions:[{date:'2026-11-02',session:{sport:'swim'},reason:'Approved session'}]};
+const assessment={focus:'catch',notes:'Coach-observed catch timing',assessed_at:'2026-10-30T12:00:00Z',coach_user_id:'coach-a',status:'active'};
+test('recent coach assessment suggests relevant swim block for review',()=>{const x=recommendSwimBlockForWeek({draft,assessments:[assessment],referenceDate:'2026-11-01'});assert.equal(x.status,'review_required');assert.equal(x.drillBlock.focus,'catch');assert.ok(x.drillBlock.drills.length>0);});
+test('no reviewed swim week means no recommendation',()=>{assert.equal(recommendSwimBlockForWeek({draft:{...draft,status:'blocked'},assessments:[assessment],referenceDate:'2026-11-01'}).status,'no_swim_session');});
+test('missing or stale assessments fail closed',()=>{assert.equal(recommendSwimBlockForWeek({draft,assessments:[],referenceDate:'2026-11-01'}).status,'no_valid_assessment');assert.equal(recommendSwimBlockForWeek({draft,assessments:[{...assessment,assessed_at:'2026-01-01'}],referenceDate:'2026-11-01'}).status,'no_valid_assessment');});
