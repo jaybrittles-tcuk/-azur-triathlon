@@ -1,0 +1,21 @@
+import type { SessionEntry, SessionFamily } from './sessionSelection.ts';
+type Template = {id:string;sport:'swim'|'run';family:SessionFamily;title:string;durationMin:number;phase:SessionEntry['phases'];level:1|2|3;segments:{name:string;minutes:number;intensity:string}[]};
+const all:Template[]=[
+ {id:'swim-technique-01',sport:'swim',family:'technique',title:'Balance and catch technique',durationMin:40,phase:['base','recovery'],level:1,segments:[{name:'Easy warm-up',minutes:10,intensity:'Easy / RPE 2–3'},{name:'Technique drills and relaxed swimming',minutes:20,intensity:'Skill quality; stop when form fades'},{name:'Easy cool-down',minutes:10,intensity:'Easy'}]},
+ {id:'swim-technique-02',sport:'swim',family:'technique',title:'Body position and breathing',durationMin:40,phase:['base','recovery'],level:1,segments:[{name:'Warm-up',minutes:10,intensity:'Easy'},{name:'Balance, rotation and breathing drills',minutes:20,intensity:'Technical focus; easy effort'},{name:'Cool-down',minutes:10,intensity:'Easy'}]},
+ {id:'swim-aerobic-01',sport:'swim',family:'aerobic_endurance',title:'Continuous aerobic swim',durationMin:45,phase:['base','build'],level:1,segments:[{name:'Warm-up',minutes:10,intensity:'Easy'},{name:'Aerobic swimming',minutes:30,intensity:'Comfortable conversational effort'},{name:'Cool-down',minutes:5,intensity:'Easy'}]},
+ {id:'swim-aerobic-02',sport:'swim',family:'aerobic_endurance',title:'Broken aerobic endurance',durationMin:45,phase:['base','build'],level:1,segments:[{name:'Warm-up',minutes:10,intensity:'Easy'},{name:'Steady repeats including recovery',minutes:30,intensity:'Controlled aerobic effort; coach to specify distances and rests'},{name:'Cool-down',minutes:5,intensity:'Easy'}]},
+ {id:'swim-threshold-01',sport:'swim',family:'threshold',title:'CSS control',durationMin:50,phase:['build','peak'],level:2,segments:[{name:'Warm-up',minutes:15,intensity:'Easy technique and build'},{name:'CSS-paced repeats including recovery',minutes:30,intensity:'At individual CSS; coach to specify lengths and recoveries'},{name:'Cool-down',minutes:5,intensity:'Easy'}]},
+ {id:'run-easy-01',sport:'run',family:'aerobic_endurance',title:'Relaxed aerobic run',durationMin:45,phase:['base','build','recovery'],level:1,segments:[{name:'Easy running',minutes:45,intensity:'Conversational / RPE 2–4'}]},
+ {id:'run-easy-02',sport:'run',family:'aerobic_endurance',title:'Easy run with relaxed strides',durationMin:45,phase:['base','build'],level:1,segments:[{name:'Easy running',minutes:35,intensity:'Conversational'},{name:'Relaxed strides with full recovery',minutes:5,intensity:'Fast but relaxed; technique focus'},{name:'Cool-down',minutes:5,intensity:'Easy'}]},
+ {id:'run-long-01',sport:'run',family:'aerobic_endurance',title:'Long aerobic endurance',durationMin:90,phase:['base','build'],level:2,segments:[{name:'Controlled endurance run',minutes:90,intensity:'Easy conversational, avoid pace chasing'}]},
+ {id:'run-long-02',sport:'run',family:'aerobic_endurance',title:'Progressive long aerobic run',durationMin:90,phase:['build'],level:2,segments:[{name:'Easy aerobic',minutes:60,intensity:'Easy conversational'},{name:'Steady finish',minutes:20,intensity:'Upper aerobic, not threshold'},{name:'Cool-down',minutes:10,intensity:'Easy'}]},
+ {id:'run-threshold-01',sport:'run',family:'threshold',title:'Cruise intervals',durationMin:60,phase:['build','peak'],level:2,segments:[{name:'Warm-up',minutes:15,intensity:'Easy'},{name:'Threshold intervals with recoveries',minutes:35,intensity:'Controlled threshold; individual pace and exact recovery to be coach-set'},{name:'Cool-down',minutes:10,intensity:'Easy'}]},
+ {id:'run-recovery-01',sport:'run',family:'recovery',title:'Recovery jog',durationMin:30,phase:['base','build','recovery','taper'],level:1,segments:[{name:'Very easy running',minutes:30,intensity:'Easy / RPE 1–2'}]},
+];
+/** Working coach-authoring references only. These are NOT fully detailed,
+ * approved workout prescriptions and MUST NOT feed the auto-publisher.
+ * In particular, intervals still require explicit lengths, rests and targets.
+ */
+export const swimRunCoachDraftTemplates = all.map(t=>({...t,approved:false as const}));
+export const approvedSwimRunSelections:SessionEntry[]=[]; // Fail closed until explicit coach approval, detailed prescriptions and validation.
