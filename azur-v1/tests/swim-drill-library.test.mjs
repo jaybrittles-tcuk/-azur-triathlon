@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {swimDrillLibrary,chooseDrills,validateSwimDrill} from '../src/lib/calculations/swimDrillLibrary.ts';import {structuredSwimRunDrafts} from '../src/lib/calculations/structuredSwimRunDrafts.ts';
+test('all drill prescriptions have distances, rest and coaching cues',()=>{assert.ok(swimDrillLibrary.length>=7);for(const drill of swimDrillLibrary)assert.deepEqual(validateSwimDrill(drill),[],drill.id)});
+test('drill selector respects focus and distance budget',()=>{const x=chooseDrills('catch',200);assert.ok(x.length>0);assert.ok(x.every(d=>d.focus==='catch'));assert.ok(x.reduce((n,d)=>n+d.distanceMeters*d.repeats,0)<=200)});
+test('technique session references known drills',()=>{const session=structuredSwimRunDrafts.find(x=>x.id==='swim-technique-v1');const ids=session.steps.flatMap(x=>x.drillIds??[]);assert.ok(ids.length>0);for(const id of ids)assert.ok(swimDrillLibrary.some(d=>d.id===id));});
