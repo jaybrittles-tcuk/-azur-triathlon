@@ -6141,3 +6141,18 @@ strong {
   .session-detail-modal .session-analysis-card{padding:19px 18px!important}
   .session-detail-modal .session-analysis-card .session-analysis-row{gap:10px}
 }
+
+
+/* Session Analysis V3: compact completed summary and usable athlete feedback. */
+.session-detail-modal .session-analysis-v3-summary{padding:18px!important}
+.session-detail-modal .session-analysis-v3-summary .completed-session-heading{margin-bottom:10px}
+.session-detail-modal .session-analysis-v3-feedback{padding:17px 18px!important}
+.session-detail-modal .session-analysis-v3-feedback .session-block-item{padding:7px 0!important;margin:0!important}
+.session-detail-modal .session-analysis-v3-feedback input{max-width:160px}
+.session-detail-modal .session-analysis-v3-feedback textarea{min-height:92px}
+.session-detail-modal .session-analysis-v3-feedback textarea,
+.session-detail-modal .session-analysis-v3-feedback input{border-radius:11px!important}
+@media(max-width:560px){
+ .session-detail-modal .session-analysis-v3-summary{padding:15px!important}
+ .session-detail-modal .session-analysis-v3-feedback{padding:15px!important}
+}
