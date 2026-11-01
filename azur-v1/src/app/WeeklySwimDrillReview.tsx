@@ -1,3 +1,4 @@
+import {validateDrillEnhancedSwim} from '../lib/calculations/validateDrillEnhancedSwim';
 import {addReviewedDrillBlock,canonicalDraftFingerprintInput} from '../lib/calculations/applySwimDrillBlock';
 import {useEffect,useState} from 'react';
 import {supabase} from '../lib/supabase';
@@ -35,6 +36,8 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions,revi
    const current=swimIndices[selected];
    if(current===undefined)throw new Error('Choose a swim workout');
    const revised=addReviewedDrillBlock(records,review,current);
+   const validation=validateDrillEnhancedSwim(revised[current],null);
+   if(validation.status==='blocked')throw new Error('Full workout validation required: '+validation.reasons.join('; '));
    const {data:latest,error:le}=await supabase.from('weekly_plan_draft').select('revision').eq('athlete_id',athleteId).eq('week_start',weekStart).order('revision',{ascending:false}).limit(1);
    if(le)throw le;
    if(latest?.[0]?.revision!==revision)throw new Error('Draft revised elsewhere. Refresh first.');
