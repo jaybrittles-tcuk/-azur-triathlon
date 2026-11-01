@@ -1,3 +1,4 @@
+import {resolveSwimDrillVolume} from '../lib/calculations/swimDrillVolumePolicy';
 import {validateDrillEnhancedSwim} from '../lib/calculations/validateDrillEnhancedSwim';
 import {addReviewedDrillBlock,canonicalDraftFingerprintInput} from '../lib/calculations/applySwimDrillBlock';
 import {useEffect,useState} from 'react';
@@ -13,6 +14,9 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions,revi
  const [saving,setSaving]=useState(false);
  const [selected,setSelected]=useState(0);
  const [cssSeconds,setCssSeconds]=useState('');
+ const [weeklyLimit,setWeeklyLimit]=useState('');
+ const [weeklyPlanned,setWeeklyPlanned]=useState('');
+ const [allowExtra,setAllowExtra]=useState(false);
  const [saveMessage,setSaveMessage]=useState('');
  useEffect(()=>{let live=true;setLoading(true);setError('');
   void supabase.from('coach_swim_assessment').select('focus,notes,assessed_at,coach_user_id,status').eq('athlete_id',athleteId).order('assessed_at',{ascending:false}).limit(15)
@@ -39,6 +43,11 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions,revi
    const revised=addReviewedDrillBlock(records,review,current);
    const validation=validateDrillEnhancedSwim(revised[current],Number(cssSeconds)||null);
    if(validation.status==='blocked')throw new Error('Full workout validation required: '+validation.reasons.join('; '));
+   const original=records[current] as {session?:{durationMin?:number;family?:string;prescription?:{poolSegments?:Array<{distanceMeters:number;repeats:number}>}}};
+   const baseMeters=original.session?.prescription?.poolSegments?.reduce((n,x)=>n+x.distanceMeters*x.repeats,0)??0;
+   const policy=resolveSwimDrillVolume({phase:phase as 'base'|'build'|'peak'|'taper'|'recovery',isTechniqueWeek:original.session?.family==='technique',baseMeters,drillMeters:review.drillBlock!.totalMeters,weeklySwimPlannedMeters:weeklyPlanned?Number(weeklyPlanned):NaN,weeklySwimLimitMeters:weeklyLimit?Number(weeklyLimit):NaN,plannedSessionMinutes:original.session?.durationMin??0,estimatedRevisedMinutes:validation.estimatedMinutes,coachApprovedExtraVolume:allowExtra});
+   if(policy.status==='blocked')throw new Error(policy.reason);
+   if(policy.status==='replace')throw new Error('Replacement requires selecting which easy swimming segment to reduce; the main set must remain unchanged. This editor does not yet support that safely.');
    const {data:latest,error:le}=await supabase.from('weekly_plan_draft').select('revision').eq('athlete_id',athleteId).eq('week_start',weekStart).order('revision',{ascending:false}).limit(1);
    if(le)throw le;
    if(latest?.[0]?.revision!==revision)throw new Error('Draft revised elsewhere. Refresh first.');
@@ -61,6 +70,9 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions,revi
    {review.drillBlock.drills.map(d=><p key={d.id}><strong>{d.name}</strong> · {d.repeats} × {d.distanceMeters}m · {d.restSeconds}s rest. {d.instructions}</p>)}
    <p><label>Apply to swim session <select value={selected} onChange={e=>setSelected(Number(e.target.value))}>{swimIndices.map((i,index)=><option key={i} value={index}>{String((records[i] as {session?:{title?:string}}).session?.title??'Swim '+(index+1))}</option>)}</select></label></p>
    <p><label>Validated athlete CSS (seconds per 100m) <input type="number" min="45" max="240" step="1" value={cssSeconds} onChange={e=>setCssSeconds(e.target.value)} placeholder="e.g. 90" /></label></p>
+   <p><label>Weekly swim planned distance (metres) <input type="number" min="0" value={weeklyPlanned} onChange={e=>setWeeklyPlanned(e.target.value)}/></label></p>
+   <p><label>Coach-approved weekly swim ceiling (metres) <input type="number" min="0" value={weeklyLimit} onChange={e=>setWeeklyLimit(e.target.value)}/></label></p>
+   <label><input type="checkbox" checked={allowExtra} onChange={e=>setAllowExtra(e.target.checked)}/> Allow additional drill distance in this build week</label>
    <button type="button" disabled={saving||swimIndices.length===0} onClick={()=>void saveRevision()}>{saving?'Saving…':'Create revised weekly draft with drills'}</button>
    <small>Creates a new pending revision only. Confirm the session's total distance, technical suitability and recovery before approving the full week. Does not publish to the athlete calendar.</small>
   </>:<p>{review.message}</p>}
