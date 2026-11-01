@@ -9,7 +9,6 @@ import CoachAthletePerformance from './CoachAthletePerformance';
 import CoachAthleteRoster from './CoachAthleteRoster';
 import type { AssignedAthlete } from './CoachAthleteRoster';
 import CoachCyclingLibraryReview from './CoachCyclingLibraryReview';
-import MultisportPlannedStress from './MultisportPlannedStress';
 import { estimatePlannedStress } from '../lib/calculations/plannedStress';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import FitParser from 'fit-file-parser';
@@ -7004,14 +7003,33 @@ onClick={() => {
     })
   }
 </section>
-<details className="calendar-stress-disclosure">
-  <summary><span><strong>Planned training load</strong><small>Sport-specific estimates · view analysis</small></span><span aria-hidden="true">⌄</span></summary>
-  <MultisportPlannedStress
-    sessions={calendarWeekSessions}
-    runThreshold={athleteProfile.runThreshold}
-    swimCss={athleteProfile.swimThreshold}
-  />
-</details>
+<section className="panel calendar-week-overview" aria-label="Training week overview">
+  <div className="calendar-week-overview-heading">
+    <strong>Your training week</strong>
+    <small>Based on sessions currently saved in your calendar</small>
+  </div>
+  {calendarWeekSessions.length > 0 ? (
+    <>
+      <div className="calendar-week-overview-stats">
+        <div><small>Scheduled time</small><strong>{(calendarWeekSessions.reduce((sum, session) => sum + session.durationMin, 0) / 60).toFixed(1)} h</strong></div>
+        <div><small>Sessions</small><strong>{calendarWeekSessions.length}</strong></div>
+        <div><small>Completed</small><strong>{calendarWeekSessions.filter(session => session.status === 'completed').length}</strong></div>
+      </div>
+      <p className="calendar-week-overview-note">
+        {calendarWeekSessions.some(session => session.rationale?.trim())
+          ? calendarWeekSessions.find(session => session.rationale?.trim())?.rationale
+          : 'Open a session to see its purpose and targets.'}
+      </p>
+    </>
+  ) : (
+    <div className="calendar-week-overview-empty">
+      <strong>{calendarWeekOffset > 0 ? 'No sessions published for this week' : 'No sessions scheduled this week'}</strong>
+      <p>{calendarWeekOffset > 0
+        ? 'Your next training week is not available in the calendar yet. Your coach will confirm when it is ready.'
+        : 'There are no planned sessions in this week. This does not indicate a recovery week or zero training load.'}</p>
+    </div>
+  )}
+</section>
         </div>
 
 {sessionDetailOpen && (
