@@ -7096,7 +7096,7 @@ onClick={() => {
             </div>;
           })()}
           {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || selected.prescription?.focus ? (
-<details open key={selected.id} className="session-prescription-disclosure">
+<details open key={selected.id} className="session-prescription-disclosure session-prescription-v2">
             <summary><span><strong>Workout prescription</strong><small>Warm-up · Main set · Cool-down · Fueling</small></span><span aria-hidden="true">⌄</span></summary>
             <div className="session-prescription-sections">
             <details><summary>View workout timeline</summary><CalendarPrescriptionSteps prescription={selected.prescription} /></details>
@@ -7753,26 +7753,12 @@ const sessionVerdict =
   </div>
 )}
 
-<div className="wide session-block">
-  <span className="eyebrow">PRIMARY TARGET</span>
-
-  <div className="session-block-item">
-    <strong>
-      {selected.prescription?.focus ||
-        Object.values(selected.targets)[0]?.toString() ||
-        'Session-specific training focus'}
-    </strong>
-  </div>
+<div className="wide session-block session-intent-v2" aria-label="Why this session matters">
+  <span className="eyebrow">SESSION PURPOSE</span>
+  <strong>{selected.prescription?.focus || Object.values(selected.targets)[0]?.toString() || 'Session-specific training focus'}</strong>
+  {selected.rationale && <p>{selected.rationale}</p>}
 </div>
-
-<div className="wide session-block">
-  <span className="eyebrow">WHY THIS MATTERS</span>
-
-  <div className="session-block-item">
-    <div>{selected.rationale}</div>
-  </div>
-</div>
-{(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail" open={!editableManualId}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
+{(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2" open={Boolean(editableManualId)}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
 <div className="wide session-block">
   <span className="eyebrow">ATHLETE FEEDBACK</span>
 

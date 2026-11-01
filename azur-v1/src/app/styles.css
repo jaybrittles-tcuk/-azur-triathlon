@@ -6095,3 +6095,20 @@ strong {
 .azur-benchmark-history .azur-benchmark-history-form {background:#f8fbfd;color:#10253a;border-color:#d7e6f2}
 .azur-benchmark-history .azur-benchmark-history-form input,
 .azur-benchmark-history .azur-benchmark-history-form select {background:#fff;color:#10253a;border-color:#bfd4e6}
+
+
+/* Session Details V2: concise workout-first hierarchy, preserving full interval metadata. */
+.session-prescription-v2 .session-prescription-sections {gap:.65rem}
+.session-prescription-v2 .session-block {padding:.8rem 1rem;margin:.45rem 0;border-radius:14px}
+.session-prescription-v2 .azur-prescription-step {padding:.65rem .15rem;margin:.3rem 0}
+.session-prescription-v2 .azur-prescription-targets {gap:.45rem}
+.session-prescription-v2 .azur-prescription-targets>div {padding:.5rem .65rem}
+.session-intent-v2 {padding:1rem 1.1rem!important;display:grid;gap:.4rem}
+.session-intent-v2 strong {font-size:1rem}
+.session-intent-v2 p {margin:0;line-height:1.45}
+.session-completion-v2 {padding:1rem 1.1rem!important}
+.session-completion-v2:not([open]) {margin-top:.45rem}
+@media(max-width:520px){
+ .session-prescription-v2 .session-block {padding:.7rem .8rem}
+ .session-prescription-v2 .azur-prescription-targets>div {padding:.45rem .55rem}
+}

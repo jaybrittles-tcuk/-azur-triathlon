@@ -245,6 +245,7 @@ try {
  await coachPage.getByText('Workout added to the assigned athlete calendar.',{exact:true}).waitFor();
  await page.goto(base);
  await page.locator('.azur-white-dashboard:visible').getByRole('button',{name:'View session',exact:true}).click();
+ await page.locator('.session-completion-v2 > summary').click();
  await page.getByLabel('Actual duration (minutes)',{exact:true}).fill('45');
  await page.getByLabel('Session effort (RPE 1–10)',{exact:true}).fill('4');
  await page.getByRole('button',{name:'Mark workout complete',exact:true}).click();
@@ -259,7 +260,8 @@ try {
  await reviews.getByText('Felt controlled after warm-up',{exact:true}).waitFor();
  await reviews.getByText('Reported effort · 6/10',{exact:true}).waitFor();
  await reviews.getByText('45 min recorded',{exact:true}).waitFor();
- await page.getByText('Edit recorded workout',{exact:false}).click();
+ const editAccordion=page.locator('.session-completion-v2');
+ if(!(await editAccordion.getAttribute('open')) && !(await editAccordion.evaluate(el=>el.open))) await editAccordion.locator('summary').click();
  await page.getByLabel('Actual duration (minutes)',{exact:true}).fill('50');
  await page.getByLabel('Distance (km, optional)',{exact:true}).fill('22');
  await page.getByLabel('Session effort (RPE 1–10)',{exact:true}).fill('5');
