@@ -6052,3 +6052,14 @@ strong {
 .azur-zone-row small {opacity:.75;line-height:1.3}
 .azur-zone-range {text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 @media(max-width:430px){.azur-zone-row {padding:.85rem .65rem}.azur-zone-row strong {font-size:.9rem}.azur-zone-range {font-size:.87rem}}
+
+
+.azur-benchmark-history {display:grid;gap:1rem;min-width:0}
+.azur-benchmark-history-graph {display:block;width:100%;max-height:200px}
+.azur-benchmark-history-items {display:grid;gap:.5rem}
+.azur-benchmark-history-items>div {display:flex;align-items:center;justify-content:space-between;gap:.7rem;background:rgba(90,155,200,.09);padding:.75rem;border-radius:10px}
+.azur-benchmark-history-items span {font-size:.85rem;opacity:.8}
+.azur-benchmark-history-form {display:grid;gap:.8rem;padding:1rem;border:1px solid rgba(100,153,195,.3);border-radius:14px}
+.azur-benchmark-history-form label {display:grid;gap:.35rem;font-size:.9rem}
+.azur-benchmark-history-form input,.azur-benchmark-history-form select {width:100%;min-width:0;border-radius:9px;border:1px solid rgba(99,156,202,.45);padding:.75rem;background:var(--surface,#fff);color:var(--text,#10253a)}
+@media(max-width:430px){.azur-benchmark-history .azur-zone-switch button{font-size:.78rem;padding:.65rem .3rem}}
