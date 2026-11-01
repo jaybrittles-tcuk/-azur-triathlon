@@ -49,6 +49,7 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions,revi
    const baseMeters=original.session?.prescription?.poolSegments?.reduce((n,x)=>n+x.distanceMeters*x.repeats,0)??0;
    const policy=resolveSwimDrillVolume({phase:phase as 'base'|'build'|'peak'|'taper'|'recovery',isTechniqueWeek:original.session?.family==='technique',baseMeters,drillMeters:review.drillBlock!.totalMeters,weeklySwimPlannedMeters:weeklyPlanned?Number(weeklyPlanned):NaN,weeklySwimLimitMeters:weeklyLimit?Number(weeklyLimit):NaN,plannedSessionMinutes:original.session?.durationMin??0,estimatedRevisedMinutes:validation.estimatedMinutes,coachApprovedExtraVolume:allowExtra});
    if(policy.status==='blocked')throw new Error(policy.reason);
+   if(!['base','build','peak','taper','recovery'].includes(phase))throw new Error('Unknown training phase; coach must correct draft');
    if(policy.status==='replace'){
     const choice=Number(easySegment);
     if(easySegment===''||!easySegmentsForReplacement(records[current],policy.replaceMeters).includes(choice))throw new Error('Select a suitable easy swimming segment for replacement');
@@ -57,6 +58,7 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions,revi
     if(rechecked.status==='blocked')throw new Error('Revised workout validation: '+rechecked.reasons.join('; '));
     if(rechecked.totalMeters!==baseMeters)throw new Error('Replacement must maintain original total swim distance');
    }
+   if(policy.status==='extra_allowed'&&validation.totalMeters!==baseMeters+policy.extraMeters)throw new Error('Extra volume does not reconcile with original session');
    const {data:latest,error:le}=await supabase.from('weekly_plan_draft').select('revision').eq('athlete_id',athleteId).eq('week_start',weekStart).order('revision',{ascending:false}).limit(1);
    if(le)throw le;
    if(latest?.[0]?.revision!==revision)throw new Error('Draft revised elsewhere. Refresh first.');
