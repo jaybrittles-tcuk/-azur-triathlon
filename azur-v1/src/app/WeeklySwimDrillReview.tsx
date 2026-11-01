@@ -12,6 +12,7 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions,revi
  const [loading,setLoading]=useState(true);
  const [saving,setSaving]=useState(false);
  const [selected,setSelected]=useState(0);
+ const [cssSeconds,setCssSeconds]=useState('');
  const [saveMessage,setSaveMessage]=useState('');
  useEffect(()=>{let live=true;setLoading(true);setError('');
   void supabase.from('coach_swim_assessment').select('focus,notes,assessed_at,coach_user_id,status').eq('athlete_id',athleteId).order('assessed_at',{ascending:false}).limit(15)
@@ -36,7 +37,7 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions,revi
    const current=swimIndices[selected];
    if(current===undefined)throw new Error('Choose a swim workout');
    const revised=addReviewedDrillBlock(records,review,current);
-   const validation=validateDrillEnhancedSwim(revised[current],null);
+   const validation=validateDrillEnhancedSwim(revised[current],Number(cssSeconds)||null);
    if(validation.status==='blocked')throw new Error('Full workout validation required: '+validation.reasons.join('; '));
    const {data:latest,error:le}=await supabase.from('weekly_plan_draft').select('revision').eq('athlete_id',athleteId).eq('week_start',weekStart).order('revision',{ascending:false}).limit(1);
    if(le)throw le;
@@ -59,6 +60,7 @@ export default function WeeklySwimDrillReview({athleteId,weekStart,sessions,revi
    <p>Priority: {review.drillBlock.focus.replaceAll('_',' ')} · Suggested drill block: {review.drillBlock.totalMeters}m</p>
    {review.drillBlock.drills.map(d=><p key={d.id}><strong>{d.name}</strong> · {d.repeats} × {d.distanceMeters}m · {d.restSeconds}s rest. {d.instructions}</p>)}
    <p><label>Apply to swim session <select value={selected} onChange={e=>setSelected(Number(e.target.value))}>{swimIndices.map((i,index)=><option key={i} value={index}>{String((records[i] as {session?:{title?:string}}).session?.title??'Swim '+(index+1))}</option>)}</select></label></p>
+   <p><label>Validated athlete CSS (seconds per 100m) <input type="number" min="45" max="240" step="1" value={cssSeconds} onChange={e=>setCssSeconds(e.target.value)} placeholder="e.g. 90" /></label></p>
    <button type="button" disabled={saving||swimIndices.length===0} onClick={()=>void saveRevision()}>{saving?'Saving…':'Create revised weekly draft with drills'}</button>
    <small>Creates a new pending revision only. Confirm the session's total distance, technical suitability and recovery before approving the full week. Does not publish to the athlete calendar.</small>
   </>:<p>{review.message}</p>}
