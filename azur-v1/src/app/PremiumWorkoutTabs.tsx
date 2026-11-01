@@ -3,7 +3,7 @@ import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity'
 import WorkoutTargetDetails from './WorkoutTargetDetails';
 type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null};
 export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource}:Props){
- const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('overview');
+ const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('intervals');
  const source=prescription?.azurWorkout as {steps?:unknown}|undefined;
  const intervals=normalizeWorkoutIntervals(source?.steps);
  const valid=intervals.filter(x=>x.durationSec!==null);
@@ -32,11 +32,11 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Intervals for prescribed targets.</p>}
   </div>}
   {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/>
+   {intervals.length ? <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/> : <p>Workout instructions are listed in the detailed prescription below. Review warm-up, main set and cool-down before starting.</p>}
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
   {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <h4>Coaching notes</h4><p>{rationale||'No additional coaching rationale recorded.'}</p>
+   <h4>Coach guidance</h4><p>{rationale||'No additional coaching rationale recorded.'}</p>
    <p>{typeof prescription?.focus==='string'?prescription.focus:'No additional focus notes supplied.'}</p>
    <small>Additional workout notes and editable athlete feedback remain in the detailed sections below.</small>
   </div>}
