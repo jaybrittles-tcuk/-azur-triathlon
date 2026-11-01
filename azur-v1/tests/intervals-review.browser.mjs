@@ -245,6 +245,7 @@ try {
  await coachPage.getByText('Workout added to the assigned athlete calendar.',{exact:true}).waitFor();
  await page.goto(base);
  await page.locator('.azur-white-dashboard:visible').getByRole('button',{name:'View session',exact:true}).click();
+ await page.locator('.session-completion-v2 > summary').click();
  await page.getByLabel('Actual duration (minutes)',{exact:true}).fill('45');
  await page.getByLabel('Session effort (RPE 1–10)',{exact:true}).fill('4');
  await page.getByRole('button',{name:'Mark workout complete',exact:true}).click();
