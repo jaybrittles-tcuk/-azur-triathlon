@@ -19,6 +19,8 @@ export type SelectionContext = {
   maxMinutes: number;
   maxLevel: 1 | 2 | 3;
   excludeIds?: readonly string[];
+  recentIds?: readonly string[];
+  rotationIndex?: number;
 };
 export type SelectionResult =
   | { status: 'selected'; session: SessionEntry; explanation: string }
@@ -41,13 +43,20 @@ export function selectCoachSession(library: readonly SessionEntry[], input: Sele
   if (!candidates.length) {
     return { status: 'unavailable', reason: 'No approved coach-designed session fits these constraints' };
   }
-  // Most appropriate difficulty, then closest duration to available time;
-  // stable ID tie-break ensures repeatable selection.
+  // Stay within the prescribed level and availability, prefer unfamiliar
+  // workouts, and rotate equally suitable approved variations across weeks.
+  const recent = new Set(input.recentIds ?? []);
   const ranked = [...candidates].sort((a, b) =>
+    Number(recent.has(a.id)) - Number(recent.has(b.id)) ||
     b.level - a.level || b.durationMin - a.durationMin || a.id.localeCompare(b.id));
+  const sameSuitability = ranked.filter(x =>
+    recent.has(x.id) === recent.has(ranked[0].id) &&
+    x.level === ranked[0].level && x.durationMin === ranked[0].durationMin);
+  const rotation = Math.max(0,Math.floor(input.rotationIndex ?? 0));
+  const chosen = sameSuitability[rotation % sameSuitability.length];
   return {
     status: 'selected',
-    session: ranked[0],
+    session: chosen,
     explanation: 'Approved session matched to sport, training focus, phase, level and available time',
   };
 }
