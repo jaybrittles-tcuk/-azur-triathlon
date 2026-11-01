@@ -1,7 +1,7 @@
 import { structuredSwimRunDrafts, validateStructuredDraft } from './structuredSwimRunDrafts.ts';
 import type { StructuredSwimRun } from './structuredSwimRunDrafts.ts';
 export type AthleteThresholds={cssSecondsPer100m?:number|null;runThresholdSecondsPerKm?:number|null};
-export type PersonalisedStep={name:string;repeats:number;workSeconds:number;recoverySeconds:number;targetLabel:string;instruction:string};
+export type PersonalisedStep={name:string;repeats:number;workSeconds:number;recoverySeconds:number;distanceMeters?:number;targetLabel:string;instruction:string};
 export type WorkoutPersonalisation={status:'ready_for_coach_review';workoutId:string;steps:PersonalisedStep[];durationSeconds:number}|{status:'blocked';workoutId:string;reasons:string[]};
 const round=(x:number)=>Math.round(x);
 export function personaliseSwimRun(workout:StructuredSwimRun,athlete:AthleteThresholds):WorkoutPersonalisation{
@@ -21,7 +21,7 @@ export function personaliseSwimRun(workout:StructuredSwimRun,athlete:AthleteThre
    if(!pace||!Number.isFinite(pace)||pace<130||pace>700)reasons.push('Valid run threshold pace required');
    else label=round(pace*t.min)+'–'+round(pace*t.max)+' sec/km (threshold-based)';
   }
-  steps.push({name:step.name,repeats:step.repeats,workSeconds:step.workSeconds,recoverySeconds:step.recoverySeconds,targetLabel:label,instruction:step.instruction});
+  steps.push({name:step.name,repeats:step.repeats,workSeconds:step.workSeconds,recoverySeconds:step.recoverySeconds,...(step.distanceMeters?{distanceMeters:step.distanceMeters}:{}),targetLabel:label,instruction:step.instruction});
  }
  if(reasons.length)return {status:'blocked',workoutId:workout.id,reasons:[...new Set(reasons)]};
  return {status:'ready_for_coach_review',workoutId:workout.id,steps,durationSeconds:steps.reduce((sum,s)=>sum+s.repeats*(s.workSeconds+s.recoverySeconds),0)};
