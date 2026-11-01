@@ -71,6 +71,23 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
       actionable.push({key:'session:'+plan.id+':'+plan.updated_at,athlete,title:plan.title,date:plan.planned_date,
         reason:'Past high-priority session without a linked completion. Check activity matching or ask the athlete.'});
     }
+    // Flag only verified links between a planned session and a recorded activity.
+    // Duration differences are review prompts, never evidence of training quality
+    // or permission to modify an athlete's sessions automatically.
+    for(const plan of plans.data??[]){
+      const athlete=profilesById.get(plan.athlete_id);
+      const actual=linked.get(plan.id);
+      if(!athlete||!actual||!Number.isFinite(plan.duration_min)||plan.duration_min<=0||
+         !Number.isFinite(actual.duration_sec)||actual.duration_sec<=0)continue;
+      const percent=Math.round(actual.duration_sec/60/plan.duration_min*100);
+      if(percent>=85&&percent<=115)continue;
+      const direction=percent<85?'shorter':'longer';
+      actionable.push({
+        key:'duration:'+plan.id+':'+actual.start_time+':'+actual.duration_sec,
+        athlete,title:plan.title,date:actual.start_time,
+        reason:`Recorded activity was ${percent}% of planned time (${Math.round(actual.duration_sec/60)} of ${Math.round(plan.duration_min)} min). Review why it was ${direction} and check athlete feedback before making any coaching decision. Duration does not confirm intensity or session quality.`
+      });
+    }
     for(const decision of pending.data??[]){
       const athlete=profilesById.get(decision.athlete_id);
       if(athlete)actionable.push({key:'priority:'+decision.id,athlete,date:decision.created_at,
@@ -116,7 +133,7 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
    {!done&&<button type="button" disabled={Boolean(saving)} onClick={()=>void markReviewed(item)}>{saving===item.key?'Saving…':'Mark reviewed'}</button>}</div></article>;
  }
  return <section className="coach-attention-v2">
-  <header className="coach-attention-heading"><div><h3>Monitoring</h3><p>Athlete notes, unlinked key sessions and priority decisions.</p></div>
+  <header className="coach-attention-heading"><div><h3>Monitoring</h3><p>Athlete feedback, workout-duration exceptions, unlinked key sessions and priority decisions.</p></div>
     <button type="button" onClick={()=>setRefreshKey(x=>x+1)} disabled={loading||Boolean(saving)}>↻ Refresh</button>
   </header>
   {loading&&<p>Checking assigned athlete records…</p>}
