@@ -1,3 +1,4 @@
+import WeeklySwimDrillReview from './WeeklySwimDrillReview';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 type Draft={id:string;athlete_id:string;week_start:string;revision:number;phase:string;sessions:unknown;proposal_fingerprint:string;created_at:string};
@@ -62,7 +63,7 @@ export default function CoachWeeklyReview(){
    {rows.map(row=><article key={row.id} className="coach-attention-row"><div><strong>{row.athleteName} · Week of {row.week_start}</strong><p>Revision {row.revision} · {row.phase} · {row.decision}</p>
     <details><summary>Inspect proposed sessions</summary>
     {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item?.session?.prescription??item?.prescription??{},null,2)}</pre></div>):<p>Draft contains no sessions.</p>}
-    </details></div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
+    </details>{import.meta.env.VITE_ENABLE_SWIM_ASSESSMENTS === 'true' && <WeeklySwimDrillReview athleteId={row.athlete_id} weekStart={row.week_start} sessions={row.sessions}/>}</div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
     {row.decision==='approved'&&<button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Revoke approval</button>}</div></article>)}
   </>}
  </section>;
