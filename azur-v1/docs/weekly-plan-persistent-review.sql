@@ -24,7 +24,7 @@ create table if not exists public.weekly_plan_decision (
 create index if not exists weekly_plan_decision_latest_idx on public.weekly_plan_decision(draft_id,decided_at desc,id desc);
 alter table public.weekly_plan_draft enable row level security;
 alter table public.weekly_plan_decision enable row level security;
-revoke all on public.weekly_plan_draft,public.weekly_plan_decision from anon;
+revoke all on public.weekly_plan_draft,public.weekly_plan_decision from authenticated, anon, public;
 grant select,insert on public.weekly_plan_draft,public.weekly_plan_decision to authenticated;
 grant all on public.weekly_plan_draft,public.weekly_plan_decision to service_role;
 create policy weekly_draft_coach_read on public.weekly_plan_draft for select to authenticated using (
