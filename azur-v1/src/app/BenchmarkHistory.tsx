@@ -32,10 +32,11 @@ export default function BenchmarkHistory(){
  const points=current.map((r,i)=>`${12+i*296/Math.max(1,current.length-1)},${116-(r.value-min)/span*94}`).join(' ');
  async function add(){
   if(!athleteId||!available||busy)return;
-  const numeric=Number(value);
+  const parsedPace = /^([0-9]{1,2}):([0-5][0-9])$/.exec(value.trim());
+  const numeric=metric==='bike_ftp_w'?Number(value):(parsedPace?Number(parsedPace[1])*60+Number(parsedPace[2]):NaN);
   const limits=metric==='bike_ftp_w'?[30,1500]:metric==='run_threshold_sec_km'?[90,1800]:[30,900];
   if(!date||date>new Date().toISOString().slice(0,10)||!Number.isFinite(numeric)||numeric<limits[0]||numeric>limits[1]) {
-   setMessage('Enter a valid result and a test date that is not in the future.');return;
+   setMessage('Enter a valid '+(metric==='bike_ftp_w'?'wattage':'mm:ss pace')+' and a test date that is not in the future.');return;
   }
   setBusy(true);setMessage('');
   const {error}=await supabase.from('athlete_benchmark_history').insert({athlete_id:athleteId,metric,value:numeric,assessed_on:date,source});
@@ -59,12 +60,12 @@ export default function BenchmarkHistory(){
     <div className="azur-benchmark-history-items">{current.slice().reverse().slice(0,8).map(r=><div key={r.id}><span>{r.assessed_on} · {r.source.replaceAll('_',' ')}</span><strong>{show(metric,r.value)}</strong></div>)}</div></>}
   <div className="azur-benchmark-history-form">
    <strong>Add a previous assessment</strong>
-   <label>Result ({metric==='bike_ftp_w'?'watts':'seconds per '+(metric==='run_threshold_sec_km'?'km':'100m')})<input inputMode="decimal" type="number" min="1" value={value} onChange={e=>setValue(e.target.value)} /></label>
+   <label>Result ({metric==='bike_ftp_w'?'watts':'mm:ss per '+(metric==='run_threshold_sec_km'?'km':'100m')})<input inputMode={metric==='bike_ftp_w'?'decimal':'numeric'} type={metric==='bike_ftp_w'?'number':'text'} placeholder={metric==='bike_ftp_w'?'e.g. 251':'e.g. 3:45'} value={value} onChange={e=>setValue(e.target.value)} /></label>
    <label>Test date<input type="date" value={date} max={new Date().toISOString().slice(0,10)} onChange={e=>setDate(e.target.value)}/></label>
    <label>Source<select value={source} onChange={e=>setSource(e.target.value)}><option value="structured_test">Structured test</option><option value="race">Race</option><option value="device_estimate">Device estimate</option><option value="coach_assessed">Coach assessment</option><option value="manual_other">Other</option></select></label>
    <button className="primary-button" type="button" disabled={!available||!athleteId||busy} onClick={()=>void add()}>Save assessment</button>
    {message&&<p role="status">{message}</p>}
   </div>
-  <small>Run/swim result entry uses seconds, not mm:ss. This is historical recording only: your coach should validate results before applying them to current training targets.</small>
+  <small>Run and swim results use mm:ss pace. This is historical recording only: your coach should validate results before applying them to current training targets.</small>
  </section>;
 }
