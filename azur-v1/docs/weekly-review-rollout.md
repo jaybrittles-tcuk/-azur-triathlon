@@ -19,3 +19,10 @@ authorization dependency must be brought across and verified *before* applying t
 
 No currently installed routine creates sessions for missing weeks. Do not
 show a successful Sunday-scheduler message until a real end-to-end run passes.
+
+## Stage 1 staging verification (1 November 2026)
+- Staging coach_athlete_assignment and both weekly review tables installed; RLS enabled.
+- Corrected default privileges: authenticated SELECT-only on assignments; SELECT/INSERT on drafts and decisions; no anon rights.
+- Rollback-only simulated JWT role tests passed: assigned coach draft/decision insert and read; unassigned coach denied; athlete-role approval denied.
+- Test rows were rolled back. The simulated claims are not a substitute for full app-level authentication tests.
+- No production schema migrated; no automatic publisher or calendar sessions created.
