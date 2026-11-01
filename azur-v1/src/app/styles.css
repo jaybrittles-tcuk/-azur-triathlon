@@ -6156,3 +6156,10 @@ strong {
  .session-detail-modal .session-analysis-v3-summary{padding:15px!important}
  .session-detail-modal .session-analysis-v3-feedback{padding:15px!important}
 }
+
+
+/* Coach review cues: modest, legible and explicitly non-automated. */
+.session-detail-modal .azur-coach-review-cue{padding:17px 19px!important;border-left:3px solid #e6b943!important}
+.session-detail-modal .azur-coach-review-cue strong{display:block;margin:.4rem 0;color:#f4f8ff!important;font-size:1rem}
+.session-detail-modal .azur-coach-review-cue p{margin:.3rem 0 .6rem;color:#e0eaf4!important;line-height:1.48}
+.session-detail-modal .azur-coach-review-cue small{color:#b4c7da!important;line-height:1.4}
