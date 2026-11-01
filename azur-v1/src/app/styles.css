@@ -6112,3 +6112,32 @@ strong {
  .session-prescription-v2 .session-block {padding:.7rem .8rem}
  .session-prescription-v2 .azur-prescription-targets>div {padding:.45rem .55rem}
 }
+
+
+/* Completed-session mobile readability: keep explanatory copy legible on navy. */
+.session-detail-modal .session-analysis-card .session-analysis-row p {
+  color:#e1eaf4!important;
+  opacity:1!important;
+  font-size:14px;
+  line-height:1.5;
+}
+.session-detail-modal .session-analysis-card .session-analysis-row span {
+  color:#acc7df!important;
+  font-size:11px;
+}
+.session-detail-modal .session-analysis-card .session-analysis-row strong {
+  color:#2998ff!important;
+}
+.session-detail-modal .session-block input::placeholder,
+.session-detail-modal .session-block textarea::placeholder {
+  color:#adbed0!important;
+  opacity:1!important;
+}
+.session-detail-modal .session-block label,
+.session-detail-modal .session-block label>span {
+  color:#d2e3f2!important;
+}
+@media(max-width:560px){
+  .session-detail-modal .session-analysis-card{padding:19px 18px!important}
+  .session-detail-modal .session-analysis-card .session-analysis-row{gap:10px}
+}
