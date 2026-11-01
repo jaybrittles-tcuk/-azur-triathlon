@@ -1,7 +1,7 @@
 import type { SessionEntry } from './sessionSelection.ts';
 
 export type StructuredStep = {
- name:string; repeats:number; workSeconds:number; recoverySeconds:number;
+ name:string; repeats:number; workSeconds:number; recoverySeconds:number; distanceMeters?:number;
  target:{type:'rpe'|'css_pace'|'run_threshold_pace'; min:number;max:number};
  instruction:string;
 };
@@ -15,17 +15,17 @@ const steps=(name:string,repeats:number,workSeconds:number,recoverySeconds:numbe
 });
 export const structuredSwimRunDrafts:StructuredSwimRun[]=[
  {id:'swim-technique-v1',sport:'swim',title:'Catch and balance skills',family:'technique',phases:['base','recovery'],level:1,approval:'coach_review_required',steps:[
-  steps('Easy swim',1,600,0,2,3,'Relaxed strokes'),
-  steps('Drill 25m / easy swim 25m, repeat',8,120,30,2,3,'Coach to choose suitable catch and balance drills; technique quality first'),
-  steps('Easy swimming',1,600,0,2,3,'Smooth relaxed stroke')]},
+  {...steps('Easy swim',1,600,0,2,3,'Relaxed strokes'),distanceMeters:300},
+  {...steps('Drill 25m / easy swim 25m, repeat',8,120,30,2,3,'Technique quality first; rest 30s between 50m repetitions'),distanceMeters:50},
+  {...steps('Easy swimming',1,600,0,2,3,'Smooth relaxed stroke'),distanceMeters:200}]},
  {id:'swim-aerobic-v1',sport:'swim',title:'Aerobic swim repeats',family:'aerobic_endurance',phases:['base','build'],level:1,approval:'coach_review_required',steps:[
-  steps('Warm-up',1,600,0,2,3,'Easy swimming'),
-  steps('Aerobic repetitions',6,240,30,3,4,'Controlled form; rest as prescribed'),
-  steps('Cool-down',1,300,0,2,3,'Easy swimming')]},
+  {...steps('Warm-up',1,600,0,2,3,'Easy swimming'),distanceMeters:300},
+  {...steps('Aerobic repetitions',6,240,30,3,4,'Controlled form; 30 seconds rest after each 200m'),distanceMeters:200},
+  {...steps('Cool-down',1,300,0,2,3,'Easy swimming'),distanceMeters:200}]},
  {id:'swim-css-v1',sport:'swim',title:'CSS controlled intervals',family:'threshold',phases:['build','peak'],level:2,approval:'coach_review_required',steps:[
-  steps('Warm-up',1,900,0,2,3,'Easy plus controlled builds'),
-  steps('CSS interval repetitions',6,180,30,0.98,1.02,'Pace factor relative to individual CSS seconds per 100m; coach validates distance', 'css_pace'),
-  steps('Cool-down',1,300,0,2,3,'Easy')]},
+  {...steps('Warm-up',1,900,0,2,3,'Easy plus controlled builds'),distanceMeters:400},
+  {...steps('CSS interval repetitions',6,180,20,0.98,1.02,'6 × 200m at individual CSS target; 20s rest after each repeat', 'css_pace'),distanceMeters:200},
+  {...steps('Cool-down',1,300,0,2,3,'Easy'),distanceMeters:200}]},
  {id:'run-easy-v1',sport:'run',title:'Easy aerobic run',family:'aerobic_endurance',phases:['base','build','recovery'],level:1,approval:'coach_review_required',steps:[
   steps('Easy aerobic running',1,2700,0,2,4,'Conversational, adjust for terrain and heat')]},
  {id:'run-strides-v1',sport:'run',title:'Aerobic run with strides',family:'aerobic_endurance',phases:['base','build'],level:1,approval:'coach_review_required',steps:[
@@ -49,6 +49,7 @@ export function validateStructuredDraft(workout:StructuredSwimRun):string[]{
   if(!Number.isFinite(s.workSeconds)||s.workSeconds<=0||!Number.isFinite(s.recoverySeconds)||s.recoverySeconds<0)errors.push('Invalid interval timing at '+i);
   if(!(s.target.min>0&&s.target.max>=s.target.min))errors.push('Invalid target at '+i);
   if(!s.instruction.trim())errors.push('Missing coach instruction at '+i);
+  if(workout.sport==='swim'&&(!Number.isInteger(s.distanceMeters)||!s.distanceMeters||s.distanceMeters<=0||s.distanceMeters%25!==0))errors.push('Pool swim distance must be a positive multiple of 25m at '+i);
  }
  return errors;
 }
