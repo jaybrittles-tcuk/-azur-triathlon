@@ -1,3 +1,4 @@
+import BenchmarkHistory from './BenchmarkHistory';
 import BenchmarkTrainingZones from './BenchmarkTrainingZones';
 import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
@@ -8389,6 +8390,7 @@ const sessionVerdict =
           runThreshold={athleteProfile.runThreshold}
           swimCss={athleteProfile.swimThreshold}
         />
+        <BenchmarkHistory />
       </>
     );
   }
