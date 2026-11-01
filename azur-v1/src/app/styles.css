@@ -5997,3 +5997,10 @@ strong {
 .athlete-agenda .calendar-session:active {background:#fff!important;color:#142e43!important}
 .athlete-agenda .calendar-session .calendar-session-meta {color:#476174!important}
 .athlete-agenda .calendar-reschedule-button {background:#eef6fb;color:#245775;border-color:#c2d9e7}
+.athlete-more .azur-invitations {margin-top:20px;padding:16px;background:#fff;border:1px solid #dce7ef;border-radius:14px;color:#17354b}
+.athlete-more .azur-invitations p,.athlete-more .azur-invitations small {color:#496176}
+.athlete-more .azur-invitations button {width:auto;min-height:42px;background:#e9f4fa;border-radius:8px;color:#145579}
+.coach-workout-reviews article {border:1px solid #35536d;border-radius:12px;padding:14px;margin:10px 0;background:#10283d}
+.coach-workout-reviews h5 {font-size:16px;margin:0 0 6px;color:#f2f8fd}
+.coach-workout-reviews p {line-height:1.5}
+.coach-feedback-notes {white-space:pre-wrap;overflow-wrap:anywhere;color:#d1e5f3}

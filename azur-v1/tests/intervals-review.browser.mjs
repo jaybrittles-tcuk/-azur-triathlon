@@ -21,16 +21,58 @@ let missingProfile=false;
 let onboardingStep=0;
 const commands=[];
 const errors=[];
+let coachDebugPage=null;
+let pilot=false,invitationAccepted=false,coachPlan=null,manualActivity=null,athleteFeedback=null;
+const pilotSession='b3730000-0000-4000-8000-000000000001';
+const invitation={id:'b3720000-0000-4000-8000-000000000001',invitee_email:user.email,coach_user_id:'b3700000-0000-4000-8000-000000000001',created_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString(),accepted_at:null,email_sent_at:null};
+
 const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
 await context.addInitScript(({user})=>{
  localStorage.setItem('sb-example-auth-token',JSON.stringify({access_token:'synthetic-session-token',refresh_token:'synthetic-refresh-token',token_type:'bearer',expires_in:3600,expires_at:Math.floor(Date.now()/1000)+3600,user}));
 },{user});
 const metrics=()=>({load_status:validated?'validated':'pending_validation',...(validated?{training_stress:98,intensity_factor:0.936,load_validation_version:1,ftp_w_at_validation:250,normalized_power:234}:{})});
 const recorded=()=>({id:activityId,athlete_id:athlete,source:'intervals',source_activity_id:'browser-ride',sport:'bike',start_time:rideStart,duration_sec:4026,distance_m:41840,planned_session_id:null,processed_metrics:metrics(),raw_payload:{}});
-await context.route('https://example.supabase.co/**',async route=>{
+const mockSupabase=async (route,coach=false)=>{
  const req=route.request(),url=new URL(req.url());
  const single=req.headers().accept?.includes('object+json');
  let data=single?null:[];
+ if(pilot){
+  const identity=coach?{...user,id:invitation.coach_user_id,app_metadata:{role:'coach'}}:user;
+  if(url.pathname.startsWith('/auth/v1/'))data=identity;
+  else if(url.pathname.endsWith('/coach_athlete_invitation')){
+   if(req.method()==='PATCH'){invitationAccepted=true;data={id:invitation.id};}
+   else data=[{...invitation,accepted_at:invitationAccepted?new Date().toISOString():null}];
+  }
+  else if(url.pathname.endsWith('/coach_athlete_assignment')) data=invitationAccepted?[{athlete_id:athlete}]:[];
+  else if(url.pathname.endsWith('/athlete_profile'))data={id:athlete,user_id:user.id,display_name:'Synthetic Athlete',ftp_w:250,normal_weekly_hours:8};
+  else if(url.pathname.endsWith('/coach_workout_approval_event'))data=[{id:'pilot-approval',workout_id:'BIKE-THR-002',workout_version:1,decision:'approved',level:1,phases:['build'],decided_at:new Date().toISOString()}];
+  else if(url.pathname.endsWith('/rpc/coach_schedule_bike_with_week')){
+   const body=req.postDataJSON();
+   assert.equal(body.p_week_hours,8);assert.equal(body.p_athlete_id,athlete);
+   coachPlan={id:pilotSession,athlete_id:athlete,planned_date:body.p_date,sport:'bike',title:body.p_title,session_class:'intensity',priority:2,duration_min:body.p_duration_min,status:'planned',prescription:body.p_prescription,rationale:body.p_rationale,is_active_version:true,targets:{}};
+   data=pilotSession;
+  }
+  else if(url.pathname.endsWith('/planned_session'))data=coachPlan?[coachPlan]:[];
+  else if(url.pathname.endsWith('/completed_activity'))data=manualActivity?[manualActivity]:[];
+  else if(url.pathname.endsWith('/session_feedback'))data=athleteFeedback?[athleteFeedback]:[];
+  else if(url.pathname.includes('/rpc/athlete_')){
+   const body=req.postDataJSON();
+   if(url.pathname.endsWith('/athlete_save_session_feedback')){
+    athleteFeedback={...athleteFeedback,planned_session_id:pilotSession,session_rpe:body.p_rpe,notes:body.p_notes,updated_at:new Date().toISOString()};
+    if(manualActivity)Object.assign(manualActivity,{session_rpe:body.p_rpe,notes:body.p_notes});
+   }else{
+    manualActivity={id:activityId,athlete_id:athlete,planned_session_id:pilotSession,source:'manual',sport:'bike',start_time:new Date().toISOString(),duration_sec:body.p_duration_min*60,distance_m:body.p_distance_km==null?null:body.p_distance_km*1000,session_rpe:body.p_rpe,notes:body.p_notes,processed_metrics:{}};
+    coachPlan.status='completed';
+    athleteFeedback={planned_session_id:pilotSession,session_rpe:body.p_rpe,notes:body.p_notes,updated_at:new Date().toISOString()};
+   }
+   data=activityId;
+  }
+  if(single&&Array.isArray(data))data=data[0]??null;
+  else if(!single&&url.pathname.endsWith('/athlete_profile'))data=[data];
+  const missing=single&&data===null;
+  await route.fulfill({status:missing?406:200,contentType:'application/json',body:JSON.stringify(missing?{code:'PGRST116',details:'The result contains 0 rows',message:'No row'}:data)});
+  return;
+ }
  if(url.pathname.startsWith('/auth/v1/')) data=user;
  else if(url.pathname.endsWith('/athlete_profile')) {
   const profile={id:athlete,user_id:user.id,display_name:'Synthetic Athlete',ftp_w:profileFtp};
@@ -43,7 +85,8 @@ await context.route('https://example.supabase.co/**',async route=>{
  else if(url.pathname.endsWith('/completed_activity')) data=accepted?[{...recorded(),...(demoSessions.length?{start_time:new Date().toISOString()}: {})}]:[];
  const emptySingle=single&&data===null;
  await route.fulfill({status:emptySingle?406:200,contentType:'application/json',body:JSON.stringify(emptySingle?{code:'PGRST116',details:'The result contains 0 rows',message:'Cannot coerce the result to a single JSON object'}:data)});
-});
+};
+await context.route('https://example.supabase.co/**',route=>mockSupabase(route,false));
 await context.route('**/api/**',async route=>{
  const req=route.request(),path=new URL(req.url()).pathname;
  let data={};
@@ -59,7 +102,7 @@ await context.route('**/api/**',async route=>{
  }
  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(data)});
 });
-const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
+const page=await context.newPage();page.on('pageerror',e=>errors.push(e.stack||e.message));
 try {
  await page.goto(base);
  await page.getByRole('button',{name:'Data Sources',exact:true}).click();
@@ -176,9 +219,57 @@ try {
  await plannedRide.click();
 
  await sheet.waitFor();
+
+ await sheet.getByRole('button',{name:'Close session detail'}).click();
+ pilot=true;
+ await page.goto(base);
+ await moreTab.click();
+ await page.getByRole('button',{name:'Accept',exact:true}).click();
+ await page.getByText('Invitation accepted. Your coach can now see your athlete profile.',{exact:true}).waitFor();
+ const coachContext=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+ await coachContext.addInitScript(({user})=>localStorage.setItem('sb-example-auth-token',JSON.stringify({access_token:'coach-pilot',refresh_token:'coach-refresh',token_type:'bearer',expires_in:3600,expires_at:Math.floor(Date.now()/1000)+3600,user})),{user:{...user,id:invitation.coach_user_id,app_metadata:{role:'coach'}}});
+ await coachContext.route('https://example.supabase.co/**',route=>mockSupabase(route,true));
+ const coachPage=await coachContext.newPage();coachDebugPage=coachPage;coachPage.on('pageerror',error=>errors.push(error.stack||error.message));
+ await coachPage.goto(base);
+ await coachPage.getByRole('button',{name:'Coach Mode',exact:true}).click();
+ await coachPage.getByRole('region',{name:'Assigned athletes'}).getByRole('button',{name:/Synthetic Athlete/}).click();
+ await coachPage.getByRole('button',{name:'Session library',exact:true}).click();
+ await coachPage.getByText('Approved workout selection preview',{exact:false}).click();
+ await coachPage.getByLabel('Workout date',{exact:true}).fill(new Date().toISOString().slice(0,10));
+ await coachPage.getByRole('button',{name:'Confirm and add to calendar',exact:true}).click();
+ await coachPage.getByText('Workout added to the assigned athlete calendar.',{exact:true}).waitFor();
+ await page.goto(base);
+ await page.locator('.azur-white-dashboard:visible').getByRole('button',{name:'View session',exact:true}).click();
+ await page.getByLabel('Actual duration (minutes)',{exact:true}).fill('45');
+ await page.getByLabel('Session effort (RPE 1–10)',{exact:true}).fill('4');
+ await page.getByRole('button',{name:'Mark workout complete',exact:true}).click();
+ await page.locator('.completed-session-summary').getByText('Completed activity',{exact:false}).waitFor();
+ await page.getByLabel('Session RPE',{exact:true}).fill('6');
+ await page.getByRole('textbox',{name:'Athlete notes',exact:true}).fill('Felt controlled after warm-up');
+ await page.getByRole('button',{name:'Save athlete feedback',exact:true}).click();
+ await page.getByText('Feedback saved.',{exact:true}).waitFor();
+ await coachPage.getByRole('button',{name:'Overview',exact:true}).click();
+ await coachPage.getByRole('button',{name:'Refresh athlete records',exact:true}).click();
+ const reviews=coachPage.getByRole('region',{name:'Workout completion and feedback'});
+ await reviews.getByText('Felt controlled after warm-up',{exact:true}).waitFor();
+ await reviews.getByText('Reported effort · 6/10',{exact:true}).waitFor();
+ await reviews.getByText('45 min recorded',{exact:true}).waitFor();
+ await page.getByText('Edit recorded workout',{exact:false}).click();
+ await page.getByLabel('Actual duration (minutes)',{exact:true}).fill('50');
+ await page.getByLabel('Distance (km, optional)',{exact:true}).fill('22');
+ await page.getByLabel('Session effort (RPE 1–10)',{exact:true}).fill('5');
+ await page.getByRole('textbox',{name:'Athlete notes',exact:true}).fill('Updated after checking my recording');
+ await page.getByRole('button',{name:'Save manual changes',exact:true}).click();
+ await page.getByText('Manual activity changes saved.',{exact:true}).waitFor();
+ await coachPage.getByRole('button',{name:'Refresh athlete records',exact:true}).click();
+ await reviews.getByText('50 min recorded',{exact:true}).waitFor();
+ await reviews.getByText('Reported effort · 5/10',{exact:true}).waitFor();
+ await reviews.getByText('Updated after checking my recording',{exact:true}).waitFor();
+ console.log('PASS: athlete accepts invitation → coach schedules → athlete completes and changes feedback → coach sees latest records');
  assert.deepEqual(errors,[]);
  console.log('PASS: white-panel mobile dashboard renders real prescription, rationale and opens session details');
 } catch(error) {
+ if(coachDebugPage&&!coachDebugPage.isClosed())console.error('Coach page:',(await coachDebugPage.locator('body').innerText()).slice(-5000));
  console.error('Browser page errors:',errors);
  console.error('Visible page:',(await page.locator('body').innerText()).slice(0,2500));
  throw error;

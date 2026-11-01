@@ -2337,67 +2337,43 @@ return {
 };
   
 })();
+const [sessionFeedbackLoading,setSessionFeedbackLoading]=useState(false);
+const [sessionFeedbackLoadFailed,setSessionFeedbackLoadFailed]=useState(false);
 useEffect(()=>{
   let cancelled=false;
-  setEditableManualId(null);
-  setManualDuration('');setManualDistance('');setManualMessage('');
-  if(selected?.id && selected.status==='completed'){
-    void supabase.from('completed_activity').select('id,source,duration_sec,distance_m,session_rpe,notes')
-      .eq('planned_session_id',selected.id).then(({data,error})=>{
-        if(cancelled||error||!data)return;
-        const activity=data.find(row=>row.source==='manual' && row.id===selected.completedActivityId) ?? (data.length===1 && data[0].source==='manual' ? data[0] : null);
-        if(!activity)return;
-        setEditableManualId(activity.id);
-        setManualDuration(String(Number(activity.duration_sec)/60));
-        setManualDistance(activity.distance_m == null?'':String(Number(activity.distance_m)/1000));
-        setSessionFeedback({rpe:activity.session_rpe==null?'':String(activity.session_rpe),notes:activity.notes??''});
-      });
+  setSessionFeedbackLoadFailed(false);
+  setEditableManualId(null);setManualDuration('');setManualDistance('');
+  setSessionFeedback({rpe:'',notes:''});setSessionFeedbackMessage('');
+  const sessionId=selected?.id;
+  if(!sessionId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(sessionId)){
+    setSessionFeedbackLoading(false);return;
   }
+  setSessionFeedbackLoading(true);
+  void (async()=>{
+    try{
+      const [feedback,records]=await Promise.all([
+        supabase.from('session_feedback').select('session_rpe,notes').eq('planned_session_id',sessionId).maybeSingle(),
+        selected.status==='completed'
+          ?supabase.from('completed_activity').select('id,source,duration_sec,distance_m,session_rpe,notes').eq('planned_session_id',sessionId)
+          :Promise.resolve({data:[],error:null}),
+      ]);
+      if(cancelled)return;
+      if(feedback.error||records.error)throw feedback.error||records.error;
+      const rows=records.data??[];
+      const manual=rows.length===1 && rows[0].source==='manual'?rows[0]:null;
+      const saved=feedback.data??manual;
+      setSessionFeedback({rpe:saved?.session_rpe==null?'':String(saved.session_rpe),notes:saved?.notes??''});
+      if(manual){
+        setEditableManualId(manual.id);
+        setManualDuration(String(Number(manual.duration_sec)/60));
+        setManualDistance(manual.distance_m==null?'':String(Number(manual.distance_m)/1000));
+      }
+    }catch(error){
+      if(!cancelled){setSessionFeedbackLoadFailed(true);setSessionFeedbackMessage('Unable to load saved feedback. Reopen the session to try again.');}
+    }finally{if(!cancelled)setSessionFeedbackLoading(false);}
+  })();
   return()=>{cancelled=true};
 },[selected?.id,selected?.status]);
-useEffect(() => {
-  async function loadSessionFeedback() {
-    if (!selected?.id) return;
-
-    // Only query Supabase for real database session IDs.
-    const isValidSessionId =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-        selected.id,
-      );
-
-    if (!isValidSessionId) {
-      setSessionFeedback({
-        rpe: '',
-        notes: '',
-      });
-      setSessionFeedbackMessage('');
-      return;
-    }
-
-    setSessionFeedbackMessage('');
-
-    const { data, error } = await supabase
-      .from('session_feedback')
-      .select('session_rpe, notes')
-      .eq('planned_session_id', selected.id)
-      .maybeSingle();
-
-    if (error) {
-      console.error(
-        'Unable to load session feedback:',
-        error,
-      );
-      return;
-    }
-
-    setSessionFeedback({
-      rpe: data?.session_rpe?.toString() ?? '',
-      notes: data?.notes ?? '',
-    });
-  }
-
-  loadSessionFeedback();
-}, [selected?.id]);
 useEffect(() => {
   async function loadRecoveryContext() {
     if (!selected?.plannedDate) return;
@@ -7776,7 +7752,7 @@ const sessionVerdict =
     <div>{selected.rationale}</div>
   </div>
 </div>
-{(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail" open={!editableManualId}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
+{(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail" open={!editableManualId}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
 <div className="wide session-block">
   <span className="eyebrow">ATHLETE FEEDBACK</span>
 
@@ -7788,7 +7764,7 @@ const sessionVerdict =
         type="number"
         min="1"
         max="10"
-        value={sessionFeedback.rpe}
+        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe}
         onChange={(event) =>
           setSessionFeedback({
             ...sessionFeedback,
@@ -7805,8 +7781,9 @@ const sessionVerdict =
       <span>Notes</span>
 
       <textarea
+        aria-label="Athlete notes"
         rows={4}
-        value={sessionFeedback.notes}
+        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.notes}
         onChange={(event) =>
           setSessionFeedback({
             ...sessionFeedback,
@@ -7825,7 +7802,7 @@ const sessionVerdict =
   type="button"
   className="primary-button"
   onClick={()=>void handleSessionFeedbackSave()}
-  disabled={sessionFeedbackSaving}
+  disabled={sessionFeedbackSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed}
 >
   <Save size={17} />
 
@@ -9846,22 +9823,11 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     return;
   }
 
-  const { error } = await supabase
-    .from('session_feedback')
-    .upsert(
-      {
-        athlete_id: athlete.id,
-        planned_session_id: selected.id,
-        session_rpe: sessionFeedback.rpe
-          ? Number(sessionFeedback.rpe)
-          : null,
-        notes: sessionFeedback.notes.trim() || null,
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: 'planned_session_id',
-      },
-    );
+  const { error } = await supabase.rpc('athlete_save_session_feedback', {
+    p_session_id:selected.id,
+    p_rpe:feedbackRpe?Number(feedbackRpe):null,
+    p_notes:sessionFeedback.notes.trim()||null,
+  });
 
   if (error) {
     console.error('Unable to save session feedback:', error);
@@ -9872,6 +9838,8 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 
   setSessionFeedbackSaving(false);
   setSessionFeedbackMessage('Feedback saved.');
+  setWeekSessions(previous=>previous.map(session=>session.id===selected.id?{...session,completedRpe:feedbackRpe?Number(feedbackRpe):undefined}:session));
+  await loadPlannedSessions(user.id);
 }
   if (window.location.pathname === '/privacy') {
   return <PrivacyPolicy />;
@@ -10278,6 +10246,7 @@ style={
           </button>
         )}</div>
       </section>)}
+      {!isCoachAccount && <CoachInvitations mode="athlete" />}
     </section>
   )
 }
