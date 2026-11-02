@@ -1,3 +1,4 @@
+import CoachWeekReconciliationPreview from './CoachWeekReconciliationPreview';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 type Draft={id:string;athlete_id:string;week_start:string;revision:number;phase:string;sessions:unknown;proposal_fingerprint:string;created_at:string};
@@ -55,6 +56,7 @@ export default function CoachWeeklyReview(){
   finally{setBusy('')}
  }
  return <section className="coach-attention-v2" aria-label="Weekly plan reviews">
+  <CoachWeekReconciliationPreview/>
   <header className="coach-attention-heading"><div><h3>Weekly plan review</h3><p>Review saved drafts before publication. Decisions do not automatically schedule training.</p></div><button type="button" disabled={loading||Boolean(busy)} onClick={()=>setReload(x=>x+1)}>↻ Refresh</button></header>
   {error&&<p role="alert">{error}</p>}
   {loading?<p>Loading approved-coach draft records…</p>:rows.length===0?<p>No saved weekly proposals are ready for coach review. The automatic proposal service is not connected yet.</p>:<>
