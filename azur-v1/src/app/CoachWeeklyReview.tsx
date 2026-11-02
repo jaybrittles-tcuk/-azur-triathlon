@@ -21,6 +21,7 @@ export default function CoachWeeklyReview(){
  const [busy,setBusy]=useState('');
  const [note,setNote]=useState('');
  const [reload,setReload]=useState(0);
+ const publishingEnabled=false; // Explicit UI gate: staging draft review must not expose calendar writes.
  useEffect(()=>{let live=true;(async()=>{
   setLoading(true);setError('');
   try{
@@ -83,6 +84,7 @@ export default function CoachWeeklyReview(){
   <CoachWeekReconciliationPreview/>
   <CoachWeeklyDraftBuilder onSaved={()=>setReload(x=>x+1)}/>
   <header className="coach-attention-heading"><div><h3>Weekly plan review</h3><p>Review saved drafts before publication. Decisions do not automatically schedule training.</p></div><button type="button" disabled={loading||Boolean(busy)} onClick={()=>setReload(x=>x+1)}>↻ Refresh</button></header>
+  <p>Calendar publishing is disabled during staging validation. Coach approval records a decision only.</p>
   {error&&<p role="alert">{error}</p>}
   {loading?<p>Loading approved-coach draft records…</p>:rows.length===0?<p>No saved weekly proposals are ready for coach review. The automatic proposal service is not connected yet.</p>:<>
    <label className="coach-attention-heading">Decision notes (optional)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Reason or coach observations" maxLength={500}/></label>
@@ -90,7 +92,7 @@ export default function CoachWeeklyReview(){
     <details><summary>Inspect proposed sessions</summary>
     {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item?.session?.prescription??item?.prescription??{},null,2)}</pre></div>):<p>Draft contains no sessions.</p>}
     </details></div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
-    {row.decision==='approved'&&<><button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'full')}>Publish complete week</button><button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'additive')}>Publish approved additions</button></>}
+    {row.decision==='approved'&&<><button type="button" disabled={!publishingEnabled||Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'full')}>Publish complete week</button><button type="button" disabled={!publishingEnabled||Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'additive')}>Publish approved additions</button></>}
     {row.decision==='approved'&&<button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Revoke approval</button>}</div></article>)}
   </>}
  </section>;
