@@ -29,3 +29,44 @@ export function shouldGenerateWeek(input:{existingActive:number;hasApprovedPlan:
  if(input.coachReviewRequired||!input.hasApprovedPlan)return {allowed:false,reason:'Coach approval is outstanding'};
  return {allowed:true,reason:'Eligible for an idempotent server-side publication transaction'};
 }
+
+/** Duration-aware readiness: a rest day is valid, but a substantial shortfall
+ * from the coach's week target is not a publishable "complete" plan.
+ * This does not generate or modify workouts.
+ */
+export function reviewWeekTarget(input:{
+ weekStart:string;
+ sessions:readonly (WeekSession & {duration_min:number})[];
+ targetHours:number;
+ minimumTargetFraction?:number;
+}):{
+ state:'ready'|'incomplete'|'blocked';
+ scheduledMinutes:number;
+ targetMinutes:number;
+ shortfallMinutes:number;
+ reasons:string[];
+}{
+ const baseline=reviewWeek(input.weekStart,[...input.sessions]);
+ const reasons=[...baseline.reasons];
+ const threshold=input.minimumTargetFraction??0.9;
+ if(!Number.isFinite(input.targetHours)||input.targetHours<=0||
+    !Number.isFinite(threshold)||threshold<0.75||threshold>1){
+  reasons.push('Valid weekly target and completeness threshold required');
+  return {state:'blocked',scheduledMinutes:0,targetMinutes:0,shortfallMinutes:0,reasons};
+ }
+ const start=new Date(input.weekStart+'T12:00:00Z');
+ const end=new Date(start);end.setUTCDate(end.getUTCDate()+7);
+ const active=input.sessions.filter(s=>s.is_active_version && s.status!=='cancelled' &&
+    s.planned_date>=input.weekStart && s.planned_date<end.toISOString().slice(0,10));
+ if(active.some(s=>!Number.isFinite(s.duration_min)||s.duration_min<=0)){
+  reasons.push('One or more active sessions have invalid planned duration');
+ }
+ const scheduledMinutes=active.reduce((sum,s)=>sum+(Number.isFinite(s.duration_min)&&s.duration_min>0?s.duration_min:0),0);
+ const targetMinutes=Math.round(input.targetHours*60);
+ const shortfallMinutes=Math.max(0,targetMinutes-scheduledMinutes);
+ if(scheduledMinutes<targetMinutes*threshold){
+  reasons.push('Scheduled duration is below the coach-defined weekly target');
+ }
+ const state=baseline.state==='blocked'||active.some(s=>!Number.isFinite(s.duration_min)||s.duration_min<=0)?'blocked':reasons.length?'incomplete':'ready';
+ return {state,scheduledMinutes,targetMinutes,shortfallMinutes,reasons};
+}

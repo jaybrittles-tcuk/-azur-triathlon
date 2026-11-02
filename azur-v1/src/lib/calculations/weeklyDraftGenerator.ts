@@ -22,6 +22,7 @@ export function draftApprovedTrainingWeek(input:{
   phase:SessionEntry['phases'][number]; weeklyLimitMinutes:number;
   existingActiveSessions:number; athleteProfileReady:boolean;
   recentSessionIds?:readonly string[];
+  targetWeekMinutes?:number;
 }):DraftResult {
   const reasons:string[]=[];
   if(mondayOf(input.weekStart)!==input.weekStart)reasons.push('Week must start on Monday');
@@ -53,6 +54,10 @@ export function draftApprovedTrainingWeek(input:{
     sessions.push({date:date.toISOString().slice(0,10),session:result.session,reason:result.explanation});
   }
   if(totalMinutes>input.weeklyLimitMinutes)reasons.push('Draft exceeds weekly availability');
+  if(input.targetWeekMinutes!==undefined){
+    if(!Number.isFinite(input.targetWeekMinutes)||input.targetWeekMinutes<=0)reasons.push('Valid weekly target required');
+    else if(totalMinutes<input.targetWeekMinutes*0.9)reasons.push('Draft is materially below the coach-defined weekly target');
+  }
   return reasons.length?{status:'blocked',weekStart:input.weekStart,reasons,sessions}:
     {status:'ready_for_coach_review',weekStart:input.weekStart,sessions,totalMinutes};
 }
