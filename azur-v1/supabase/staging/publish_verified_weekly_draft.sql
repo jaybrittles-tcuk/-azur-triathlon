@@ -21,7 +21,7 @@ begin
   item->'session'->>'sessionClass',
   (item->'session'->>'priority')::integer,
   (item->'session'->>'durationMin')::integer,
-  coalesce(item->'session'->'targets','{}'::jsonb),
+  item->'session'->'targets',
   item->'session'->'prescription',item->'session'->>'rationale',
   item->'session'->>'terrain','planned'::public.session_status,false,1,true
  from jsonb_array_elements(d.sessions) item;
@@ -29,7 +29,21 @@ begin
  select count(*),coalesce(sum(duration_min),0) into v_readback,v_minutes from public.planned_session
  where athlete_id=d.athlete_id and planned_date between d.week_start and d.week_start+6 and is_active_version;
  if v_count<>jsonb_array_length(d.sessions) or v_readback<>v_count or v_minutes<>(v_result->>'minutes')::numeric
- then raise exception 'Calendar readback does not match approved draft'; end if;
+ then raise exception 'Calendar count/duration readback does not match approved draft'; end if;
+ if exists (select 1 from jsonb_array_elements(d.sessions) item where not exists (
+  select 1 from public.planned_session p where p.athlete_id=d.athlete_id
+   and p.season_week_id=v_week and p.is_active_version
+   and p.planned_date=(item->>'date')::date
+   and p.sport::text=item->'session'->>'sport'
+   and p.title=item->'session'->>'title'
+   and p.session_class=item->'session'->>'sessionClass'
+   and p.priority=(item->'session'->>'priority')::integer
+   and p.duration_min=(item->'session'->>'durationMin')::integer
+   and p.targets=item->'session'->'targets'
+   and p.prescription=item->'session'->'prescription'
+   and p.rationale is not distinct from item->'session'->>'rationale'
+   and p.terrain is not distinct from item->'session'->>'terrain'
+ )) then raise exception 'Calendar session content differs from approved draft'; end if;
  return jsonb_build_object('status','published_verified','draft_id',d.id,'sessions',v_count,'minutes',v_minutes);
 end;$$;
 revoke all on function public.publish_verified_weekly_draft(uuid) from public,anon,authenticated;
