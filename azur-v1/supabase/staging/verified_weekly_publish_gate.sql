@@ -21,10 +21,13 @@ begin
  if exists(select 1 from jsonb_array_elements(d.sessions) item
    where jsonb_typeof(item)<>'object'
    or item->>'date' is null or (item->>'date')::date not between d.week_start and d.week_start+6
-   or coalesce((item->'session'->>'durationMin')::numeric,0)<=0
-   or nullif(item->'session'->>'sport','') is null
-   or nullif(item->'session'->>'title','') is null
-   or jsonb_typeof(item->'session'->'prescription')<>'object')
+   or coalesce((item->'session'->>'durationMin')::integer,0) not between 1 and 720
+   or (item->'session'->>'sport') not in ('bike','run','swim')
+   or nullif(btrim(item->'session'->>'title'),'') is null
+   or nullif(btrim(item->'session'->>'sessionClass'),'') is null
+   or coalesce((item->'session'->>'priority')::integer,0) not between 1 and 3
+   or jsonb_typeof(item->'session'->'prescription')<>'object'
+   or item->'session'->'prescription'='{}'::jsonb)
  then raise exception 'Draft has incomplete or out-of-week sessions'; end if;
  select count(*),sum((item->'session'->>'durationMin')::numeric) into v_count,v_minutes
  from jsonb_array_elements(d.sessions) item;

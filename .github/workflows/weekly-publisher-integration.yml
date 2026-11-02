@@ -1,0 +1,49 @@
+name: AZUR weekly publisher integration
+on:
+  pull_request:
+    paths:
+      - 'azur-v1/supabase/staging/verified_weekly_publish_gate.sql'
+      - 'azur-v1/supabase/staging/weekly_review_immutable_guards.sql'
+      - 'azur-v1/supabase/staging/weekly_publisher_race_guards.sql'
+      - 'azur-v1/supabase/staging/publish_verified_weekly_draft.sql'
+      - 'azur-v1/supabase/tests/weekly_publisher_fixture.sql'
+      - 'azur-v1/supabase/tests/weekly_publisher_integration.sql'
+      - '.github/workflows/weekly-publisher-integration.yml'
+  workflow_dispatch:
+jobs:
+  verified-publisher:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: azur_weekly_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d azur_weekly_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: azur_weekly_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create synthetic schemas and roles
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/weekly_publisher_fixture.sql
+      - name: Install immutable approval guards
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/staging/weekly_review_immutable_guards.sql
+      - name: Install verified approval gate
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/staging/verified_weekly_publish_gate.sql
+      - name: Install publication coordination locks
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/staging/weekly_publisher_race_guards.sql
+      - name: Install verified publisher
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/staging/publish_verified_weekly_draft.sql
+      - name: Run positive and negative transaction tests
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/weekly_publisher_integration.sql
