@@ -1,3 +1,4 @@
+import CoachWorkoutLibrary from './CoachWorkoutLibrary';
 import CoachWeekReconciliationPreview from './CoachWeekReconciliationPreview';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
@@ -56,6 +57,7 @@ export default function CoachWeeklyReview(){
   finally{setBusy('')}
  }
  return <section className="coach-attention-v2" aria-label="Weekly plan reviews">
+  <CoachWorkoutLibrary/>
   <CoachWeekReconciliationPreview/>
   <header className="coach-attention-heading"><div><h3>Weekly plan review</h3><p>Review saved drafts before publication. Decisions do not automatically schedule training.</p></div><button type="button" disabled={loading||Boolean(busy)} onClick={()=>setReload(x=>x+1)}>↻ Refresh</button></header>
   {error&&<p role="alert">{error}</p>}
