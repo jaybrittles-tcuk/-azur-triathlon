@@ -39,15 +39,15 @@ grant select,insert,update on public.athlete_training_baseline to authenticated;
 grant select on public.training_priority_review to authenticated;
 grant select,insert on public.coach_monitoring_review to authenticated;
 create policy "staging_baseline_own_select" on public.athlete_training_baseline for select to authenticated using (
- exists(select 1 from public.athlete_profile a where a.id=athlete_id and a.user_id=(select auth.uid()))
- or ((select auth.jwt()->'app_metadata'->>'role')='coach' and exists(select 1 from public.coach_athlete_assignment ca where ca.athlete_id=athlete_id and ca.coach_user_id=(select auth.uid())))
+ exists(select 1 from public.athlete_profile a where a.id=athlete_training_baseline.athlete_id and a.user_id=(select auth.uid()))
+ or ((select auth.jwt()->'app_metadata'->>'role')='coach' and exists(select 1 from public.coach_athlete_assignment ca where ca.athlete_id=athlete_training_baseline.athlete_id and ca.coach_user_id=(select auth.uid())))
 );
 create policy "staging_baseline_own_insert" on public.athlete_training_baseline for insert to authenticated with check (
- exists(select 1 from public.athlete_profile a where a.id=athlete_id and a.user_id=(select auth.uid()))
+ exists(select 1 from public.athlete_profile a where a.id=athlete_training_baseline.athlete_id and a.user_id=(select auth.uid()))
 );
 create policy "staging_baseline_own_update" on public.athlete_training_baseline for update to authenticated
- using (exists(select 1 from public.athlete_profile a where a.id=athlete_id and a.user_id=(select auth.uid())))
- with check (exists(select 1 from public.athlete_profile a where a.id=athlete_id and a.user_id=(select auth.uid())));
+ using (exists(select 1 from public.athlete_profile a where a.id=athlete_training_baseline.athlete_id and a.user_id=(select auth.uid())))
+ with check (exists(select 1 from public.athlete_profile a where a.id=athlete_training_baseline.athlete_id and a.user_id=(select auth.uid())));
 create policy "staging_assigned_coach_priority_read" on public.training_priority_review for select to authenticated using (
  (select auth.jwt()->'app_metadata'->>'role')='coach' and exists(select 1 from public.coach_athlete_assignment ca where ca.athlete_id=training_priority_review.athlete_id and ca.coach_user_id=(select auth.uid()))
 );
