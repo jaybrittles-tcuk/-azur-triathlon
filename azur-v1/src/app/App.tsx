@@ -9620,6 +9620,29 @@ onClick={handleImportActivities}
 
     setAuthLoading(false);
   }
+async function requestPasswordReset() {
+  if (!email.trim()) {setAuthError('Please enter your account email.');return;}
+  setAuthLoading(true);setAuthError('');setRecoveryNotice('');
+  try {
+    const {error}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:window.location.origin+'/reset-password'});
+    if(error)throw error;
+    setRecoveryNotice('If your account exists, a reset link has been emailed. Check your inbox and spam folder.');
+  } catch(e) {setAuthError(e instanceof Error?e.message:'Could not request password reset.');}
+  finally {setAuthLoading(false);}
+}
+async function saveRecoveredPassword(event:React.FormEvent) {
+  event.preventDefault();
+  if (recoveryPassword.length<12) {setAuthError('Use a password of at least 12 characters.');return;}
+  setAuthLoading(true);setAuthError('');
+  try {
+    const {error}=await supabase.auth.updateUser({password:recoveryPassword});
+    if(error)throw error;
+    setRecoveryPassword('');setPasswordRecoveryActive(false);setRecoveryMode(false);
+    window.history.replaceState({},'', '/');
+    setRecoveryNotice('Password updated successfully.');
+  } catch(e) {setAuthError(e instanceof Error?e.message:'Could not update password.');}
+  finally {setAuthLoading(false);}
+}
 async function handleRegister(event: React.FormEvent) {
   event.preventDefault();
   if (password.length < 12) { setAuthError('Use a password of at least 12 characters.'); return; }
