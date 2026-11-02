@@ -31,8 +31,9 @@ export default function CoachWeeklyDraftBuilder({onSaved}:{onSaved:()=>void}){
  const restDays=Array.from({length:7},(_,i)=>dateAt(week,i)).filter(date=>!(picks[date]??[]).some(x=>x.key)).length;
  const unselected=Object.values(picks).flat().some(x=>!x.key);
  const usedKeys=chosen.map(x=>x.workout!.workout_key);
+ const dayTotals=Array.from({length:7},(_,i)=>{const date=dateAt(week,i);return {date,minutes:chosen.filter(x=>x.date===date).reduce((sum,x)=>sum+(x.workout?.duration_min??0),0),sports:chosen.filter(x=>x.date===date).map(x=>x.workout!.sport)}});
  const total=chosen.reduce((n,x)=>n+(x.workout?.duration_min??0),0),target=Number(weekRecord?.target_hours??0)*60;
- const blockers=[...(!weekRecord?['No verified weekly target exists for this athlete and week']:[]),...(weekRecord?.locked?['The week is locked']:[]),...(!['base','build','peak','taper','recovery'].includes(phase)?['Training phase requires review']:[]),...(target<=0?['Target hours must be positive']:[]),...(chosen.length===0?['Choose at least one approved workout']:[]),...(chosen.some(x=>!x.pick||!x.pick.priority)?['Session priority must be chosen']:[]),...(chosen.length>21?['Maximum 21 sessions per week']:[]),...(unselected?['Remove or select every added workout slot']:[]),...(restDays<1?['Reserve at least one rest day']:[]),...(new Set(usedKeys).size!==usedKeys.length?['Each approved workout can only be selected once in a week']:[]),...(target>0&&(total<target*.9||total>target*1.1)?['Selected duration must fall within 90–110% of the verified target']:[])];
+ const blockers=[...(!weekRecord?['No verified weekly target exists for this athlete and week']:[]),...(weekRecord?.locked?['The week is locked']:[]),...(!['base','build','peak','taper','recovery'].includes(phase)?['Training phase requires review']:[]),...(target<=0?['Target hours must be positive']:[]),...(chosen.length===0?['Choose at least one approved workout']:[]),...(chosen.some(x=>!x.pick||!x.pick.priority)?['Session priority must be chosen']:[]),...(chosen.length>21?['Maximum 21 sessions per week']:[]),...(unselected?['Remove or select every added workout slot']:[]),...(restDays<1?['Reserve at least one rest day']:[]),...(dayTotals.some(x=>x.minutes>240)?['Daily training exceeds four hours; review session placement']:[]),...(dayTotals.some(x=>new Set(x.sports).size!==x.sports.length)?['A day contains more than one session in the same sport; review the structure']:[]),...(new Set(usedKeys).size!==usedKeys.length?['Each approved workout can only be selected once in a week']:[]),...(target>0&&(total<target*.9||total>target*1.1)?['Selected duration must fall within 90–110% of the verified target']:[])];
  async function save(){
   setBusy(true);setMessage('');
   try{
@@ -73,6 +74,8 @@ export default function CoachWeeklyDraftBuilder({onSaved}:{onSaved:()=>void}){
    </select></label><button type="button" onClick={()=>setPicks(old=>({...old,[date]:(old[date]??[]).filter((_,j)=>j!==index)}))}>Remove session</button></div>)}
    <button type="button" disabled={dayPicks.length>=3} onClick={()=>setPicks(old=>({...old,[date]:[...(old[date]??[]),{key:'',priority:2}]}))}>Add session</button>
   </div>})}
+  <p>Calendar preview · {chosen.length} sessions · {restDays} rest days · {total} of {target} target minutes</p>
+  {dayTotals.map(x=><p key={x.date}><strong>{x.date}</strong> · {x.minutes?`${x.minutes} min · ${x.sports.join(' + ')}`:'Rest'}</p>)}
   {blockers.map(x=><p key={x}>{x}</p>)}
   <button type="button" disabled={busy||blockers.length>0} onClick={()=>void save()}>Save draft for coach review</button>
   {message&&<p role="status">{message}</p>}
