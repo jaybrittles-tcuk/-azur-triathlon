@@ -8,6 +8,8 @@ on:
       - 'azur-v1/src/app/styles.css'
       - 'azur-v1/src/app/AthleteOnboardingDraft.tsx'
       - 'azur-v1/src/app/App.tsx'
+      - 'azur-v1/src/app/CoachWeeklyReview.tsx'
+      - 'azur-v1/src/app/CoachWeekReconciliationPreview.tsx'
       - 'azur-v1/src/main.tsx'
       - 'azur-v1/supabase/functions/**'
       - 'azur-v1/src/lib/calculations/trainingLoad.ts'
