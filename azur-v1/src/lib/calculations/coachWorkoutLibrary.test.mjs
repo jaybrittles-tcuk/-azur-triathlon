@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {approvedWorkoutEntries,validateWorkoutCandidate} from './coachWorkoutLibrary.ts';
+const workout={id:'azur-run-easy-001',title:'Aerobic run',sport:'run',family:'aerobic_endurance',durationMin:50,level:1,phases:['base'],prescription:{steps:[{minutes:50,effort:'easy'}]},approved:false};
+test('no default approval, even for structurally complete workout',()=>{assert.equal(validateWorkoutCandidate(workout).length,0);assert.deepEqual(approvedWorkoutEntries([workout]),[])});
+test('explicit coach review required to select session',()=>{assert.equal(approvedWorkoutEntries([{...workout,approved:true}]).length,0);assert.equal(approvedWorkoutEntries([{...workout,approved:true,reviewedBy:'coach-uid',reviewedAt:'2026-11-02T10:00:00Z'}]).length,1)});
+test('empty prescription or duplicate ID cannot qualify',()=>{assert.ok(validateWorkoutCandidate({...workout,prescription:{}}).length);const accepted={...workout,approved:true,reviewedBy:'coach-uid',reviewedAt:'2026-11-02T10:00:00Z'};assert.equal(approvedWorkoutEntries([accepted,accepted]).length,1)});
