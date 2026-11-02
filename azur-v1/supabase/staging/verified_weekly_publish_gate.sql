@@ -21,45 +21,11 @@ begin
  if exists(select 1 from jsonb_array_elements(d.sessions) item
    where jsonb_typeof(item)<>'object'
    or item->>'date' is null or (item->>'date')::date not between d.week_start and d.week_start+6
-   or jsonb_typeof(item->'session')<>'object'
-   or coalesce((item->'session'->>'durationMin') ~ '^[1-9][0-9]{0,2}
- then raise exception 'Draft has incomplete or out-of-week sessions'; end if;
- select count(*),sum((item->'session'->>'durationMin')::numeric) into v_count,v_minutes
- from jsonb_array_elements(d.sessions) item;
- select target_hours into v_target from public.season_week where athlete_id=d.athlete_id and week_start=d.week_start;
- if v_target is null or v_target<=0 then raise exception 'Verified week target missing'; end if;
- if v_minutes < v_target*60*0.9 or v_minutes>v_target*60*1.1
- then raise exception 'Draft duration outside target tolerance'; end if;
- if exists(select 1 from public.planned_session p where p.athlete_id=d.athlete_id and p.planned_date between d.week_start and d.week_start+6 and p.is_active_version)
- then raise exception 'Existing active sessions require reconciliation; no overwrite'; end if;
- return jsonb_build_object('status','ready_for_service_publication','draft_id',d.id,'revision',d.revision,'sessions',v_count,'minutes',v_minutes,'coach_user_id',v_coach);
-end; $$;
-revoke all on function public.verify_weekly_publish_readiness(uuid) from public,anon,authenticated;
-grant execute on function public.verify_weekly_publish_readiness(uuid) to service_role;
--- Disable the old reference-string publishing path in staging.
-revoke all on function public.publish_approved_training_week(uuid,date,jsonb,text) from service_role,public,anon,authenticated;
-,false)=false
-   or coalesce((item->'session'->>'durationMin')::numeric,0)>720
-   or (item->'session'->>'sport') not in ('swim','bike','run')
+   or coalesce((item->'session'->>'durationMin')::integer,0) not between 1 and 720
+   or (item->'session'->>'sport') not in ('bike','run','swim')
    or nullif(btrim(item->'session'->>'title'),'') is null
    or nullif(btrim(item->'session'->>'sessionClass'),'') is null
-   or coalesce((item->'session'->>'priority') ~ '^[1-3]
- then raise exception 'Draft has incomplete or out-of-week sessions'; end if;
- select count(*),sum((item->'session'->>'durationMin')::numeric) into v_count,v_minutes
- from jsonb_array_elements(d.sessions) item;
- select target_hours into v_target from public.season_week where athlete_id=d.athlete_id and week_start=d.week_start;
- if v_target is null or v_target<=0 then raise exception 'Verified week target missing'; end if;
- if v_minutes < v_target*60*0.9 or v_minutes>v_target*60*1.1
- then raise exception 'Draft duration outside target tolerance'; end if;
- if exists(select 1 from public.planned_session p where p.athlete_id=d.athlete_id and p.planned_date between d.week_start and d.week_start+6 and p.is_active_version)
- then raise exception 'Existing active sessions require reconciliation; no overwrite'; end if;
- return jsonb_build_object('status','ready_for_service_publication','draft_id',d.id,'revision',d.revision,'sessions',v_count,'minutes',v_minutes,'coach_user_id',v_coach);
-end; $$;
-revoke all on function public.verify_weekly_publish_readiness(uuid) from public,anon,authenticated;
-grant execute on function public.verify_weekly_publish_readiness(uuid) to service_role;
--- Disable the old reference-string publishing path in staging.
-revoke all on function public.publish_approved_training_week(uuid,date,jsonb,text) from service_role,public,anon,authenticated;
-,false)=false
+   or coalesce((item->'session'->>'priority')::integer,0) not between 1 and 3
    or jsonb_typeof(item->'session'->'prescription')<>'object'
    or item->'session'->'prescription'='{}'::jsonb)
  then raise exception 'Draft has incomplete or out-of-week sessions'; end if;
