@@ -9,11 +9,12 @@ export default async function handler(req,res){
  if(process.env.AZUR_WEEK_PUBLISH_ENABLED!=='true')return res.status(503).json({error:'Weekly publishing is disabled'});
  const url=process.env.SUPABASE_URL;const anon=process.env.SUPABASE_ANON_KEY;const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!url||!anon||!key)return res.status(503).json({error:'Publisher not configured'});
+ if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url))return res.status(503).json({error:'Invalid Supabase configuration'});
  const token=(req.headers.authorization||'').match(/^Bearer ([A-Za-z0-9._-]+)$/)?.[1];
  if(!token)return res.status(401).json({error:'Authentication required'});
  const draftId=req.body?.draftId;
  const mode=req.body?.mode;
- if(typeof draftId!=='string'||!/^[a-f0-9]{8}-[a-f0-9-]{27,}$/i.test(draftId)||!['full','additive'].includes(mode))
+ if(typeof draftId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(draftId)||!['full','additive'].includes(mode))
   return res.status(400).json({error:'Valid draft and publishing mode required'});
  try{
   const userClient=createClient(url,anon,{auth:{persistSession:false,autoRefreshToken:false}});
