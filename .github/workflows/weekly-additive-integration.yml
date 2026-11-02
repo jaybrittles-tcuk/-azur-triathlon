@@ -1,0 +1,46 @@
+name: AZUR additive weekly publication
+on:
+  pull_request:
+    paths:
+      - 'azur-v1/supabase/staging/weekly_additive_baseline.sql'
+      - 'azur-v1/supabase/staging/publish_verified_additive_week.sql'
+      - 'azur-v1/supabase/tests/weekly_additive_integration.sql'
+      - '.github/workflows/weekly-additive-integration.yml'
+  workflow_dispatch:
+jobs:
+  additive-publisher:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: azur_additive_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d azur_additive_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: azur_additive_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create disposable schema
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/weekly_publisher_fixture.sql
+      - name: Install immutable weekly review
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/staging/weekly_review_immutable_guards.sql
+      - name: Install coordinating locks
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/staging/weekly_publisher_race_guards.sql
+      - name: Install baseline
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/staging/weekly_additive_baseline.sql
+      - name: Install additive publisher
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/staging/publish_verified_additive_week.sql
+      - name: Test publication and duplicate protection
+        run: psql -v ON_ERROR_STOP=1 -f azur-v1/supabase/tests/weekly_additive_integration.sql
