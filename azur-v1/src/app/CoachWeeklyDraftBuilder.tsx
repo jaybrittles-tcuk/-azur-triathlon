@@ -25,7 +25,7 @@ export default function CoachWeeklyDraftBuilder({onSaved}:{onSaved:()=>void}){
  (async()=>{const {data,error}=await supabase.from('season_week').select('week_start,phase,target_hours,locked').eq('athlete_id',selected).eq('week_start',week).maybeSingle();
  if(active){setWeekRecord((data as Week|null)??null);if(error)setMessage(error.message)}})();
  return()=>{active=false}},[selected,week]);
- const phase=weekRecord?.phase?.trim().toLowerCase().split(/\\s+/)[0]??'';
+ const phase=weekRecord?.phase?.trim().toLowerCase().split(' ')[0]??'';
  const candidates=library.filter(x=>x.phases?.includes(phase)&&objectPrescription(x.prescription)&&['bike','run','swim'].includes(x.sport)&&x.duration_min>0);
  const chosen=Array.from({length:7},(_,i)=>{const date=dateAt(week,i),pick=picks[date],workout=candidates.find(x=>x.workout_key===pick?.key);return {date,pick,workout}}).filter(x=>x.workout);
  const total=chosen.reduce((n,x)=>n+(x.workout?.duration_min??0),0),target=Number(weekRecord?.target_hours??0)*60;
