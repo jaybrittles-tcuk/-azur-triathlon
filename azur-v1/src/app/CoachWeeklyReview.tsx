@@ -46,6 +46,19 @@ export default function CoachWeeklyReview(){
   }catch(e){if(live)setError(e instanceof Error?e.message:'Could not load weekly reviews');}
   finally{if(live)setLoading(false);}
  })();return()=>{live=false};},[reload]);
+ async function publish(row:Row,mode:'full'|'additive'){
+  setBusy(row.id);setError('');
+  try{
+   const {data:{session}}=await supabase.auth.getSession();
+   if(!session?.access_token)throw new Error('Coach sign-in required');
+   if(readiness(row).length)throw new Error(readiness(row).join('; '));
+   const response=await fetch('/api/publish-week',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token},body:JSON.stringify({draftId:row.id,mode})});
+   const payload=await response.json();
+   if(!response.ok)throw new Error(payload.error||'Publication declined');
+   setReload(x=>x+1);
+  }catch(e){setError(e instanceof Error?e.message:'Unable to publish');}
+  finally{setBusy('')}
+ }
  async function decide(row:Row,decision:'approved'|'rejected'){
   setError('');setBusy(row.id);
   try{
@@ -75,6 +88,7 @@ export default function CoachWeeklyReview(){
     <details><summary>Inspect proposed sessions</summary>
     {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item?.session?.prescription??item?.prescription??{},null,2)}</pre></div>):<p>Draft contains no sessions.</p>}
     </details></div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
+    {row.decision==='approved'&&<><button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'full')}>Publish complete week</button><button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'additive')}>Publish approved additions</button></>}
     {row.decision==='approved'&&<button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Revoke approval</button>}</div></article>)}
   </>}
  </section>;
