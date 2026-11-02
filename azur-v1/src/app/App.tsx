@@ -1202,6 +1202,10 @@ export function App() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [recoveryMode,setRecoveryMode]=useState(false);
+  const [recoveryPassword,setRecoveryPassword]=useState('');
+  const [recoveryNotice,setRecoveryNotice]=useState('');
+  const [passwordRecoveryActive,setPasswordRecoveryActive]=useState(() => window.location.pathname === '/reset-password');
   const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true';
   const [registrationMode, setRegistrationMode] = useState(() => new URLSearchParams(window.location.search).get('join') === '1');
   const [registrationNotice, setRegistrationNotice] = useState('');
@@ -1908,6 +1912,7 @@ if (data.session?.user) {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (_event === 'PASSWORD_RECOVERY') setPasswordRecoveryActive(true);
     syncIntervalsReviewOwner(session?.user.id ?? null);
     setIsAuthenticated(!!session);
 
@@ -9826,22 +9831,25 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     );
   }
 
+  if (passwordRecoveryActive) {
+    return <div className="login-screen"><form className="login-card" onSubmit={saveRecoveredPassword}><img src="/brand/azur-logo.png" alt="AZUR Triathlon Coaching" className="login-logo"/><h2>Set a new password</h2><p>Enter a new password of at least 12 characters.</p><label>New password<input type="password" autoComplete="new-password" required minLength={12} value={recoveryPassword} onChange={e=>setRecoveryPassword(e.target.value)}/></label>{authError&&<div className="login-error" role="alert">{authError}</div>}<button className="primary-button" type="submit" disabled={authLoading}>{authLoading?'Updating...':'Save new password'}</button></form></div>;
+  }
   if (!isAuthenticated) {
     return (
       <div className="login-screen">
-        <form className="login-card" onSubmit={registrationMode && betaRegistrationEnabled ? handleRegister : handleLogin}>
+        <form className="login-card" onSubmit={recoveryMode ? (e)=>{e.preventDefault();void requestPasswordReset()} : registrationMode && betaRegistrationEnabled ? handleRegister : handleLogin}>
           <img
             src="/brand/azur-logo.png"
             alt="Azur Triathlon Coaching"
             className="login-logo"
           />
 
-          <span className="eyebrow">{registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
+          <span className="eyebrow">{recoveryMode?'PASSWORD RECOVERY':registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
 
-          <h2>{registrationMode ? 'Join AZUR' : 'Welcome to Azur'}</h2>
+          <h2>{recoveryMode?'Reset your password':registrationMode ? 'Join AZUR' : 'Welcome to Azur'}</h2>
 
           <p>
-            {registrationMode ? 'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.' : 'Sign in to access your training, performance and recovery data.'}
+            {recoveryMode?'Enter your email to receive a secure reset link.':registrationMode ? 'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.' : 'Sign in to access your training, performance and recovery data.'}
           </p>
 
           <label>
@@ -9855,7 +9863,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
             />
           </label>
 
-          <label>
+          {!recoveryMode && <label>
             <span>Password</span>
 
             <input
@@ -9864,7 +9872,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
               onChange={(event) => setPassword(event.target.value)}
               required
             />
-          </label>
+          </label>}
 
           {authError && (
             <div className="login-error">{authError}</div>
@@ -9875,9 +9883,11 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
             type="submit"
             disabled={authLoading}
           >
-            {authLoading ? (registrationMode ? 'Creating account...' : 'Signing in...') : registrationMode ? 'Create athlete account' : 'Sign in'}
+            {authLoading ? 'Working...' : recoveryMode?'Send reset link':registrationMode ? 'Create athlete account' : 'Sign in'}
           </button>
-        {betaRegistrationEnabled && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
+        <button type="button" className="azur-auth-switch" onClick={()=>{setRecoveryMode(v=>!v);setAuthError('');setRecoveryNotice('');setRegistrationMode(false)}}>{recoveryMode?'Back to sign in':'Forgot password?'}</button>
+        {recoveryNotice&&<p role="status">{recoveryNotice}</p>}
+        {betaRegistrationEnabled && !recoveryMode && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
           {registrationNotice && <p className="azur-registration-notice" role="status">{registrationNotice}</p>}
         </form>
 
