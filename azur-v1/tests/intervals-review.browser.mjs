@@ -46,7 +46,7 @@ const mockSupabase=async (route,coach=false)=>{
   }
   else if(url.pathname.endsWith('/coach_athlete_assignment')) data=invitationAccepted?[{athlete_id:athlete}]:[];
   else if(url.pathname.endsWith('/athlete_profile'))data={id:athlete,user_id:user.id,display_name:'Synthetic Athlete',ftp_w:250,normal_weekly_hours:8};
-  else if(url.pathname.endsWith('/athlete_onboarding'))data={user_id:user.id,onboarding_step:3,race_distance:'70.3',race_date:null,weekly_hours:8,device:'garmin',experience:'first'};
+  else if(url.pathname.endsWith('/athlete_onboarding')){const setup={user_id:user.id,onboarding_step:3,race_distance:'70.3',race_date:null,weekly_hours:8,device:'garmin',experience:'first'};data=single?setup:[setup];}
   else if(url.pathname.endsWith('/coach_workout_approval_event'))data=[{id:'pilot-approval',workout_id:'BIKE-THR-002',workout_version:1,decision:'approved',level:1,phases:['build'],decided_at:new Date().toISOString()}];
   else if(url.pathname.endsWith('/rpc/coach_schedule_bike_with_week')){
    const body=req.postDataJSON();
