@@ -55,12 +55,12 @@ export default function AthleteOnboardingDraft(){
     setExperience(data.experience);setHours(Number(data.weekly_hours));
     setDevice(data.device as Device);
     setTrainingDays(Array.isArray(data.training_days)?data.training_days:[]);
-    setRecentHours(data.recent_weekly_hours===null?'':String(data.recent_weekly_hours));
+    setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
     setTrainingConcern(data.current_training_concern==='none'||data.current_training_concern==='yes'?data.current_training_concern:'unsure');
-    setFtpWatts(data.ftp_watts===null?'':String(data.ftp_watts));
+    setFtpWatts(data.ftp_watts==null?'':String(data.ftp_watts));
     setSwimCss(secondsToPace(data.swim_css_seconds_per_100m));
     setRunPace(secondsToPace(data.run_threshold_seconds_per_km));
-    setKnownTests(data.ftp_watts!==null||data.swim_css_seconds_per_100m!==null||data.run_threshold_seconds_per_km!==null);
+    setKnownTests(data.ftp_watts!=null||data.swim_css_seconds_per_100m!=null||data.run_threshold_seconds_per_km!=null);
     setStep(data.onboarding_step===3?1:Math.min(2,Math.max(0,data.onboarding_step)));
    }
    setLoading(false);
