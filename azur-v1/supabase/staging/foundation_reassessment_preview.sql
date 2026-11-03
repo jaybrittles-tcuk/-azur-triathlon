@@ -1,4 +1,14 @@
 -- Athlete-driven draft preview and explicit, atomic application on staging.
+-- Athlete-readable subset only: coach-approved base aerobic run templates.
+-- All unapproved, bike FTP/CSS, and higher-intensity workouts retain existing RLS.
+drop policy if exists staging_approved_aerobic_run_read on public.coach_workout_library;
+create policy staging_approved_aerobic_run_read
+on public.coach_workout_library for select to authenticated
+using (
+ approved=true and sport='run' and family='aerobic_endurance'
+ and level=1 and 'base'=any(phases)
+);
+
 -- Preview is read-only; applying never changes completed, locked or coach-authored sessions.
 create or replace function public.preview_foundation_reassessment(p_inputs jsonb)
 returns jsonb language plpgsql security invoker set search_path=public,pg_temp as $$
@@ -11,6 +21,7 @@ declare
  v_tier text:='foundation';v_reason text:='limited or unverified training history';
  v_cap int; v_sessions_limit int; v_week_min int; v_count int; v_seq int; v_duration int;
  v_sport text;v_title text;v_steps jsonb;v_plan jsonb:='[]'::jsonb;
+ v_library_id uuid;v_source text;v_slot_family text;v_lib record;
  v_existing int;v_existing_min int;v_existing_max int:=0;
  v_sig text;v_blocked text:='';v_total int:=0;v_week_total int:=0;
 begin
@@ -115,11 +126,51 @@ begin
          jsonb_build_object('durationMin',v_duration-10,'target','Technique-focused easy swimming and breaks, RPE 2–3, supervised pool'),
          jsonb_build_object('durationMin',5,'target','Easy cooldown or rest'));
      end if;
+     -- Coach-approved library first, but only when an entire prescription is
+     -- threshold-independent and matches the exact time budget.
+     -- Current approved bike and swim options rely on FTP/CSS, so never select
+     -- them automatically from athlete-reported metrics.
+     v_library_id:=null;
+     v_source:='conservative_rpe_foundation';
+     v_slot_family:=case when v_sport='swim' then 'technique' else 'aerobic_endurance' end;
+     if v_sport='run' and v_tier <> 'foundation' then
+       select lib.id,lib.title,lib.duration_min,lib.prescription->'steps' as steps
+         into v_lib
+       from public.coach_workout_library lib
+       where lib.approved=true and lib.sport='run'
+         and lib.family='aerobic_endurance' and lib.level=1
+         and 'base'=any(lib.phases)
+         and lib.duration_min between 30 and
+           case when v_tier='established_continuation' then 60 else 45 end
+         and jsonb_typeof(lib.prescription->'steps')='array'
+         and jsonb_array_length(lib.prescription->'steps')=3
+         and not (lib.prescription::text ~* '(FTP|CSS|%|threshold pace)')
+         and (select sum((block.value->>'durationMin')::int)
+                from jsonb_array_elements(lib.prescription->'steps') block)
+              =lib.duration_min
+       order by case
+         when (v_seq % 3)=1 and v_week=v_start then abs(lib.duration_min-45)
+         when (v_seq % 3)=1 then abs(lib.duration_min-60)
+         else abs(lib.duration_min-45) end,
+         lib.workout_key
+       limit 1;
+       if found then
+         v_library_id:=v_lib.id;v_title:=v_lib.title;
+         v_duration:=v_lib.duration_min;v_steps:=v_lib.steps;
+         v_source:='approved_coach_library';
+       end if;
+     end if;
      if v_week_min+v_duration>v_cap then continue; end if;
      v_plan:=v_plan||jsonb_build_array(jsonb_build_object(
        'date',v_date,'sport',v_sport,'title',v_title,'duration_min',v_duration,
        'prescription',jsonb_build_object('steps',v_steps,
-          'focus','Easy aerobic foundation · RPE-led session'),
+          'focus',case when v_library_id is not null then 'Coach-approved aerobic endurance · RPE-led'
+             else 'Easy aerobic foundation · RPE-led session' end),
+       'selection_source',v_source,'workout_library_id',v_library_id,
+       'family',v_slot_family,
+       'selection_reason',case when v_library_id is not null
+         then 'Approved aerobic run matched to an easy base-phase session without unverified threshold targets'
+         else 'Conservative RPE prescription; no suitable threshold-independent approved library workout' end,
        'week_start',v_week));
      v_week_min:=v_week_min+v_duration;v_total:=v_total+v_duration;
      v_count:=v_count+1;v_seq:=v_seq+1;
@@ -207,7 +258,9 @@ begin
    values (v_week_id,v_athlete,(v_item->>'date')::date,
     (v_item->>'sport')::public.sport_type,v_item->>'title','easy',2,
     (v_item->>'duration_min')::int,
-    jsonb_build_object('generation_source','onboarding_foundation','training_tier',v_plan->>'training_tier',
+    jsonb_build_object('generation_source','onboarding_foundation',
+      'selection_source',v_item->>'selection_source','workout_library_id',v_item->>'workout_library_id',
+      'session_family',v_item->>'family','training_tier',v_plan->>'training_tier',
       'capacity_basis',v_plan->>'capacity_basis','athlete_reported',true,
       'rpe_min',2,'rpe_max',4,'requires_coach_review_for_progression',true),
     v_item->'prescription',

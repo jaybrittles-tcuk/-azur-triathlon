@@ -247,6 +247,9 @@ try {
  await page.getByRole('button',{name:'Reassess my programme'}).click();
  await page.getByRole('button',{name:'Preview next two weeks'}).click();
  await page.getByText('Preview · established continuation',{exact:true}).waitFor();
+ await page.getByRole('region',{name:'Week of '+new Date(new Date().setDate(new Date().getDate()+((8-new Date().getDay())%7||7))).toISOString().slice(0,10)}).waitFor();
+ await page.getByText('RPE-based foundation',{exact:true}).first().waitFor();
+ await page.getByText('Rest / no planned session',{exact:true}).first().waitFor();
  await page.getByRole('button',{name:'Confirm and update future calendar'}).click();
  await page.getByText('Reassessment applied: 1 future sessions published.',{exact:false}).waitFor();
  assert.equal(demoSessions.some(s=>s.id==='reassessed-1'),true,'Reassessment must save only after confirmation');
