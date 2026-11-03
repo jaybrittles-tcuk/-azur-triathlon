@@ -51,23 +51,25 @@ export default function AthleteOnboardingDraft(){
   if(!Number.isFinite(hours)||hours<2||hours>25){setMessage('Weekly hours must be between 2 and 25.');return;}
   if(nextStep===3 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
-  if(nextStep===3){
-   const {data:existing,error:lookupError}=await supabase.from('athlete_profile').select('id').eq('user_id',userId).maybeSingle();
-   if(lookupError){setSaving(false);setMessage('Unable to check athlete profile: '+lookupError.message);return;}
-   if(!existing){
-    const {error:profileError}=await supabase.from('athlete_profile').insert({user_id:userId,display_name:displayName.trim()});
-    if(profileError){setSaving(false);setMessage('Unable to create athlete profile: '+profileError.message);return;}
-   }
-  }
   const {error}=await supabase.from('athlete_onboarding').upsert({
    user_id:userId,race_distance:race,race_date:raceDate||null,
    experience,weekly_hours:hours,device,onboarding_step:nextStep,
    updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
+  if(error){setSaving(false);setMessage('Unable to save setup: '+error.message);return;}
+  if(nextStep===3){
+   const {data:existing,error:lookupError}=await supabase.from('athlete_profile')
+     .select('id').eq('user_id',userId).maybeSingle();
+   if(lookupError){setSaving(false);setMessage('Unable to verify athlete profile: '+lookupError.message);return;}
+   if(!existing){
+    const {error:profileError}=await supabase.from('athlete_profile')
+      .insert({user_id:userId,display_name:displayName.trim()});
+    if(profileError){setSaving(false);setMessage('Setup preferences saved, but your athlete profile could not be created. Please try Finish setup again: '+profileError.message);return;}
+   }
+  }
   setSaving(false);
-  if(error){setMessage('Unable to save setup: '+error.message);return;}
   setStep(Math.min(2,nextStep));
-  if(nextStep===3){if(window.location.pathname==='/onboarding'){window.location.assign('/');return;}setReady(true);setMessage('Your preferences have been saved. A coach assignment and training plan are separate steps.');}
+  if(nextStep===3){if(window.location.pathname==='/onboarding'){window.location.assign('/');return;}setReady(true);setMessage('Your athlete setup is complete. Your coach will arrange your training plan.');}
   else setMessage('Progress saved.');
  }
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
@@ -103,7 +105,7 @@ export default function AthleteOnboardingDraft(){
   <div className="azur-onboarding-actions">
    {step>0&&<button type="button" onClick={()=>{setStep(s=>s-1);setReady(false)}}>Back</button>}
    {step<2?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>Continue</button>
-   :<button type="button" disabled={saving} onClick={()=>void save(3)}>Review setup</button>}
+   :<button type="button" disabled={saving} onClick={()=>void save(3)}>Finish setup</button>}
   </div>
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
   {ready&&<div role="status" className="azur-onboarding-recap"><strong>Draft setup</strong>
