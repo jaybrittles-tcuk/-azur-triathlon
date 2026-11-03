@@ -70,3 +70,16 @@ test('four available days with high volume is not marked publishable',()=>{
  assert.ok(result.warnings.some(x=>x.includes('five or more')));
  assert.ok(result.restDays>=3);
 });
+
+test('CSS and FTP prescribed sessions must not appear as ready to assign with unverified thresholds',()=>{
+ const library=[{workout_key:'swim-css',sport:'swim',duration_min:55,approved:true,prescription:{steps:[{durationMin:55,target:'CSS + 10 seconds per 100m'}]}},
+ {workout_key:'bike-ftp',sport:'bike',duration_min:90,approved:true,prescription:{steps:[{durationMin:90,target:'70% FTP'}]}}];
+ const x=entrySessionDistribution({pathway:'continuation',targetMinutes:960,trainingDays:[0,1,2,3,4,5,6],workouts:library});
+ assert.equal(x.mappedMinutes,0);
+ assert.ok(x.slots.every(slot=>slot.approvedMatches.length===0));
+});
+test('only exact duration matching is labelled ready for athlete session',()=>{
+ const rpe={workout_key:'run-easy-50',sport:'run',duration_min:50,approved:true,prescription:{steps:[{durationMin:50,target:'Easy RPE 3'}]}};
+ const x=entrySessionDistribution({pathway:'continuation',targetMinutes:960,trainingDays:[0,1,2,3,4,5,6],workouts:[rpe]});
+ assert.ok(x.slots.filter(slot=>slot.sport==='run'&&slot.minutes!==50).every(slot=>slot.approvedMatches.length===0));
+});
