@@ -5,10 +5,22 @@ alter table public.athlete_onboarding
 alter table public.athlete_onboarding
   add column if not exists training_background text not null default 'unknown',
   add column if not exists training_consistency text not null default 'unknown';
-alter table public.athlete_onboarding
-  add constraint onboarding_training_background_check check(training_background in ('unknown','novice','regular','established')) not valid;
-alter table public.athlete_onboarding
-  add constraint onboarding_training_consistency_check check(training_consistency in ('unknown','under4','4to7','8plus')) not valid;
+do $guard$
+begin
+ if not exists (select 1 from pg_constraint where conname='onboarding_training_background_check'
+   and conrelid='public.athlete_onboarding'::regclass) then
+   alter table public.athlete_onboarding
+    add constraint onboarding_training_background_check
+    check(training_background in ('unknown','novice','regular','established')) not valid;
+ end if;
+ if not exists (select 1 from pg_constraint where conname='onboarding_training_consistency_check'
+   and conrelid='public.athlete_onboarding'::regclass) then
+   alter table public.athlete_onboarding
+    add constraint onboarding_training_consistency_check
+    check(training_consistency in ('unknown','under4','4to7','8plus')) not valid;
+ end if;
+end
+$guard$;
 
 create or replace function public.generate_onboarding_foundation()
 returns jsonb
