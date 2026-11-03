@@ -61,6 +61,7 @@ export default function CoachStarterWeekPreview(){
  }
  return <section aria-label="Automatic starter-week preview" style={{padding:16,background:'#102c44',border:'1px solid #335c77',borderRadius:15,color:'#edf8ff',minWidth:0}}>
   <h3 style={{fontSize:20,margin:'0 0 8px'}}>Automatic starter-week preview</h3>
+  <p style={{fontSize:11,color:'#7fcbee',margin:'0 0 8px'}}>Planner v2 · 7-day availability supported</p>
   <p style={{fontSize:13,color:'#aec8d9',lineHeight:1.5}}>AZUR uses the athlete's available training days and reported thresholds to propose a two-week easy foundation before testing. This never publishes to their calendar.</p>
   <div style={{display:'grid',gap:12,margin:'14px 0'}}>
    <label style={{fontSize:13}}>Athlete<select style={{width:'100%',minHeight:44,marginTop:5}} value={selected} onChange={e=>setSelected(e.target.value)}>{athletes.map(a=><option key={a.id} value={a.id}>{a.display_name}</option>)}</select></label>
