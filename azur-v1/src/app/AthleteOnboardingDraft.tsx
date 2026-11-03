@@ -20,6 +20,7 @@ export default function AthleteOnboardingDraft(){
  const [trainingDays,setTrainingDays]=useState<number[]>([]);
  const [recentHours,setRecentHours]=useState('');
  const [trainingConcern,setTrainingConcern]=useState<'none'|'yes'|'unsure'>('unsure');
+ const [canSwim,setCanSwim]=useState(false);
  const [knownTests,setKnownTests]=useState(false);
  const [ftpWatts,setFtpWatts]=useState('');
  const [swimCss,setSwimCss]=useState('');
@@ -42,7 +43,7 @@ export default function AthleteOnboardingDraft(){
    setUserId(user.id);
    const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
    if(!cancelled && profile?.display_name) setDisplayName(profile.display_name);
-   const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,device,onboarding_step,training_days,recent_weekly_hours,current_training_concern,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km').eq('user_id',user.id).maybeSingle();
+   const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,device,onboarding_step,training_days,recent_weekly_hours,current_training_concern,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,can_swim_200m').eq('user_id',user.id).maybeSingle();
    if(cancelled)return;
    if(error)setMessage('Could not load your saved setup: '+error.message);
    else if(data){
@@ -55,6 +56,7 @@ export default function AthleteOnboardingDraft(){
     setFtpWatts(data.ftp_watts==null?'':String(data.ftp_watts));
     setSwimCss(formatAthletePace(data.swim_css_seconds_per_100m));
     setRunPace(formatAthletePace(data.run_threshold_seconds_per_km));
+    setCanSwim(data.can_swim_200m===true);
     setKnownTests(data.ftp_watts!=null||data.swim_css_seconds_per_100m!=null||data.run_threshold_seconds_per_km!=null);
     setStep(data.onboarding_step===3?1:Math.min(2,Math.max(0,data.onboarding_step)));
    }
@@ -82,6 +84,7 @@ export default function AthleteOnboardingDraft(){
    experience,weekly_hours:hours,device,onboarding_step:nextStep,
    training_days:[...trainingDays].sort((a,b)=>a-b),
    recent_weekly_hours:recent,current_training_concern:trainingConcern,
+   can_swim_200m:canSwim,
    ftp_watts:ftp,swim_css_seconds_per_100m:css,run_threshold_seconds_per_km:run,
    updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
@@ -96,10 +99,40 @@ export default function AthleteOnboardingDraft(){
     if(profileError){setSaving(false);setMessage('Setup preferences saved, but your athlete profile could not be created. Please try Finish setup again: '+profileError.message);return;}
    }
   }
-  setSaving(false);
   setStep(Math.min(2,nextStep));
-  if(nextStep===3){if(window.location.pathname==='/onboarding'){window.location.assign('/');return;}setReady(true);setMessage('Your athlete setup is complete. Your coach will arrange your training plan.');}
-  else setMessage('Progress saved.');
+  if(nextStep===3){
+    setMessage('Creating your first two weeks of training…');
+    const {data:result,error:generatorError}=await supabase.rpc('generate_onboarding_foundation');
+    if(generatorError){
+      setSaving(false);
+      setMessage('Your setup was saved but the training programme could not be created: '+generatorError.message);
+      return;
+    }
+    if(result?.status==='review_required'){
+      setSaving(false);setReady(true);
+      setMessage(result.reason||'Your training setup needs review before we can activate sessions.');
+      return;
+    }
+    if(result?.status!=='created'&&result?.status!=='already_planned'){
+      setSaving(false);setMessage('Unable to confirm your first training programme. Please retry.');return;
+    }
+    const {data:athlete,error:athleteError}=await supabase.from('athlete_profile')
+      .select('id').eq('user_id',userId).single();
+    if(athleteError||!athlete){setSaving(false);setMessage('Your plan was prepared, but your athlete account could not be verified.');return;}
+    // The calendar can only be opened after committed sessions have been read back.
+    const fromDate=result.first_date||new Date().toISOString().slice(0,10);
+    const {data:calendar,error:calendarError}=await supabase.from('planned_session')
+      .select('id').eq('athlete_id',athlete.id).eq('is_active_version',true)
+      .gte('planned_date',fromDate).limit(1);
+    setSaving(false);
+    if(calendarError||!calendar?.length){
+      setMessage('Your programme was generated, but we could not confirm it in your calendar. Please reopen the app.');
+      return;
+    }
+    window.location.assign('/?start=calendar');
+    return;
+  }
+  setSaving(false);setMessage('Progress saved.');
  }
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
  if(isCoach)return <section className="azur-onboarding-draft"><h3>Athlete onboarding</h3><p>This setup is for athlete accounts. Coach access and assignments are managed separately.</p></section>;
@@ -148,10 +181,14 @@ export default function AthleteOnboardingDraft(){
    <div className="azur-onboarding-options">{devices.map(d=><label key={d.id} className={device===d.id?'selected':''}>
     <input type="radio" name="azur-device" checked={device===d.id} onChange={()=>setDevice(d.id)}/>{d.label}
    </label>)}</div>
+   <label style={{display:'flex',gap:10,alignItems:'center',marginTop:16,fontSize:14}}>
+     <input type="checkbox" checked={canSwim} onChange={e=>setCanSwim(e.target.checked)}/>
+     I can swim at least 200 metres comfortably and safely
+   </label>
    <p>{device==='garmin'?'Garmin connection will be offered after setup where available.':device==='none'?'You can record workouts, RPE and benchmarks manually.':'You can start with manual workout logging. Direct syncing for this device is not yet available.'}</p>
    <fieldset style={{border:'1px solid #305f7b',borderRadius:14,padding:13,marginTop:18}}>
     <legend style={{fontWeight:700}}>Do you already know your training thresholds?</legend>
-    <p style={{fontSize:13,lineHeight:1.5}}>If you don't know them, that's fine. AZUR will propose two weeks of easy endurance for your coach to review. Suitable benchmark tests can follow once you are ready.</p>
+    <p style={{fontSize:13,lineHeight:1.5}}>If you don't know them, that's fine. AZUR can start you with two weeks of easy, RPE-based endurance when your training readiness allows. Your coach reviews later progression. Suitable benchmark tests can follow once you are ready.</p>
     <label style={{display:'flex',gap:10,alignItems:'center',fontSize:14}}>
      <input type="checkbox" checked={knownTests} onChange={e=>setKnownTests(e.target.checked)}/> I have recent test values to enter
     </label>
@@ -172,12 +209,12 @@ export default function AthleteOnboardingDraft(){
   <div className="azur-onboarding-actions">
    {step>0&&<button type="button" onClick={()=>{setStep(s=>s-1);setReady(false)}}>Back</button>}
    {step<2?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>Continue</button>
-   :<button type="button" disabled={saving} onClick={()=>void save(3)}>Finish setup</button>}
+   :<button type="button" disabled={saving} onClick={()=>void save(3)}>{saving?'Creating your plan…':'Finish & build my programme'}</button>}
   </div>
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
   {ready&&<div role="status" className="azur-onboarding-recap"><strong>Draft setup</strong>
    <p>{race.toUpperCase()} {raceDate?'· '+raceDate:''} · {hours} h/week · {device==='none'?'Manual logging':device.toUpperCase()}</p>
-   <small>These onboarding preferences are saved to your account. No performance profile, coach assignment, Garmin connection or training plan has been created or activated.</small>
+   <small>Training is only activated when the onboarding safety checks pass. Health concerns are held for review.</small>
   </div>}
  </section>;
 }

@@ -88,6 +88,18 @@ const mockSupabase=async (route,coach=false)=>{
   if(req.method()==='POST'){onboardingSavedFields=req.postDataJSON();onboardingStep=onboardingSavedFields.onboarding_step;}
   const setup={user_id:user.id,onboarding_step:onboardingStep,race_distance:'70.3',race_date:null,experience:'first',weekly_hours:8,device:'garmin',...onboardingSavedFields};
   data=single?setup:[setup];
+ } else if(url.pathname.endsWith('/rpc/generate_onboarding_foundation')) {
+  assert.equal(onboardingStep,3,'Generation must follow completed onboarding');
+  demoSessions=[{id:'00000000-0000-4000-8000-000000000077',athlete_id:athlete,
+    planned_date:new Date().toISOString().slice(0,10),sport:'bike',
+    title:'Foundation easy aerobic ride',session_class:'easy',priority:2,
+    duration_min:40,status:'planned',locked:false,version:1,is_active_version:true,
+    targets:{rpe_min:2,rpe_max:4},
+    prescription:{steps:[{durationMin:10,target:'Easy spin RPE 2'},
+      {durationMin:25,target:'Conversational RPE 3-4'},
+      {durationMin:5,target:'Easy cool-down'}]}
+  }];
+  data={status:'created',sessions:1,first_date:new Date().toISOString().slice(0,10)};
  } else if(url.pathname.endsWith('/planned_session')) data=demoSessions;
  else if(url.pathname.endsWith('/completed_activity')) data=accepted?[{...recorded(),...(demoSessions.length?{start_time:new Date().toISOString()}: {})}]:[];
  const emptySingle=single&&data===null;
@@ -183,23 +195,26 @@ try {
  await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByRole('heading',{name:'How do you track training?',exact:true}).waitFor();
  await page.getByText('Do you already know your training thresholds?',{exact:true}).waitFor();
+ await page.getByRole('checkbox',{name:'I can swim at least 200 metres comfortably and safely'}).check();
  await page.getByRole('checkbox',{name:'I have recent test values to enter'}).check();
  await page.getByLabel('Bike FTP (watts, if known)').fill('280');
  await page.getByLabel('Swim CSS (min:sec per 100m, e.g. 1:45 or 1.45)').fill('1.45');
  await page.getByLabel('Run threshold pace (min:sec per km, e.g. 4:20 or 4.20)').fill('4.20');
- await page.getByRole('button',{name:'Finish setup',exact:true}).click();
- await page.waitForURL(base+'/');
+ await page.getByRole('button',{name:'Finish & build my programme',exact:true}).click();
+ await page.waitForURL('**/?start=calendar');
  assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
  assert.equal(onboardingStep,3,'Final onboarding step must be saved');
  assert.deepEqual(onboardingSavedFields.training_days,[0,2,4],'Athlete availability days saved');
  assert.equal(onboardingSavedFields.ftp_watts,280,'Reported FTP persists unchanged');
+ assert.equal(onboardingSavedFields.can_swim_200m,true,'Swim safety confirmation persists');
  assert.equal(onboardingSavedFields.swim_css_seconds_per_100m,105,'1.45 parsed as 105 seconds, not decimal minutes');
  assert.equal(onboardingSavedFields.run_threshold_seconds_per_km,260,'4.20 parsed as 260 seconds, not decimal minutes');
- await page.getByRole('heading',{name:'No workout scheduled',exact:true}).waitFor();
- await page.locator('.azur-white-dashboard:visible').getByRole('button',{name:'View calendar',exact:false}).waitFor();
+ await page.locator('.athlete-agenda:visible').waitFor();
+ await page.getByText('Foundation easy aerobic ride',{exact:true}).first().waitFor();
+ assert.equal(demoSessions.length,1,'Generated starter must be present in calendar');
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'White dashboard must fit phone width');
  assert.deepEqual(errors,[]);
- console.log('PASS: signed-in athlete without profile → automatic onboarding → saved profile → dashboard');
+ console.log('PASS: signed-in new athlete → onboarding → saved profile → generated starter → calendar');
  await page.getByRole('button',{name:'Chat',exact:true}).click();
  await page.getByRole('heading',{name:'Chat',exact:true }).waitFor();
  await page.getByText('Coming soon',{exact:true}).waitFor();

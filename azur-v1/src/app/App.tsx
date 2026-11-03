@@ -1285,7 +1285,9 @@ const [primaryRace, setPrimaryRace] = useState({
     target_total?: string;
   },
 });
-  const [activeNav, setActiveNav] = useState('Home');
+  const [activeNav, setActiveNav] = useState(
+    new URLSearchParams(window.location.search).get('start') === 'calendar' ? 'Calendar' : 'Home'
+  );
   const [isCoachAccount, setIsCoachAccount] = useState(false);
   const [homeMode, setHomeMode] = useState<'athlete' | 'coach'>('athlete');
   useEffect(() => {
@@ -1965,6 +1967,45 @@ if (session?.user) {
     subscription.unsubscribe();
   };
 }, []);
+  // Recover a just-completed onboarding if the previous app version returned an
+  // athlete to an empty dashboard. Never replace an existing active calendar.
+  const starterRecoveryAttempted = useRef(false);
+  useEffect(() => {
+    if (!authReady || !isAuthenticated || starterRecoveryAttempted.current) return;
+    starterRecoveryAttempted.current = true;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || user.app_metadata?.role === 'coach') return;
+        const { data: setup, error: setupError } = await supabase
+          .from('athlete_onboarding')
+          .select('onboarding_step,updated_at')
+          .eq('user_id',user.id).maybeSingle();
+        if (setupError || setup?.onboarding_step !== 3 || !setup.updated_at) return;
+        const completedAt = new Date(setup.updated_at).getTime();
+        // Only repair recent completions, not historical athlete accounts.
+        if (!Number.isFinite(completedAt) || Date.now()-completedAt > 24*60*60*1000 || completedAt>Date.now()+60000) return;
+        const { data: athlete } = await supabase.from('athlete_profile')
+          .select('id').eq('user_id',user.id).maybeSingle();
+        if (!athlete) return;
+        const today = new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+        const { data: sessions, error: sessionsError } = await supabase.from('planned_session')
+          .select('id').eq('athlete_id',athlete.id).eq('is_active_version',true)
+          .gte('planned_date',today).limit(1);
+        if (sessionsError || sessions?.length || cancelled) return;
+        const { data: result, error: generatedError } = await supabase.rpc('generate_onboarding_foundation');
+        if (generatedError || cancelled) return;
+        if (result?.status === 'created' || result?.status === 'already_planned') {
+          await loadPlannedSessions(user.id);
+          if (!cancelled) setActiveNav('Calendar');
+        }
+      } catch (error) {
+        console.warn('AZUR starter recovery could not complete:',error);
+      }
+    })();
+    return () => { cancelled=true; };
+  },[authReady,isAuthenticated]);
   const selected =
     weekSessions.find((session) => session.id === selectedId) ||
     weekSessions[0];
@@ -4905,15 +4946,11 @@ useEffect(() => {
     return;
   }
 void loadGarminConnection();
-  if (!needsCurrentWeekPlan) {
-    return;
-  }
-
-  generateCurrentWeekPlan();
+  // Do not create plans opportunistically while the athlete calendar is loading.
+  // First training is committed by the authenticated onboarding foundation RPC.
 }, [
   authReady,
   isAuthenticated,
-  needsCurrentWeekPlan,
 ]);
   const [showBaselineForm, setShowBaselineForm] =
   useState(false);
@@ -9956,7 +9993,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   }
 
   if (window.location.pathname === '/onboarding') {
-    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer" style={{textAlign:'center',paddingBottom:'calc(24px + env(safe-area-inset-bottom, 0px))'}}><p style={{fontSize:13,color:'#9eb8cb',margin:'8px 0 0'}}>After finishing setup, you can accept a coach invitation from More.</p></div></main>
+    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer" style={{textAlign:'center',paddingBottom:'calc(24px + env(safe-area-inset-bottom, 0px))'}}><p style={{fontSize:13,color:'#9eb8cb',margin:'8px 0 0'}}>When setup is complete, AZUR will build your safe starter programme. Coach invitations remain available from More.</p></div></main>
   }
 
   return (
