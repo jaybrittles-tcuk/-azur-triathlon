@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {supabase} from '../lib/supabase';
 import {starterWeekPreview} from '../lib/starterWeekPreview.mjs';
 import {twoWeekFoundationPreview} from '../lib/twoWeekFoundation.mjs';
+import {assessEntryPathway,entrySessionDistribution} from '../lib/athleteEntryPathway.mjs';
 
 type Athlete={id:string;display_name:string;user_id:string|null};
 type Workout={workout_key:string;title:string;sport:string;family:string;duration_min:number;level:number;phases:string[];prescription:unknown;approved:boolean};
@@ -14,6 +15,8 @@ export default function CoachStarterWeekPreview(){
  const [loading,setLoading]=useState(true);
  const [result,setResult]=useState<ReturnType<typeof starterWeekPreview>|null>(null);
  const [foundation,setFoundation]=useState<ReturnType<typeof twoWeekFoundationPreview>|null>(null);
+ const [entry,setEntry]=useState<ReturnType<typeof assessEntryPathway>|null>(null);
+ const [distribution,setDistribution]=useState<ReturnType<typeof entrySessionDistribution>|null>(null);
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState(false);
  useEffect(()=>{let active=true;(async()=>{
@@ -30,21 +33,31 @@ export default function CoachStarterWeekPreview(){
   }catch(e){if(active)setMessage(e instanceof Error?e.message:'Unable to load assigned athletes')}
   finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[]);
- useEffect(()=>{setResult(null);setFoundation(null)},[selected,week]);
+ useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null)},[selected,week]);
  async function preview(){
-  setBusy(true);setMessage('');setResult(null);setFoundation(null);
+  setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);
   try{
    const athlete=athletes.find(a=>a.id===selected);
    if(!athlete?.user_id)throw new Error('Select an athlete with a verified account');
    const end=new Date(week+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+14);
    const [setup,workouts,existing]=await Promise.all([
-    supabase.from('athlete_onboarding').select('weekly_hours,onboarding_step,training_days,recent_weekly_hours,current_training_concern,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km').eq('user_id',athlete.user_id).maybeSingle(),
+    supabase.from('athlete_onboarding').select('weekly_hours,experience,onboarding_step,training_days,recent_weekly_hours,current_training_concern,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km').eq('user_id',athlete.user_id).maybeSingle(),
     supabase.from('coach_workout_library').select('workout_key,title,sport,family,duration_min,level,phases,prescription,approved').eq('approved',true),
     supabase.from('planned_session').select('id').eq('athlete_id',athlete.id).gte('planned_date',week).lt('planned_date',end.toISOString().slice(0,10)).eq('is_active_version',true).neq('status','cancelled')
    ]);
    if(setup.error||workouts.error||existing.error)throw new Error(setup.error?.message||workouts.error?.message||existing.error?.message||'Data validation failed');
    if(!setup.data)throw new Error('No onboarding preferences available for this athlete. Ask them to finish setup.');
    const info=setup.data;
+   const entryResult=assessEntryPathway({
+      experience:info.experience,recentHours:info.recent_weekly_hours==null?null:Number(info.recent_weekly_hours),
+      availableHours:Number(info.weekly_hours),trainingConcern:info.current_training_concern||'unsure',
+      historyVerified:false,thresholdsVerified:false
+   });
+   setEntry(entryResult);
+   setDistribution(entrySessionDistribution({pathway:entryResult.pathway,
+    targetMinutes:entryResult.targetMinutes,trainingDays:info.training_days||[],
+    workouts:(workouts.data??[]) as Workout[]}));
+
    setResult(starterWeekPreview({weekStart:week,availabilityHours:Number(info.weekly_hours),onboardingCompleted:info.onboarding_step===3,existingSessions:existing.data?.length??0,library:(workouts.data??[]) as Workout[]}));
    setFoundation(twoWeekFoundationPreview({
      weekStart:week,onboardingCompleted:info.onboarding_step===3,
@@ -69,6 +82,21 @@ export default function CoachStarterWeekPreview(){
   </div>
   <button type="button" disabled={loading||busy||!selected} onClick={()=>void preview()} style={{minHeight:46,padding:'10px 17px',borderRadius:12,border:'1px solid #53bce9',background:'#1576ab',fontWeight:700,color:'#fff'}}>{busy?'Checking…':'Preview two-week foundation'}</button>
   {message&&<p role="alert">{message}</p>}
+  {entry&&<section style={{marginTop:16,padding:13,borderRadius:12,border:'1px solid #39748d',background:'#133951'}}>
+   <span style={{fontSize:11,color:'#83d5ff',fontWeight:700,letterSpacing:'0.07em'}}>AUTOMATIC ATHLETE CLASSIFICATION</span>
+   <h4 style={{margin:'8px 0',fontSize:19}}>{entry.pathway==='continuation'?'Established-athlete continuation':entry.pathway==='return_to_training'?'Return-to-training review':entry.pathway==='continuation_review'?'Continuation needs checking':'Beginner foundation'}</h4>
+   <p style={{fontSize:13,color:'#bad2e1'}}>Weekly volume reference: {entry.targetMinutes===null?'Needs review':Math.floor(entry.targetMinutes/60)+'h '+String(entry.targetMinutes%60).padStart(2,'0')+'m'} · not yet a validated training target.</p>
+   {entry.blockers.map(item=><p key={item} style={{fontSize:13,color:'#ffda9c'}}>• {item}</p>)}
+   {distribution&&<details style={{marginTop:10}} open>
+     <summary style={{cursor:'pointer',fontSize:14,fontWeight:700,color:'#a9e1ff'}}>Proposed training distribution and library readiness</summary>
+     {distribution.targetBySport&&<p style={{fontSize:13,color:'#c2d7e6',marginTop:12}}>
+      {Object.entries(distribution.targetBySport).map(([sport,mins])=>sport.toUpperCase()+' '+Math.floor(Number(mins)/60)+'h '+String(Number(mins)%60).padStart(2,'0')+'m').join(' · ')}
+     </p>}
+     {distribution.slots.map(slot=><div key={slot.day} style={{padding:'8px 0',borderBottom:'1px solid #345c77',fontSize:13}}>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][slot.day]} · {slot.sport.toUpperCase()} · {slot.availableTemplates} approved workout options</div>)}
+     {distribution.warnings.map(w=><p key={w} style={{fontSize:12,color:'#ffdfaf'}}>{w}</p>)}
+   </details>}
+   <p style={{fontSize:12,color:'#a7c5d8',marginTop:12}}>AZUR won't prescribe zone targets until a coach verifies the supplied thresholds. No calendar writes are enabled.</p>
+  </section>}
   {foundation&&<div style={{marginTop:16}}>
    <h4 style={{fontSize:17,margin:'0 0 6px',color:'#f8fbff'}}>{foundation.path==='two_week_endurance_foundation'?'Two-week endurance foundation':'Coach threshold verification'}</h4>
    <p style={{fontSize:13,color:'#b2cedf'}}>Missing thresholds: {foundation.unknownSports.length?foundation.unknownSports.join(', '):'None reported missing'} · Athlete-reported values require coach verification.</p>
