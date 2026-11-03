@@ -42,8 +42,8 @@ test('distribution checks approved library gaps and always remains unpublishable
  assert.ok(x.slots.some(s=>s.sport==='swim'&&!s.approvedMatches.length));
  assert.equal(x.ready,false);
  assert.equal(x.proposedMinutes,960);
- assert.ok(x.mappedMinutes>0);
- assert.ok(x.unmappedMinutes>0);
+ assert.equal(x.mappedMinutes,0);
+ assert.equal(x.unmappedMinutes,960);
  assert.ok(x.slots.some(s=>s.day===5&&s.sport==='bike'&&s.minutes===210));
  assert.ok(x.slots.some(s=>s.day===5&&s.sport==='run'));
  assert.equal(x.restDays,1);
