@@ -18,7 +18,7 @@ let staged=false,accepted=false,validated=false;
 let profileFtp=250;
 let demoSessions=[];
 let missingProfile=false;
-let onboardingStep=3;
+let onboardingStep=3,onboardingSavedFields={};
 const commands=[];
 const errors=[];
 let coachDebugPage=null;
@@ -85,8 +85,8 @@ const mockSupabase=async (route,coach=false)=>{
   if(req.method()==='POST')missingProfile=false;
   data=missingProfile?(single?null:[]):(single?profile:[profile]);
  } else if(url.pathname.endsWith('/athlete_onboarding')) {
-  if(req.method()==='POST')onboardingStep=req.postDataJSON().onboarding_step;
-  const setup={user_id:user.id,onboarding_step:onboardingStep,race_distance:'70.3',race_date:null,experience:'first',weekly_hours:8,device:'garmin'};
+  if(req.method()==='POST'){onboardingSavedFields=req.postDataJSON();onboardingStep=onboardingSavedFields.onboarding_step;}
+  const setup={user_id:user.id,onboarding_step:onboardingStep,race_distance:'70.3',race_date:null,experience:'first',weekly_hours:8,device:'garmin',...onboardingSavedFields};
   data=single?setup:[setup];
  } else if(url.pathname.endsWith('/planned_session')) data=demoSessions;
  else if(url.pathname.endsWith('/completed_activity')) data=accepted?[{...recorded(),...(demoSessions.length?{start_time:new Date().toISOString()}: {})}]:[];
@@ -187,6 +187,10 @@ try {
  await page.waitForURL(base+'/');
  assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
  assert.equal(onboardingStep,3,'Final onboarding step must be saved');
+ assert.deepEqual(onboardingSavedFields.training_days,[0,2,4],'Athlete availability days saved');
+ assert.equal(onboardingSavedFields.ftp_watts,null,'Unknown FTP must remain missing');
+ assert.equal(onboardingSavedFields.swim_css_seconds_per_100m,null,'Unknown CSS must remain missing');
+ assert.equal(onboardingSavedFields.run_threshold_seconds_per_km,null,'Unknown run threshold must remain missing');
  await page.getByRole('heading',{name:'No workout scheduled',exact:true}).waitFor();
  await page.locator('.azur-white-dashboard:visible').getByRole('button',{name:'View calendar',exact:false}).waitFor();
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'White dashboard must fit phone width');
