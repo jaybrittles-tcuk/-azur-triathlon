@@ -25,6 +25,8 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
  const [preview,setPreview]=useState<PlanPreview|null>(null);
  const [previewInputs,setPreviewInputs]=useState<Inputs|null>(null);
  const [loading,setLoading]=useState(false);
+ const [reviewStatus,setReviewStatus]=useState<'none'|'pending'|'approved'|'rejected'>('none');
+ const [reviewNote,setReviewNote]=useState('');
  const [message,setMessage]=useState('');
  useEffect(()=>{
   let cancelled=false;
@@ -50,7 +52,26 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
   })();
   return ()=>{cancelled=true};
  },[]);
- function edit(patch:Partial<Inputs>){setInputs(i=>({...i,...patch}));setPreview(null);setPreviewInputs(null);setMessage('');}
+ function edit(patch:Partial<Inputs>){setInputs(i=>({...i,...patch}));setPreview(null);setPreviewInputs(null);setReviewStatus('none');setMessage('');}
+ async function loadReviewState(proposed:Inputs,data:PlanPreview){
+  if(data.status!=='coach_review_required')return;
+  const response=await supabase.rpc('foundation_coach_review_state',{p_inputs:proposed,p_expected_preview:data});
+  if(response.error){setMessage('Unable to check coach review: '+response.error.message);return;}
+  setReviewStatus(response.data?.status||'none');
+  setReviewNote(response.data?.coach_note||'');
+ }
+ async function requestCoachReview(){
+  if(!preview||!previewInputs||loading)return;
+  setLoading(true);setMessage('');
+  const response=await supabase.rpc('submit_foundation_coach_review',{p_inputs:previewInputs,p_expected_preview:preview});
+  setLoading(false);
+  if(response.error){setMessage('Could not request coach approval: '+response.error.message);return;}
+  if(response.data?.status==='coach_assignment_required'){
+    setMessage(response.data.reason||'An assigned coach is required before this increase can be reviewed.');return;
+  }
+  if(response.data?.status!=='submitted'){setMessage(response.data?.reason||'Coach review not available.');return;}
+  setReviewStatus('pending');setMessage('Review request sent to your assigned AZUR coach. Your current training remains unchanged.');
+ }
  async function makePreview(){
   const recent=recentInput.trim()===''?null:Number(recentInput);
   if(!['novice','regular','established'].includes(inputs.training_background) ||
@@ -63,7 +84,7 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
    setMessage('Check available days and training hours (0–25 completed hours; 2–25 available).');return;
   }
   const proposed:Inputs={...inputs,recent_weekly_hours:recent};
-  setLoading(true);setMessage('');setPreview(null);
+  setLoading(true);setMessage('');setPreview(null);setReviewStatus('none');
   const {data,error}=await supabase.rpc('preview_foundation_reassessment',{p_inputs:proposed});
   setLoading(false);
   if(error){setMessage('Unable to preview: '+error.message);return;}
@@ -71,9 +92,11 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
    setMessage(data?.reason||'A safe reassessment preview is unavailable.');return;
   }
   setPreview(data as PlanPreview);setPreviewInputs(proposed);
+  await loadReviewState(proposed,data as PlanPreview);
  }
  async function confirm(){
-  if(!preview||!previewInputs||preview.status!=='ready_for_confirmation'||loading)return;
+  if(!preview||!previewInputs||loading||
+   (preview.status!=='ready_for_confirmation'&&reviewStatus!=='approved'))return;
   setLoading(true);setMessage('');
   const {data,error}=await supabase.rpc('apply_foundation_reassessment',{
     p_inputs:previewInputs,p_expected_preview:preview,p_confirm:true
@@ -207,17 +230,32 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
              })}
            </div>
          </section>)}
-       {preview.status==='coach_review_required'
-         ?<p role="status" style={{color:'#784317',fontWeight:600}}>
-           Coach review required: {preview.reason}. Your existing calendar has not changed.
-         </p>
-         :<><p style={{fontSize:12}}>
-           This replaces only future, uncompleted, unlocked starter sessions.
-           Current week and coach-created workouts remain protected.
+       {preview.status==='coach_review_required'&&<p role="status" style={{color:'#784317',fontWeight:600}}>
+         Coach review required: {preview.reason}. Your existing calendar has not changed.
+       </p>}
+       {reviewNote&&<p style={{fontSize:13}}>Coach note: {reviewNote}</p>}
+       {preview.status==='coach_review_required' && reviewStatus==='none'
+         && preview.reason?.startsWith('Material increase beyond 20%') &&
+         <button type="button" disabled={loading} onClick={()=>void requestCoachReview()}>
+           {loading?'Submitting…':'Request review from my coach'}
+         </button>}
+       {reviewStatus==='pending'&&<p role="status" style={{fontSize:13,fontWeight:600}}>
+         Waiting for your assigned coach to review this exact programme.
+         Preview again to refresh the decision.
+       </p>}
+       {reviewStatus==='rejected'&&<p role="status" style={{fontSize:13,fontWeight:600}}>
+         Your coach has declined this version. Revise your training baseline or contact your coach.
+       </p>}
+       {(preview.status==='ready_for_confirmation'||reviewStatus==='approved')&&<>
+         <p style={{fontSize:12}}>
+           {reviewStatus==='approved'?'Your assigned coach approved this exact programme. You must still confirm it. ':''}
+           Only future, uncompleted and unlocked starter sessions will be replaced.
+           This week's sessions and coach-created workouts remain protected.
          </p>
          <button type="button" disabled={loading} onClick={()=>void confirm()}>
-           {loading?'Applying…':'Confirm and update future calendar'}
-         </button></>}
+           {loading?'Applying…':reviewStatus==='approved'?'Confirm coach-approved programme':'Confirm and update future calendar'}
+         </button>
+       </>}
      </div>}
    </div>}
    {message&&<p role="status" style={{fontSize:13,marginTop:10}}>{message}</p>}
