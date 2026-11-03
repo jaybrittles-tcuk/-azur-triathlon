@@ -156,7 +156,7 @@ export default function AthleteOnboardingDraft(){
    <p>{device==='garmin'?'Garmin connection will be offered after setup where available.':device==='none'?'You can record workouts, RPE and benchmarks manually.':'You can start with manual workout logging. Direct syncing for this device is not yet available.'}</p>
    <fieldset style={{border:'1px solid #305f7b',borderRadius:14,padding:13,marginTop:18}}>
     <legend style={{fontWeight:700}}>Do you already know your training thresholds?</legend>
-    <p style={{fontSize:13,lineHeight:1.5}}>If you don't know them, that's fine. AZUR starts with a conservative two-week endurance foundation, then schedules suitable benchmark tests for coach review.</p>
+    <p style={{fontSize:13,lineHeight:1.5}}>If you don't know them, that's fine. AZUR will propose two weeks of easy endurance for your coach to review. Suitable benchmark tests can follow once you are ready.</p>
     <label style={{display:'flex',gap:10,alignItems:'center',fontSize:14}}>
      <input type="checkbox" checked={knownTests} onChange={e=>setKnownTests(e.target.checked)}/> I have recent test values to enter
     </label>
