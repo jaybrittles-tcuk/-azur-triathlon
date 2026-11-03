@@ -1,8 +1,9 @@
 import {useEffect,useState} from 'react';
 import {supabase} from '../lib/supabase';
 import {proposeWorkoutMatch} from '../lib/calculations/workoutMatchEvidence';
+import {assessWorkoutExecution} from '../lib/calculations/workoutExecutionEvidence';
 import type {RecordedWorkout,PlannedWorkout,MatchProposal} from '../lib/calculations/workoutMatchEvidence';
-type Item={proposal:MatchProposal;date:string;source:string; sport:string};
+type Item={proposal:MatchProposal;date:string;source:string; sport:string;executionObservation:string};
 const LIMIT=500;
 export default function CoachWorkoutMatchReview(){
  const [items,setItems]=useState<Item[]>([]);
@@ -36,10 +37,23 @@ export default function CoachWorkoutMatchReview(){
    if((activities.data??[]).length>LIMIT||(sessions.data??[]).length>LIMIT)
      throw new Error('Too many recent activities or planned sessions for complete matching. Pagination required.');
    const plans=(sessions.data??[]) as PlannedWorkout[];
-   const proposed=((activities.data??[]) as RecordedWorkout[]).map(activity=>({
-    proposal:proposeWorkoutMatch(activity,plans),
-    date:activity.start_time,source:activity.source,sport:activity.sport
-   })).filter(row=>row.proposal.status!=='excluded');
+   const proposed=((activities.data??[]) as RecordedWorkout[]).map(activity=>{
+    const proposal=proposeWorkoutMatch(activity,plans);
+    // Current accepted imports store only summary cycling metrics. Do not treat
+    // those metrics as a power trace or manufacture numeric interval targets.
+    const execution=assessWorkoutExecution({
+      same_athlete:true,
+      confirmed_plan_link:proposal.status==='linked',
+      import_status:activity.processed_metrics?.load_status==='validated'?'validated':
+        activity.processed_metrics?.load_status==='rejected'?'rejected':
+        activity.processed_metrics?.load_status==='pending_validation'?'pending_validation':'unknown',
+      source:activity.source==='intervals'?'intervals':activity.source==='garmin'?'garmin':'other',
+      ftp_at_activity_w:null,
+      planned:null,recorded:null,series_provenance:'summary_only'
+    });
+    return {proposal,date:activity.start_time,source:activity.source,sport:activity.sport,
+      executionObservation:execution.observation};
+   }).filter(row=>row.proposal.status!=='excluded');
    if(active)setItems(proposed);
   }catch(e){if(active){setItems([]);setError(e instanceof Error?e.message:'Could not assess imports')}}
   finally{if(active)setLoading(false)}
@@ -59,6 +73,7 @@ export default function CoachWorkoutMatchReview(){
     <strong>{item.sport.toUpperCase()} · {item.proposal.status==='candidate_review'?'Candidate — coach confirmation needed':item.proposal.status==='linked'?'Linked (not compliance-verified)':item.proposal.status==='ambiguous'?'Ambiguous':'Unmatched'}</strong>
     <p>{new Date(item.date).toLocaleDateString('en-GB')} · {item.source}</p>
     <p>{item.proposal.rationale}</p>
+    <p><b>Interval execution:</b> {item.executionObservation}</p>
     <small>Activity: {item.proposal.activity_id.slice(0,8)} · Suggested session: {item.proposal.planned_session_id?.slice(0,8)||'None'}. No writes permitted.</small>
    </div>
   </article>)}
