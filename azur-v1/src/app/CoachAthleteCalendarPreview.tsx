@@ -35,9 +35,11 @@ export default function CoachAthleteCalendarPreview(){
  <header className="coach-attention-heading"><div><h3>Assigned athlete calendar preview</h3><p>Read-only preview of the published athlete calendar. Your personal calendar remains unchanged.</p></div><button type="button" onClick={()=>setReload(x=>x+1)} disabled={loading}>Refresh</button></header>
  <div style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",minWidth:0,maxWidth:"100%"}}>
  <label style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:8,minWidth:0,maxWidth:"100%"}}>Athlete <select style={{maxWidth:"100%",minWidth:0,width:"min(100%, 310px)"}} value={athleteId} onChange={e=>setAthleteId(e.target.value)}>{athletes.map(a=><option key={a.id} value={a.id}>{a.display_name||'Assigned athlete'}</option>)}</select></label>
- <button type="button" className="primary-button" style={{minHeight:44}} onClick={()=>setWeek(x=>addDays(x,-7))}>‹ Previous</button>
- <strong style={{fontSize:14,whiteSpace:"normal"}}>{new Date(week+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"})} – {new Date(addDays(week,6)+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}</strong>
- <button type="button" className="primary-button" style={{minHeight:44}} onClick={()=>setWeek(x=>addDays(x,7))}>Next ›</button>
+ <nav aria-label="Calendar week navigation" style={{display:"grid",gridTemplateColumns:"auto minmax(0,1fr) auto",gap:8,alignItems:"center",width:"100%",maxWidth:"100%",minWidth:0}}>
+ <button type="button" style={{minHeight:44,minWidth:72,padding:"9px 12px",borderRadius:11,background:"#153a59",border:"1px solid #34709b",color:"#e5f5ff",fontWeight:650,flex:"none",width:"auto"}} onClick={()=>setWeek(x=>addDays(x,-7))}>‹ Prev</button>
+ <strong style={{fontSize:13,whiteSpace:"normal",textAlign:"center",minWidth:0,overflowWrap:"anywhere",lineHeight:1.35}}>{new Date(week+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"})} – {new Date(addDays(week,6)+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}</strong>
+ <button type="button" style={{minHeight:44,minWidth:72,padding:"9px 12px",borderRadius:11,background:"#117cdc",border:"1px solid #3397e6",color:"#fff",fontWeight:650,flex:"none",width:"auto"}} onClick={()=>setWeek(x=>addDays(x,7))}>Next ›</button>
+ </nav>
  </div>
  {error&&<p role="alert">Calendar preview unavailable: {error}. This preview needs assigned-coach read permission; it cannot change athlete sessions.</p>}
  <p aria-live="polite">{loading?'Loading published sessions…':error?'Unable to verify session count':`${sessions.length} published sessions · ${minutes} minutes`}</p>
