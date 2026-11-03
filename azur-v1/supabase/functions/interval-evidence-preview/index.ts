@@ -5,7 +5,7 @@ const url=Deno.env.get('SUPABASE_URL')??'';
 const serviceKey=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'';
 const STAGING='juvceqrzkeethontnezw';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const sourcePattern=/^i?[A-Za-z0-9_-]{1,100}$/;
+const sourcePattern=/^i[0-9]{1,30}$/;
 const response=(status:number,body:Record<string,unknown>)=>new Response(JSON.stringify(body),{
  status,headers:{'Content-Type':'application/json','Cache-Control':'private, no-store'}
 });
@@ -51,7 +51,7 @@ Deno.serve(async request=>{
     metrics.is_test===true||metrics.test_fixture===true)
    return response(409,{error:'Only validated cycling activities can be previewed'});
   const sourceId=String(activity.source_activity_id??'');
-  if(!sourcePattern.test(sourceId))return response(409,{error:'Invalid provider activity reference'});
+  if(!sourcePattern.test(sourceId))return response(409,{error:'No real Intervals.icu activity reference is available for this staging record'});
   const connected=await fetchRows('athlete_integration?athlete_id=eq.'+
    encodeURIComponent(athleteId)+'&provider=eq.intervals&select=access_token&limit=1');
   const token=connected[0]?.access_token;
