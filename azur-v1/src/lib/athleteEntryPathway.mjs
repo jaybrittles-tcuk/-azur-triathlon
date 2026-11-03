@@ -4,6 +4,7 @@
  * Athlete statements guide the pathway; device history and coach review
  * are needed before establishing a workload baseline.
  */
+import {safeRpeWorkout} from './automaticWeekDraft.mjs';
 const finite=(x,lo,hi)=>typeof x==='number'&&Number.isFinite(x)&&x>=lo&&x<=hi;
 export function assessEntryPathway({experience='',recentHours=null,availableHours=null,trainingConcern='unsure',historyVerified=false,thresholdsVerified=false}={}){
  const blockers=[],notes=[];
@@ -74,8 +75,8 @@ export function entrySessionDistribution({pathway,targetMinutes,trainingDays,wor
  }));
  const slots=desired.flatMap(day=>day.sessions.map(entry=>({
   day:day.day,sport:entry.sport,minutes:entry.minutes,
-  approvedMatches:workouts.filter(w=>w.approved&&w.sport===entry.sport&&w.prescription&&
-   Number.isFinite(w.duration_min)&&Math.abs(w.duration_min-entry.minutes)<=10)
+  approvedMatches:workouts.filter(w=>safeRpeWorkout(w)&&w.sport===entry.sport&&
+   w.duration_min===entry.minutes)
    .map(w=>({workout_key:w.workout_key,title:w.title,duration_min:w.duration_min}))
  })));
  const proposedMinutes=slots.reduce((n,s)=>n+s.minutes,0);
@@ -92,7 +93,7 @@ export function entrySessionDistribution({pathway,targetMinutes,trainingDays,wor
  for(const slot of slots)byDay.set(slot.day,(byDay.get(slot.day)||0)+slot.minutes);
  if([...byDay.values()].some(m=>m>240))warnings.push('A proposed day exceeds four hours and needs coach review');
  if(slots.some(s=>!s.approvedMatches.length))
-  warnings.push('Approved workout library does not yet cover every proposed duration; additional coach-approved prescriptions needed');
+  warnings.push('Approved benchmark-independent workouts do not cover every proposed session exactly; coach-reviewed prescriptions needed');
  warnings.push('Indicative coach-review structure only. Do not publish until load, injury status, thresholds and exact workouts are approved.');
  return {slots,targetBySport,warnings,proposedMinutes,mappedMinutes,
   unmappedMinutes:proposedMinutes-mappedMinutes,restDays:7-byDay.size,ready:false};
