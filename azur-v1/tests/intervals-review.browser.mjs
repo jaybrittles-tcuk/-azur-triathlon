@@ -111,15 +111,22 @@ await context.route('**/api/**',async route=>{
 });
 const page=await context.newPage();page.on('pageerror',e=>errors.push(e.stack||e.message));
 try {
+ // The primary browser context is already signed in. Registration needs a
+ // separate, clean context to reproduce a first-time athlete experience.
+ const registrationContext=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+ try {
+  const newAthlete=await registrationContext.newPage();
+  await newAthlete.goto(base);
+  await newAthlete.getByRole('link',{name:'New to AZUR? Create an athlete account'}).click();
+  await newAthlete.waitForURL('**/register');
+  await newAthlete.getByRole('heading',{name:'Create your athlete account'}).waitFor();
+  await newAthlete.getByRole('button',{name:'Create athlete account',exact:true}).waitFor();
+  assert.equal(await newAthlete.getByRole('heading',{name:'Welcome to Azur'}).count(),0);
+  await newAthlete.getByRole('link',{name:'Already registered? Sign in'}).click();
+  await newAthlete.waitForURL(base+'/');
+  await newAthlete.getByRole('heading',{name:'Welcome to Azur'}).waitFor();
+ } finally { await registrationContext.close(); }
  await page.goto(base);
- // Registration must leave login and open a dedicated screen.
- await page.getByRole('link',{name:'New to AZUR? Create an athlete account'}).click();
- await page.waitForURL('**/register');
- await page.getByRole('heading',{name:'Create your athlete account'}).waitFor();
- await page.getByRole('button',{name:'Create athlete account',exact:true}).waitFor();
- assert.equal(await page.getByRole('heading',{name:'Welcome to Azur'}).count(),0);
- await page.getByRole('link',{name:'Already registered? Sign in'}).click();
- await page.waitForURL(base+'/');
  await page.getByRole('button',{name:'Data Sources',exact:true}).click();
  await page.getByRole('button',{name:'Preview rides',exact:true}).click();
  await page.getByText('Synthetic Zwift ride',{exact:true}).waitFor();
