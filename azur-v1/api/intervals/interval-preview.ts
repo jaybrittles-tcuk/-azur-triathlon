@@ -5,6 +5,26 @@ export function createIntervalPreviewHandler(fetcher:typeof fetch=globalThis.fet
  return async function handler(req:any,res:any) {
   res.setHeader('Cache-Control','private, no-store');
   if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
+  // The dedicated staging website delegates to the protected staging Edge backend.
+  // No Supabase service key is required in Vercel, and production cannot use this route.
+  if(process.env.AZUR_STAGING_BACKEND_URL){
+   const backend='https://juvceqrzkeethontnezw.supabase.co/functions/v1/import-review';
+   if(process.env.AZUR_STAGING_BACKEND_URL!==backend ||
+      process.env.VITE_SUPABASE_URL!=='https://juvceqrzkeethontnezw.supabase.co')
+    return res.status(503).json({error:'Staging target mismatch'});
+   const bearer=String(req.headers?.authorization??'');
+   if(!bearer.startsWith('Bearer ')||bearer.length<12)return res.status(401).json({error:'Sign in required'});
+   const id=String(req.query?.activityId??'');
+   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+    return res.status(400).json({error:'Valid AZUR activity ID required'});
+   try {
+    const upstream=await fetcher('https://juvceqrzkeethontnezw.supabase.co/functions/v1/interval-evidence-preview?activityId='+encodeURIComponent(id),{
+      method:'GET',headers:{Authorization:bearer,Accept:'application/json'}
+    });
+    const payload=await upstream.json();
+    return res.status(upstream.status).json(payload);
+   }catch{return res.status(502).json({error:'Staging interval detail unavailable'});}
+  }
   if(process.env.AZUR_INTERVAL_DETAIL_PREVIEW_ENABLED!=='true')return res.status(503).json({error:'Interval detail preview not enabled'});
   const url=process.env.VITE_SUPABASE_URL;
   const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
