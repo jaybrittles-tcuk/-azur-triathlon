@@ -21,10 +21,10 @@ export function twoWeekFoundationPreview({
  if(!/^\d{4}-\d{2}-\d{2}$/.test(weekStart??'')||Number.isNaN(d.getTime())||d.toISOString().slice(0,10)!==weekStart||d.getUTCDay()!==1)
   blockers.push('Select a valid Monday for the first foundation week');
  if(!onboardingCompleted)blockers.push('Finish athlete onboarding');
- if(!Array.isArray(trainingDays)||trainingDays.length<2||trainingDays.length>6||
+ if(!Array.isArray(trainingDays)||trainingDays.length<2||trainingDays.length>7||
     new Set(trainingDays).size!==trainingDays.length||
     trainingDays.some(n=>!Number.isInteger(n)||n<0||n>6))
-  blockers.push('Confirm at least two available training days and leave at least one rest day');
+  blockers.push('Confirm at least two valid available training days');
  if(numberOrNull(availableHours,2,25)===null)blockers.push('Valid weekly availability required');
  const knownRecent=numberOrNull(recentHours,0,25);
  if(recentHours!==null&&knownRecent===null)blockers.push('Recent training history needs clarification');
@@ -46,8 +46,10 @@ export function twoWeekFoundationPreview({
  const weeks=[];
  if(!blockers.length){
   const available=[...trainingDays].sort((a,b)=>a-b);
-  // Keep at most five training days; two rest days where possible.
-  const chosen=available.length<=5?available:available.filter((_,i)=>i!==2).slice(0,5);
+  // Athlete availability is NOT a request to train every day. Pick at most five,
+  // spacing sessions and retaining two rest days even when all seven are available.
+  const chosen=available.length===7?[0,1,3,4,6]:
+   available.length<=5?available:available.filter((_,i)=>i!==2).slice(0,5);
   const sports=chosen.length===2?['bike','run']:
     chosen.length===3?['run','bike','swim']:
     chosen.length===4?['run','bike','swim','bike']:['run','bike','swim','bike','run'];
