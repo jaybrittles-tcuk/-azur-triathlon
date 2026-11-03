@@ -44,7 +44,7 @@ export function twoWeekFoundationPreview({
  ];
  if(knownRecent===null)warnings.push('Recent weekly load is unknown. Athlete availability is not evidence of training tolerance.');
  const weeks=[];
- if(!blockers.some(s=>/Monday|onboarding|available training days|weekly availability|Calendar|reconciliation/.test(s))){
+ if(!blockers.length){
   const available=[...trainingDays].sort((a,b)=>a-b);
   // Keep at most five training days; two rest days where possible.
   const chosen=available.length<=5?available:available.filter((_,i)=>i!==2).slice(0,5);
