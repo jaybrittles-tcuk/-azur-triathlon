@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-const edge=readFileSync(new URL('../../supabase/functions/publish-approved-week/index.ts',import.meta.url),'utf8');
+const edge=readFileSync(new URL('../../../supabase/functions/publish-approved-week/index.ts',import.meta.url),'utf8');
 const review=readFileSync(new URL('../../app/CoachWeeklyReview.tsx',import.meta.url),'utf8');
 test('isolated staging publisher checks exact origin and project',()=>{
  assert.match(edge,/STAGING_PROJECT='juvceqrzkeethontnezw'/);
