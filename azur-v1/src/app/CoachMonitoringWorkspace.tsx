@@ -10,10 +10,11 @@ import CoachWorkoutLibrary from './CoachWorkoutLibrary';
 import CoachWeekReconciliationPreview from './CoachWeekReconciliationPreview';
 import CoachAthleteCalendarPreview from './CoachAthleteCalendarPreview';
 import CoachWeeklyDraftBuilder from './CoachWeeklyDraftBuilder';
+import CoachStarterWeekPreview from './CoachStarterWeekPreview';
 import CoachSwimFocusReview from './CoachSwimFocusReview';
 
 type Area='actions'|'analysis'|'planning';
-type PlanningTool='calendar'|'drafts'|'library'|'completeness';
+type PlanningTool='starter'|'calendar'|'drafts'|'library'|'completeness';
 type Props={onSelectAthlete:(athlete:AssignedAthlete)=>void};
 const areas:{id:Area;title:string;description:string;icon:string}[]=[
  {id:'actions',title:'Athlete Actions',description:'Prioritised decisions and athlete feedback',icon:'◎'},
@@ -78,6 +79,7 @@ export default function CoachMonitoringWorkspace({onSelectAthlete}:Props){
     {import.meta.env.VITE_ENABLE_WEEKLY_REVIEW === 'true' ? <>
       {!planningTool ? <div style={{display:'grid',gap:10}}>
         {([
+          {id:'starter',title:'Automatic starter week',subtitle:'See safe coach-review candidates based on onboarding'},
           {id:'calendar',title:'Athlete calendar',subtitle:'See the published week without editing it'},
           {id:'drafts',title:'Weekly plans',subtitle:'Create and review coach-approved drafts'},
           {id:'library',title:'Workout library',subtitle:'Find, inspect and approve sessions'},
@@ -88,6 +90,7 @@ export default function CoachMonitoringWorkspace({onSelectAthlete}:Props){
          </button>)}
        </div> : <>
         <button type="button" onClick={()=>setPlanningTool(null)} style={{marginBottom:14,minHeight:44,padding:'8px 12px',borderRadius:10,border:'1px solid #396784',background:'#12314c',color:'#d8efff'}}>‹ Planning Tools</button>
+        {planningTool==='starter'&&<CoachStarterWeekPreview/>}
         {planningTool==='calendar'&&<CoachAthleteCalendarPreview/>}
         {planningTool==='library'&&<CoachWorkoutLibrary/>}
         {planningTool==='completeness'&&<CoachWeekReconciliationPreview/>}
