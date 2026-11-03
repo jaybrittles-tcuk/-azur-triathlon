@@ -177,7 +177,12 @@ try {
  await page.getByLabel('Your name',{exact:true}).fill('New Athlete');
  await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByRole('heading',{name:'Your training availability',exact:true}).waitFor();
+ await page.getByRole('checkbox',{name:'Mon',exact:true}).check();
+ await page.getByRole('checkbox',{name:'Wed',exact:true}).check();
+ await page.getByRole('checkbox',{name:'Fri',exact:true}).check();
  await page.getByRole('button',{name:'Continue',exact:true}).click();
+ await page.getByRole('heading',{name:'How do you track training?',exact:true}).waitFor();
+ await page.getByText('Do you already know your training thresholds?',{exact:true}).waitFor();
  await page.getByRole('button',{name:'Finish setup',exact:true}).click();
  await page.waitForURL(base+'/');
  assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
