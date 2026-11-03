@@ -1,3 +1,4 @@
+import {resolveAthleteEntry} from '../lib/athleteBetaReadiness.mjs';
 import BenchmarkHistory from './BenchmarkHistory';
 import BenchmarkTrainingZones from './BenchmarkTrainingZones';
 import AthleteDashboard from './AthleteDashboard';
@@ -1622,10 +1623,25 @@ async function loadAthleteProfile(userId: string, isCoach = false) {
     return;
   }
 
-  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/privacy') {
-    onboardingRedirectStarted.current = true;
-    window.location.replace('/onboarding');
-    return;
+  // A profile alone is not evidence that athlete onboarding was finished.
+  // Never redirect during password recovery or if setup verification is unavailable.
+  if (!isCoach && !onboardingRedirectStarted.current &&
+      window.location.pathname !== '/onboarding' &&
+      window.location.pathname !== '/privacy' &&
+      window.location.pathname !== '/reset-password') {
+    const {data:setup,error:setupError}=await supabase.from('athlete_onboarding')
+      .select('onboarding_step').eq('user_id',userId).maybeSingle();
+    const entry=resolveAthleteEntry({
+      hasProfile:Boolean(data),onboardingStep:setup?.onboarding_step??null,
+      lookupError:Boolean(setupError)
+    });
+    if(entry.status==='verification_unavailable'){
+      console.warn('Could not verify onboarding: please check your athlete setup.');
+    }else if(entry.redirect){
+      onboardingRedirectStarted.current=true;
+      window.location.replace('/onboarding');
+      return;
+    }
   }
 
   if (data?.display_name) {
