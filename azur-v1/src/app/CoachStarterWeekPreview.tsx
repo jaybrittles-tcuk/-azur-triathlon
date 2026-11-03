@@ -3,6 +3,7 @@ import {supabase} from '../lib/supabase';
 import {starterWeekPreview} from '../lib/starterWeekPreview.mjs';
 import {twoWeekFoundationPreview} from '../lib/twoWeekFoundation.mjs';
 import {assessEntryPathway,entrySessionDistribution} from '../lib/athleteEntryPathway.mjs';
+import {mapAutoWeek} from '../lib/automaticWeekDraft.mjs';
 
 type Athlete={id:string;display_name:string;user_id:string|null};
 type Workout={workout_key:string;title:string;sport:string;family:string;duration_min:number;level:number;phases:string[];prescription:unknown;approved:boolean};
@@ -23,6 +24,7 @@ export default function CoachStarterWeekPreview(){
  const [targetHours,setTargetHours]=useState('');
  const [existingTarget,setExistingTarget]=useState<number|null>(null);
  const [targetStatus,setTargetStatus]=useState('');
+ const [draftStatus,setDraftStatus]=useState('');
  useEffect(()=>{let active=true;(async()=>{
   try{
    const {data:{user}}=await supabase.auth.getUser();
@@ -37,7 +39,7 @@ export default function CoachStarterWeekPreview(){
   }catch(e){if(active)setMessage(e instanceof Error?e.message:'Unable to load assigned athletes')}
   finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[]);
- useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('')},[selected,week]);
+ useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('');setDraftStatus('')},[selected,week]);
  async function preview(){
   setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setTargetStatus('');
   try{
@@ -77,6 +79,54 @@ export default function CoachStarterWeekPreview(){
      existingSessions:existing.data?.length??0
    }));
   }catch(e){setMessage(e instanceof Error?e.message:'Preview unavailable')}
+  finally{setBusy(false)}
+ }
+ async function saveAutomaticDraft(){
+  setBusy(true);setDraftStatus('');
+  try{
+   const athlete=athletes.find(a=>a.id===selected);
+   if(!athlete?.user_id)throw new Error('Select a verified athlete');
+   const {data:{user}}=await supabase.auth.getUser();
+   if(!user||user.app_metadata?.role!=='coach')throw new Error('Verified coach required');
+   const end=new Date(week+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+7);
+   const [setup,targets,approvals,library,active,drafts]=await Promise.all([
+    supabase.from('athlete_onboarding').select('onboarding_step,experience,weekly_hours,recent_weekly_hours,current_training_concern,training_days').eq('user_id',athlete.user_id).maybeSingle(),
+    supabase.from('season_week').select('target_hours,phase,locked').eq('athlete_id',selected).eq('week_start',week).maybeSingle(),
+    supabase.from('coach_initial_target_approval').select('target_hours,coach_user_id').eq('athlete_id',selected).eq('week_start',week).maybeSingle(),
+    supabase.from('coach_workout_library').select('workout_key,title,sport,family,duration_min,level,phases,prescription,approved').eq('approved',true),
+    supabase.from('planned_session').select('id').eq('athlete_id',selected).gte('planned_date',week).lt('planned_date',end.toISOString().slice(0,10)).eq('is_active_version',true).limit(1),
+    supabase.from('weekly_plan_draft').select('id').eq('athlete_id',selected).eq('week_start',week).limit(1)
+   ]);
+   const failed=[setup,targets,approvals,library,active,drafts].find(x=>x.error);
+   if(failed?.error)throw new Error(failed.error.message);
+   const info=setup.data,target=targets.data,approval=approvals.data;
+   if(!info||info.onboarding_step!==3||info.current_training_concern!=='none')
+    throw new Error('Onboarding or training safety check is incomplete');
+   if(!target||target.locked||target.phase!=='base'||!approval||
+      approval.coach_user_id!==user.id||Number(approval.target_hours)!==Number(target.target_hours))
+    throw new Error('A coach-audited baseline week target is required first');
+   if(active.data?.length||drafts.data?.length)
+    throw new Error('A calendar session or existing weekly draft must be reconciled before another is generated');
+   const assessment=assessEntryPathway({experience:info.experience,
+     recentHours:info.recent_weekly_hours==null?null:Number(info.recent_weekly_hours),
+     availableHours:Number(info.weekly_hours),trainingConcern:info.current_training_concern,
+     historyVerified:true,thresholdsVerified:false});
+   if(assessment.pathway!=='continuation'||Number(target.target_hours)*60>(assessment.targetMinutes??0))
+    throw new Error('Athlete training history does not support this proposed week');
+   const suggested=entrySessionDistribution({pathway:assessment.pathway,targetMinutes:Number(target.target_hours)*60,
+     trainingDays:info.training_days,workouts:library.data??[]});
+   const mapped=mapAutoWeek({weekStart:week,targetHours:Number(target.target_hours),slots:suggested.slots,library:library.data??[]});
+   if(!mapped.complete)throw new Error('Week not yet ready: '+mapped.blockers.join('; '));
+   if(suggested.warnings.some(w=>/too few|five or more|exceeds four hours|rounding/.test(w)))
+    throw new Error('Proposed distribution needs additional coach review');
+   const canonical=JSON.stringify(mapped.sessions);
+   const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical));
+   const fingerprint=Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+   const {error}=await supabase.from('weekly_plan_draft').insert({athlete_id:selected,week_start:week,
+     revision:1,phase:'base',sessions:mapped.sessions,proposal_fingerprint:fingerprint,created_by:user.id});
+   if(error)throw error;
+   setDraftStatus('Complete week generated and saved for coach approval. No calendar changes made. Open Planning Tools → Weekly drafts to review.');
+  }catch(e){setDraftStatus(e instanceof Error?e.message:'Unable to generate a safe weekly draft')}
   finally{setBusy(false)}
  }
  async function confirmTarget(){
@@ -142,6 +192,14 @@ export default function CoachStarterWeekPreview(){
      </button>
     </>}
     {targetStatus&&<p role="status" style={{fontSize:13,marginTop:10}}>{targetStatus}</p>}
+    {existingTarget!==null&&<div style={{marginTop:12,paddingTop:12,borderTop:'1px solid #345d79'}}>
+     <strong style={{fontSize:14}}>Automatic weekly draft</strong>
+     <p style={{fontSize:12,color:'#b5d2e4'}}>Generate from the approved RPE workout library, after all session gaps are resolved. A saved draft still needs a separate coach approval and secure publication.</p>
+     <button type="button" disabled={busy} onClick={()=>void saveAutomaticDraft()} style={{minHeight:44,borderRadius:10,padding:'10px 16px',background:'#176c96',color:'#fff',border:'1px solid #55a9ce',fontWeight:700}}>
+      {busy?'Checking approved workouts…':'Generate complete week for approval'}
+     </button>
+     {draftStatus&&<p role="status" style={{fontSize:13,marginTop:10}}>{draftStatus}</p>}
+    </div>}
     <p style={{fontSize:12,color:'#9abed2'}}>This records a coach decision only. Workouts still require approved prescriptions, a complete draft and separate publication approval.</p>
    </section>}
       <p style={{fontSize:12,color:'#a7c5d8',marginTop:12}}>AZUR won't prescribe zone targets until a coach verifies the supplied thresholds. No calendar writes are enabled.</p>
