@@ -37,7 +37,7 @@ export function mapAutoWeek({weekStart,targetHours,slots,library}={}){
     .sort((a,b)=>
     a.workout_key.localeCompare(b.workout_key));
   if(!matching.length){
-   blockers.push('No approved benchmark-independent '+slot.sport+' workout near '+slot.minutes+' minutes');
+   blockers.push('No approved benchmark-independent '+slot.sport+' workout for exactly '+slot.minutes+' minutes');
    continue;
   }
   const w=matching[0];
