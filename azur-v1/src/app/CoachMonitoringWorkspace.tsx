@@ -47,7 +47,12 @@ export default function CoachMonitoringWorkspace({onSelectAthlete}:Props){
   </div>
   {active==='actions'&&<div aria-label="Athlete Actions" style={{minWidth:0}}>
     <CoachActionCentre/>
-    <CoachAttentionInbox onSelect={onSelectAthlete}/>
+    <details open={false} style={{marginTop:12,padding:'12px 14px',border:'1px solid #315773',borderRadius:14,background:'#102a42'}}>
+     <summary style={{cursor:'pointer',minHeight:44,display:'flex',alignItems:'center',fontSize:14,fontWeight:700,color:'#d9ecfb'}}>
+      Athlete notes and setup <span style={{marginLeft:'auto',fontSize:12,color:'#8ccff9'}}>Open details</span>
+     </summary>
+     <CoachAttentionInbox onSelect={onSelectAthlete}/>
+    </details>
    </div>}
   {active==='analysis'&&<div aria-label="Training Analysis" style={{minWidth:0}}>
     {!analysisDetail ? <div style={{display:'grid',gap:10}}>
