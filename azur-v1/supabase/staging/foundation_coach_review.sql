@@ -203,3 +203,24 @@ end;
 $$;
 revoke all on function public.apply_foundation_reassessment(jsonb,jsonb,boolean) from public,anon;
 grant execute on function public.apply_foundation_reassessment(jsonb,jsonb,boolean) to authenticated;
+
+-- Athlete-safe readback of an exact proposal, never a self-attested approval.
+create or replace function public.foundation_coach_review_state(p_inputs jsonb,p_expected_preview jsonb)
+returns jsonb language plpgsql security invoker set search_path=public,pg_temp as $$
+declare v_user uuid:=auth.uid();v_athlete uuid;v_id uuid;v_decision text;v_note text;
+begin
+ if v_user is null then raise exception 'Athlete sign-in required';end if;
+ select id into v_athlete from public.athlete_profile where user_id=v_user;
+ if v_athlete is null then raise exception 'Athlete profile missing';end if;
+ select r.id,d.decision,d.review_note into v_id,v_decision,v_note
+ from public.foundation_reassessment_request r
+ left join public.foundation_reassessment_decision d on d.request_id=r.id
+ where r.athlete_id=v_athlete and r.inputs=p_inputs and r.preview=p_expected_preview
+ order by r.created_at desc limit 1;
+ if v_id is null then return jsonb_build_object('status','none');end if;
+ return jsonb_build_object('status',coalesce(v_decision,'pending'),'request_id',v_id,
+  'coach_note',case when v_decision is not null then v_note else null end);
+end;
+$$;
+revoke all on function public.foundation_coach_review_state(jsonb,jsonb) from public,anon;
+grant execute on function public.foundation_coach_review_state(jsonb,jsonb) to authenticated;
