@@ -4,6 +4,7 @@ import BenchmarkTrainingZones from './BenchmarkTrainingZones';
 import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
+import FoundationSwimPreference from './FoundationSwimPreference';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
@@ -6792,6 +6793,10 @@ color:
     return (
       <div className="calendar-layout athlete-agenda">
         <div>
+          <FoundationSwimPreference onUpdated={async()=>{
+            const {data:{user}}=await supabase.auth.getUser();
+            if(user)await loadPlannedSessions(user.id);
+          }}/>
 
 {movingSessionId && (
   <section className="calendar-move-panel" aria-label="Reschedule workout">

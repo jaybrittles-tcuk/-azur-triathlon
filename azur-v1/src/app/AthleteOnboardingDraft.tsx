@@ -116,6 +116,12 @@ export default function AthleteOnboardingDraft(){
     if(result?.status!=='created'&&result?.status!=='already_planned'){
       setSaving(false);setMessage('Unable to confirm your first training programme. Please retry.');return;
     }
+    // Correct previously generated foundation plans when an athlete updates
+    // swimming capability. The database replaces only safe, future workouts.
+    const {data:swimResult,error:swimError}=await supabase.rpc('update_foundation_swim_preference',{p_can_swim:canSwim});
+    if(swimError){setSaving(false);setMessage('Training was saved, but swimming preference could not be applied: '+swimError.message);return;}
+    if(swimResult?.status==='review_required'){setSaving(false);setMessage(swimResult.reason);return;}
+
     const {data:athlete,error:athleteError}=await supabase.from('athlete_profile')
       .select('id').eq('user_id',userId).single();
     if(athleteError||!athlete){setSaving(false);setMessage('Your plan was prepared, but your athlete account could not be verified.');return;}
@@ -165,6 +171,15 @@ export default function AthleteOnboardingDraft(){
     </div>
     <p style={{fontSize:12,margin:'8px 0'}}>Choose every day you could realistically train. Rest days are still built into the plan.</p>
    </fieldset>
+   <fieldset style={{border:'1px solid #4395c8',borderRadius:14,padding:14,margin:'18px 0',background:'rgba(29,129,194,0.10)'}}>
+    <legend style={{fontWeight:800,fontSize:16,padding:'0 6px'}}>Swimming availability</legend>
+    <p style={{margin:'0 0 10px',fontSize:13}}>AZUR needs to know whether swimming is appropriate before including it in your programme.</p>
+    <label style={{display:'flex',gap:10,alignItems:'flex-start',fontSize:14,lineHeight:1.5}}>
+      <input type="checkbox" aria-label="I can swim 200 metres comfortably and safely" checked={canSwim} onChange={e=>setCanSwim(e.target.checked)}/>
+      <span>I can swim at least 200 metres comfortably and safely, and I have access to a suitable pool.</span>
+    </label>
+    <small style={{display:'block',marginTop:8}}>Leave unticked if unsure. You can update this later; no swim sessions will be prescribed until confirmed.</small>
+   </fieldset>
    <label>Average training actually completed in recent weeks (hours, if known)
     <input type="number" min={0} max={25} step={0.5} placeholder="Optional" value={recentHours} onChange={e=>setRecentHours(e.target.value)}/>
    </label>
@@ -181,10 +196,6 @@ export default function AthleteOnboardingDraft(){
    <div className="azur-onboarding-options">{devices.map(d=><label key={d.id} className={device===d.id?'selected':''}>
     <input type="radio" name="azur-device" checked={device===d.id} onChange={()=>setDevice(d.id)}/>{d.label}
    </label>)}</div>
-   <label style={{display:'flex',gap:10,alignItems:'center',marginTop:16,fontSize:14}}>
-     <input type="checkbox" checked={canSwim} onChange={e=>setCanSwim(e.target.checked)}/>
-     I can swim at least 200 metres comfortably and safely
-   </label>
    <p>{device==='garmin'?'Garmin connection will be offered after setup where available.':device==='none'?'You can record workouts, RPE and benchmarks manually.':'You can start with manual workout logging. Direct syncing for this device is not yet available.'}</p>
    <fieldset style={{border:'1px solid #305f7b',borderRadius:14,padding:13,marginTop:18}}>
     <legend style={{fontWeight:700}}>Do you already know your training thresholds?</legend>
