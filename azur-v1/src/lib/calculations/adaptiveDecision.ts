@@ -51,10 +51,14 @@ export function assessAdaptiveDecision(
   athleteId: string,
   observations: DurationObservation[],
   patterns: DurationPattern[],
+  now = new Date(),
 ): Decision {
-  const observed = observations.filter(o => o.athlete_id === athleteId && validObservation(o))
+  const minTimestamp = now.getTime() - 21 * 86400000;
+  const maxTimestamp = now.getTime() + 86400000;
+  const isRecent = (value: string) => Date.parse(value) >= minTimestamp && Date.parse(value) <= maxTimestamp;
+  const observed = observations.filter(o => o.athlete_id === athleteId && validObservation(o) && isRecent(o.observed_at))
     .sort((a,b) => Date.parse(b.observed_at)-Date.parse(a.observed_at));
-  const repeated = patterns.filter(p => p.athlete_id === athleteId && validPattern(p))
+  const repeated = patterns.filter(p => p.athlete_id === athleteId && validPattern(p) && isRecent(p.latest_observed_at))
     .sort((a,b) => Date.parse(b.latest_observed_at)-Date.parse(a.latest_observed_at));
   const newest = observed[0];
   if (repeated.length) {
