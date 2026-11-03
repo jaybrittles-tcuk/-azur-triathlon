@@ -86,7 +86,7 @@ export default function CoachMonitoringWorkspace({onSelectAthlete}:Props){
         {planningTool==='calendar'&&<CoachAthleteCalendarPreview/>}
         {planningTool==='library'&&<CoachWorkoutLibrary/>}
         {planningTool==='completeness'&&<CoachWeekReconciliationPreview/>}
-        {planningTool==='drafts'&&<><CoachWeeklyDraftBuilder/><CoachWeeklyReview/></>}
+        {planningTool==='drafts'&&<><CoachWeeklyDraftBuilder onSaved={()=>{}}/><CoachWeeklyReview/></>}
        </>}
      </> : <p style={{color:'#aac4d5'}}>Weekly planning tools are not enabled in this environment.</p>}
    </div>}
