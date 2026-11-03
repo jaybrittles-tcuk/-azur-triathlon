@@ -1,3 +1,4 @@
+import WorkoutPrescriptionView from './WorkoutPrescriptionView';
 import {useEffect,useState} from 'react';
 import {supabase} from '../lib/supabase';
 import {validateWorkoutCandidate} from '../lib/calculations/coachWorkoutLibrary';
@@ -36,6 +37,6 @@ export default function CoachWorkoutLibrary(){
  <button type="button" disabled={busy} onClick={()=>void save()}>Save unapproved draft</button></div></details>
  {rows.some(r=>r.sport==='swim')&&<label>Swim timing check: athlete CSS (seconds per 100m) <input type="number" min="50" max="240" step="1" placeholder="Enter verified CSS" value={cssInput} onChange={e=>setCssInput(e.target.value)}/></label>}
  {rows.map(row=><article key={row.id} className="coach-attention-row"><div><strong>{row.title}</strong><p>{row.sport} · {row.family} · {row.duration_min} min · Level {row.level} · {row.approved?'Approved':'Needs coach approval'}</p>{row.sport==='swim'&&(()=>{const segments=(row.prescription as {poolSegments?:unknown}).poolSegments;const estimate=estimateSwimMinutes(Array.isArray(segments)?segments as Parameters<typeof estimateSwimMinutes>[0]:[],cssInput.trim()?Number(cssInput):NaN);return <p>{estimate.status==='estimated'?`Expected swim duration: ${estimate.lowMinutes}–${estimate.highMinutes} min (${estimate.distanceMeters}m), versus ${row.duration_min} min listed. Approximate only; coach must validate pace, drills and rests.`:'CSS required to estimate swim duration. Do not assume advertised session minutes match an individual athlete.'}</p>})()}
- <details><summary>Inspect complete prescription</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(row.prescription,null,2)}</pre></details></div>{!row.approved&&<button type="button" disabled={busy} onClick={()=>void approve(row)}>Approve reviewed session</button>}</article>)}
+ <details><summary>Inspect complete prescription</summary><WorkoutPrescriptionView prescription={row.prescription}/></details></div>{!row.approved&&<button type="button" disabled={busy} onClick={()=>void approve(row)}>Approve reviewed session</button>}</article>)}
  {!rows.length&&<p>No coach-reviewed workouts stored yet.</p>}</section>;
 }
