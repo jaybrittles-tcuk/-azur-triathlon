@@ -11,7 +11,7 @@ declare
  v_tier text:='foundation';v_reason text:='limited or unverified training history';
  v_cap int; v_sessions_limit int; v_week_min int; v_count int; v_seq int; v_duration int;
  v_sport text;v_title text;v_steps jsonb;v_plan jsonb:='[]'::jsonb;
- v_library_id uuid;v_source text;v_slot_family text;v_day_number int;
+ v_library_id uuid;v_source text;v_slot_family text;v_lib record;
  v_existing int;v_existing_min int;v_existing_max int:=0;
  v_sig text;v_blocked text:='';v_total int:=0;v_week_total int:=0;
 begin
@@ -124,8 +124,8 @@ begin
      v_source:='conservative_rpe_foundation';
      v_slot_family:=case when v_sport='swim' then 'technique' else 'aerobic_endurance' end;
      if v_sport='run' and v_tier <> 'foundation' then
-       select lib.id,lib.title,lib.duration_min,lib.prescription->'steps'
-         into v_library_id,v_title,v_duration,v_steps
+       select lib.id,lib.title,lib.duration_min,lib.prescription->'steps' as steps
+         into v_lib
        from public.coach_workout_library lib
        where lib.approved=true and lib.sport='run'
          and lib.family='aerobic_endurance' and lib.level=1
@@ -144,7 +144,11 @@ begin
          else abs(lib.duration_min-45) end,
          lib.workout_key
        limit 1;
-       if v_library_id is not null then v_source:='approved_coach_library'; end if;
+       if found then
+         v_library_id:=v_lib.id;v_title:=v_lib.title;
+         v_duration:=v_lib.duration_min;v_steps:=v_lib.steps;
+         v_source:='approved_coach_library';
+       end if;
      end if;
      if v_week_min+v_duration>v_cap then continue; end if;
      v_plan:=v_plan||jsonb_build_array(jsonb_build_object(
