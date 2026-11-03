@@ -37,34 +37,63 @@ export function assessEntryPathway({experience='',recentHours=null,availableHour
  return {pathway,status:blockers.length?'coach_review':'ready_for_workout_mapping',targetMinutes,blockers,notes,
   thresholdReady:Boolean(thresholdsVerified)};
 }
+/**
+ * Provide a realistic *unpublished* weekly structure for established
+ * athletes, including double sessions and a long ride. Durations are
+ * proposed, never mistaken for available approved workout prescriptions.
+ */
 export function entrySessionDistribution({pathway,targetMinutes,trainingDays,workouts=[]}={}){
  const warnings=[];
  if(!finite(targetMinutes,1,1500)||!Array.isArray(trainingDays)||!trainingDays.length){
-  return {slots:[],warnings:['Cannot distribute sessions without a reviewed load and training days'],mappedMinutes:0,unmappedMinutes:0,ready:false};
+  return {slots:[],warnings:['Cannot distribute sessions without a reviewed load and training days'],
+   mappedMinutes:0,unmappedMinutes:0,ready:false};
  }
  const available=[...new Set(trainingDays)].filter(x=>Number.isInteger(x)&&x>=0&&x<=6).sort((a,b)=>a-b);
- // At least one rest day; two for foundation. A coach may revise days
- // after reviewing actual recent training and double-session tolerance.
- const chosen=available.length===7?pathway==='foundation'?[0,2,4,6]:[0,1,2,3,4,5]:
-   available.slice(0,pathway==='foundation'?5:6);
- const allocations=pathway.startsWith('continuation')?
-  [['swim',.20],['bike',.50],['run',.30]]:[['swim',.20],['bike',.45],['run',.35]];
- const targetBySport=Object.fromEntries(allocations.map(([sport,part])=>[sport,Math.round(targetMinutes*part/5)*5]));
- const slots=chosen.map((day,i)=>{
-  const sport=pathway.startsWith('continuation')?
-    ['swim','bike','run','swim','bike','run'][i%6]:
-    ['run','bike','swim','bike','run'][i%5];
-  const approved=workouts.filter(w=>w.approved&&w.sport===sport&&w.prescription&&w.duration_min>0);
-  const mapped=approved.sort((a,b)=>a.duration_min-b.duration_min);
-  return {day,sport,availableTemplates:mapped.length,exampleTitle:mapped[0]?.title||null};
- });
- for(const [sport,minutes] of Object.entries(targetBySport)){
-  const librarySport=workouts.filter(w=>w.approved&&w.sport===sport);
-  if(!librarySport.length)warnings.push('No approved '+sport+' sessions');
-  else if(librarySport.reduce((n,x)=>n+x.duration_min,0)<minutes)
-   warnings.push('Approved '+sport+' library cannot yet cover suggested weekly volume');
+ const isContinuing=pathway.startsWith('continuation');
+ const chosen=available.length===7?(isContinuing?[1,2,3,4,5,6]:[0,2,4,6]):
+   available.slice(0,isContinuing?6:5);
+ if(chosen.length<3)warnings.push('Too few available training days for a balanced triathlon plan');
+ if(isContinuing&&targetMinutes>=600&&chosen.length<5)
+  warnings.push('High-volume continuation needs five or more available days; coach must review double-session feasibility');
+ const base=isContinuing?[
+  [['swim',60],['bike',90]],
+  [['run',60],['swim',45]],
+  [['bike',90],['run',45]],
+  [['swim',60],['bike',90]],
+  [['bike',210],['run',30]],
+  [['run',105],['swim',75]]
+ ]:[
+  [['run',30]],[['bike',40]],[['swim',30]],[['bike',40]],[['run',30]]
+ ];
+ const baseTotal=base.flat().reduce((n,[,min])=>n+min,0);
+ const factor=targetMinutes/baseTotal;
+ const desired=base.slice(0,chosen.length).map((daySlots,i)=>({
+  day:chosen[i],sessions:daySlots.map(([sport,minutes])=>({
+   sport,minutes:Math.max(20,Math.round(minutes*factor/5)*5)
+  }))
+ }));
+ const slots=desired.flatMap(day=>day.sessions.map(entry=>({
+  day:day.day,sport:entry.sport,minutes:entry.minutes,
+  approvedMatches:workouts.filter(w=>w.approved&&w.sport===entry.sport&&w.prescription&&
+   Number.isFinite(w.duration_min)&&Math.abs(w.duration_min-entry.minutes)<=10)
+   .map(w=>({workout_key:w.workout_key,title:w.title,duration_min:w.duration_min}))
+ })));
+ const proposedMinutes=slots.reduce((n,s)=>n+s.minutes,0);
+ const targetBySport={swim:0,bike:0,run:0};
+ for(const slot of slots)targetBySport[slot.sport]+=slot.minutes;
+ const mappedMinutes=slots.filter(s=>s.approvedMatches.length).reduce((n,s)=>n+s.minutes,0);
+ if(Math.abs(proposedMinutes-targetMinutes)>20)
+  warnings.push('Availability and proportional session rounding do not match target; coach must redistribute '+Math.abs(proposedMinutes-targetMinutes)+' minutes');
+ for(const sport of ['swim','bike','run']){
+  if(targetBySport[sport]===0)warnings.push('No '+sport+' training in suggested structure');
  }
- if(targetMinutes>480&&chosen.length<5)warnings.push('Large weekly load with few available days requires coach assessment of double sessions');
- warnings.push('Sport distribution is an indicative coaching framework, not a complete published week');
- return {slots,targetBySport,warnings,mappedMinutes:0,unmappedMinutes:targetMinutes,ready:false};
+ if(slots.some(s=>s.minutes>240))warnings.push('A proposed session exceeds four hours and needs coach review');
+ const byDay=new Map();
+ for(const slot of slots)byDay.set(slot.day,(byDay.get(slot.day)||0)+slot.minutes);
+ if([...byDay.values()].some(m=>m>240))warnings.push('A proposed day exceeds four hours and needs coach review');
+ if(slots.some(s=>!s.approvedMatches.length))
+  warnings.push('Approved workout library does not yet cover every proposed duration; additional coach-approved prescriptions needed');
+ warnings.push('Indicative coach-review structure only. Do not publish until load, injury status, thresholds and exact workouts are approved.');
+ return {slots,targetBySport,warnings,proposedMinutes,mappedMinutes,
+  unmappedMinutes:proposedMinutes-mappedMinutes,restDays:7-byDay.size,ready:false};
 }
