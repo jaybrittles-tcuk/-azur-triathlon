@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import type {AssignedAthlete} from './CoachAthleteRoster';
 import CoachActionCentre from './CoachActionCentre';
 import CoachAttentionInbox from './CoachAttentionInbox';
 import CoachTrainingExceptions from './CoachTrainingExceptions';
@@ -8,7 +9,7 @@ import CoachWeeklyReview from './CoachWeeklyReview';
 import CoachSwimFocusReview from './CoachSwimFocusReview';
 
 type Area='actions'|'analysis'|'planning';
-type Props={onSelectAthlete:(athlete:Parameters<typeof CoachAttentionInbox>[0]['onSelect'] extends (athlete:infer T)=>void?T:never)=>void};
+type Props={onSelectAthlete:(athlete:AssignedAthlete)=>void};
 const areas:{id:Area;title:string;description:string;icon:string}[]=[
  {id:'actions',title:'Athlete Actions',description:'Prioritised decisions and athlete feedback',icon:'◎'},
  {id:'analysis',title:'Training Analysis',description:'Workout execution and training patterns',icon:'◷'},
