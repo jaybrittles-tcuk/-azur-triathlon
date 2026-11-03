@@ -31,7 +31,7 @@ export default function CoachAthleteCalendarPreview(){
   }catch(e){if(active){setSessions([]);setError(e instanceof Error?e.message:'Unable to read calendar')}}finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[athleteId,week,reload]);
  const minutes=sessions.reduce((sum,s)=>sum+s.duration_min,0);
- return <section className="coach-attention-v2" aria-label="Assigned athlete calendar preview" style={{paddingBottom:"calc(110px + env(safe-area-inset-bottom, 0px))",maxWidth:"100%",minWidth:0,overflowWrap:"anywhere"}}>
+ return <section className="coach-attention-v2" aria-label="Assigned athlete calendar preview" style={{paddingBottom:12,maxWidth:"100%",minWidth:0,overflowWrap:"anywhere"}}>
  <header className="coach-attention-heading"><div><h3>Assigned athlete calendar preview</h3><p>Read-only preview of the published athlete calendar. Your personal calendar remains unchanged.</p></div><button type="button" onClick={()=>setReload(x=>x+1)} disabled={loading}>Refresh</button></header>
  <div style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",minWidth:0,maxWidth:"100%"}}>
  <label style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:8,minWidth:0,maxWidth:"100%"}}>Athlete <select style={{maxWidth:"100%",minWidth:0,width:"min(100%, 310px)"}} value={athleteId} onChange={e=>setAthleteId(e.target.value)}>{athletes.map(a=><option key={a.id} value={a.id}>{a.display_name||'Assigned athlete'}</option>)}</select></label>
