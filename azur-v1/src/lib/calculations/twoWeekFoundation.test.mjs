@@ -26,8 +26,8 @@ test('available hours never treated as training history or target',()=>{
  assert.ok(result.warnings.some(w=>w.includes('unknown')));
  assert.equal(result.coachReviewRequired,true);
 });
-test('days with duplicates, no rest day or missing availability fail closed',()=>{
- for(const trainingDays of [[],[0,0],[0,1,2,3,4,5,6]]){
+test('duplicate or missing availability fails closed',()=>{
+ for(const trainingDays of [[],[0,0]]){
   const result=twoWeekFoundationPreview({...valid,trainingDays});
   assert.equal(result.weeks.length,0);
   assert.ok(result.blockers.length);
@@ -55,4 +55,13 @@ test('three supplied thresholds do not bypass coach verification or publish sess
 test('unreliable recent hours and invalid Monday produce no proposals',()=>{
  assert.equal(twoWeekFoundationPreview({...valid,recentHours:-1}).weeks.length,0);
  assert.equal(twoWeekFoundationPreview({...valid,weekStart:'2026-11-10'}).weeks.length,0);
+});
+
+test('all seven days available still results in rest days rather than seven workouts',()=>{
+ const result=twoWeekFoundationPreview({...valid,trainingDays:[0,1,2,3,4,5,6],recentHours:17,ftpWatts:250,swimCssSeconds:105,runThresholdSeconds:260});
+ assert.equal(result.blockers.length,0);
+ assert.equal(result.path,'coach_threshold_verification');
+ assert.equal(result.weeks.length,2);
+ assert.ok(result.weeks.every(w=>w.sessions.length<=5&&w.restDays>=2));
+ assert.equal(result.canPublish,false);
 });
