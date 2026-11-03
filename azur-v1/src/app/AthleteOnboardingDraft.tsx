@@ -1,15 +1,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import {parseAthletePace,formatAthletePace} from '../lib/athletePaceInput.mjs';
 
 type Device = 'garmin'|'coros'|'polar'|'apple'|'other'|'none';
 type Race = 'sprint'|'olympic'|'70.3'|'ironman'|'other';
 const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const secondsToPace=(s:number|null):string=>s&&Number.isFinite(s)?`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`:'';
-const paceToSeconds=(s:string):number|null=>{
- if(!s.trim())return null;
- const match=s.trim().match(/^(\d{1,2}):([0-5]\d)$/);
- return match?Number(match[1])*60+Number(match[2]):NaN;
-};
 const devices: {id:Device;label:string}[]=[
  {id:'garmin',label:'Garmin'}, {id:'coros',label:'COROS'},
  {id:'polar',label:'Polar / Wahoo'}, {id:'apple',label:'Apple Watch'},
@@ -58,8 +53,8 @@ export default function AthleteOnboardingDraft(){
     setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
     setTrainingConcern(data.current_training_concern==='none'||data.current_training_concern==='yes'?data.current_training_concern:'unsure');
     setFtpWatts(data.ftp_watts==null?'':String(data.ftp_watts));
-    setSwimCss(secondsToPace(data.swim_css_seconds_per_100m));
-    setRunPace(secondsToPace(data.run_threshold_seconds_per_km));
+    setSwimCss(formatAthletePace(data.swim_css_seconds_per_100m));
+    setRunPace(formatAthletePace(data.run_threshold_seconds_per_km));
     setKnownTests(data.ftp_watts!=null||data.swim_css_seconds_per_100m!=null||data.run_threshold_seconds_per_km!=null);
     setStep(data.onboarding_step===3?1:Math.min(2,Math.max(0,data.onboarding_step)));
    }
@@ -75,11 +70,11 @@ export default function AthleteOnboardingDraft(){
   const recent=recentHours.trim()===''?null:Number(recentHours);
   if(recent!==null&&(!Number.isFinite(recent)||recent<0||recent>25)){setMessage('Recent weekly training hours must be between 0 and 25.');return;}
   const ftp=knownTests&&ftpWatts.trim()!==''?Number(ftpWatts):null;
-  const css=knownTests?paceToSeconds(swimCss):null;
-  const run=knownTests?paceToSeconds(runPace):null;
+  const css=knownTests?parseAthletePace(swimCss):null;
+  const run=knownTests?parseAthletePace(runPace):null;
   if(ftp!==null&&(!Number.isInteger(ftp)||ftp<60||ftp>650)){setMessage('Bike FTP should be between 60 and 650 W, or left blank.');return;}
-  if(css!==null&&(!Number.isInteger(css)||css<50||css>300)){setMessage('Swim CSS should be in mm:ss per 100m, between 0:50 and 5:00.');return;}
-  if(run!==null&&(!Number.isInteger(run)||run<150||run>900)){setMessage('Run threshold should be in mm:ss per km, between 2:30 and 15:00.');return;}
+  if(css!==null&&(!Number.isInteger(css)||css<50||css>300)){setMessage('Swim CSS: use 1:45 or 1.45 for one minute 45 seconds per 100m (0:50–5:00).');return;}
+  if(run!==null&&(!Number.isInteger(run)||run<150||run>900)){setMessage('Run threshold: use 4:20 or 4.20 for four minutes 20 seconds per km (2:30–15:00).');return;}
   if(nextStep===3 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
   const {error}=await supabase.from('athlete_onboarding').upsert({
@@ -164,11 +159,11 @@ export default function AthleteOnboardingDraft(){
       <label>Bike FTP (watts, if known)
        <input type="number" min={60} max={650} inputMode="numeric" placeholder="e.g. 250" value={ftpWatts} onChange={e=>setFtpWatts(e.target.value)}/>
       </label>
-      <label>Swim CSS (min:sec per 100m, if known)
-       <input type="text" inputMode="decimal" placeholder="e.g. 1:45" value={swimCss} onChange={e=>setSwimCss(e.target.value)} />
+      <label>Swim CSS (min:sec per 100m, e.g. 1:45 or 1.45)
+       <input type="text" inputMode="text" placeholder="1:45 or 1.45" value={swimCss} onChange={e=>setSwimCss(e.target.value)} />
       </label>
-      <label>Run threshold pace (min:sec per km, if known)
-       <input type="text" inputMode="decimal" placeholder="e.g. 4:15" value={runPace} onChange={e=>setRunPace(e.target.value)} />
+      <label>Run threshold pace (min:sec per km, e.g. 4:20 or 4.20)
+       <input type="text" inputMode="text" placeholder="4:20 or 4.20" value={runPace} onChange={e=>setRunPace(e.target.value)} />
       </label>
       <p style={{fontSize:12,margin:0}}>Values you supply are athlete-reported until your coach verifies them. Leave any unknown field blank.</p>
      </div>}
