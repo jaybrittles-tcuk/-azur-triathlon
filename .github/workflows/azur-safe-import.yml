@@ -118,6 +118,7 @@ jobs:
       VITE_SUPABASE_URL: https://example.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_local_verification
       VITE_ENABLE_COACH_SCHEDULING: "true"
+      VITE_ENABLE_BETA_SIGNUP: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
