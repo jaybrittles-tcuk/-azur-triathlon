@@ -61,7 +61,7 @@ export default function AthleteOnboardingDraft(){
     setSwimCss(secondsToPace(data.swim_css_seconds_per_100m));
     setRunPace(secondsToPace(data.run_threshold_seconds_per_km));
     setKnownTests(data.ftp_watts!==null||data.swim_css_seconds_per_100m!==null||data.run_threshold_seconds_per_km!==null);
-    setStep(Math.min(2,Math.max(0,data.onboarding_step)));
+    setStep(data.onboarding_step===3?1:Math.min(2,Math.max(0,data.onboarding_step)));
    }
    setLoading(false);
   }
