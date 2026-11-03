@@ -277,10 +277,10 @@ try {
  await inbox.getByText('Updated after checking my recording',{exact:true}).waitFor();
  await inbox.getByRole('button',{name:'Mark reviewed'}).click();
  await inbox.getByText('You’re up to date on the records checked.').waitFor();
- await coachPage.getByRole('button',{name:/Refresh/}).click();
+ await coachPage.getByRole('region',{name:'Coach attention inbox'}).getByRole('button',{name:/Refresh/}).click();
  await inbox.getByText('You’re up to date on the records checked.').waitFor();
  athleteFeedback={...athleteFeedback,notes:'Legs felt heavy today',updated_at:new Date(Date.now()+1000).toISOString()};
- await coachPage.getByRole('button',{name:/Refresh/}).click();
+ await coachPage.getByRole('region',{name:'Coach attention inbox'}).getByRole('button',{name:/Refresh/}).click();
  await inbox.getByText('Legs felt heavy today',{exact:true}).waitFor();
  console.log('PASS: reviewed notes survive refresh and revised feedback returns to the coach queue');
  console.log('PASS: athlete accepts invitation → coach schedules → athlete completes and changes feedback → coach sees latest records');
