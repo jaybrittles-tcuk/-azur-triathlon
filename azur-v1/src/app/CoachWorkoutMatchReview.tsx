@@ -10,6 +10,9 @@ export default function CoachWorkoutMatchReview(){
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState('');
  const [revision,setRevision]=useState(0);
+ const [detailBusy,setDetailBusy]=useState('');
+ const [details,setDetails]=useState<Record<string,IntervalResult>>({});
+ const [detailError,setDetailError]=useState<Record<string,string>>({});
  useEffect(()=>{let active=true;(async()=>{
   setLoading(true);setError('');
   try{
@@ -58,6 +61,22 @@ export default function CoachWorkoutMatchReview(){
   }catch(e){if(active){setItems([]);setError(e instanceof Error?e.message:'Could not assess imports')}}
   finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[revision]);
+ async function previewIntervals(activityId:string){
+  setDetailBusy(activityId);
+  setDetailError(old=>({...old,[activityId]:''}));
+  try{
+   const {data:{session}}=await supabase.auth.getSession();
+   if(!session?.access_token)throw new Error('Coach sign-in required');
+   const result=await fetch('/api/intervals/interval-preview?activityId='+encodeURIComponent(activityId),{
+    method:'GET',headers:{Authorization:'Bearer '+session.access_token,Accept:'application/json'}
+   });
+   const payload=await result.json();
+   if(!result.ok)throw new Error(payload.error||'Interval preview unavailable');
+   if(!['provider_intervals_available','unavailable'].includes(payload.status))throw new Error('Unexpected interval preview response');
+   setDetails(old=>({...old,[activityId]:payload}));
+  }catch(e){setDetailError(old=>({...old,[activityId]:e instanceof Error?e.message:'Interval preview unavailable'}))}
+  finally{setDetailBusy('')}
+ }
  const candidate=items.filter(item=>item.proposal.status==='candidate_review').length;
  return <section className="coach-attention-v2" aria-label="Workout association review">
   <header className="coach-attention-heading">
@@ -74,6 +93,22 @@ export default function CoachWorkoutMatchReview(){
     <p>{new Date(item.date).toLocaleDateString('en-GB')} · {item.source}</p>
     <p>{item.proposal.rationale}</p>
     <p><b>Interval execution:</b> {item.executionObservation}</p>
+    {item.source==='intervals'&&<button type="button" disabled={Boolean(detailBusy)}
+      onClick={()=>void previewIntervals(item.proposal.activity_id)}>
+      {detailBusy===item.proposal.activity_id?'Retrieving interval evidence…':'View provider intervals'}
+    </button>}
+    {detailError[item.proposal.activity_id]&&<p role="alert">{detailError[item.proposal.activity_id]}</p>}
+    {details[item.proposal.activity_id]&&<div style={{padding:12,marginTop:8,border:'1px solid #456078',borderRadius:10}}>
+      <strong>{details[item.proposal.activity_id].status==='provider_intervals_available'?'Provider interval preview':'Interval detail unavailable'}</strong>
+      <p>{details[item.proposal.activity_id].reason||'Read-only upstream intervals. No plan matching or workout-compliance judgement has been performed.'}</p>
+      {details[item.proposal.activity_id].status==='provider_intervals_available'&&<>
+        <p>{details[item.proposal.activity_id].work_intervals} work intervals · {details[item.proposal.activity_id].interval_count} total detected segments</p>
+        {(details[item.proposal.activity_id].intervals||[]).slice(0,12).map((segment,index)=>
+          <p key={index} style={{fontSize:12}}>{index+1}. {segment.kind} · {Math.round(segment.duration_sec/60)} min · {segment.average_power_w??'—'} W · {segment.average_heart_rate_bpm??'—'} bpm</p>)}
+        {(details[item.proposal.activity_id].interval_count??0)>12&&<small>Showing first 12 intervals only.</small>}
+        <p><small>Provider-detected segments are not yet matched against confirmed AZUR workout steps. No calendar, activity or training-load changes.</small></p>
+      </>}
+    </div>}
     <small>Activity: {item.proposal.activity_id.slice(0,8)} · Suggested session: {item.proposal.planned_session_id?.slice(0,8)||'None'}. No writes permitted.</small>
    </div>
   </article>)}
