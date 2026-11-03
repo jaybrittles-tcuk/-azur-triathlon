@@ -153,14 +153,14 @@ export default function CoachStarterWeekPreview(){
   finally{setBusy(false)}
  }
  return <section aria-label="Automatic starter-week preview" style={{padding:16,background:'#102c44',border:'1px solid #335c77',borderRadius:15,color:'#edf8ff',minWidth:0}}>
-  <h3 style={{fontSize:20,margin:'0 0 8px'}}>Automatic starter-week preview</h3>
-  <p style={{fontSize:11,color:'#7fcbee',margin:'0 0 8px'}}>Planner v2 · 7-day availability supported</p>
-  <p style={{fontSize:13,color:'#aec8d9',lineHeight:1.5}}>AZUR uses the athlete's available training days and reported thresholds to propose a two-week easy foundation before testing. This never publishes to their calendar.</p>
+  <h3 style={{fontSize:20,margin:'0 0 8px'}}>Automatic training plan</h3>
+  <p style={{fontSize:11,color:'#7fcbee',margin:'0 0 8px'}}>Planner v3 · athlete-specific starting pathways</p>
+  <p style={{fontSize:13,color:'#aec8d9',lineHeight:1.5}}>AZUR selects a starting pathway from training history, availability and thresholds. Beginner athletes receive a conservative foundation; established athletes receive a continuation proposal. Every plan requires coach review before publication.</p>
   <div style={{display:'grid',gap:12,margin:'14px 0'}}>
    <label style={{fontSize:13}}>Athlete<select style={{width:'100%',minHeight:44,marginTop:5}} value={selected} onChange={e=>setSelected(e.target.value)}>{athletes.map(a=><option key={a.id} value={a.id}>{a.display_name}</option>)}</select></label>
    <label style={{fontSize:13}}>Week starting Monday<input style={{display:'block',width:'100%',minHeight:44,marginTop:5}} type="date" value={week} onChange={e=>setWeek(e.target.value)}/></label>
   </div>
-  <button type="button" disabled={loading||busy||!selected} onClick={()=>void preview()} style={{minHeight:46,padding:'10px 17px',borderRadius:12,border:'1px solid #53bce9',background:'#1576ab',fontWeight:700,color:'#fff'}}>{busy?'Checking…':'Preview two-week foundation'}</button>
+  <button type="button" disabled={loading||busy||!selected} onClick={()=>void preview()} style={{minHeight:46,padding:'10px 17px',borderRadius:12,border:'1px solid #53bce9',background:'#1576ab',fontWeight:700,color:'#fff'}}>{busy?'Checking…':'Generate training preview'}</button>
   {message&&<p role="alert">{message}</p>}
   {entry&&<section style={{marginTop:16,padding:13,borderRadius:12,border:'1px solid #39748d',background:'#133951'}}>
    <span style={{fontSize:11,color:'#83d5ff',fontWeight:700,letterSpacing:'0.07em'}}>AUTOMATIC ATHLETE CLASSIFICATION</span>
@@ -202,9 +202,9 @@ export default function CoachStarterWeekPreview(){
     </div>}
     <p style={{fontSize:12,color:'#9abed2'}}>This records a coach decision only. Workouts still require approved prescriptions, a complete draft and separate publication approval.</p>
    </section>}
-      <p style={{fontSize:12,color:'#a7c5d8',marginTop:12}}>AZUR won't prescribe zone targets until a coach verifies the supplied thresholds. No calendar writes are enabled.</p>
+      <p style={{fontSize:12,color:'#a7c5d8',marginTop:12}}>For now, AZUR uses RPE-based workouts only. Athlete-reported thresholds cannot be treated as verified coach targets.</p>
   </section>}
-  {foundation&&<div style={{marginTop:16}}>
+  {foundation&&entry?.pathway==='foundation'&&<div style={{marginTop:16}}>
    <h4 style={{fontSize:17,margin:'0 0 6px',color:'#f8fbff'}}>{foundation.path==='two_week_endurance_foundation'?'Two-week endurance foundation':'Coach threshold verification'}</h4>
    <p style={{fontSize:13,color:'#b2cedf'}}>Missing thresholds: {foundation.unknownSports.length?foundation.unknownSports.join(', '):'None reported missing'} · Athlete-reported values require coach verification.</p>
    {foundation.blockers.map(block=><p key={block} role="alert" style={{padding:'8px 10px',background:'#4a312a',borderRadius:10,fontSize:13}}>Before planning: {block}</p>)}
@@ -226,7 +226,7 @@ export default function CoachStarterWeekPreview(){
    </details>
    <p style={{fontSize:13,fontWeight:700,color:'#ffdb8a'}}>Coach review required · Publication is disabled.</p>
   </div>}
-  {result&&<details style={{marginTop:14}}><summary style={{cursor:'pointer',fontSize:13,color:'#9accf4'}}>Existing approved-workout coverage</summary><div style={{marginTop:10}}> 
+  {result&&entry?.pathway==='foundation'&&<details style={{marginTop:14}}><summary style={{cursor:'pointer',fontSize:13,color:'#9accf4'}}>Existing approved-workout coverage</summary><div style={{marginTop:10}}> 
    <strong style={{color:'#ffdb8a'}}>Coach review required · not publishable</strong>
    <p style={{fontSize:13,color:'#a9c7d7'}}>{result.minutes} candidate minutes · availability ceiling {result.availabilityCeilingMinutes??'unknown'} minutes (not a training target)</p>
    <p style={{fontSize:12,color:'#a6c9db'}}>Template matches: {result.sessions.length}. This library check is separate from the athlete's day-specific two-week foundation above.</p>
