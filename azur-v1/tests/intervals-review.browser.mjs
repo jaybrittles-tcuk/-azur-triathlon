@@ -18,7 +18,7 @@ let staged=false,accepted=false,validated=false;
 let profileFtp=250;
 let demoSessions=[];
 let missingProfile=false;
-let onboardingStep=0;
+let onboardingStep=3;
 const commands=[];
 const errors=[];
 let coachDebugPage=null;
@@ -154,7 +154,7 @@ try {
  await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByRole('heading',{name:'Your training availability',exact:true}).waitFor();
  await page.getByRole('button',{name:'Continue',exact:true}).click();
- await page.getByRole('button',{name:'Review setup',exact:true}).click();
+ await page.getByRole('button',{name:'Finish setup',exact:true}).click();
  await page.waitForURL(base+'/');
  assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
  assert.equal(onboardingStep,3,'Final onboarding step must be saved');
