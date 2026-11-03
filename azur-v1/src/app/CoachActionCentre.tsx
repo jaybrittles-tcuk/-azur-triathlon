@@ -1,21 +1,24 @@
 import {useEffect,useMemo,useState} from 'react';
 import {supabase} from '../lib/supabase';
 import {assessAdaptiveDecision} from '../lib/calculations/adaptiveDecision';
+import {assessBikeEvidence} from '../lib/calculations/validatedBikeEvidence';
+import type {ValidatedBikeRow} from '../lib/calculations/validatedBikeEvidence';
 import type {DurationObservation,DurationPattern,Decision} from '../lib/calculations/adaptiveDecision';
 
 type Assignment = {athlete_id:string};
 type Profile = {id:string;display_name:string|null};
 type Seen = {item_key:string};
 type CoachRow = {athlete:Profile;decision:Decision;key:string;reviewed:boolean};
+const PERFORMANCE_WINDOW_DAYS=21;
 const LIMIT=1000;
-const keyFor=(d:Decision, observations:DurationObservation[],patterns:DurationPattern[])=>{
+const keyFor=(d:Decision, observations:DurationObservation[],patterns:DurationPattern[], latestPowerId:string|null)=>{
  const latestObservation=observations.filter(o=>o.athlete_id===d.athlete_id)
    .sort((a,b)=>b.observed_at.localeCompare(a.observed_at))[0];
  const latestPattern=patterns.filter(p=>p.athlete_id===d.athlete_id)
    .sort((a,b)=>b.latest_observed_at.localeCompare(a.latest_observed_at))[0];
  return ['adaptive-v3',d.action,d.priority,latestObservation?.activity_id||'none',
    latestObservation?.duration_delta_pct??'none',latestPattern?.latest_observed_at||'none',
-   latestPattern?.signal_type||'none'].join(':');
+   latestPattern?.signal_type||'none',latestPowerId||'no-power'].join(':');
 };
 
 export default function CoachActionCentre(){
@@ -40,7 +43,7 @@ export default function CoachActionCentre(){
    if(!ids.length){if(active){setRows([]);setCoachId(user.id)}return;}
    // Only the two evidence tables and athlete display names are needed for triage.
    // Database policies restrict insights and patterns to assigned coaches.
-   const [profiles,insights,patterns,reviewed]=await Promise.all([
+   const [profiles,insights,patterns,power,reviewed]=await Promise.all([
     supabase.from('athlete_profile').select('id,display_name').in('id',ids).limit(LIMIT+1),
     supabase.from('coach_session_insight')
       .select('activity_id,athlete_id,duration_delta_pct,evidence_level,severity,observed_at')
@@ -49,22 +52,44 @@ export default function CoachActionCentre(){
     supabase.from('coach_training_pattern')
       .select('athlete_id,signal_type,linked_sessions,affected_sessions,reported_sessions,device_sessions,latest_observed_at')
       .in('athlete_id',ids).order('latest_observed_at',{ascending:false}).limit(LIMIT+1),
+    supabase.from('coach_validated_bike_evidence')
+      .select('activity_id,athlete_id,planned_session_id,start_time,source,processed_metrics')
+      .in('athlete_id',ids)
+      .gte('start_time',new Date(Date.now()-PERFORMANCE_WINDOW_DAYS*86400000).toISOString())
+      .order('start_time',{ascending:false}).limit(LIMIT+1),
     supabase.from('coach_monitoring_review').select('item_key')
       .eq('coach_user_id',user.id).like('item_key','adaptive-v3:%').limit(LIMIT+1)
    ]);
-   const issue=[profiles.error,insights.error,patterns.error,reviewed.error].find(Boolean);
+   const issue=[profiles.error,insights.error,patterns.error,power.error,reviewed.error].find(Boolean);
    if(issue)throw issue;
-   const incomplete=[profiles.data,insights.data,patterns.data,reviewed.data].some(result=>(result??[]).length>LIMIT);
+   const incomplete=[profiles.data,insights.data,patterns.data,power.data,reviewed.data].some(result=>(result??[]).length>LIMIT);
    if(incomplete)throw new Error('Evidence or review history exceeds current 1000-row limit. Unable to safely rank the full roster.');
    const observations=(insights.data??[]) as DurationObservation[];
    const repeating=(patterns.data??[]) as DurationPattern[];
+   const validatedPower=(power.data??[]) as ValidatedBikeRow[];
    const reviewedKeys=new Set(((reviewed.data??[]) as Seen[]).map(x=>x.item_key));
    const athleteById=new Map(((profiles.data??[]) as Profile[]).map(p=>[p.id,p]));
    // Missing or inaccessible athlete profiles are not silently dropped.
    if(ids.some(id=>!athleteById.has(id)))throw new Error('One or more assigned athlete profiles could not be read.');
    const decisions=ids.map(id=>{
-     const decision=assessAdaptiveDecision(id,observations,repeating);
-     const key=keyFor(decision,observations,repeating);
+     const base=assessAdaptiveDecision(id,observations,repeating);
+     const powerEvidence=assessBikeEvidence(id,validatedPower);
+     const powerContext=powerEvidence.count
+       ? [`Validated Intervals.icu bike: ${powerEvidence.count} ride(s) in 21 days`,
+          `Latest approved cycling stress ${powerEvidence.latest_stress}, IF ${powerEvidence.latest_intensity_factor?.toFixed(2)}, FTP snapshot ${powerEvidence.ftp_at_validation} W`,
+          'Separate activity evidence: not proof that any particular planned session was completed as prescribed.',
+          ...powerEvidence.notes]
+       : ['No recent validated cycling power evidence available'];
+     const spike=powerEvidence.load_spike_review;
+     const decision:Decision=spike
+       ? {...base,action:'coach_review',priority:'high',confidence:'moderate',
+          rationale:base.action==='coach_review' ? base.rationale+' A separate validated cycling load spike also needs context.'
+            : 'Recent validated cycling training stress is substantially higher than the preceding two rides.',
+          evidence:[...base.evidence,...powerContext,`Previous rides median stress ${powerEvidence.prior_median_stress}`],
+          suggested_next_step:'Review why the validated cycling load rose and assess athlete context before any plan adjustment.',
+          coach_approval_required:true}
+       : {...base,evidence:[...base.evidence,...powerContext]};
+     const key=keyFor(decision,observations,repeating,powerEvidence.latest_activity_id);
      return {athlete:athleteById.get(id)!,decision,key,reviewed:reviewedKeys.has(key)};
    });
    const weight=(r:CoachRow)=>r.decision.priority==='high'?0:r.decision.priority==='review'?1:r.decision.action==='insufficient_data'?2:3;
