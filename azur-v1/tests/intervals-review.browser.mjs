@@ -273,6 +273,13 @@ try {
  await reviews.getByText('Reported effort · 5/10',{exact:true}).waitFor();
  await reviews.getByText('Updated after checking my recording',{exact:true}).waitFor();
  await coachPage.getByRole('button',{name:'Monitoring',exact:true}).click();
+ const monitoringNav=coachPage.getByRole('navigation',{name:'Monitoring sections'});
+ await monitoringNav.getByRole('button',{name:'Athlete Actions'}).waitFor();
+ await monitoringNav.getByRole('button',{name:'Training Analysis'}).click();
+ await coachPage.getByRole('region',{name:'Workout association review'}).waitFor();
+ await monitoringNav.getByRole('button',{name:'Planning Tools'}).click();
+ await coachPage.getByRole('region',{name:'Weekly plan reviews'}).waitFor();
+ await monitoringNav.getByRole('button',{name:'Athlete Actions'}).click();
  const inbox=coachPage.getByRole('region',{name:'Needs your attention'});
  await inbox.getByText('Updated after checking my recording',{exact:true}).waitFor();
  await inbox.getByRole('button',{name:'Mark reviewed'}).click();
