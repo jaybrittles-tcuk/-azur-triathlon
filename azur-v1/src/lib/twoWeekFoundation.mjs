@@ -5,7 +5,7 @@
  */
 const basicTypes={
  swim:{title:'Easy technique swim',minutes:30,intensity:'Relaxed technique and conversational effort; coach confirms distance and ability'},
- bike:{title:'Easy aerobic ride',minutes:40,intensity:'Conversational effort, RPE 2–3; no FTP target'},
+ bike:{title:'Easy aerobic ride',minutes:40,intensity:'Conversational effort, RPE 2–3; no power targets'},
  run:{title:'Easy run or run/walk',minutes:30,intensity:'Conversational effort, RPE 2–3; coach confirms run readiness'},
 };
 const days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
