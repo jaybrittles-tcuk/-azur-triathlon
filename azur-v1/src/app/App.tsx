@@ -10281,6 +10281,7 @@ style={
           </button>
         )}</div>
       </section>)}
+      {!isCoachAccount && <a href="/onboarding" style={{display:"block",margin:"15px 0",padding:"14px 16px",minHeight:44,borderRadius:14,background:"#fff",border:"1px solid #d2e3ed",color:"#15577a",fontSize:15,fontWeight:700,textDecoration:"none",boxSizing:"border-box"}}>Update training days &amp; thresholds <span aria-hidden="true">→</span></a>}
       {!isCoachAccount && <CoachInvitations mode="athlete" />}
     </section>
   )
