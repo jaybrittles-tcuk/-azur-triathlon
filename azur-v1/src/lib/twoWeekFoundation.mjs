@@ -74,6 +74,16 @@ export function twoWeekFoundationPreview({
  }
  if(unknownSports.length)warnings.push('After the two easy-endurance weeks, coach schedules suitable tests for: '+unknownSports.join(', ')+'.');
  else warnings.push('All three thresholds were supplied by the athlete; coach checks their age and reliability before using any intensity zones.');
+ const testWindowStart=!Number.isNaN(d.getTime())&&d.getUTCDay()===1?
+   weekDate(weekStart,14):null;
+ const proposedAssessments=unknownSports.map(sport=>({
+  sport,windowStart:testWindowStart,
+  purpose:sport==='bike'?'Establish FTP from an appropriate cycling assessment':
+   sport==='swim'?'Establish CSS from appropriately selected swim testing':
+   'Establish run training thresholds from an appropriate run assessment',
+  status:'coach_review_after_foundation'
+ }));
  return {path,unknownSports,thresholds,weeks,blockers:[...new Set(blockers)],warnings,
+  proposedAssessments,testWindowStart,
   canPublish:false,coachReviewRequired:true};
 }
