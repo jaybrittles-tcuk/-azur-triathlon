@@ -281,6 +281,7 @@ try {
  await monitoringNav.getByRole('button',{name:'Planning Tools'}).click();
  await coachPage.getByText('Weekly planning tools are not enabled in this environment.',{exact:true}).waitFor();
  await monitoringNav.getByRole('button',{name:'Athlete Actions'}).click();
+ await coachPage.getByText('Athlete notes and setup',{exact:false}).click();
  const inbox=coachPage.getByRole('region',{name:'Needs your attention'});
  await inbox.getByText('Updated after checking my recording',{exact:true}).waitFor();
  await inbox.getByRole('button',{name:'Mark reviewed'}).click();
