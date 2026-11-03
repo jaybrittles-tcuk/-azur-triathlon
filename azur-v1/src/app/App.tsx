@@ -1967,6 +1967,45 @@ if (session?.user) {
     subscription.unsubscribe();
   };
 }, []);
+  // Recover a just-completed onboarding if the previous app version returned an
+  // athlete to an empty dashboard. Never replace an existing active calendar.
+  const starterRecoveryAttempted = useRef(false);
+  useEffect(() => {
+    if (!authReady || !isAuthenticated || starterRecoveryAttempted.current) return;
+    starterRecoveryAttempted.current = true;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || user.app_metadata?.role === 'coach') return;
+        const { data: setup, error: setupError } = await supabase
+          .from('athlete_onboarding')
+          .select('onboarding_step,updated_at')
+          .eq('user_id',user.id).maybeSingle();
+        if (setupError || setup?.onboarding_step !== 3 || !setup.updated_at) return;
+        const completedAt = new Date(setup.updated_at).getTime();
+        // Only repair recent completions, not historical athlete accounts.
+        if (!Number.isFinite(completedAt) || Date.now()-completedAt > 24*60*60*1000 || completedAt>Date.now()+60000) return;
+        const { data: athlete } = await supabase.from('athlete_profile')
+          .select('id').eq('user_id',user.id).maybeSingle();
+        if (!athlete) return;
+        const today = new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+        const { data: sessions, error: sessionsError } = await supabase.from('planned_session')
+          .select('id').eq('athlete_id',athlete.id).eq('is_active_version',true)
+          .gte('planned_date',today).limit(1);
+        if (sessionsError || sessions?.length || cancelled) return;
+        const { data: result, error: generatedError } = await supabase.rpc('generate_onboarding_foundation');
+        if (generatedError || cancelled) return;
+        if (result?.status === 'created' || result?.status === 'already_planned') {
+          await loadPlannedSessions(user.id);
+          if (!cancelled) setActiveNav('Calendar');
+        }
+      } catch (error) {
+        console.warn('AZUR starter recovery could not complete:',error);
+      }
+    })();
+    return () => { cancelled=true; };
+  },[authReady,isAuthenticated]);
   const selected =
     weekSessions.find((session) => session.id === selectedId) ||
     weekSessions[0];
