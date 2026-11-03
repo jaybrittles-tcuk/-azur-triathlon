@@ -1,4 +1,14 @@
 -- Athlete-driven draft preview and explicit, atomic application on staging.
+-- Athlete-readable subset only: coach-approved base aerobic run templates.
+-- All unapproved, bike FTP/CSS, and higher-intensity workouts retain existing RLS.
+drop policy if exists staging_approved_aerobic_run_read on public.coach_workout_library;
+create policy staging_approved_aerobic_run_read
+on public.coach_workout_library for select to authenticated
+using (
+ approved=true and sport='run' and family='aerobic_endurance'
+ and level=1 and 'base'=any(phases)
+);
+
 -- Preview is read-only; applying never changes completed, locked or coach-authored sessions.
 create or replace function public.preview_foundation_reassessment(p_inputs jsonb)
 returns jsonb language plpgsql security invoker set search_path=public,pg_temp as $$
