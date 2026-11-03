@@ -193,6 +193,9 @@ try {
  await page.getByRole('checkbox',{name:'Wed',exact:true}).check();
  await page.getByRole('checkbox',{name:'Fri',exact:true}).check();
  await page.getByRole('checkbox',{name:'I can swim 200 metres comfortably and safely'}).check();
+ await page.getByLabel('Current endurance training background').selectOption('established');
+ await page.getByLabel('How consistently have you trained recently?').selectOption('8plus');
+ await page.getByLabel('Average training actually completed in recent weeks (hours, if known)').fill('10');
  await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByRole('heading',{name:'How do you track training?',exact:true}).waitFor();
  await page.getByText('Do you already know your training thresholds?',{exact:true}).waitFor();
@@ -207,6 +210,9 @@ try {
  assert.deepEqual(onboardingSavedFields.training_days,[0,2,4],'Athlete availability days saved');
  assert.equal(onboardingSavedFields.ftp_watts,280,'Reported FTP persists unchanged');
  assert.equal(onboardingSavedFields.can_swim_200m,true,'Swim safety confirmation persists');
+ assert.equal(onboardingSavedFields.training_background,'established','Endurance background is independent from first race distance');
+ assert.equal(onboardingSavedFields.training_consistency,'8plus','Consistent recent endurance training is recorded');
+ assert.equal(onboardingSavedFields.recent_weekly_hours,10,'Actual recent hours are distinguished from available hours');
  assert.equal(onboardingSavedFields.swim_css_seconds_per_100m,105,'1.45 parsed as 105 seconds, not decimal minutes');
  assert.equal(onboardingSavedFields.run_threshold_seconds_per_km,260,'4.20 parsed as 260 seconds, not decimal minutes');
  await page.locator('.athlete-agenda:visible').waitFor();

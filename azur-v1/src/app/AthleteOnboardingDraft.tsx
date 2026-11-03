@@ -19,6 +19,8 @@ export default function AthleteOnboardingDraft(){
  const [hours,setHours]=useState(8);
  const [trainingDays,setTrainingDays]=useState<number[]>([]);
  const [recentHours,setRecentHours]=useState('');
+ const [trainingBackground,setTrainingBackground]=useState('unknown');
+ const [trainingConsistency,setTrainingConsistency]=useState('unknown');
  const [trainingConcern,setTrainingConcern]=useState<'none'|'yes'|'unsure'>('unsure');
  const [canSwim,setCanSwim]=useState(false);
  const [knownTests,setKnownTests]=useState(false);
@@ -43,7 +45,7 @@ export default function AthleteOnboardingDraft(){
    setUserId(user.id);
    const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
    if(!cancelled && profile?.display_name) setDisplayName(profile.display_name);
-   const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,device,onboarding_step,training_days,recent_weekly_hours,current_training_concern,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,can_swim_200m').eq('user_id',user.id).maybeSingle();
+   const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,device,onboarding_step,training_days,recent_weekly_hours,current_training_concern,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,can_swim_200m,training_background,training_consistency').eq('user_id',user.id).maybeSingle();
    if(cancelled)return;
    if(error)setMessage('Could not load your saved setup: '+error.message);
    else if(data){
@@ -52,6 +54,8 @@ export default function AthleteOnboardingDraft(){
     setDevice(data.device as Device);
     setTrainingDays(Array.isArray(data.training_days)?data.training_days:[]);
     setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
+    setTrainingBackground(data.training_background||'unknown');
+    setTrainingConsistency(data.training_consistency||'unknown');
     setTrainingConcern(data.current_training_concern==='none'||data.current_training_concern==='yes'?data.current_training_concern:'unsure');
     setFtpWatts(data.ftp_watts==null?'':String(data.ftp_watts));
     setSwimCss(formatAthletePace(data.swim_css_seconds_per_100m));
@@ -77,6 +81,7 @@ export default function AthleteOnboardingDraft(){
   if(ftp!==null&&(!Number.isInteger(ftp)||ftp<60||ftp>650)){setMessage('Bike FTP should be between 60 and 650 W, or left blank.');return;}
   if(css!==null&&(!Number.isInteger(css)||css<50||css>300)){setMessage('Swim CSS: use 1:45 or 1.45 for one minute 45 seconds per 100m (0:50–5:00).');return;}
   if(run!==null&&(!Number.isInteger(run)||run<150||run>900)){setMessage('Run threshold: use 4:20 or 4.20 for four minutes 20 seconds per km (2:30–15:00).');return;}
+  if(nextStep===3 && (trainingBackground==='unknown'||trainingConsistency==='unknown')){setMessage('Please confirm your training background and recent consistency.');setStep(1);return;}
   if(nextStep===3 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
   const {error}=await supabase.from('athlete_onboarding').upsert({
@@ -84,6 +89,7 @@ export default function AthleteOnboardingDraft(){
    experience,weekly_hours:hours,device,onboarding_step:nextStep,
    training_days:[...trainingDays].sort((a,b)=>a-b),
    recent_weekly_hours:recent,current_training_concern:trainingConcern,
+   training_background:trainingBackground,training_consistency:trainingConsistency,
    can_swim_200m:canSwim,
    ftp_watts:ftp,swim_css_seconds_per_100m:css,run_threshold_seconds_per_km:run,
    updated_at:new Date().toISOString()
@@ -180,6 +186,23 @@ export default function AthleteOnboardingDraft(){
     </label>
     <small style={{display:'block',marginTop:8}}>Leave unticked if unsure. You can update this later; no swim sessions will be prescribed until confirmed.</small>
    </fieldset>
+   <label>Current endurance training background
+    <select value={trainingBackground} onChange={e=>setTrainingBackground(e.target.value)}>
+      <option value="unknown">Select your current training background</option>
+      <option value="novice">New to consistent swim, bike and run training</option>
+      <option value="regular">Train regularly, building endurance</option>
+      <option value="established">Established endurance athlete with substantial training history</option>
+    </select>
+   </label>
+   <label>How consistently have you trained recently?
+    <select value={trainingConsistency} onChange={e=>setTrainingConsistency(e.target.value)}>
+      <option value="unknown">Choose your recent consistency</option>
+      <option value="under4">Less than four consecutive weeks</option>
+      <option value="4to7">Four to seven consecutive weeks</option>
+      <option value="8plus">Eight or more consecutive weeks</option>
+    </select>
+   </label>
+   <p>Being new to a race distance does not mean you are new to endurance training. AZUR uses your training background and consistent, actually completed hours to determine a safe starting point.</p>
    <label>Average training actually completed in recent weeks (hours, if known)
     <input type="number" min={0} max={25} step={0.5} placeholder="Optional" value={recentHours} onChange={e=>setRecentHours(e.target.value)}/>
    </label>
