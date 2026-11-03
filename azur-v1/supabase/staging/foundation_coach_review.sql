@@ -1,4 +1,14 @@
 -- AZUR staging: immutable athlete requests and audited assigned-coach decisions.
+
+-- Self-only access to the existence of one's own assignment.
+-- Required because the authenticated request RPC uses invoker permissions.
+drop policy if exists staging_own_coach_assignment_read on public.coach_athlete_assignment;
+create policy staging_own_coach_assignment_read on public.coach_athlete_assignment
+ for select to authenticated using (
+  exists(select 1 from public.athlete_profile p
+    where p.id=athlete_id and p.user_id=(select auth.uid()))
+ );
+
 create table if not exists public.foundation_reassessment_request (
  id uuid primary key default gen_random_uuid(),
  athlete_id uuid not null references public.athlete_profile(id),
