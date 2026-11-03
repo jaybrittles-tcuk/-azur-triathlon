@@ -92,7 +92,8 @@ export default function CoachStarterWeekPreview(){
      {distribution.targetBySport&&<p style={{fontSize:13,color:'#c2d7e6',marginTop:12}}>
       {Object.entries(distribution.targetBySport).map(([sport,mins])=>sport.toUpperCase()+' '+Math.floor(Number(mins)/60)+'h '+String(Number(mins)%60).padStart(2,'0')+'m').join(' · ')}
      </p>}
-     {distribution.slots.map(slot=><div key={slot.day} style={{padding:'8px 0',borderBottom:'1px solid #345c77',fontSize:13}}>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][slot.day]} · {slot.sport.toUpperCase()} · {slot.availableTemplates} approved workout options</div>)}
+     {distribution.slots.map(slot=><div key={slot.day} style={{padding:'8px 0',borderBottom:'1px solid #345c77',fontSize:13}}>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][slot.day]} · {slot.sport.toUpperCase()} · {slot.minutes} min · {slot.approvedMatches.length?'Approved option: '+slot.approvedMatches[0].title:'Needs workout prescription'}</div>)}
+     <p style={{fontSize:12,color:'#bde2f6'}}>Suggested {distribution.proposedMinutes??0} min · matched to approved workout durations {distribution.mappedMinutes} min · {distribution.restDays??'—'} rest day(s). No sessions are published.</p>
      {distribution.warnings.map(w=><p key={w} style={{fontSize:12,color:'#ffdfaf'}}>{w}</p>)}
    </details>}
    <p style={{fontSize:12,color:'#a7c5d8',marginTop:12}}>AZUR won't prescribe zone targets until a coach verifies the supplied thresholds. No calendar writes are enabled.</p>
