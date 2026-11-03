@@ -61,7 +61,10 @@ begin
   -- Without corroborated history the initial programme stays deliberately light.
   v_cap_minutes := floor(60 * least(
     v_setup.weekly_hours,
-    coalesce(v_setup.recent_weekly_hours * 1.1, 2.5),
+    coalesce(case
+      when v_setup.recent_weekly_hours = 0 then 2.0
+      else greatest(1.5, v_setup.recent_weekly_hours * 1.1)
+    end, 2.5),
     case when v_setup.experience='first' then 3.0 else 5.0 end
   ));
   v_max_sessions := least(4, cardinality(v_days));
