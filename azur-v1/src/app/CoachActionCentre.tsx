@@ -68,7 +68,7 @@ export default function CoachActionCentre(){
      return {athlete:athleteById.get(id)!,decision,key,reviewed:reviewedKeys.has(key)};
    });
    const weight=(r:CoachRow)=>r.decision.priority==='high'?0:r.decision.priority==='review'?1:r.decision.action==='insufficient_data'?2:3;
-   decisions.sort((a,b)=>weight(a)-weight(b)||a.athlete.display_name!.localeCompare(b.athlete.display_name!));
+   decisions.sort((a,b)=>weight(a)-weight(b)||(a.athlete.display_name||'Assigned athlete').localeCompare(b.athlete.display_name||'Assigned athlete'));
    if(active){setRows(decisions);setCoachId(user.id);setTruncated(false)}
   }catch(e){if(active){setRows([]);setError(e instanceof Error?e.message:'Unable to assess assigned athletes')}}
   finally{if(active)setLoading(false)}
