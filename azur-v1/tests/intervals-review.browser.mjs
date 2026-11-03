@@ -46,6 +46,7 @@ const mockSupabase=async (route,coach=false)=>{
   }
   else if(url.pathname.endsWith('/coach_athlete_assignment')) data=invitationAccepted?[{athlete_id:athlete}]:[];
   else if(url.pathname.endsWith('/athlete_profile'))data={id:athlete,user_id:user.id,display_name:'Synthetic Athlete',ftp_w:250,normal_weekly_hours:8};
+  else if(url.pathname.endsWith('/athlete_onboarding'))data={user_id:user.id,onboarding_step:3,race_distance:'70.3',race_date:null,weekly_hours:8,device:'garmin',experience:'first'};
   else if(url.pathname.endsWith('/coach_workout_approval_event'))data=[{id:'pilot-approval',workout_id:'BIKE-THR-002',workout_version:1,decision:'approved',level:1,phases:['build'],decided_at:new Date().toISOString()}];
   else if(url.pathname.endsWith('/rpc/coach_schedule_bike_with_week')){
    const body=req.postDataJSON();
@@ -85,7 +86,8 @@ const mockSupabase=async (route,coach=false)=>{
   data=missingProfile?(single?null:[]):(single?profile:[profile]);
  } else if(url.pathname.endsWith('/athlete_onboarding')) {
   if(req.method()==='POST')onboardingStep=req.postDataJSON().onboarding_step;
-  data=single?null:[];
+  const setup={user_id:user.id,onboarding_step:onboardingStep,race_distance:'70.3',race_date:null,experience:'first',weekly_hours:8,device:'garmin'};
+  data=single?setup:[setup];
  } else if(url.pathname.endsWith('/planned_session')) data=demoSessions;
  else if(url.pathname.endsWith('/completed_activity')) data=accepted?[{...recorded(),...(demoSessions.length?{start_time:new Date().toISOString()}: {})}]:[];
  const emptySingle=single&&data===null;
@@ -148,6 +150,7 @@ try {
  assert.deepEqual(errors,[]);
  console.log('PASS: standalone mobile onboarding, no sidebar or horizontal overflow');
  missingProfile=true;
+ onboardingStep=0;
  await page.goto(base);
  await page.waitForURL('**/onboarding');
  await page.getByLabel('Your name',{exact:true}).fill('New Athlete');
