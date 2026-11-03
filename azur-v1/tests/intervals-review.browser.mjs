@@ -18,6 +18,7 @@ let staged=false,accepted=false,validated=false;
 let profileFtp=250;
 let demoSessions=[];
 let missingProfile=false;
+let reviewMode=false,reviewDecision='none';
 let onboardingStep=3,onboardingSavedFields={};
 const commands=[];
 const errors=[];
@@ -107,11 +108,18 @@ const mockSupabase=async (route,coach=false)=>{
   assert.equal(body.p_inputs.recent_weekly_hours,10);
   const date=new Date();date.setDate(date.getDate()+((8-date.getDay())%7||7));
   const day=date.toISOString().slice(0,10);
-  data={status:'ready_for_confirmation',reason:null,week_start:day,week_cap_minutes:480,
+  data={status:reviewMode?'coach_review_required':'ready_for_confirmation',reason:reviewMode?'Material increase beyond 20% of existing weekly training requires coach approval':null,week_start:day,week_cap_minutes:480,
     training_tier:'established_continuation',capacity_basis:'athlete-reported 8+ consistent weeks',
     athlete_reported:true,total_minutes:120,calendar_fingerprint:'synthetic',
     sessions:[{date:day,sport:'bike',title:'Foundation easy aerobic ride',duration_min:120,
       week_start:day,prescription:{steps:[]}}]};
+ } else if(url.pathname.endsWith('/rpc/foundation_coach_review_state')) {
+  assert.equal(req.postDataJSON().p_expected_preview.status,'coach_review_required');
+  data={status:reviewDecision,request_id:'test-review-request',coach_note:reviewDecision==='approved'?'I checked recent training evidence and readiness':null};
+ } else if(url.pathname.endsWith('/rpc/submit_foundation_coach_review')) {
+  assert.equal(req.postDataJSON().p_expected_preview.status,'coach_review_required');
+  reviewDecision='pending';
+  data={status:'submitted',request_id:'test-review-request'};
  } else if(url.pathname.endsWith('/rpc/apply_foundation_reassessment')) {
   const body=req.postDataJSON();
   assert.equal(body.p_confirm,true);
@@ -254,6 +262,17 @@ try {
  await page.getByText('Reassessment applied: 1 future sessions published.',{exact:false}).waitFor();
  assert.equal(demoSessions.some(s=>s.id==='reassessed-1'),true,'Reassessment must save only after confirmation');
  console.log('PASS: athlete reassessment → preview → explicit confirm → future calendar refresh');
+ reviewMode=true;
+ await page.getByRole('button',{name:'Reassess my programme'}).click();
+ await page.getByRole('button',{name:'Preview next two weeks'}).click();
+ await page.getByRole('button',{name:'Request review from my coach'}).click();
+ await page.getByText('Review request sent to your assigned AZUR coach.',{exact:false}).waitFor();
+ assert.equal(reviewDecision,'pending','Coach request should remain pending after athlete action');
+ reviewDecision='approved'; // synthetic assigned coach decision was recorded separately
+ await page.getByRole('button',{name:'Preview next two weeks'}).click();
+ await page.getByRole('button',{name:'Confirm coach-approved programme'}).click();
+ await page.getByText('Reassessment applied:',{exact:false}).waitFor();
+ console.log('PASS: material increase requires assigned coach decision plus fresh athlete confirmation');
  await page.getByRole('button',{name:'Chat',exact:true}).click();
  await page.getByRole('heading',{name:'Chat',exact:true }).waitFor();
  await page.getByText('Coming soon',{exact:true}).waitFor();
