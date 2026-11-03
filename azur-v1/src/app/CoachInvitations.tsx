@@ -13,8 +13,8 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   const {data:{user}}=await supabase.auth.getUser();
   if(!user){setMessage('Sign in to manage invitations.');setLoading(false);return;}
   const {data,error}=await supabase.from('coach_athlete_invitation').select('id,invitee_email,coach_user_id,created_at,expires_at,accepted_at,email_sent_at').order('created_at',{ascending:false}).limit(30);
-  if(error)setMessage(error.message);
-  else setItems((data||[]) as Invitation[]);
+  if(error)setMessage('Could not refresh invitations. Please try again.');
+  else {setItems((data||[]) as Invitation[]);setMessage(previous=>previous.startsWith('permission denied') || previous.startsWith('Could not refresh invitations') ? '' : previous);}
   setLoading(false);
  }
  useEffect(()=>{void refresh()},[]);
@@ -47,9 +47,9 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   setBusy(true);setMessage('');
   const {data:{user}}=await supabase.auth.getUser();
   if(!user){setMessage('Please sign in.');setBusy(false);return;}
-  const {data,error}=await supabase.from('coach_athlete_invitation').update({accepted_at:new Date().toISOString(),accepted_by:user.id}).eq('id',inv.id).is('accepted_at',null).select('id').maybeSingle();
+  const {data,error}=await supabase.from('coach_athlete_invitation').update({accepted_at:new Date().toISOString()}).eq('id',inv.id).is('accepted_at',null).select('id').maybeSingle();
   setBusy(false);
-  if(error){setMessage(error.message);return;}
+  if(error){setMessage('Unable to accept the invitation: '+error.message);return;}
   if(!data){setMessage('This invitation could not be accepted. Refresh to check its status.');await refresh();return;}
   setMessage('Invitation accepted. Your coach can now see your athlete profile.');await refresh();
  }
