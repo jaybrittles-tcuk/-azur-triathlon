@@ -115,7 +115,7 @@ export default function CoachAttentionInbox({onSelect}:{onSelect:(athlete:Assign
    </div><div><button type="button" onClick={()=>onSelect(item.athlete)}>View athlete</button>
    {!done&&<button type="button" disabled={Boolean(saving)} onClick={()=>void markReviewed(item)}>{saving===item.key?'Saving…':'Mark reviewed'}</button>}</div></article>;
  }
- return <section className="coach-attention-v2">
+ return <section className="coach-attention-v2" aria-label="Coach attention inbox">
   <header className="coach-attention-heading"><div><h3>Monitoring</h3><p>Athlete notes, unlinked key sessions and priority decisions.</p></div>
     <button type="button" onClick={()=>setRefreshKey(x=>x+1)} disabled={loading||Boolean(saving)}>↻ Refresh</button>
   </header>
