@@ -75,7 +75,9 @@ begin
  and p.planned_date>=v_start and p.planned_date<v_start+14;
  if exists(select 1 from public.season_week w
   where w.athlete_id=v_athlete and w.week_start in (v_start,v_start+7)
-    and w.locked) then v_blocked:='A coach-locked week cannot be replaced'; end if;
+    and (w.locked or w.phase<>'Foundation')) then
+    v_blocked:='A coach-managed or locked training week cannot be replaced';
+ end if;
  if exists(select 1 from public.planned_session p
   where p.athlete_id=v_athlete and p.is_active_version
     and p.planned_date>=v_start and p.planned_date<v_start+14
@@ -195,8 +197,10 @@ begin
       round((v_plan->>'week_cap_minutes')::numeric/60,1),false,false)
    on conflict(athlete_id,week_start) do nothing;
    select id into v_week_id from public.season_week
-     where athlete_id=v_athlete and week_start=v_week;
-   if v_week_id is null then raise exception 'Foundation week missing'; end if;
+     where athlete_id=v_athlete and week_start=v_week and phase='Foundation' and not locked;
+   if v_week_id is null then raise exception 'Safe foundation week missing'; end if;
+   update public.season_week set target_hours=round((v_plan->>'week_cap_minutes')::numeric/60,1)
+     where id=v_week_id and phase='Foundation' and not locked;
    insert into public.planned_session (
     season_week_id,athlete_id,planned_date,sport,title,session_class,priority,
     duration_min,targets,prescription,rationale,status,locked,is_active_version)
