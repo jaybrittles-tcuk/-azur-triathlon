@@ -33,8 +33,8 @@ export function mapAutoWeek({weekStart,targetHours,slots,library}={}){
      !['swim','bike','run'].includes(slot.sport)||!Number.isInteger(slot.minutes)||slot.minutes<15||slot.minutes>240){
    blockers.push('Invalid proposed session slot');continue;
   }
-  const matching=approved.filter(w=>w.sport===slot.sport&&Math.abs(w.duration_min-slot.minutes)<=10)
-    .sort((a,b)=>Math.abs(a.duration_min-slot.minutes)-Math.abs(b.duration_min-slot.minutes)||
+  const matching=approved.filter(w=>w.sport===slot.sport&&w.duration_min===slot.minutes)
+    .sort((a,b)=>
     a.workout_key.localeCompare(b.workout_key));
   if(!matching.length){
    blockers.push('No approved benchmark-independent '+slot.sport+' workout near '+slot.minutes+' minutes');
