@@ -6,9 +6,14 @@ import CoachTrainingExceptions from './CoachTrainingExceptions';
 import CoachTrainingPatterns from './CoachTrainingPatterns';
 import CoachWorkoutMatchReview from './CoachWorkoutMatchReview';
 import CoachWeeklyReview from './CoachWeeklyReview';
+import CoachWorkoutLibrary from './CoachWorkoutLibrary';
+import CoachWeekReconciliationPreview from './CoachWeekReconciliationPreview';
+import CoachAthleteCalendarPreview from './CoachAthleteCalendarPreview';
+import CoachWeeklyDraftBuilder from './CoachWeeklyDraftBuilder';
 import CoachSwimFocusReview from './CoachSwimFocusReview';
 
 type Area='actions'|'analysis'|'planning';
+type PlanningTool='calendar'|'drafts'|'library'|'completeness';
 type Props={onSelectAthlete:(athlete:AssignedAthlete)=>void};
 const areas:{id:Area;title:string;description:string;icon:string}[]=[
  {id:'actions',title:'Athlete Actions',description:'Prioritised decisions and athlete feedback',icon:'◎'},
@@ -18,6 +23,8 @@ const areas:{id:Area;title:string;description:string;icon:string}[]=[
 
 export default function CoachMonitoringWorkspace({onSelectAthlete}:Props){
  const [active,setActive]=useState<Area>('actions');
+ const [planningTool,setPlanningTool]=useState<PlanningTool|null>(null);
+ const [analysisDetail,setAnalysisDetail]=useState<'exceptions'|'patterns'|'matching'|null>(null);
  return <section aria-label="Coach monitoring tools" style={{minWidth:0,maxWidth:'100%',paddingBottom:'calc(96px + env(safe-area-inset-bottom, 0px))'}}>
   <div style={{margin:'0 0 16px',minWidth:0}}>
    <div style={{marginBottom:12}}>
@@ -43,15 +50,45 @@ export default function CoachMonitoringWorkspace({onSelectAthlete}:Props){
     <CoachAttentionInbox onSelect={onSelectAthlete}/>
    </div>}
   {active==='analysis'&&<div aria-label="Training Analysis" style={{minWidth:0}}>
-    <CoachTrainingExceptions/>
-    <CoachTrainingPatterns/>
-    <CoachWorkoutMatchReview/>
-    {import.meta.env.VITE_ENABLE_SWIM_ASSESSMENTS === 'true' && <CoachSwimFocusReview/>}
+    {!analysisDetail ? <div style={{display:'grid',gap:10}}>
+      {([
+        {id:'exceptions',title:'Workout exceptions',subtitle:'Review unusual individual workout results'},
+        {id:'patterns',title:'Training patterns',subtitle:'Monitor repeated changes across sessions'},
+        {id:'matching',title:'Device workout matching',subtitle:'Check imported activity links and execution evidence'}
+      ] as const).map(tool=><button key={tool.id} type="button"
+        onClick={()=>setAnalysisDetail(tool.id)}
+        style={{width:'100%',minHeight:80,border:'1px solid #315977',borderRadius:14,background:'#14344e',color:'#edf8ff',padding:'15px 16px',textAlign:'left',display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
+        <span><strong style={{display:'block',fontSize:16}}>{tool.title}</strong><span style={{display:'block',color:'#a9c3d4',fontSize:12,marginTop:5}}>{tool.subtitle}</span></span><span aria-hidden="true" style={{color:'#83ceff',fontSize:24}}>›</span>
+      </button>)}
+    </div> : <>
+     <button type="button" onClick={()=>setAnalysisDetail(null)} style={{marginBottom:14,minHeight:44,padding:'8px 12px',borderRadius:10,border:'1px solid #396784',background:'#12314c',color:'#d8efff'}}>‹ Training Analysis</button>
+     {analysisDetail==='exceptions'&&<CoachTrainingExceptions/>}
+     {analysisDetail==='patterns'&&<CoachTrainingPatterns/>}
+     {analysisDetail==='matching'&&<CoachWorkoutMatchReview/>}
+    </>}
+    {import.meta.env.VITE_ENABLE_SWIM_ASSESSMENTS === 'true'&& !analysisDetail &&
+      <details style={{marginTop:14,padding:12,border:'1px solid #315977',borderRadius:12}}><summary style={{cursor:'pointer'}}>Swim performance review</summary><CoachSwimFocusReview/></details>}
    </div>}
   {active==='planning'&&<div aria-label="Planning Tools" style={{minWidth:0}}>
-    {import.meta.env.VITE_ENABLE_WEEKLY_REVIEW === 'true'
-      ? <CoachWeeklyReview/>
-      : <p style={{color:'#aac4d5'}}>Weekly planning tools are not enabled in this environment.</p>}
+    {import.meta.env.VITE_ENABLE_WEEKLY_REVIEW === 'true' ? <>
+      {!planningTool ? <div style={{display:'grid',gap:10}}>
+        {([
+          {id:'calendar',title:'Athlete calendar',subtitle:'See the published week without editing it'},
+          {id:'drafts',title:'Weekly plans',subtitle:'Create and review coach-approved drafts'},
+          {id:'library',title:'Workout library',subtitle:'Find, inspect and approve sessions'},
+          {id:'completeness',title:'Week completeness',subtitle:'Check target hours and proposed additions'}
+        ] as const).map(tool=><button key={tool.id} type="button" onClick={()=>setPlanningTool(tool.id)}
+          style={{width:'100%',minHeight:80,padding:'14px 16px',display:'flex',justifyContent:'space-between',alignItems:'center',textAlign:'left',gap:12,border:'1px solid #315977',borderRadius:14,background:'#14344e',color:'#edf8ff'}}>
+          <span><strong style={{display:'block',fontSize:16}}>{tool.title}</strong><span style={{display:'block',fontSize:12,marginTop:5,color:'#a9c3d4'}}>{tool.subtitle}</span></span><span aria-hidden="true" style={{fontSize:24,color:'#83ceff'}}>›</span>
+         </button>)}
+       </div> : <>
+        <button type="button" onClick={()=>setPlanningTool(null)} style={{marginBottom:14,minHeight:44,padding:'8px 12px',borderRadius:10,border:'1px solid #396784',background:'#12314c',color:'#d8efff'}}>‹ Planning Tools</button>
+        {planningTool==='calendar'&&<CoachAthleteCalendarPreview/>}
+        {planningTool==='library'&&<CoachWorkoutLibrary/>}
+        {planningTool==='completeness'&&<CoachWeekReconciliationPreview/>}
+        {planningTool==='drafts'&&<><CoachWeeklyDraftBuilder/><CoachWeeklyReview/></>}
+       </>}
+     </> : <p style={{color:'#aac4d5'}}>Weekly planning tools are not enabled in this environment.</p>}
    </div>}
  </section>;
 }
