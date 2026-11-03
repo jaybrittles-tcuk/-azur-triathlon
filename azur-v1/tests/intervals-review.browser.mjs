@@ -100,6 +100,29 @@ const mockSupabase=async (route,coach=false)=>{
       {durationMin:5,target:'Easy cool-down'}]}
   }];
   data={status:'created',sessions:1,first_date:new Date().toISOString().slice(0,10)};
+ } else if(url.pathname.endsWith('/rpc/preview_foundation_reassessment')) {
+  const body=req.postDataJSON();
+  assert.equal(body.p_inputs.training_background,'established');
+  assert.equal(body.p_inputs.training_consistency,'8plus');
+  assert.equal(body.p_inputs.recent_weekly_hours,10);
+  const date=new Date();date.setDate(date.getDate()+((8-date.getDay())%7||7));
+  const day=date.toISOString().slice(0,10);
+  data={status:'ready_for_confirmation',reason:null,week_start:day,week_cap_minutes:480,
+    training_tier:'established_continuation',capacity_basis:'athlete-reported 8+ consistent weeks',
+    athlete_reported:true,total_minutes:120,calendar_fingerprint:'synthetic',
+    sessions:[{date:day,sport:'bike',title:'Foundation easy aerobic ride',duration_min:120,
+      week_start:day,prescription:{steps:[]}}]};
+ } else if(url.pathname.endsWith('/rpc/apply_foundation_reassessment')) {
+  const body=req.postDataJSON();
+  assert.equal(body.p_confirm,true);
+  assert.equal(body.p_expected_preview.calendar_fingerprint,'synthetic');
+  const plan=body.p_expected_preview.sessions[0];
+  demoSessions.push({id:'reassessed-1',athlete_id:athlete,planned_date:plan.date,
+    sport:plan.sport,title:plan.title,session_class:'easy',priority:2,duration_min:plan.duration_min,
+    status:'planned',is_active_version:true,targets:{generation_source:'onboarding_foundation'},
+    prescription:{steps:[{durationMin:10,target:'Easy warmup'}, {durationMin:105,target:'Aerobic'},
+      {durationMin:5,target:'Cooldown'}]}});
+  data={status:'applied',sessions:1,week_start:body.p_expected_preview.week_start};
  } else if(url.pathname.endsWith('/planned_session')) data=demoSessions;
  else if(url.pathname.endsWith('/completed_activity')) data=accepted?[{...recorded(),...(demoSessions.length?{start_time:new Date().toISOString()}: {})}]:[];
  const emptySingle=single&&data===null;
@@ -221,6 +244,13 @@ try {
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'White dashboard must fit phone width');
  assert.deepEqual(errors,[]);
  console.log('PASS: signed-in new athlete → onboarding → saved profile → generated starter → calendar');
+ await page.getByRole('button',{name:'Reassess my programme'}).click();
+ await page.getByRole('button',{name:'Preview next two weeks'}).click();
+ await page.getByText('Preview · established continuation',{exact:true}).waitFor();
+ await page.getByRole('button',{name:'Confirm and update future calendar'}).click();
+ await page.getByText('Reassessment applied: 1 future sessions published.',{exact:false}).waitFor();
+ assert.equal(demoSessions.some(s=>s.id==='reassessed-1'),true,'Reassessment must save only after confirmation');
+ console.log('PASS: athlete reassessment → preview → explicit confirm → future calendar refresh');
  await page.getByRole('button',{name:'Chat',exact:true}).click();
  await page.getByRole('heading',{name:'Chat',exact:true }).waitFor();
  await page.getByText('Coming soon',{exact:true}).waitFor();
