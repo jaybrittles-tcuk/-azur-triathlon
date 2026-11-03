@@ -1,11 +1,12 @@
 import {useEffect,useState} from 'react';
 import {supabase} from '../lib/supabase';
 
-type PlanSession={date:string;sport:'swim'|'bike'|'run';title:string;duration_min:number};
+type PlanSession={date:string;sport:'swim'|'bike'|'run';title:string;duration_min:number;
+ selection_source?:'approved_coach_library'|'conservative_rpe_foundation';selection_reason?:string;family?:string};
 type PlanPreview={
  status:'ready_for_confirmation'|'coach_review_required';
  reason?:string|null;week_start:string;week_cap_minutes:number;training_tier:string;
- capacity_basis:string;athlete_reported:boolean;total_minutes:number;
+ capacity_basis:string;athlete_reported:boolean;total_minutes:number;existing_peak_week_minutes?:number;
  sessions:PlanSession[];calendar_fingerprint:string;
 };
 type Inputs={training_background:string;training_consistency:string;recent_weekly_hours:number|null;weekly_hours:number;training_days:number[];can_swim_200m:boolean};
@@ -158,14 +159,54 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
          {' '}across the two weeks · {preview.sessions.length} sessions.
          Based on athlete-reported history, not verified device load.
        </p>
+       <div style={{display:'flex',gap:10,flexWrap:'wrap',fontSize:12,margin:'8px 0 14px'}}>
+         <span>Current highest planned week: {minutes(preview.existing_peak_week_minutes||0)}</span>
+         <span>Proposed maximum: {minutes(preview.week_cap_minutes)}/week</span>
+       </div>
+       <p style={{fontSize:12,lineHeight:1.5}}>
+         Coach-approved low-intensity library workouts are identified below.
+         Other sessions use conservative RPE instructions. Tempo, threshold,
+         and hard intervals remain outside this automatic reassessment.
+       </p>
        {Object.entries(daysPerWeek).map(([week,sessions])=>
-         <div key={week} style={{margin:'12px 0'}}>
-           <strong>Week of {week} · {minutes(sessions.reduce((n,s)=>n+s.duration_min,0))}</strong>
-           {sessions.map((s,i)=><div key={s.date+'-'+i} style={{
-             padding:'5px 0',fontSize:13,borderBottom:'1px solid #dbe7ef'}}>
-             {s.date} · {s.sport.toUpperCase()} · {s.title} · {s.duration_min}m
-           </div>)}
-         </div>)}
+         <section key={week} aria-label={'Week of '+week} style={{margin:'16px 0'}}>
+           <strong style={{display:'block',marginBottom:10,fontSize:15}}>
+             Week of {new Date(week+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'})}
+             {' · '}{minutes(sessions.reduce((n,s)=>n+s.duration_min,0))}
+           </strong>
+           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,185px),1fr))',gap:9}}>
+             {Array.from({length:7},(_,index)=>{
+               const date=new Date(week+'T12:00:00Z');
+               date.setUTCDate(date.getUTCDate()+index);
+               const key=date.toISOString().slice(0,10);
+               const daySessions=sessions.filter(session=>session.date===key);
+               const sport=daySessions[0]?.sport;
+               const accent=sport==='bike'?'#1576b6':sport==='run'?'#c88419':sport==='swim'?'#008f9d':'#9eb4c5';
+               return <article key={key} style={{
+                 border:'1px solid #cadbe7',borderLeft:'4px solid '+accent,
+                 borderRadius:12,padding:11,minHeight:92,
+                 background:daySessions.length?'#fff':'#eaf1f5'
+               }}>
+                 <strong style={{display:'block',fontSize:12,color:'#31536a'}}>
+                   {names[index]} {date.getUTCDate()} {date.toLocaleDateString('en-GB',{month:'short',timeZone:'UTC'})}
+                 </strong>
+                 {daySessions.length?daySessions.map((session,i)=><div key={i}>
+                   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:6,margin:'7px 0'}}>
+                     <span style={{fontSize:11,fontWeight:800,color:accent}}>{session.sport.toUpperCase()}</span>
+                     <strong style={{fontSize:13}}>{minutes(session.duration_min)}</strong>
+                   </div>
+                   <strong style={{display:'block',fontSize:13,lineHeight:1.35}}>{session.title}</strong>
+                   <small style={{display:'block',marginTop:6,fontSize:11,color:'#526b7f'}}>
+                     {session.selection_source==='approved_coach_library'?'Approved AZUR workout':'RPE-based foundation'}
+                   </small>
+                   {session.selection_reason&&<small style={{display:'block',fontSize:11,color:'#526b7f',marginTop:4}}>
+                     {session.selection_reason}
+                   </small>}
+                 </div>):<span style={{display:'block',marginTop:10,fontSize:12,color:'#64788a'}}>Rest / no planned session</span>}
+               </article>;
+             })}
+           </div>
+         </section>)}
        {preview.status==='coach_review_required'
          ?<p role="status" style={{color:'#784317',fontWeight:600}}>
            Coach review required: {preview.reason}. Your existing calendar has not changed.
