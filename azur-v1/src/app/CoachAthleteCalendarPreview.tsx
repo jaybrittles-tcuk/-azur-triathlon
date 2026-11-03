@@ -30,16 +30,16 @@ export default function CoachAthleteCalendarPreview(){
   }catch(e){if(active){setSessions([]);setError(e instanceof Error?e.message:'Unable to read calendar')}}finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[athleteId,week,reload]);
  const minutes=sessions.reduce((sum,s)=>sum+s.duration_min,0);
- return <section className="coach-attention-v2" aria-label="Assigned athlete calendar preview">
+ return <section className="coach-attention-v2" aria-label="Assigned athlete calendar preview" style={{paddingBottom:"calc(110px + env(safe-area-inset-bottom, 0px))",maxWidth:"100%",minWidth:0,overflowWrap:"anywhere"}}>
  <header className="coach-attention-heading"><div><h3>Assigned athlete calendar preview</h3><p>Read-only preview of the published athlete calendar. Your personal calendar remains unchanged.</p></div><button type="button" onClick={()=>setReload(x=>x+1)} disabled={loading}>Refresh</button></header>
- <div style={{display:'flex',gap:12,flexWrap:'wrap',alignItems:'center'}}>
- <label>Athlete <select value={athleteId} onChange={e=>setAthleteId(e.target.value)}>{athletes.map(a=><option key={a.id} value={a.id}>{a.display_name||'Assigned athlete'}</option>)}</select></label>
- <button type="button" onClick={()=>setWeek(x=>addDays(x,-7))}>Previous week</button>
- <strong>{week} – {addDays(week,6)}</strong>
- <button type="button" onClick={()=>setWeek(x=>addDays(x,7))}>Next week</button>
+ <div style={{display:"flex",gap:12,flexWrap:"wrap",alignItems:"center",minWidth:0,maxWidth:"100%"}}>
+ <label style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:8,minWidth:0,maxWidth:"100%"}}>Athlete <select style={{maxWidth:"100%",minWidth:0,width:"min(100%, 310px)"}} value={athleteId} onChange={e=>setAthleteId(e.target.value)}>{athletes.map(a=><option key={a.id} value={a.id}>{a.display_name||'Assigned athlete'}</option>)}</select></label>
+ <button type="button" className="primary-button" style={{minHeight:44}} onClick={()=>setWeek(x=>addDays(x,-7))}>‹ Previous</button>
+ <strong style={{fontSize:14,whiteSpace:"normal"}}>{new Date(week+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"})} – {new Date(addDays(week,6)+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}</strong>
+ <button type="button" className="primary-button" style={{minHeight:44}} onClick={()=>setWeek(x=>addDays(x,7))}>Next ›</button>
  </div>
  {error&&<p role="alert">Calendar preview unavailable: {error}. This preview needs assigned-coach read permission; it cannot change athlete sessions.</p>}
- <p>{loading?'Loading published sessions…':error?'Unable to verify session count':`${sessions.length} published sessions · ${minutes} minutes`}</p>
- {!error&&Array.from({length:7},(_,i)=>{const date=addDays(week,i);const items=sessions.filter(s=>s.planned_date===date);return <article className="coach-attention-row" key={date}><div><strong>{new Date(date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}</strong>{!items.length?<p>Rest / no published sessions</p>:items.map(s=><details key={s.id}><summary>{s.sport.toUpperCase()} · {s.title} · {s.duration_min} min · {s.status}</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(s.prescription,null,2)}</pre></details>)}</div></article>})}
+ <p aria-live="polite">{loading?'Loading published sessions…':error?'Unable to verify session count':`${sessions.length} published sessions · ${minutes} minutes`}</p>
+ {!error&&Array.from({length:7},(_,i)=>{const date=addDays(week,i);const items=sessions.filter(s=>s.planned_date===date);return <article className="coach-attention-row" key={date} style={{minWidth:0,maxWidth:"100%",padding:16}}><div style={{minWidth:0,width:"100%"}}><strong>{new Date(date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}</strong>{!items.length?<p>Rest / no published sessions</p>:items.map(s=><details key={s.id} style={{marginTop:10,maxWidth:"100%"}}><summary style={{cursor:"pointer",overflowWrap:"anywhere",lineHeight:1.5}}>{s.sport.toUpperCase()} · {s.title} · {s.duration_min} min · {s.status}</summary><pre style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere",fontSize:12,overflowX:"auto",maxWidth:"100%"}}>{JSON.stringify(s.prescription,null,2)}</pre></details>)}</div></article>})}
  </section>
 }
