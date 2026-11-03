@@ -43,6 +43,7 @@ export default function CoachTrainingExceptions() {
       const { data, error: insightError } = await supabase
         .from('coach_session_insight')
         .select('activity_id,athlete_id,planned_session_id,observed_at,planned_minutes,recorded_minutes,duration_delta_pct,evidence_level,severity,observation,coach_guidance')
+        .eq('eligible_for_patterns', true)
         .in('severity', ['review', 'high'])
         .order('observed_at', { ascending: false })
         .limit(100);
