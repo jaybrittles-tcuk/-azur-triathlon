@@ -14,6 +14,9 @@ test('unknown thresholds generate two easy weeks with a pre-testing path',()=>{
  assert.ok(result.weeks.every(w=>w.totalMinutes<=4*60));
  assert.deepEqual(result.weeks[0].sessions.map(s=>s.day),['Monday','Tuesday','Thursday','Saturday']);
  assert.equal(result.weeks[1].weekStart,'2026-11-16');
+ assert.equal(result.testWindowStart,'2026-11-23');
+ assert.deepEqual(result.proposedAssessments.map(a=>a.sport),['bike','swim','run']);
+ assert.ok(result.proposedAssessments.every(a=>a.status==='coach_review_after_foundation'));
  assert.equal(result.canPublish,false);
  assert.ok(result.weeks.flatMap(w=>w.sessions).every(s=>s.status==='unapproved_proposal'&&!/FTP|CSS|threshold|zone [2-9]/i.test(s.intensity)));
 });
