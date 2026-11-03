@@ -21,3 +21,20 @@ test('unapproved or wrong phase sessions never selected',()=>{
  assert.equal(draftApprovedTrainingWeek({...base,library:[{...library[0],approved:false}]}).status,'blocked');
  assert.equal(draftApprovedTrainingWeek({...base,phase:'taper'}).status,'blocked');
 });
+
+test('planner reports unmatched proposed minutes without inventing workouts',()=>{
+ const result=draftApprovedTrainingWeek({...base,slots:[...base.slots,{day:2,sport:'swim',family:'technique',maxMinutes:45,maxLevel:1}]});
+ assert.equal(result.status,'blocked');
+ assert.deepEqual(result.coverage,{proposedMinutes:125,prescribedMinutes:60,missingMinutes:65,missingSlots:1});
+});
+test('a proposed weekly total above coach target needs review',()=>{
+ const result=draftApprovedTrainingWeek({...base,targetWeekMinutes:50});
+ assert.equal(result.status,'blocked');
+ assert.match(result.reasons.join(' '),/materially exceeds/);
+});
+test('invalid slot durations are blocked rather than silently discarded',()=>{
+ const result=draftApprovedTrainingWeek({...base,slots:[{...base.slots[0],maxMinutes:NaN}]});
+ assert.equal(result.status,'blocked');
+ assert.match(result.reasons.join(' '),/Invalid available minutes/);
+ assert.equal(result.coverage.missingSlots,1);
+});

@@ -10,9 +10,17 @@ export type DraftSlot = {
   maxLevel: 1 | 2 | 3;
 };
 export type DraftItem = { date:string; session:SessionEntry; reason:string };
+export type DraftCoverage = {
+  proposedMinutes:number;
+  prescribedMinutes:number;
+  missingMinutes:number;
+  missingSlots:number;
+};
+
+/** Coverage deliberately counts only approved, successfully selected workouts. */
 export type DraftResult =
-  | { status:'ready_for_coach_review'; weekStart:string; sessions:DraftItem[]; totalMinutes:number }
-  | { status:'blocked'; weekStart:string; reasons:string[]; sessions:DraftItem[] };
+  | { status:'ready_for_coach_review'; weekStart:string; sessions:DraftItem[]; totalMinutes:number; coverage:DraftCoverage }
+  | { status:'blocked'; weekStart:string; reasons:string[]; sessions:DraftItem[]; coverage:DraftCoverage };
 
 /** Draft generation never publishes, invents prescriptions, or treats coach approval of
  * a library template as approval of the athlete's full weekly programme.
@@ -33,10 +41,18 @@ export function draftApprovedTrainingWeek(input:{
   const sessions:DraftItem[]=[];
   const used:string[]=[];
   let totalMinutes=0;
+  let proposedMinutes=0;
+  let missingSlots=0;
   for(const slot of input.slots){
     if(!Number.isInteger(slot.day)||slot.day<0||slot.day>6){
       reasons.push('Invalid day in weekly structure');continue;
     }
+    if(!Number.isFinite(slot.maxMinutes)||slot.maxMinutes<=0){
+      reasons.push('Invalid available minutes for day '+(slot.day+1));
+      missingSlots++;
+      continue;
+    }
+    proposedMinutes+=slot.maxMinutes;
     const result=selectCoachSession(input.library,{
       sport:slot.sport,family:slot.family,phase:input.phase,
       maxMinutes:Math.min(slot.maxMinutes,input.weeklyLimitMinutes-totalMinutes),
@@ -45,7 +61,9 @@ export function draftApprovedTrainingWeek(input:{
       rotationIndex:Math.floor(Date.parse(input.weekStart+'T12:00:00Z')/604800000)
     });
     if(result.status==='unavailable'){
-      reasons.push('Missing approved '+slot.sport+' '+slot.family+' workout for day '+(slot.day+1));continue;
+      reasons.push('Missing approved '+slot.sport+' '+slot.family+' workout for day '+(slot.day+1));
+      missingSlots++;
+      continue;
     }
     used.push(result.session.id);
     totalMinutes+=result.session.durationMin;
@@ -56,8 +74,15 @@ export function draftApprovedTrainingWeek(input:{
   if(totalMinutes>input.weeklyLimitMinutes)reasons.push('Draft exceeds weekly availability');
   if(input.targetWeekMinutes!==undefined){
     if(!Number.isFinite(input.targetWeekMinutes)||input.targetWeekMinutes<=0)reasons.push('Valid weekly target required');
+    else if(totalMinutes>input.targetWeekMinutes*1.1)reasons.push('Draft materially exceeds the coach-defined weekly target');
     else if(totalMinutes<input.targetWeekMinutes*0.9)reasons.push('Draft is materially below the coach-defined weekly target');
   }
-  return reasons.length?{status:'blocked',weekStart:input.weekStart,reasons,sessions}:
-    {status:'ready_for_coach_review',weekStart:input.weekStart,sessions,totalMinutes};
+  const coverage:DraftCoverage={
+    proposedMinutes,
+    prescribedMinutes:totalMinutes,
+    missingMinutes:Math.max(0,proposedMinutes-totalMinutes),
+    missingSlots
+  };
+  return reasons.length?{status:'blocked',weekStart:input.weekStart,reasons,sessions,coverage}:
+    {status:'ready_for_coach_review',weekStart:input.weekStart,sessions,totalMinutes,coverage};
 }
