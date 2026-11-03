@@ -37,7 +37,8 @@ test('distribution checks approved library gaps and always remains unpublishable
  const x=entrySessionDistribution({pathway:'continuation',targetMinutes:960,trainingDays:[0,1,2,3,4,5,6],
   workouts:[{sport:'bike',approved:true,duration_min:90,title:'Aerobic Endurance Ride',prescription:{steps:[]}},
    {sport:'run',approved:true,duration_min:45,title:'Easy Run',prescription:{steps:[]}}]});
- assert.ok(x.slots.length<=6);
+ assert.ok(x.slots.length<=12);
+ assert.equal(new Set(x.slots.map(s=>s.day)).size,6);
  assert.ok(x.warnings.some(s=>/swim/.test(s)));
  assert.equal(x.ready,false);
  assert.equal(x.proposedMinutes,960);
