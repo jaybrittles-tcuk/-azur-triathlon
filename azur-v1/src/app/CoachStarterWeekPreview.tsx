@@ -19,6 +19,10 @@ export default function CoachStarterWeekPreview(){
  const [distribution,setDistribution]=useState<ReturnType<typeof entrySessionDistribution>|null>(null);
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState(false);
+ const [confirmHistory,setConfirmHistory]=useState(false);
+ const [targetHours,setTargetHours]=useState('');
+ const [existingTarget,setExistingTarget]=useState<number|null>(null);
+ const [targetStatus,setTargetStatus]=useState('');
  useEffect(()=>{let active=true;(async()=>{
   try{
    const {data:{user}}=await supabase.auth.getUser();
@@ -33,19 +37,21 @@ export default function CoachStarterWeekPreview(){
   }catch(e){if(active)setMessage(e instanceof Error?e.message:'Unable to load assigned athletes')}
   finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[]);
- useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null)},[selected,week]);
+ useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('')},[selected,week]);
  async function preview(){
-  setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);
+  setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setTargetStatus('');
   try{
    const athlete=athletes.find(a=>a.id===selected);
    if(!athlete?.user_id)throw new Error('Select an athlete with a verified account');
    const end=new Date(week+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+14);
-   const [setup,workouts,existing]=await Promise.all([
+   const [setup,workouts,existing,targetRecord]=await Promise.all([
     supabase.from('athlete_onboarding').select('weekly_hours,experience,onboarding_step,training_days,recent_weekly_hours,current_training_concern,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km').eq('user_id',athlete.user_id).maybeSingle(),
     supabase.from('coach_workout_library').select('workout_key,title,sport,family,duration_min,level,phases,prescription,approved').eq('approved',true),
-    supabase.from('planned_session').select('id').eq('athlete_id',athlete.id).gte('planned_date',week).lt('planned_date',end.toISOString().slice(0,10)).eq('is_active_version',true).neq('status','cancelled')
+    supabase.from('planned_session').select('id').eq('athlete_id',athlete.id).gte('planned_date',week).lt('planned_date',end.toISOString().slice(0,10)).eq('is_active_version',true).neq('status','cancelled'),
+    supabase.from('season_week').select('id,target_hours').eq('athlete_id',athlete.id).eq('week_start',week).maybeSingle()
    ]);
-   if(setup.error||workouts.error||existing.error)throw new Error(setup.error?.message||workouts.error?.message||existing.error?.message||'Data validation failed');
+   if(setup.error||workouts.error||existing.error||targetRecord.error)throw new Error(setup.error?.message||workouts.error?.message||existing.error?.message||targetRecord.error?.message||'Data validation failed');
+   setExistingTarget(targetRecord.data?Number(targetRecord.data.target_hours):null);
    if(!setup.data)throw new Error('No onboarding preferences available for this athlete. Ask them to finish setup.');
    const info=setup.data;
    const entryResult=assessEntryPathway({
@@ -54,6 +60,7 @@ export default function CoachStarterWeekPreview(){
       historyVerified:false,thresholdsVerified:false
    });
    setEntry(entryResult);
+   setTargetHours(entryResult.targetMinutes===null?'':String(entryResult.targetMinutes/60));
    setDistribution(entrySessionDistribution({pathway:entryResult.pathway,
     targetMinutes:entryResult.targetMinutes,trainingDays:info.training_days||[],
     workouts:(workouts.data??[]) as Workout[]}));
@@ -70,6 +77,29 @@ export default function CoachStarterWeekPreview(){
      existingSessions:existing.data?.length??0
    }));
   }catch(e){setMessage(e instanceof Error?e.message:'Preview unavailable')}
+  finally{setBusy(false)}
+ }
+ async function confirmTarget(){
+  if(!entry||!confirmHistory||existingTarget!==null||entry.pathway!=='continuation')return;
+  setBusy(true);setTargetStatus('');
+  try{
+   const {data:{user}}=await supabase.auth.getUser();
+   if(!user||user.app_metadata?.role!=='coach')throw new Error('Verified coach required');
+   const hours=Number(targetHours);
+   if(!Number.isFinite(hours)||hours<2||entry.targetMinutes===null||hours*60>entry.targetMinutes)
+    throw new Error('Choose a target no higher than recent verified training or availability');
+   const {data,error}=await supabase.rpc('approve_initial_week_target',{
+     p_coach_id:user.id,p_athlete_id:selected,p_week_start:week,
+     p_target_hours:hours,p_confirmed_history:true
+   });
+   if(error)throw error;
+   if(!data||data.status!=='coach_target_approved')throw new Error('Target approval was not confirmed');
+   const {data:readback,error:rb}=await supabase.from('season_week')
+    .select('target_hours').eq('athlete_id',selected).eq('week_start',week).maybeSingle();
+   if(rb||!readback||Number(readback.target_hours)!==hours)throw new Error('Target saved, but calendar target readback failed. Do not retry without checking.');
+   setExistingTarget(hours);
+   setTargetStatus('Coach-reviewed training target saved. No sessions have been scheduled.');
+  }catch(e){setTargetStatus(e instanceof Error?e.message:'Unable to verify target approval')}
   finally{setBusy(false)}
  }
  return <section aria-label="Automatic starter-week preview" style={{padding:16,background:'#102c44',border:'1px solid #335c77',borderRadius:15,color:'#edf8ff',minWidth:0}}>
@@ -96,7 +126,25 @@ export default function CoachStarterWeekPreview(){
      <p style={{fontSize:12,color:'#bde2f6'}}>Suggested {distribution.proposedMinutes??0} min · matched to approved workout durations {distribution.mappedMinutes} min · {distribution.restDays??'—'} rest day(s). No sessions are published.</p>
      {distribution.warnings.map(w=><p key={w} style={{fontSize:12,color:'#ffdfaf'}}>{w}</p>)}
    </details>}
-   <p style={{fontSize:12,color:'#a7c5d8',marginTop:12}}>AZUR won't prescribe zone targets until a coach verifies the supplied thresholds. No calendar writes are enabled.</p>
+   {entry.pathway==='continuation'&&<section style={{padding:12,marginTop:12,border:'1px solid #4e8ab0',borderRadius:12}}>
+    <strong style={{fontSize:14}}>Coach-approved weekly target</strong>
+    <p style={{fontSize:12,color:'#b5d2e4'}}>Only confirm if you've checked the athlete's recent training and readiness. The athlete's availability is not proof of capacity.</p>
+    {existingTarget!==null?<p role="status" style={{fontSize:13,color:'#a9f0bd'}}>Target already exists: {existingTarget} h. No new target will be created.</p>:<>
+     <label style={{display:'block',fontSize:13}}>Target hours (maximum {entry.targetMinutes===null?'—':(entry.targetMinutes/60).toFixed(1)} h)
+      <input type="number" min={2} max={entry.targetMinutes===null?2:entry.targetMinutes/60} step={0.5} value={targetHours} onChange={e=>setTargetHours(e.target.value)} style={{display:'block',minHeight:44,width:'100%',margin:'6px 0 12px'}}/>
+     </label>
+     <label style={{display:'flex',alignItems:'flex-start',gap:10,fontSize:13,lineHeight:1.5,margin:'12px 0'}}>
+      <input type="checkbox" checked={confirmHistory} onChange={e=>setConfirmHistory(e.target.checked)} style={{width:20,height:20,flexShrink:0}}/>
+      I have reviewed the athlete's actual recent training and confirmed this initial weekly target is appropriate.
+     </label>
+     <button type="button" disabled={busy||!confirmHistory} onClick={()=>void confirmTarget()} style={{minHeight:44,borderRadius:10,padding:'10px 16px',background:'#1776a7',color:'#fff',border:'1px solid #62c4e8',fontWeight:700}}>
+      {busy?'Saving…':'Approve initial weekly target'}
+     </button>
+    </>}
+    {targetStatus&&<p role="status" style={{fontSize:13,marginTop:10}}>{targetStatus}</p>}
+    <p style={{fontSize:12,color:'#9abed2'}}>This records a coach decision only. Workouts still require approved prescriptions, a complete draft and separate publication approval.</p>
+   </section>}
+      <p style={{fontSize:12,color:'#a7c5d8',marginTop:12}}>AZUR won't prescribe zone targets until a coach verifies the supplied thresholds. No calendar writes are enabled.</p>
   </section>}
   {foundation&&<div style={{marginTop:16}}>
    <h4 style={{fontSize:17,margin:'0 0 6px',color:'#f8fbff'}}>{foundation.path==='two_week_endurance_foundation'?'Two-week endurance foundation':'Coach threshold verification'}</h4>
