@@ -1,3 +1,26 @@
+/** Display-only adapter for the explicitly timed, low-intensity onboarding foundation.
+ * Does not invent numerical FTP/CSS/pace targets, rest periods or prescribe new work.
+ * A malformed or incomplete foundation session keeps the existing safety warning.
+ */
+function foundationInstructionDisplay(prescription: any, plannedMinutes: number | undefined): any {
+  if (!prescription || typeof prescription !== 'object') return prescription;
+  if ([prescription.warmup,prescription.main_set,prescription.cooldown].some(Array.isArray)) return prescription;
+  const raw = prescription.steps;
+  if (!Array.isArray(raw) || raw.length !== 3 || !Number.isInteger(plannedMinutes)) return prescription;
+  const valid = raw.every((step: any) => step && typeof step === 'object'
+    && Number.isInteger(step.durationMin) && step.durationMin > 0
+    && typeof step.target === 'string' && step.target.trim().length > 0);
+  if (!valid || raw.reduce((sum: number, step: any) => sum+step.durationMin,0) !== plannedMinutes) return prescription;
+  const section = (step: any) => [{duration_min:step.durationMin,target:step.target}];
+  return {
+    ...prescription,
+    warmup:section(raw[0]),
+    main_set:section(raw[1]),
+    cooldown:section(raw[2]),
+    focus: 'Easy aerobic foundation · RPE-led session',
+  };
+}
+
 import {resolveAthleteEntry} from '../lib/athleteBetaReadiness.mjs';
 import BenchmarkHistory from './BenchmarkHistory';
 import BenchmarkTrainingZones from './BenchmarkTrainingZones';
@@ -2010,6 +2033,7 @@ if (session?.user) {
   const selected =
     weekSessions.find((session) => session.id === selectedId) ||
     weekSessions[0];
+  const displayPrescription = foundationInstructionDisplay(selected?.prescription, selected?.durationMin);
   const nextPlannedSession = selected
   ? [...weekSessions]
       .filter(
@@ -7172,7 +7196,7 @@ onClick={() => {
           </div>
 
           {(() => {
-            const check = auditAthleteInstructions(selected.prescription);
+            const check = auditAthleteInstructions(displayPrescription);
             if (check.complete) return null;
             return <div className="session-prescription-warning" role="note">
               <strong>Prescription needs coach clarification</strong>
@@ -7180,23 +7204,23 @@ onClick={() => {
               <small>Do not infer missing targets or rest periods. Ask your coach before completing an unclear session.</small>
             </div>;
           })()}
-          {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || selected.prescription?.focus || (Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) ? (
+          {[displayPrescription?.warmup, displayPrescription?.main_set, displayPrescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || displayPrescription?.fueling || displayPrescription?.focus || (Array.isArray(displayPrescription?.azurWorkout?.steps) && displayPrescription.azurWorkout.steps.length > 0) ? (
           <>
-          <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
-<details open={!(Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0)} key={selected.id} className="session-prescription-disclosure session-prescription-v2">
+          <PremiumWorkoutTabs prescription={displayPrescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
+<details open={!(Array.isArray(displayPrescription?.azurWorkout?.steps) && displayPrescription.azurWorkout.steps.length > 0)} key={selected.id} className="session-prescription-disclosure session-prescription-v2">
             <summary><span><strong>Detailed workout instructions</strong><small>Warm-up · Main set · Cool-down · Fuelling</small></span><span aria-hidden="true">⌄</span></summary>
             <div className="session-prescription-sections">
-            <details><summary>View workout timeline</summary><CalendarPrescriptionSteps prescription={selected.prescription} /></details>
-            {selected.prescription?.focus && (
+            <details><summary>View workout timeline</summary><CalendarPrescriptionSteps prescription={displayPrescription} /></details>
+            {displayPrescription?.focus && (
  <div className="wide session-block">
     <span className="eyebrow">FOCUS</span>
-    <strong>{selected.prescription.focus}</strong>
+    <strong>{displayPrescription.focus}</strong>
   </div>
 )}
-{Array.isArray(selected.prescription?.warmup) && selected.prescription.warmup.length > 0 && (
+{Array.isArray(displayPrescription?.warmup) && displayPrescription.warmup.length > 0 && (
   <div className="wide session-block">
     <span className="eyebrow">WARM-UP</span>
-    {selected.prescription.warmup.map((block: any, index: number) => (
+    {displayPrescription.warmup.map((block: any, index: number) => (
       <div key={index} className="session-block-item azur-prescription-step">
         <strong>{block.reps ? `${block.reps} × ` : ''}{block.distance_m ? `${block.distance_m} m` : block.duration_min ? `${block.duration_min} min` : block.duration_sec ? `${block.duration_sec} sec` : 'Training block'}</strong>
         {block.discipline && <small>{String(block.discipline).toUpperCase()}</small>}
@@ -7217,10 +7241,10 @@ onClick={() => {
     ))}
   </div>
 )}
-{Array.isArray(selected.prescription?.main_set) && selected.prescription.main_set.length > 0 && (
+{Array.isArray(displayPrescription?.main_set) && displayPrescription.main_set.length > 0 && (
   <div className="wide session-block">
     <span className="eyebrow">MAIN SET</span>
-    {selected.prescription.main_set.map((block: any, index: number) => (
+    {displayPrescription.main_set.map((block: any, index: number) => (
       <div key={index} className="session-block-item azur-prescription-step">
         <strong>{block.reps ? `${block.reps} × ` : ''}{block.distance_m ? `${block.distance_m} m` : block.duration_min ? `${block.duration_min} min` : block.duration_sec ? `${block.duration_sec} sec` : 'Training block'}</strong>
         {block.discipline && <small>{String(block.discipline).toUpperCase()}</small>}
@@ -7241,10 +7265,10 @@ onClick={() => {
     ))}
   </div>
 )}
-{Array.isArray(selected.prescription?.cooldown) && selected.prescription.cooldown.length > 0 && (
+{Array.isArray(displayPrescription?.cooldown) && displayPrescription.cooldown.length > 0 && (
   <div className="wide session-block">
     <span className="eyebrow">COOL-DOWN</span>
-    {selected.prescription.cooldown.map((block: any, index: number) => (
+    {displayPrescription.cooldown.map((block: any, index: number) => (
       <div key={index} className="session-block-item azur-prescription-step">
         <strong>{block.reps ? `${block.reps} × ` : ''}{block.distance_m ? `${block.distance_m} m` : block.duration_min ? `${block.duration_min} min` : block.duration_sec ? `${block.duration_sec} sec` : 'Training block'}</strong>
         {block.discipline && <small>{String(block.discipline).toUpperCase()}</small>}
@@ -7265,58 +7289,58 @@ onClick={() => {
     ))}
   </div>
 )}
-{selected.prescription?.fueling && (
+{displayPrescription?.fueling && (
   <div className="wide session-block">
     <span className="eyebrow">FUELING</span>
 
-    {selected.prescription.fueling.carbs_per_hour && (
+    {displayPrescription.fueling.carbs_per_hour && (
       <div className="session-block-item">
         <strong>
-          {selected.prescription.fueling.carbs_per_hour}
+          {displayPrescription.fueling.carbs_per_hour}
         </strong>
         <small> carbohydrate per hour</small>
       </div>
     )}
 
-    {selected.prescription.fueling.fluid_per_hour && (
+    {displayPrescription.fueling.fluid_per_hour && (
       <div className="session-block-item">
         <strong>
-          {selected.prescription.fueling.fluid_per_hour}
+          {displayPrescription.fueling.fluid_per_hour}
         </strong>
         <small> fluid per hour</small>
       </div>
     )}
-{selected.prescription.fueling.sodium_per_hour && (
+{displayPrescription.fueling.sodium_per_hour && (
   <div className="session-block-item">
     <strong>
-      {selected.prescription.fueling.sodium_per_hour}
+      {displayPrescription.fueling.sodium_per_hour}
     </strong>
     <small> sodium per hour</small>
   </div>
 )}
 
-{selected.prescription.fueling.notes && (
+{displayPrescription.fueling.notes && (
   <div className="session-block-item">
     <strong>Fueling note</strong>
     <div>
-      {selected.prescription.fueling.notes}
+      {displayPrescription.fueling.notes}
     </div>
   </div>
 )}
-    {selected.prescription.fueling.pre_session && (
+    {displayPrescription.fueling.pre_session && (
       <div className="session-block-item">
         <strong>Before session</strong>
         <div>
-          {selected.prescription.fueling.pre_session}
+          {displayPrescription.fueling.pre_session}
         </div>
       </div>
     )}
 
-    {selected.prescription.fueling.during_session && (
+    {displayPrescription.fueling.during_session && (
       <div className="session-block-item">
         <strong>During session</strong>
         <div>
-          {selected.prescription.fueling.during_session}
+          {displayPrescription.fueling.during_session}
         </div>
       </div>
     )}
@@ -7326,7 +7350,7 @@ onClick={() => {
 </div>
           </details>
           </>
-          ) : <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />}
+          ) : <WorkoutTargetDetails prescription={displayPrescription} ftpWatts={athleteProfile.ftp} />}
 
           <div className="editor-grid">
 
@@ -7855,7 +7879,7 @@ const sessionVerdict =
 
 <div className="wide session-block session-intent-v2" aria-label="Why this session matters">
   <span className="eyebrow">SESSION PURPOSE</span>
-  <strong>{selected.prescription?.focus || Object.values(selected.targets)[0]?.toString() || 'Session-specific training focus'}</strong>
+  <strong>{displayPrescription?.focus || (selected.targets?.generation_source === 'onboarding_foundation' ? 'Easy aerobic foundation · RPE-led session' : 'Session-specific training focus')}</strong>
   {selected.rationale && <p>{selected.rationale}</p>}
 </div>
 {(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2" open={Boolean(editableManualId)}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
