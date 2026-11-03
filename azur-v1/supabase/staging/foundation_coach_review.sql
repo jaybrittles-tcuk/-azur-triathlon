@@ -1,13 +1,44 @@
 -- AZUR staging: immutable athlete requests and audited assigned-coach decisions.
 
--- Self-only access to the existence of one's own assignment.
--- Required because the authenticated request RPC uses invoker permissions.
+-- Do not add an athlete SELECT policy on coach_athlete_assignment:
+-- athlete_profile already references assignments for coach reads, causing
+-- recursive RLS. These private helpers return booleans only for the
+-- authenticated athlete who actually owns the profile.
 drop policy if exists staging_own_coach_assignment_read on public.coach_athlete_assignment;
-create policy staging_own_coach_assignment_read on public.coach_athlete_assignment
- for select to authenticated using (
+create schema if not exists azur_private;
+revoke all on schema azur_private from public,anon;
+grant usage on schema azur_private to authenticated;
+
+create or replace function azur_private.athlete_has_assigned_coach(p_athlete uuid)
+returns boolean language sql stable security definer
+set search_path=public,pg_temp as $
+ select auth.uid() is not null and
   exists(select 1 from public.athlete_profile p
-    where p.id=athlete_id and p.user_id=(select auth.uid()))
- );
+    where p.id=p_athlete and p.user_id=auth.uid()) and
+  exists(select 1 from public.coach_athlete_assignment a
+    where a.athlete_id=p_athlete);
+$;
+revoke all on function azur_private.athlete_has_assigned_coach(uuid) from public,anon;
+grant execute on function azur_private.athlete_has_assigned_coach(uuid) to authenticated;
+
+create or replace function azur_private.athlete_exact_review_approved(
+ p_athlete uuid,p_inputs jsonb,p_preview jsonb)
+returns boolean language sql stable security definer
+set search_path=public,pg_temp as $
+ select auth.uid() is not null and
+  exists(select 1 from public.athlete_profile p
+    where p.id=p_athlete and p.user_id=auth.uid()) and
+  exists(
+    select 1 from public.foundation_reassessment_request r
+     join public.foundation_reassessment_decision d on d.request_id=r.id
+     join public.coach_athlete_assignment a on a.athlete_id=r.athlete_id
+       and a.coach_user_id=d.coach_user_id
+    where r.athlete_id=p_athlete and r.inputs=p_inputs
+      and r.preview=p_preview and d.decision='approved'
+  );
+$;
+revoke all on function azur_private.athlete_exact_review_approved(uuid,jsonb,jsonb) from public,anon;
+grant execute on function azur_private.athlete_exact_review_approved(uuid,jsonb,jsonb) to authenticated;
 
 create table if not exists public.foundation_reassessment_request (
  id uuid primary key default gen_random_uuid(),
@@ -92,8 +123,7 @@ begin
    or v_actual->>'reason' not like 'Material increase beyond 20%%' then
      return jsonb_build_object('status','not_reviewable','reason',coalesce(v_actual->>'reason','Coach review not required for this proposal'));
  end if;
- select exists(select 1 from public.coach_athlete_assignment
-  where athlete_id=v_athlete) into v_has_coach;
+ select azur_private.athlete_has_assigned_coach(v_athlete) into v_has_coach;
  if not v_has_coach then
   return jsonb_build_object('status','coach_assignment_required',
    'reason','Connect to an AZUR coach before requesting a material training increase');
@@ -139,14 +169,8 @@ begin
  end if;
  if v_plan->>'status'='coach_review_required'
    and v_plan->>'reason' like 'Material increase beyond 20%%' then
-   select exists(
-     select 1 from public.foundation_reassessment_request r
-       join public.foundation_reassessment_decision d on d.request_id=r.id
-       join public.coach_athlete_assignment a on a.athlete_id=r.athlete_id
-           and a.coach_user_id=d.coach_user_id
-     where r.athlete_id=v_athlete and r.inputs=p_inputs and r.preview=v_plan
-       and d.decision='approved'
-   ) into v_approved;
+   select azur_private.athlete_exact_review_approved(v_athlete,p_inputs,v_plan)
+     into v_approved;
  end if;
  if v_plan->>'status'<>'ready_for_confirmation' and not v_approved then
    raise exception 'Coach review required or calendar is not safely replaceable: %',coalesce(v_plan->>'reason','invalid plan');
