@@ -1679,10 +1679,25 @@ async function loadPrimaryRace(userId: string) {
     .eq('priority', 'A')
     .order('race_date', { ascending: true })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Unable to load primary race:', error);
+    return;
+  }
+  if (!data) {
+    // Onboarding goals are preferences, not an automatically registered A race.
+    const {data:setup,error:setupError}=await supabase.from('athlete_onboarding')
+      .select('race_distance,race_date,onboarding_step')
+      .eq('user_id',userId).maybeSingle();
+    if(!setupError && setup?.onboarding_step===3){
+      const goals:Record<string,string>={
+        sprint:'Sprint triathlon',olympic:'Olympic triathlon',
+        '70.3':'IRONMAN 70.3',ironman:'IRONMAN',other:'Your training goal'
+      };
+      setPrimaryRace(previous=>({...previous,id:'',name:goals[setup.race_distance]||'Your training goal',
+        raceDate:setup.race_date||'',priority:'',location:''}));
+    }
     return;
   }
 
