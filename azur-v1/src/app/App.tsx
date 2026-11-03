@@ -9956,7 +9956,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   }
 
   if (window.location.pathname === '/onboarding') {
-    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer"><CoachInvitations mode="athlete" /><a href="/" className="azur-onboarding-exit">Go to dashboard</a></div></main>
+    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer" style={{textAlign:'center',paddingBottom:'calc(24px + env(safe-area-inset-bottom, 0px))'}}><p style={{fontSize:13,color:'#9eb8cb',margin:'8px 0 0'}}>After finishing setup, you can accept a coach invitation from More.</p></div></main>
   }
 
   return (
