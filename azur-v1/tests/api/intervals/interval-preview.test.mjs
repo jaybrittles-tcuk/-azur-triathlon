@@ -71,3 +71,32 @@ test('upstream id mismatch is nonverifiable, never reported as successful execut
  const {res}=await run(t,{replies});
  assert.equal(res.code,200);assert.equal(res.data.status,'unavailable');
 });
+
+test('staging proxy requires correct Supabase project and never uses Vercel service key',async t=>{
+ const saved={...process.env};
+ t.after(()=>{process.env=saved});
+ process.env.AZUR_STAGING_BACKEND_URL='https://juvceqrzkeethontnezw.supabase.co/functions/v1/import-review';
+ process.env.VITE_SUPABASE_URL='https://juvceqrzkeethontnezw.supabase.co';
+ delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+ const calls=[];
+ const fetcher=async(url,options)=>{
+  calls.push({url:String(url),options});
+  return mock({status:200,data:{mode:'read_only',activityId:id,status:'unavailable'}});
+ };
+ const res={code:0,setHeader(){},status(n){this.code=n;return this;},json(x){this.data=x;return this;}};
+ await createIntervalPreviewHandler(fetcher)({method:'GET',headers:{authorization:'Bearer coach-token'},query:{activityId:id}},res);
+ assert.equal(res.code,200);assert.equal(calls.length,1);
+ assert.ok(calls[0].url.includes('/functions/v1/interval-evidence-preview?activityId='));
+ assert.equal(calls[0].options.method,'GET');
+ assert.equal(calls[0].options.headers.Authorization,'Bearer coach-token');
+});
+test('staging proxy rejects project mismatch before any provider read',async t=>{
+ const saved={...process.env};
+ t.after(()=>{process.env=saved});
+ process.env.AZUR_STAGING_BACKEND_URL='https://juvceqrzkeethontnezw.supabase.co/functions/v1/import-review';
+ process.env.VITE_SUPABASE_URL='https://another-project.supabase.co';
+ let reads=0;
+ const res={code:0,setHeader(){},status(n){this.code=n;return this;},json(x){this.data=x;return this;}};
+ await createIntervalPreviewHandler(async()=>{reads++;throw Error('should not fetch')})({method:'GET',headers:{authorization:'Bearer coach-token'},query:{activityId:id}},res);
+ assert.equal(res.code,503);assert.equal(reads,0);
+});
