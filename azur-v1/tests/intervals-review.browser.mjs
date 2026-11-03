@@ -142,6 +142,7 @@ try {
  assert.deepEqual(errors,[]);
  console.log('PASS: browser preview → stage → accept → load approval → dashboard, with no planned sessions');
  await page.setViewportSize({width:390,height:844});
+ onboardingStep=0; // Explicitly exercise a new athlete's first-run wizard.
  await page.goto(base+'/onboarding');
  await page.getByRole('heading',{name:'Welcome to AZUR',exact:true}).waitFor();
  await page.getByRole('heading',{name:'Your training goal',exact:true}).waitFor();
