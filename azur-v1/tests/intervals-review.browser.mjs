@@ -276,6 +276,7 @@ try {
  const monitoringNav=coachPage.getByRole('navigation',{name:'Monitoring sections'});
  await monitoringNav.getByRole('button',{name:'Athlete Actions'}).waitFor();
  await monitoringNav.getByRole('button',{name:'Training Analysis'}).click();
+ await coachPage.getByRole('button',{name:/Device workout matching/}).click();
  await coachPage.getByRole('region',{name:'Workout association review'}).waitFor();
  await monitoringNav.getByRole('button',{name:'Planning Tools'}).click();
  await coachPage.getByText('Weekly planning tools are not enabled in this environment.',{exact:true}).waitFor();
