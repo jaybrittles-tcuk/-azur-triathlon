@@ -152,8 +152,13 @@ try {
  console.log('PASS: standalone mobile onboarding, no sidebar or horizontal overflow');
  missingProfile=true;
  onboardingStep=0;
- await page.goto(base);
- await page.waitForURL('**/onboarding');
+ // The app deliberately replaces the initial navigation with /onboarding.
+ // Waiting for 'load' on the replaced page can race with frame detachment.
+ await page.goto(base,{waitUntil:'commit'}).catch(error=>{
+  if(!String(error).includes('ERR_ABORTED'))throw error;
+ });
+ await page.getByRole('heading',{name:'Your training goal',exact:true}).waitFor();
+ assert.match(page.url(),/\/onboarding$/);
  await page.getByLabel('Your name',{exact:true}).fill('New Athlete');
  await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByRole('heading',{name:'Your training availability',exact:true}).waitFor();
