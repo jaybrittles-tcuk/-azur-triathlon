@@ -1,8 +1,4 @@
 import WorkoutPrescriptionView from './WorkoutPrescriptionView';
-import CoachWorkoutLibrary from './CoachWorkoutLibrary';
-import CoachWeeklyDraftBuilder from './CoachWeeklyDraftBuilder';
-import CoachAthleteCalendarPreview from './CoachAthleteCalendarPreview';
-import CoachWeekReconciliationPreview from './CoachWeekReconciliationPreview';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 type Draft={id:string;athlete_id:string;week_start:string;revision:number;phase:string;sessions:unknown;proposal_fingerprint:string;created_at:string};
@@ -82,10 +78,6 @@ export default function CoachWeeklyReview(){
   finally{setBusy('')}
  }
  return <section className="coach-attention-v2" aria-label="Weekly plan reviews">
-  <CoachWorkoutLibrary/>
-  <CoachWeekReconciliationPreview/>
-  <CoachAthleteCalendarPreview/>
-  <CoachWeeklyDraftBuilder onSaved={()=>setReload(x=>x+1)}/>
   <header className="coach-attention-heading"><div><h3>Weekly plan review</h3><p>Review saved drafts before publication. Decisions do not automatically schedule training.</p></div><button type="button" disabled={loading||Boolean(busy)} onClick={()=>setReload(x=>x+1)}>↻ Refresh</button></header>
   <p>Calendar publishing is disabled during staging validation. Coach approval records a decision only.</p>
   {error&&<p role="alert">{error}</p>}
