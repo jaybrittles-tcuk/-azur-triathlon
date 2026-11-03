@@ -1,4 +1,4 @@
-import {getValidatedIntervalsTrainingStress} from './trainingLoad';
+import {getValidatedIntervalsTrainingStress} from './trainingLoad.ts';
 
 export type ValidatedBikeRow = {
  activity_id: string;
