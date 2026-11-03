@@ -1,0 +1,184 @@
+import {useEffect,useState} from 'react';
+import {supabase} from '../lib/supabase';
+
+type PlanSession={date:string;sport:'swim'|'bike'|'run';title:string;duration_min:number};
+type PlanPreview={
+ status:'ready_for_confirmation'|'coach_review_required';
+ reason?:string|null;week_start:string;week_cap_minutes:number;training_tier:string;
+ capacity_basis:string;athlete_reported:boolean;total_minutes:number;
+ sessions:PlanSession[];calendar_fingerprint:string;
+};
+type Inputs={training_background:string;training_consistency:string;recent_weekly_hours:number|null;weekly_hours:number;training_days:number[];can_swim_200m:boolean};
+const names=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const minutes=(value:number)=>value>=60?`${Math.floor(value/60)}h ${value%60?value%60+'m':''}`.trim():value+'m';
+
+/** Athlete-only preview: read-only until an explicit second confirmation. */
+export default function FoundationReassessment({onApplied}:{onApplied:()=>Promise<void>|void}){
+ const [eligible,setEligible]=useState(false);
+ const [open,setOpen]=useState(false);
+ const [inputs,setInputs]=useState<Inputs>({
+   training_background:'unknown',training_consistency:'unknown',recent_weekly_hours:null,
+   weekly_hours:8,training_days:[],can_swim_200m:false
+ });
+ const [recentInput,setRecentInput]=useState('');
+ const [preview,setPreview]=useState<PlanPreview|null>(null);
+ const [previewInputs,setPreviewInputs]=useState<Inputs|null>(null);
+ const [loading,setLoading]=useState(false);
+ const [message,setMessage]=useState('');
+ useEffect(()=>{
+  let cancelled=false;
+  void (async()=>{
+   const {data:{user}}=await supabase.auth.getUser();
+   if(!user || user.app_metadata?.role==='coach')return;
+   const {data:setup,error}=await supabase.from('athlete_onboarding')
+    .select('onboarding_step,training_background,training_consistency,recent_weekly_hours,weekly_hours,training_days,can_swim_200m,current_training_concern')
+    .eq('user_id',user.id).maybeSingle();
+   if(cancelled||error||!setup||setup.onboarding_step!==3)return;
+   setEligible(true);
+   setInputs({
+    training_background:setup.training_background||'unknown',
+    training_consistency:setup.training_consistency||'unknown',
+    recent_weekly_hours:setup.recent_weekly_hours==null?null:Number(setup.recent_weekly_hours),
+    weekly_hours:Number(setup.weekly_hours),
+    training_days:Array.isArray(setup.training_days)?setup.training_days:[],
+    can_swim_200m:setup.can_swim_200m===true
+   });
+   setRecentInput(setup.recent_weekly_hours==null?'':String(setup.recent_weekly_hours));
+   if(setup.current_training_concern!=='none')
+     setMessage('Training concerns are held for coach review. Please do not increase training until cleared.');
+  })();
+  return ()=>{cancelled=true};
+ },[]);
+ function edit(patch:Partial<Inputs>){setInputs(i=>({...i,...patch}));setPreview(null);setPreviewInputs(null);setMessage('');}
+ async function makePreview(){
+  const recent=recentInput.trim()===''?null:Number(recentInput);
+  if(!['novice','regular','established'].includes(inputs.training_background) ||
+     !['under4','4to7','8plus'].includes(inputs.training_consistency)){
+   setMessage('Choose your endurance background and recent consistency.');return;
+  }
+  if(!Number.isFinite(inputs.weekly_hours)||inputs.weekly_hours<2||inputs.weekly_hours>25||
+      (recent!==null&&(!Number.isFinite(recent)||recent<0||recent>25))||
+      inputs.training_days.length===0){
+   setMessage('Check available days and training hours (0–25 completed hours; 2–25 available).');return;
+  }
+  const proposed:Inputs={...inputs,recent_weekly_hours:recent};
+  setLoading(true);setMessage('');setPreview(null);
+  const {data,error}=await supabase.rpc('preview_foundation_reassessment',{p_inputs:proposed});
+  setLoading(false);
+  if(error){setMessage('Unable to preview: '+error.message);return;}
+  if(!data||!Array.isArray(data.sessions)){
+   setMessage(data?.reason||'A safe reassessment preview is unavailable.');return;
+  }
+  setPreview(data as PlanPreview);setPreviewInputs(proposed);
+ }
+ async function confirm(){
+  if(!preview||!previewInputs||preview.status!=='ready_for_confirmation'||loading)return;
+  setLoading(true);setMessage('');
+  const {data,error}=await supabase.rpc('apply_foundation_reassessment',{
+    p_inputs:previewInputs,p_expected_preview:preview,p_confirm:true
+  });
+  if(error){setLoading(false);setMessage('No calendar changes were made: '+error.message);return;}
+  if(data?.status!=='applied'){setLoading(false);setMessage('Unable to confirm the calendar update.');return;}
+  try{
+   await onApplied();
+   setMessage(`Reassessment applied: ${data.sessions} future sessions published. Current week preserved.`);
+   setPreview(null);setPreviewInputs(null);setOpen(false);
+  }catch{setMessage('Training saved, but calendar refresh failed. Reopen your calendar.');}
+  setLoading(false);
+ }
+ if(!eligible)return null;
+ const daysPerWeek=preview?.sessions.reduce<Record<string,PlanSession[]>>((acc,s)=>{
+   const week=new Date(s.date+'T12:00:00Z');
+   const offset=(week.getUTCDay()+6)%7;
+   week.setUTCDate(week.getUTCDate()-offset);
+   const key=week.toISOString().slice(0,10);
+   (acc[key]??=[]).push(s);
+   return acc;
+ },{})??{};
+ return <section aria-label="Reassess your training baseline" style={{
+   padding:16,border:'1px solid #9ac4dd',borderRadius:16,
+   background:'#f2f8fd',marginBottom:16,color:'#17354b'}}>
+   <strong style={{fontSize:17}}>Review your training baseline</strong>
+   <p style={{fontSize:13,lineHeight:1.5,margin:'7px 0 12px'}}>
+     Recent training changed? Preview a more personalised easy-training programme.
+     Your calendar won't change unless you confirm; large increases require coach approval.
+   </p>
+   {!open?<button type="button" onClick={()=>setOpen(true)}
+      style={{padding:'10px 14px',borderRadius:10}}>Reassess my programme</button>:<div style={{display:'grid',gap:12}}>
+     <label>Current endurance training background
+       <select value={inputs.training_background} onChange={e=>edit({training_background:e.target.value})}>
+         <option value="unknown">Choose your background</option>
+         <option value="novice">New to regular endurance training</option>
+         <option value="regular">Regular endurance athlete</option>
+         <option value="established">Established endurance athlete</option>
+       </select>
+     </label>
+     <label>Consistent training recently
+       <select value={inputs.training_consistency} onChange={e=>edit({training_consistency:e.target.value})}>
+         <option value="unknown">Choose your consistency</option>
+         <option value="under4">Fewer than 4 weeks</option>
+         <option value="4to7">4–7 weeks</option>
+         <option value="8plus">8+ weeks</option>
+       </select>
+     </label>
+     <label>Actual weekly training completed recently (hours)
+       <input type="number" inputMode="decimal" step="0.5" min="0" max="25"
+         placeholder="Leave blank if unknown" value={recentInput}
+         onChange={e=>{setRecentInput(e.target.value);setPreview(null);setPreviewInputs(null);}}/>
+     </label>
+     <label>Hours available each week
+       <input type="number" inputMode="decimal" step="0.5" min="2" max="25"
+        value={inputs.weekly_hours} onChange={e=>edit({weekly_hours:Number(e.target.value)})}/>
+     </label>
+     <fieldset style={{border:'1px solid #c7dbe8',borderRadius:10,padding:10}}>
+       <legend>Days available</legend>
+       <div style={{display:'flex',flexWrap:'wrap',gap:10}}>
+         {names.map((name,day)=><label key={name} style={{display:'flex',gap:4,alignItems:'center'}}>
+           <input type="checkbox" checked={inputs.training_days.includes(day)}
+             onChange={e=>edit({training_days:e.target.checked?
+               [...inputs.training_days,day].sort():inputs.training_days.filter(d=>d!==day)})}/>{name}
+         </label>)}
+       </div>
+     </fieldset>
+     <label style={{display:'flex',gap:8,alignItems:'flex-start'}}>
+       <input type="checkbox" checked={inputs.can_swim_200m}
+         onChange={e=>edit({can_swim_200m:e.target.checked})}/>
+       I can swim 200 metres comfortably and safely with access to a suitable pool
+     </label>
+     <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+       <button type="button" disabled={loading} onClick={()=>void makePreview()}>
+         {loading?'Checking…':'Preview next two weeks'}
+       </button>
+       <button type="button" disabled={loading} onClick={()=>{setOpen(false);setPreview(null);}}>Cancel</button>
+     </div>
+     {preview&&<div style={{borderTop:'1px solid #c7dbe8',paddingTop:12}}>
+       <strong>Preview · {preview.training_tier.replaceAll('_',' ')}</strong>
+       <p style={{fontSize:13,margin:'7px 0'}}>
+         Max {minutes(preview.week_cap_minutes)}/week · {minutes(preview.total_minutes)}
+         {' '}across the two weeks · {preview.sessions.length} sessions.
+         Based on athlete-reported history, not verified device load.
+       </p>
+       {Object.entries(daysPerWeek).map(([week,sessions])=>
+         <div key={week} style={{margin:'12px 0'}}>
+           <strong>Week of {week} · {minutes(sessions.reduce((n,s)=>n+s.duration_min,0))}</strong>
+           {sessions.map((s,i)=><div key={s.date+'-'+i} style={{
+             padding:'5px 0',fontSize:13,borderBottom:'1px solid #dbe7ef'}}>
+             {s.date} · {s.sport.toUpperCase()} · {s.title} · {s.duration_min}m
+           </div>)}
+         </div>)}
+       {preview.status==='coach_review_required'
+         ?<p role="status" style={{color:'#784317',fontWeight:600}}>
+           Coach review required: {preview.reason}. Your existing calendar has not changed.
+         </p>
+         :<><p style={{fontSize:12}}>
+           This replaces only future, uncompleted, unlocked starter sessions.
+           Current week and coach-created workouts remain protected.
+         </p>
+         <button type="button" disabled={loading} onClick={()=>void confirm()}>
+           {loading?'Applying…':'Confirm and update future calendar'}
+         </button></>}
+     </div>}
+   </div>}
+   {message&&<p role="status" style={{fontSize:13,marginTop:10}}>{message}</p>}
+ </section>;
+}
