@@ -10,7 +10,7 @@ alter table public.athlete_onboarding
   drop constraint if exists onboarding_training_days_check,
   add constraint onboarding_training_days_check check (
     cardinality(training_days)<=7 and training_days <@ array[0,1,2,3,4,5,6]::integer[]
-    and (select count(distinct d) from unnest(training_days) as d)=cardinality(training_days)
+    and array_position(training_days,null) is null
   );
 alter table public.athlete_onboarding
   drop constraint if exists onboarding_ftp_range,
