@@ -1285,7 +1285,9 @@ const [primaryRace, setPrimaryRace] = useState({
     target_total?: string;
   },
 });
-  const [activeNav, setActiveNav] = useState('Home');
+  const [activeNav, setActiveNav] = useState(
+    new URLSearchParams(window.location.search).get('start') === 'calendar' ? 'Calendar' : 'Home'
+  );
   const [isCoachAccount, setIsCoachAccount] = useState(false);
   const [homeMode, setHomeMode] = useState<'athlete' | 'coach'>('athlete');
   useEffect(() => {
@@ -4905,15 +4907,11 @@ useEffect(() => {
     return;
   }
 void loadGarminConnection();
-  if (!needsCurrentWeekPlan) {
-    return;
-  }
-
-  generateCurrentWeekPlan();
+  // Do not create plans opportunistically while the athlete calendar is loading.
+  // First training is committed by the authenticated onboarding foundation RPC.
 }, [
   authReady,
   isAuthenticated,
-  needsCurrentWeekPlan,
 ]);
   const [showBaselineForm, setShowBaselineForm] =
   useState(false);
