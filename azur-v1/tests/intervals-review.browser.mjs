@@ -192,10 +192,10 @@ try {
  await page.getByRole('checkbox',{name:'Mon',exact:true}).check();
  await page.getByRole('checkbox',{name:'Wed',exact:true}).check();
  await page.getByRole('checkbox',{name:'Fri',exact:true}).check();
+ await page.getByRole('checkbox',{name:'I can swim 200 metres comfortably and safely'}).check();
  await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByRole('heading',{name:'How do you track training?',exact:true}).waitFor();
  await page.getByText('Do you already know your training thresholds?',{exact:true}).waitFor();
- await page.getByRole('checkbox',{name:'I can swim at least 200 metres comfortably and safely'}).check();
  await page.getByRole('checkbox',{name:'I have recent test values to enter'}).check();
  await page.getByLabel('Bike FTP (watts, if known)').fill('280');
  await page.getByLabel('Swim CSS (min:sec per 100m, e.g. 1:45 or 1.45)').fill('1.45');
