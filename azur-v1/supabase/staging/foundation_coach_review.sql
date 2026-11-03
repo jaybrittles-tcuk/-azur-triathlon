@@ -11,20 +11,20 @@ grant usage on schema azur_private to authenticated;
 
 create or replace function azur_private.athlete_has_assigned_coach(p_athlete uuid)
 returns boolean language sql stable security definer
-set search_path=public,pg_temp as $
+set search_path=public,pg_temp as $safe$
  select auth.uid() is not null and
   exists(select 1 from public.athlete_profile p
     where p.id=p_athlete and p.user_id=auth.uid()) and
   exists(select 1 from public.coach_athlete_assignment a
     where a.athlete_id=p_athlete);
-$;
+$safe$;
 revoke all on function azur_private.athlete_has_assigned_coach(uuid) from public,anon;
 grant execute on function azur_private.athlete_has_assigned_coach(uuid) to authenticated;
 
 create or replace function azur_private.athlete_exact_review_approved(
  p_athlete uuid,p_inputs jsonb,p_preview jsonb)
 returns boolean language sql stable security definer
-set search_path=public,pg_temp as $
+set search_path=public,pg_temp as $safe$
  select auth.uid() is not null and
   exists(select 1 from public.athlete_profile p
     where p.id=p_athlete and p.user_id=auth.uid()) and
@@ -36,7 +36,7 @@ set search_path=public,pg_temp as $
     where r.athlete_id=p_athlete and r.inputs=p_inputs
       and r.preview=p_preview and d.decision='approved'
   );
-$;
+$safe$;
 revoke all on function azur_private.athlete_exact_review_approved(uuid,jsonb,jsonb) from public,anon;
 grant execute on function azur_private.athlete_exact_review_approved(uuid,jsonb,jsonb) to authenticated;
 
