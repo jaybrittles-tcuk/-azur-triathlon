@@ -39,7 +39,7 @@ test('distribution checks approved library gaps and always remains unpublishable
    {sport:'run',approved:true,duration_min:45,title:'Easy Run',prescription:{steps:[]}}]});
  assert.ok(x.slots.length<=12);
  assert.equal(new Set(x.slots.map(s=>s.day)).size,6);
- assert.ok(x.warnings.some(s=>/swim/.test(s)));
+ assert.ok(x.slots.some(s=>s.sport==='swim'&&!s.approvedMatches.length));
  assert.equal(x.ready,false);
  assert.equal(x.proposedMinutes,960);
  assert.ok(x.mappedMinutes>0);
