@@ -41,7 +41,7 @@ const mockSupabase=async (route,coach=false)=>{
   const identity=coach?{...user,id:invitation.coach_user_id,app_metadata:{role:'coach'}}:user;
   if(url.pathname.startsWith('/auth/v1/'))data=identity;
   else if(url.pathname.endsWith('/coach_athlete_invitation')){
-   if(req.method()==='PATCH'){invitationAccepted=true;data={id:invitation.id};}
+   if(req.method()==='PATCH'){const payload=req.postDataJSON();assert.deepEqual(Object.keys(payload),['accepted_at'],'Athlete may only set accepted_at; server trigger owns accepted_by');assert.ok(!Number.isNaN(Date.parse(payload.accepted_at)));invitationAccepted=true;data={id:invitation.id};}
    else data=[{...invitation,accepted_at:invitationAccepted?new Date().toISOString():null}];
   }
   else if(url.pathname.endsWith('/coach_athlete_assignment')) data=invitationAccepted?[{athlete_id:athlete}]:[];
