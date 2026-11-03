@@ -80,6 +80,11 @@ export default function CoachStarterWeekPreview(){
     </div>)}
     <p style={{fontSize:12,color:'#a6c3d4',margin:'10px 0 0'}}>{w.restDays} days without sessions · Unapproved planning suggestions</p>
    </section>)}
+   {foundation.proposedAssessments.length>0&&<section style={{margin:'14px 0',padding:12,border:'1px solid #356d87',borderRadius:12}}>
+    <strong style={{fontSize:14}}>After two weeks: review benchmark readiness</strong>
+    <p style={{fontSize:12,color:'#b6cfe0'}}>Earliest review: {foundation.testWindowStart??'Date pending'}. Tests are not automatically scheduled.</p>
+    {foundation.proposedAssessments.map(a=><p key={a.sport} style={{fontSize:13,margin:'8px 0'}}><strong>{a.sport.toUpperCase()}:</strong> {a.purpose}</p>)}
+   </section>}
    <details style={{padding:'10px 0'}}><summary style={{fontSize:13,cursor:'pointer',color:'#8ad0fa'}}>Safety checks and next steps</summary>
     <ul style={{fontSize:13,lineHeight:1.6,paddingLeft:20}}>{foundation.warnings.map(w=><li key={w}>{w}</li>)}</ul>
    </details>
