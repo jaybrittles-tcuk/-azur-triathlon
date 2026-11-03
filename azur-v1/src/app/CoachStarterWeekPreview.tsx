@@ -93,9 +93,7 @@ export default function CoachStarterWeekPreview(){
   {result&&<details style={{marginTop:14}}><summary style={{cursor:'pointer',fontSize:13,color:'#9accf4'}}>Existing approved-workout coverage</summary><div style={{marginTop:10}}> 
    <strong style={{color:'#ffdb8a'}}>Coach review required · not publishable</strong>
    <p style={{fontSize:13,color:'#a9c7d7'}}>{result.minutes} candidate minutes · availability ceiling {result.availabilityCeilingMinutes??'unknown'} minutes (not a training target)</p>
-   {result.sessions.map(s=><article key={s.workout_key} style={{padding:12,marginBottom:10,borderRadius:11,border:'1px solid #315c78',background:'#173d58'}}>
-     <strong>{s.title}</strong><p style={{fontSize:12,margin:'6px 0 0',color:'#bbd7e9'}}>{s.date} · {s.sport} · {s.duration_min} min · approved RPE-compatible candidate</p>
-    </article>)}
+   <p style={{fontSize:12,color:'#a6c9db'}}>Template matches: {result.sessions.length}. This library check is separate from the athlete's day-specific two-week foundation above.</p>
    <div style={{padding:12,borderRadius:11,background:'#26392e',border:'1px solid #626a42'}}>
     <strong>Before the first week can be released</strong>
     <ul style={{fontSize:13,lineHeight:1.6,paddingLeft:20}}>{result.reasons.map(reason=><li key={reason}>{reason}</li>)}</ul>
