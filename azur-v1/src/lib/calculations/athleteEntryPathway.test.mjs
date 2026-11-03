@@ -40,6 +40,32 @@ test('distribution checks approved library gaps and always remains unpublishable
  assert.ok(x.slots.length<=6);
  assert.ok(x.warnings.some(s=>/swim/.test(s)));
  assert.equal(x.ready,false);
- assert.equal(x.mappedMinutes,0);
- assert.equal(x.unmappedMinutes,960);
+ assert.equal(x.proposedMinutes,960);
+ assert.ok(x.mappedMinutes>0);
+ assert.ok(x.unmappedMinutes>0);
+ assert.ok(x.slots.some(s=>s.day===5&&s.sport==='bike'&&s.minutes===210));
+ assert.ok(x.slots.some(s=>s.day===5&&s.sport==='run'));
+ assert.equal(x.restDays,1);
+ assert.ok(x.slots.every(s=>s.day!==0));
+
+});
+
+test('continuation structure reserves a rest day and expresses double-session availability',()=>{
+ const result=entrySessionDistribution({pathway:'continuation',targetMinutes:960,
+  trainingDays:[0,1,2,3,4,5,6],workouts:[]});
+ assert.equal(result.slots.length,12);
+ assert.equal(result.proposedMinutes,960);
+ assert.equal(result.mappedMinutes,0);
+ assert.equal(result.restDays,1);
+ assert.equal(result.ready,false);
+ assert.equal(result.targetBySport.bike,480);
+ assert.equal(result.targetBySport.swim,240);
+ assert.equal(result.targetBySport.run,240);
+});
+test('four available days with high volume is not marked publishable',()=>{
+ const result=entrySessionDistribution({pathway:'continuation',targetMinutes:960,
+  trainingDays:[0,2,4,6],workouts:[]});
+ assert.equal(result.ready,false);
+ assert.ok(result.warnings.some(x=>x.includes('five or more')));
+ assert.ok(result.restDays>=3);
 });
