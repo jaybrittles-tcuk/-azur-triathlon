@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
+import CalendarIntensityProfile from './CalendarIntensityProfile';
+import './premiumWorkoutV103.css';
 type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null};
 export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource}:Props){
- const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('intervals');
+ const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('overview');
  const source=prescription?.azurWorkout as {steps?:unknown}|undefined;
  const intervals=normalizeWorkoutIntervals(source?.steps);
  const valid=intervals.filter(x=>x.durationSec!==null);
@@ -22,14 +24,14 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {(['overview','intervals','notes'] as const).map(t=><button type="button" key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t[0].toUpperCase()+t.slice(1)}</button>)}
   </div>
   {tab==='overview'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <p>{rationale||'Review this session and its prescribed training objective.'}</p>
+   <div className="azur-v103-purpose"><small>WHY THIS SESSION MATTERS</small><p>{rationale||'Review this session and its prescribed training objective.'}</p></div>
    <div className="azur-workout-facts">
     <div><small>Scheduled</small><strong>{plannedMinutes} min</strong></div>
     <div><small>Recorded</small><strong>{completedMinutes==null?'Awaiting activity':completedMinutes+' min'}</strong></div>
     <div><small>Workout structure</small><strong>{intervals.length?intervals.length+' timed blocks':'Coach-prescribed'}</strong></div>
    </div>
    {completedMinutes!=null&&<p>Recorded duration difference: {completedMinutes-plannedMinutes>=0?'+':''}{completedMinutes-plannedMinutes} min{completedSource?' · '+completedSource:''}. Duration alone does not establish intensity compliance.</p>}
-   {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Intervals for prescribed targets.</p>}
+   {intervals.length>0&&<><CalendarIntensityProfile steps={source?.steps}/><WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts} compact/><p className="azur-workout-footnote">Structured duration: {Math.round(duration)} min{Math.abs(duration-plannedMinutes)>1?' · scheduled '+plannedMinutes+' min':''}. Open Intervals for full targets.</p></>}
   </div>}
   {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
    {intervals.length ? <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/> : <p>Workout instructions are listed in the detailed prescription below. Review warm-up, main set and cool-down before starting.</p>}
