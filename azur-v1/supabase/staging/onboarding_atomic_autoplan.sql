@@ -114,10 +114,20 @@ begin
   swim_css_seconds_per_100m=excluded.swim_css_seconds_per_100m,
   run_threshold_seconds_per_km=excluded.run_threshold_seconds_per_km,
   updated_at=now();
- insert into public.athlete_profile(user_id,display_name)
- values(v_user,v_name)
- on conflict(user_id) do update set display_name=excluded.display_name
- returning id into v_profile;
+ -- Profile user_id has no unique constraint on this staging schema.
+ -- Under the per-user advisory lock, reuse one existing profile or create
+ -- exactly one. Never manufacture another profile on a retry.
+ if (select count(*) from public.athlete_profile where user_id=v_user)>1 then
+   raise exception 'Multiple athlete profiles require support review before planning';
+ end if;
+ select id into v_profile from public.athlete_profile
+ where user_id=v_user for update;
+ if v_profile is null then
+   insert into public.athlete_profile(user_id,display_name)
+   values(v_user,v_name) returning id into v_profile;
+ else
+   update public.athlete_profile set display_name=v_name where id=v_profile;
+ end if;
  if v_profile is null then raise exception 'Athlete profile could not be created';end if;
  v_result:=public.generate_onboarding_foundation();
  if v_result->>'status'='review_required' then
