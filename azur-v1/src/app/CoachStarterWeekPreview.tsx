@@ -4,6 +4,7 @@ import {starterWeekPreview} from '../lib/starterWeekPreview.mjs';
 import {twoWeekFoundationPreview} from '../lib/twoWeekFoundation.mjs';
 import {assessEntryPathway,entrySessionDistribution} from '../lib/athleteEntryPathway.mjs';
 import {mapAutoWeek} from '../lib/automaticWeekDraft.mjs';
+import {proposeIntelligentWorkout, type WorkoutProposal} from '../lib/calculations/intelligentWorkoutPrescription.ts';
 
 type Athlete={id:string;display_name:string;user_id:string|null};
 type Workout={workout_key:string;title:string;sport:string;family:string;duration_min:number;level:number;phases:string[];prescription:unknown;approved:boolean};
@@ -15,6 +16,7 @@ export default function CoachStarterWeekPreview(){
  const [week,setWeek]=useState(monday);
  const [loading,setLoading]=useState(true);
  const [result,setResult]=useState<ReturnType<typeof starterWeekPreview>|null>(null);
+ const [intelligentSessions,setIntelligentSessions]=useState<WorkoutProposal[]>([]);
  const [foundation,setFoundation]=useState<ReturnType<typeof twoWeekFoundationPreview>|null>(null);
  const [entry,setEntry]=useState<ReturnType<typeof assessEntryPathway>|null>(null);
  const [distribution,setDistribution]=useState<ReturnType<typeof entrySessionDistribution>|null>(null);
@@ -39,9 +41,9 @@ export default function CoachStarterWeekPreview(){
   }catch(e){if(active)setMessage(e instanceof Error?e.message:'Unable to load assigned athletes')}
   finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[]);
- useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('');setDraftStatus('')},[selected,week]);
+ useEffect(()=>{setResult(null);setFoundation(null);setIntelligentSessions([]);setEntry(null);setDistribution(null);setExistingTarget(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('');setDraftStatus('')},[selected,week]);
  async function preview(){
-  setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setTargetStatus('');
+  setBusy(true);setMessage('');setResult(null);setFoundation(null);setIntelligentSessions([]);setEntry(null);setDistribution(null);setTargetStatus('');
   try{
    const athlete=athletes.find(a=>a.id===selected);
    if(!athlete?.user_id)throw new Error('Select an athlete with a verified account');
@@ -68,6 +70,17 @@ export default function CoachStarterWeekPreview(){
     workouts:(workouts.data??[]) as Workout[]}));
 
    setResult(starterWeekPreview({weekStart:week,availabilityHours:Number(info.weekly_hours),onboardingCompleted:info.onboarding_step===3,existingSessions:existing.data?.length??0,library:(workouts.data??[]) as Workout[]}));
+   // Read-only demonstration: never treat onboarding threshold entries as verified.
+   // A coach must confirm sport-specific history and benchmark provenance before publication.
+   const sampleSports=['swim','bike','run'] as const;
+   setIntelligentSessions(sampleSports.map(sport=>proposeIntelligentWorkout({
+     sport,phase:'base',availableMinutes:sport==='bike'?70:sport==='swim'?45:50,
+     recentSportHours:info.recent_weekly_hours==null?null:Number(info.recent_weekly_hours)/3,
+     recoveryConcern:info.current_training_concern!=='none',
+     benchmarks:{verified:false,ftpWatts:info.ftp_watts==null?null:Number(info.ftp_watts),
+       cssSecondsPer100m:info.swim_css_seconds_per_100m==null?null:Number(info.swim_css_seconds_per_100m),
+       runThresholdSecondsPerKm:info.run_threshold_seconds_per_km==null?null:Number(info.run_threshold_seconds_per_km)}
+   })).filter((p):p is WorkoutProposal=>p!==null));
    setFoundation(twoWeekFoundationPreview({
      weekStart:week,onboardingCompleted:info.onboarding_step===3,
      trainingDays:info.training_days||[],availableHours:Number(info.weekly_hours),
@@ -162,6 +175,19 @@ export default function CoachStarterWeekPreview(){
   </div>
   <button type="button" disabled={loading||busy||!selected} onClick={()=>void preview()} style={{minHeight:46,padding:'10px 17px',borderRadius:12,border:'1px solid #53bce9',background:'#1576ab',fontWeight:700,color:'#fff'}}>{busy?'Checking…':'Generate training preview'}</button>
   {message&&<p role="alert">{message}</p>}
+  {intelligentSessions.length>0&&<section aria-label="Intelligent workout proposals" style={{marginTop:16,padding:14,border:'1px solid #477a99',borderRadius:14,background:'#173c55'}}>
+   <h4 style={{margin:'0 0 6px',fontSize:17}}>Intelligent session preview</h4>
+   <p style={{fontSize:12,color:'#b7d6e9',lineHeight:1.5}}>Read-only coaching examples using onboarding history. Sport-specific training volume is provisionally estimated from overall volume; benchmark entries are unverified, so these sessions use RPE rather than numeric targets. Not saved to the calendar.</p>
+   {intelligentSessions.map(p=><details key={p.sport} style={{marginTop:11,padding:12,border:'1px solid #416d87',borderRadius:12,background:'#102f47'}}>
+    <summary style={{cursor:'pointer',fontWeight:700,fontSize:14}}>{p.sport.toUpperCase()} · {p.title} · {p.minutes} min</summary>
+    <p style={{fontSize:12,color:'#c5e2ef'}}>{p.purpose}</p>
+    {p.steps.map((step,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',gap:10,padding:'8px 0',borderBottom:'1px solid #31516a',fontSize:12}}>
+     <span><strong>{step.name}</strong><span style={{display:'block',color:'#b8d4e4',marginTop:3}}>{step.instruction}</span></span>
+     <strong style={{whiteSpace:'nowrap',color:'#91dbff'}}>{step.minutes} min</strong>
+    </div>)}
+    <p style={{fontSize:11,color:'#a7c8d9',marginBottom:0}}>Coach review required · {p.reason}</p>
+   </details>)}
+  </section>}
   {entry&&<section style={{marginTop:16,padding:13,borderRadius:12,border:'1px solid #39748d',background:'#133951'}}>
    <span style={{fontSize:11,color:'#83d5ff',fontWeight:700,letterSpacing:'0.07em'}}>AUTOMATIC ATHLETE CLASSIFICATION</span>
    <h4 style={{margin:'8px 0',fontSize:19}}>{entry.pathway==='continuation'?'Established-athlete continuation':entry.pathway==='return_to_training'?'Return-to-training review':entry.pathway==='continuation_review'?'Continuation needs checking':'Beginner foundation'}</h4>
