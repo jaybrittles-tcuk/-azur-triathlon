@@ -1,3 +1,4 @@
+import './premiumWorkoutV103.css';
 import { useState } from 'react';
 import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity';
 
