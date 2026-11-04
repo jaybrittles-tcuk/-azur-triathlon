@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {safeRpeWorkout,mapAutoWeek} from '../automaticWeekDraft.mjs';
+import {safeRpeWorkout,mapAutoWeek,proposeMissingRpeWorkout} from '../automaticWeekDraft.mjs';
 const workout=(sport,minutes)=>({workout_key:sport+'-'+minutes,title:'Easy '+sport+' '+minutes,
  sport,family:'aerobic_endurance',duration_min:minutes,approved:true,
  prescription:{steps:[{target:'Easy conversational RPE 3',durationMin:minutes}]}});
@@ -34,4 +34,15 @@ test('target, dates, rest and daily limits remain hard gates',()=>{
  assert.equal(mapAutoWeek({weekStart:'2026-11-10',targetHours:16,slots,library}).complete,false);
  assert.equal(mapAutoWeek({weekStart:'2026-11-09',targetHours:17.8,slots,library}).complete,false);
  assert.equal(mapAutoWeek({weekStart:'2026-11-09',targetHours:16,slots:slots.map(s=>({...s,day:0})),library}).complete,false);
+});
+
+test('missing workout candidates have exact durations but are never approved',()=>{
+ for(const sport of ['swim','bike','run'])for(const minutes of [30,45,60,75,90,105,120,180]){
+  const candidate=proposeMissingRpeWorkout({sport,minutes});
+  assert.ok(candidate,sport+' '+minutes);
+  assert.equal(candidate.approved,false);
+  assert.equal(candidate.prescription.steps.reduce((n,x)=>n+x.durationMin,0),minutes);
+  assert.equal(safeRpeWorkout(candidate),false);
+ }
+ assert.equal(proposeMissingRpeWorkout({sport:'bike',minutes:210}),null);
 });

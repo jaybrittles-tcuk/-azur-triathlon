@@ -3,7 +3,7 @@ import {supabase} from '../lib/supabase';
 import {starterWeekPreview} from '../lib/starterWeekPreview.mjs';
 import {twoWeekFoundationPreview} from '../lib/twoWeekFoundation.mjs';
 import {assessEntryPathway,entrySessionDistribution} from '../lib/athleteEntryPathway.mjs';
-import {mapAutoWeek} from '../lib/automaticWeekDraft.mjs';
+import {mapAutoWeek,proposeMissingRpeWorkout} from '../lib/automaticWeekDraft.mjs';
 
 type Athlete={id:string;display_name:string;user_id:string|null};
 type Workout={workout_key:string;title:string;sport:string;family:string;duration_min:number;level:number;phases:string[];prescription:unknown;approved:boolean};
@@ -172,7 +172,14 @@ export default function CoachStarterWeekPreview(){
      {distribution.targetBySport&&<p style={{fontSize:13,color:'#c2d7e6',marginTop:12}}>
       {Object.entries(distribution.targetBySport).map(([sport,mins])=>sport.toUpperCase()+' '+Math.floor(Number(mins)/60)+'h '+String(Number(mins)%60).padStart(2,'0')+'m').join(' · ')}
      </p>}
-     {distribution.slots.map(slot=><div key={slot.day} style={{padding:'8px 0',borderBottom:'1px solid #345c77',fontSize:13}}>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][slot.day]} · {slot.sport.toUpperCase()} · {slot.minutes} min · {slot.approvedMatches.length?'Approved option: '+slot.approvedMatches[0].title:'Needs workout prescription'}</div>)}
+     {distribution.slots.map((slot,index)=>{const proposal=!slot.approvedMatches.length?proposeMissingRpeWorkout({sport:slot.sport,minutes:slot.minutes}):null;return <div key={slot.day+'-'+slot.sport+'-'+index} style={{padding:'8px 0',borderBottom:'1px solid #345c77',fontSize:13}}>
+      {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][slot.day]} · {slot.sport.toUpperCase()} · {slot.minutes} min · {slot.approvedMatches.length?'Approved: '+slot.approvedMatches[0].title:proposal?'Structured candidate — coach approval required':'Needs manual coach prescription'}
+      {proposal&&<details style={{margin:'7px 0',padding:9,background:'#102c44',borderRadius:9}}>
+       <summary style={{cursor:'pointer',color:'#9edbff'}}>Review proposed intervals · {proposal.prescription.steps.length} steps</summary>
+       <p style={{fontSize:12,color:'#bcd5e5'}}>{proposal.purpose}. Not approved or publishable.</p>
+       {proposal.prescription.steps.map((step,i)=><div key={i} style={{fontSize:12,padding:'4px 0',color:'#e1eff8'}}>{step.durationMin} min · {step.target}</div>)}
+      </details>}
+     </div>})}
      <p style={{fontSize:12,color:'#bde2f6'}}>Suggested {distribution.proposedMinutes??0} min · matched to approved workout durations {distribution.mappedMinutes} min · {distribution.restDays??'—'} rest day(s). No sessions are published.</p>
      {distribution.warnings.map(w=><p key={w} style={{fontSize:12,color:'#ffdfaf'}}>{w}</p>)}
    </details>}

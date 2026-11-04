@@ -66,3 +66,34 @@ export function mapAutoWeek({weekStart,targetHours,slots,library}={}){
  return {sessions,blockers:[...new Set(blockers)],matchedMinutes:total,
   complete:!blockers.length};
 }
+
+/**
+ * Generate a conservative, structured candidate for a missing exact-duration
+ * library slot. This is NOT an approved workout and cannot be published.
+ * A coach must explicitly review/approve it into the workout library.
+ */
+export function proposeMissingRpeWorkout({sport,minutes}={}){
+ if(!['swim','bike','run'].includes(sport)||!Number.isInteger(minutes)||minutes<20||minutes>180)return null;
+ const warm=Math.min(sport==='swim'?5:10,Math.floor(minutes/4));
+ const cool=warm;
+ const available=minutes-warm-cool;
+ const recovery=available>=20?2:1;
+ const repeats=available>=35?4:available>=20?3:2;
+ const work=Math.floor((available-(repeats-1)*recovery)/repeats);
+ if(work<3)return null;
+ const steps=[{type:'warmup',durationMin:warm,target:'Easy conversational RPE 2; gradually warm up'}];
+ for(let i=0;i<repeats;i++){
+  steps.push({type:'work',durationMin:work,target:sport==='swim'?
+   'Relaxed technique focus, controlled breathing, RPE 2–3':
+   sport==='bike'?'Steady aerobic RPE 3; smooth pedalling':'Easy conversational RPE 3; relaxed running form'});
+  if(i<repeats-1)steps.push({type:'recovery',durationMin:recovery,target:'Very easy RPE 1–2 recovery'});
+ }
+ const used=steps.reduce((sum,x)=>sum+x.durationMin,0)+cool;
+ if(used<minutes)steps.push({type:'work',durationMin:minutes-used,target:'Easy conversational RPE 2–3'});
+ steps.push({type:'cooldown',durationMin:cool,target:'Relaxed easy RPE 1–2 cool-down'});
+ const candidate={sport,duration_min:minutes,title:sport.toUpperCase()+' structured aerobic '+minutes+'m',
+  family:sport==='swim'?'technique':'aerobic_endurance',approved:false,
+  purpose:sport==='swim'?'Improve repeatable technique and breathing':'Build aerobic consistency without excessive intensity',
+  prescription:{steps}};
+ return steps.reduce((n,x)=>n+x.durationMin,0)===minutes?candidate:null;
+}
