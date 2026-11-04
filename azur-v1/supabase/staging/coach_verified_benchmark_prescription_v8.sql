@@ -97,7 +97,8 @@ begin
   'azur-run-easy-base-45','azur-run-steady-base-60')
  then raise exception 'Workout has no validated individual-target prescription policy';end if;
  select * into v_lib from public.coach_workout_library
- where workout_key=p_workout_key and approved=true and level=1;
+ where workout_key=p_workout_key and approved=true
+ and (level=1 or (workout_key='azur-bike-tempo-base-75' and level=2));
  if not found then raise exception 'Approved coach workout not available';end if;
  v_sport:=v_lib.sport;
  v_metric:=case when v_sport='bike' then 'bike_ftp_w'
