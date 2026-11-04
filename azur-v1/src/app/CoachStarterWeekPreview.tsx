@@ -55,7 +55,9 @@ export default function CoachStarterWeekPreview(){
     supabase.from('season_week').select('id,target_hours').eq('athlete_id',athlete.id).eq('week_start',week).maybeSingle()
    ]);
    if(setup.error||workouts.error||existing.error||targetRecord.error)throw new Error(setup.error?.message||workouts.error?.message||existing.error?.message||targetRecord.error?.message||'Data validation failed');
-   setExistingTarget(targetRecord.data?Number(targetRecord.data.target_hours):null);
+   const approvedHours=targetRecord.data?Number(targetRecord.data.target_hours):null;
+   if(approvedHours!==null&&(!Number.isFinite(approvedHours)||approvedHours<=0))throw new Error('Invalid coach-approved target; review required');
+   setExistingTarget(approvedHours);
    if(!setup.data)throw new Error('No onboarding preferences available for this athlete. Ask them to finish setup.');
    const info=setup.data;
    const entryResult=assessEntryPathway({
@@ -65,8 +67,10 @@ export default function CoachStarterWeekPreview(){
    });
    setEntry(entryResult);
    setTargetHours(entryResult.targetMinutes===null?'':String(entryResult.targetMinutes/60));
+   const safePreviewMinutes=approvedHours===null?entryResult.targetMinutes:
+     Math.min(entryResult.targetMinutes??approvedHours*60,approvedHours*60);
    setDistribution(entrySessionDistribution({pathway:entryResult.pathway,
-    targetMinutes:entryResult.targetMinutes,trainingDays:info.training_days||[],
+    targetMinutes:safePreviewMinutes,trainingDays:info.training_days||[],
     workouts:(workouts.data??[]) as Workout[]}));
 
    setResult(starterWeekPreview({weekStart:week,availabilityHours:Number(info.weekly_hours),onboardingCompleted:info.onboarding_step===3,existingSessions:existing.data?.length??0,library:(workouts.data??[]) as Workout[]}));
