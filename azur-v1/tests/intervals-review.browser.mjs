@@ -350,6 +350,11 @@ try {
  await home.getByRole('button',{name:'View session',exact:true}).click();
  await page.locator('.session-detail-modal:visible').waitFor();
  const sheet=page.locator('.session-detail-modal:visible');
+ await sheet.getByText("TODAY'S OBJECTIVE",{exact:true}).first().waitFor();
+ await sheet.getByRole('tab',{name:'At a glance'}).waitFor();
+ const detailed=sheet.locator('details.azur-v11-disclosure');
+ assert.equal(await detailed.evaluate(el=>el.open),false,'Full written prescription should be collapsed by default');
+ await detailed.locator(':scope > summary').click();
  for(const label of ['WARM-UP','MAIN SET','Recovery between efforts','4 min','COOL-DOWN','65–75% FTP']){
   await sheet.locator('.session-prescription-sections').getByText(label,{exact:true}).first().waitFor();
  }
@@ -374,6 +379,7 @@ try {
  assert.equal(await completedRide.locator('strong').evaluate(el=>getComputedStyle(el).color),'rgb(20, 46, 67)');
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  const plannedRide=calendar.locator('.calendar-session').filter({hasText:'Long Aerobic Ride'});
+ await plannedRide.locator('.azur-v11-open-session').waitFor();
  await plannedRide.hover();
  assert.equal(await surface(plannedRide),'rgb(255, 255, 255)','Hover must preserve the light calendar card');
  await plannedRide.click();

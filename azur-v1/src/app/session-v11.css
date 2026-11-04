@@ -1,0 +1,90 @@
+/* AZUR V11 — purpose-led, thumb-friendly mobile session UI.
+   Scoped overrides; athlete training data and permissions are unchanged. */
+.calendar-session.azur-not-used{display:block}
+.calendar-session-wrapper{min-width:0}
+.calendar-session{
+  position:relative;display:flex!important;flex-direction:column!important;
+  min-width:0;box-sizing:border-box;gap:10px!important;
+  padding:16px!important;border-radius:18px!important;
+  box-shadow:0 8px 22px rgba(8,33,56,.055)!important;
+  text-align:left!important;overflow:hidden!important
+}
+.calendar-session .calendar-session-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0!important}
+.calendar-session .azur-v11-calendar-title{display:block;font-size:clamp(17px,4.4vw,21px)!important;line-height:1.27!important;letter-spacing:-.025em!important;max-width:100%;overflow-wrap:anywhere}
+.azur-v11-calendar-quickstats{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.azur-v11-calendar-quickstats span{font-size:11px;line-height:1.4;font-weight:750;color:#315a73;background:#edf5fb;padding:6px 9px;border-radius:9px;text-transform:capitalize}
+.azur-v11-card-purpose{padding:10px 12px;background:#f4f8fc;border:1px solid #e2edf4;border-radius:12px;min-width:0}
+.azur-v11-card-purpose-label,.azur-v11-kicker{display:block;font-size:10px!important;line-height:1.3;letter-spacing:.11em;text-transform:uppercase;font-weight:800!important;color:#4281ad!important}
+.azur-v11-card-purpose p{font-size:12px!important;line-height:1.45!important;color:#38586f!important;margin:5px 0 0!important;overflow-wrap:anywhere}
+.azur-v11-open-session{display:flex;justify-content:space-between;align-items:center;margin-top:0;padding:0 2px;color:#10699e!important;font-size:12px!important;font-weight:800!important}
+.azur-v11-open-session span{font-size:19px}
+.azur-mini-interval{width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:10px 12px;background:#f7fafc;border:1px solid #e4edf3;border-radius:12px;overflow:hidden}
+.azur-mini-interval-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px!important;color:#537084!important;line-height:1.4}
+.azur-mini-interval-top span:first-child{font-weight:800;color:#234f69}
+.azur-mini-interval-track{display:flex;align-items:stretch;gap:2px;height:31px;width:100%;margin:8px 0 7px;overflow:hidden;border-radius:6px}
+.azur-mini-interval-part{position:relative;display:flex;align-items:flex-end;min-width:2px;overflow:hidden;background:#e5edf3}
+.azur-mini-interval-part i{display:block;width:100%;background:#4f9dce;min-height:3px;border-radius:2px 2px 0 0}
+.azur-mini-interval-part.work i{background:#f7b641}
+.azur-mini-interval-part.recovery i{background:#93b9ce}
+.azur-mini-interval-part.cooldown i{background:#5fafd0}
+.azur-mini-interval-legend{display:flex;gap:8px;flex-wrap:wrap;color:#658194!important;font-size:9px!important;line-height:1.5}
+.azur-mini-interval-legend span:before{content:'•';color:#4f9dce;margin-right:3px}
+.azur-mini-interval-legend span:nth-child(2):before{color:#f3ae30}
+.azur-mini-interval-legend span:nth-child(3):before{color:#8eb1c9}
+.calendar-week-overview{overflow:hidden}
+.azur-v11-week-focus{margin-top:13px;padding:12px 14px;background:rgba(255,255,255,.065);border:1px solid rgba(166,207,233,.18);border-radius:14px}
+.azur-v11-week-focus p{font-size:16px!important;line-height:1.3;font-weight:800;color:#fff!important;margin:6px 0!important}
+.azur-v11-week-focus small{display:block;font-size:12px;line-height:1.5;color:#b0c7d8}
+.session-detail-modal .azur-v2-session-hero{min-height:0!important;padding:14px 20px!important}
+.session-detail-modal>.section-heading{padding-top:14px!important;padding-bottom:12px!important}
+.session-detail-modal>.section-heading h3{font-size:clamp(23px,6vw,31px)!important;line-height:1.15!important;letter-spacing:-.035em}
+.session-detail-modal .session-detail-meta{display:flex;flex-wrap:wrap;gap:6px}
+.session-detail-modal .session-detail-meta span{font-size:11px!important;padding:6px 9px!important}
+.session-detail-modal .azur-v11-detail-intro{margin:0 16px 16px;border:1px solid #c7dfef;background:#eaf5fc;border-radius:14px;padding:14px 16px;color:#17394f}
+.azur-v11-detail-intro p{margin:6px 0 0;font-size:14px;line-height:1.5;font-weight:600}
+.azur-premium-workout-tabs.azur-v11-tabs{margin:0 16px 16px!important;border-radius:20px!important;overflow:hidden!important;box-shadow:0 8px 23px rgba(4,20,34,.12)}
+.azur-v11-tabs .azur-workout-tab-nav{padding:6px!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px!important}
+.azur-v11-tabs .azur-workout-tab-nav button{min-width:0!important;white-space:normal!important;font-size:12px!important;line-height:1.25!important;padding:12px 5px!important;border-radius:12px!important}
+.azur-v11-tabs .azur-workout-tab-content{padding:14px!important}
+.azur-v11-purpose{padding:17px;background:linear-gradient(145deg,#123c5b,#112b42);border:1px solid rgba(114,186,229,.28);border-radius:15px}
+.azur-v11-purpose p{color:#f0f8ff!important;font-size:15px!important;line-height:1.58!important;margin:8px 0 0!important}
+.azur-v11-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.azur-v11-facts>div{min-width:0;background:#193d59;border:1px solid rgba(118,186,224,.17);border-radius:12px;padding:12px 9px}
+.azur-v11-facts small{display:block;font-size:10px!important;color:#a8c2d6!important;line-height:1.3}
+.azur-v11-facts strong{display:block;margin-top:6px;font-size:17px!important;color:#fff!important;line-height:1.2;overflow-wrap:anywhere}
+.azur-v11-facts em{font-size:11px;font-style:normal;font-weight:500;color:#bdd4e4}
+.azur-v11-focus{border-left:3px solid #f7b641;background:rgba(255,255,255,.055);padding:12px 14px;border-radius:0 12px 12px 0}
+.azur-v11-focus p{font-size:13px!important;line-height:1.55!important;margin:5px 0 0!important;color:#d7e9f4!important}
+.azur-v11-see-intervals{width:100%;display:flex;justify-content:space-between;align-items:center;margin:12px 0 0;padding:12px 14px;border-radius:12px;border:1px solid #397da7;background:#16658e;color:#fff;font-weight:750;font-size:13px}
+.azur-v11-notes>p,.azur-v11-completion-note,.azur-v11-context-note{font-size:13px;line-height:1.6;color:#d2e3ee}
+.azur-v11-workout-breakdown{width:100%;min-width:0;box-sizing:border-box;background:#0a253d;border:1px solid #284d68;border-radius:15px;padding:15px}
+.azur-v11-breakdown-heading{display:flex;align-items:end;justify-content:space-between;gap:8px;margin-bottom:13px}
+.azur-v11-breakdown-heading strong{display:block;color:#f2f8fc;font-size:18px;line-height:1.3;margin-top:5px}
+.azur-v11-minutes{font-size:11px;color:#a7c5d9;white-space:nowrap}
+.azur-v11-timebar{height:9px;display:flex;gap:2px;width:100%;overflow:hidden;border-radius:10px;margin-bottom:12px;background:#294860}
+.azur-v11-timebar-segment{min-width:2px;background:#3196d0;border-radius:2px}
+.azur-v11-timebar-segment.work{background:#f4b33e}
+.azur-v11-timebar-segment.recovery{background:#87aabc}
+.azur-v11-timebar-segment.cooldown{background:#57b5d1}
+.azur-v11-step-list{display:grid;gap:7px}
+.azur-v11-step{display:flex;align-items:center;gap:10px;min-width:0;border-radius:11px;padding:11px;background:#143650;border:1px solid #214763;border-left:3px solid #3999d1}
+.azur-v11-step.work{border-left-color:#f6b43f}
+.azur-v11-step.recovery{border-left-color:#8aafc5}
+.azur-v11-step-number{flex:0 0 auto;font-size:11px;font-weight:800;color:#77bfe7}
+.azur-v11-step-copy{min-width:0;flex:1;display:grid;gap:3px}
+.azur-v11-step-copy strong{font-size:13px;color:#f5faff}
+.azur-v11-step-copy small{font-size:11px;color:#b9d2e2;line-height:1.4;overflow-wrap:anywhere}
+.azur-v11-step-time{flex:0 0 auto;font-size:12px;color:#fff;font-weight:800}
+.azur-v11-more{display:block;margin-top:10px;color:#a6c4d7}
+.session-detail-modal .azur-v11-disclosure{margin:0 16px 14px!important}
+@media(max-width:480px){
+ .calendar-session{padding:13px!important;gap:8px!important}
+ .calendar-session .azur-v11-calendar-title{font-size:18px!important}
+ .azur-mini-interval{padding:8px 10px}
+ .session-detail-modal .azur-v11-detail-intro{margin:0 12px 12px}
+ .azur-premium-workout-tabs.azur-v11-tabs{margin:0 12px 12px!important}
+ .azur-v11-tabs .azur-workout-tab-content{padding:10px!important}
+ .azur-v11-workout-breakdown{padding:11px}
+ .azur-v11-facts{gap:5px}
+ .azur-v11-facts>div{padding:11px 7px}
+}
