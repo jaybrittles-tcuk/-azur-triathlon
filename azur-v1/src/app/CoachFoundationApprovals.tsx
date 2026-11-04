@@ -20,6 +20,10 @@ type TrainingEvidence={
  weekly_validated_load:Array<{week_start:string;validated_hours:number;validated_sessions:number}>;
  sport_distribution:Array<{sport:string;validated_hours:number;sessions:number}>;
 };
+type WorkloadAdvice={disposition:string;confidence:string;suggested_weekly_hours:number|null;
+ suggested_range_hours:number[]|null;observed_weekly_hours:number;
+ proposed_weekly_hours:number;recommendation:string;workout_guidance:string;
+ sport_guidance:string;};
 type Display=Request&{athleteName:string;decision?:Decision};
 
 export default function CoachFoundationApprovals(){
@@ -31,6 +35,7 @@ export default function CoachFoundationApprovals(){
  const [notes,setNotes]=useState<Record<string,string>>({});
  const [evidence,setEvidence]=useState<Record<string,TrainingEvidence>>({});
  const [evidenceBusy,setEvidenceBusy]=useState('');
+ const [advice,setAdvice]=useState<Record<string,WorkloadAdvice>>({});
  const [reload,setReload]=useState(0);
  useEffect(()=>{
   let active=true;
@@ -68,9 +73,14 @@ export default function CoachFoundationApprovals(){
  },[reload]);
  async function loadEvidence(requestId:string){
   setEvidenceBusy(requestId);setMessage('');
-  const response=await supabase.rpc('coach_foundation_training_evidence',{p_request_id:requestId});
+  const [response,adviceResponse]=await Promise.all([
+   supabase.rpc('coach_foundation_training_evidence',{p_request_id:requestId}),
+   supabase.rpc('coach_foundation_workload_advice',{p_request_id:requestId})
+  ]);
   if(response.error)setMessage('Training evidence not available: '+response.error.message);
   else if(response.data)setEvidence(prev=>({...prev,[requestId]:response.data as TrainingEvidence}));
+  if(adviceResponse.error)setMessage('Workload recommendation unavailable: '+adviceResponse.error.message);
+  else if(adviceResponse.data)setAdvice(prev=>({...prev,[requestId]:adviceResponse.data as WorkloadAdvice}));
   setEvidenceBusy('');
  }
  async function decide(row:Display,decision:'approved'|'rejected'){
@@ -162,6 +172,26 @@ export default function CoachFoundationApprovals(){
           background:'#fff',padding:10,borderRadius:9,fontWeight:600,fontSize:12
         }}>{evidence[row.id].decision_guidance}</p>
         <small>Device observations may be incomplete if integrations or imports are missing. Reported hours are not independently verified. Review readiness and injuries before approving.</small>
+        {advice[row.id]&&<div style={{border:'1px solid #bdd2e0',background:'#f3f9fe',
+          padding:12,borderRadius:10,marginTop:12,lineHeight:1.5}}>
+          <strong style={{display:'block',fontSize:14}}>AZUR training recommendation</strong>
+          <div style={{fontSize:12,marginTop:5}}>
+            Evidence status: {advice[row.id].confidence.replaceAll('_',' ')}
+          </div>
+          {advice[row.id].suggested_weekly_hours!==null&&
+            <p style={{margin:'6px 0',fontSize:13}}>
+              Conservative reference: <strong>{advice[row.id].suggested_weekly_hours}h/week</strong>.
+              This is not a published training target.
+            </p>}
+          <p style={{fontSize:13,margin:'7px 0',fontWeight:600}}>{advice[row.id].recommendation}</p>
+          <details style={{marginTop:8}}>
+            <summary style={{fontSize:12,cursor:'pointer'}}>Workout and sport-selection reasoning</summary>
+            <p style={{fontSize:12}}>{advice[row.id].workout_guidance}</p>
+            <p style={{fontSize:12}}>{advice[row.id].sport_guidance}</p>
+          </details>
+          <small>This decision support does not approve a plan. Only the assigned coach can authorise the exact proposal.</small>
+        </div>}
+
       </>}
     </div>
     <p style={{fontSize:12,color:'#77502d',margin:'8px 0'}}>
