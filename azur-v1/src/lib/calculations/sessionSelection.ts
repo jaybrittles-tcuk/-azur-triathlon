@@ -41,7 +41,7 @@ export function selectCoachSession(library: readonly SessionEntry[], input: Sele
     return { status: 'unavailable', reason: 'Recent training history requires coach review' };
   }
   // Evidence limits are ceilings, never reasons to intensify training.
-  const historyLevel = recent == null ? 1 : recent < 4 ? 1 : recent < 8 ? 2 : 3;
+  const historyLevel = recent == null ? 3 : recent < 4 ? 1 : recent < 8 ? 2 : 3;
   const verifiedLevel = input.benchmarksVerified === false ? 1 : 3;
   const effectiveLevel = Math.min(input.maxLevel, input.demonstratedLevel ?? 3, historyLevel, verifiedLevel);
   const candidates = library.filter((session) =>
