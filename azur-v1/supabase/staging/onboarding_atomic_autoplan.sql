@@ -131,7 +131,7 @@ begin
  if v_profile is null then raise exception 'Athlete profile could not be created';end if;
  v_result:=public.generate_onboarding_foundation();
  -- First distribute appropriate weekly bike durations without increasing load.
- perform public.athlete_balance_foundation_bikes();
+ perform public.athlete_balance_foundation_week();
  -- Enrich only compatible unlocked, as-yet-uncompleted foundation workouts.
  -- Still RPE-led and time-neutral; any failure rolls back onboarding.
  perform public.athlete_enrich_foundation_sessions();
