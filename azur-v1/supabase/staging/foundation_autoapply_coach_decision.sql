@@ -294,3 +294,8 @@ end;
 $evidence$;
 revoke all on function public.coach_foundation_training_evidence(uuid) from public,anon;
 grant execute on function public.coach_foundation_training_evidence(uuid) to authenticated;
+
+-- Prevent the old direct insert route from recording "approved" without
+-- applying its sessions. All decisions must pass the atomic RPC above.
+revoke insert on public.foundation_reassessment_decision from authenticated;
+drop policy if exists foundation_decision_coach_insert on public.foundation_reassessment_decision;
