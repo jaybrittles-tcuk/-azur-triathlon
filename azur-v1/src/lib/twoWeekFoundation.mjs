@@ -22,7 +22,7 @@ export function foundationPrescription(sport, minutes, week=0) {
   ],
   bike:[
    {title:'Aerobic rhythm ride',purpose:'Develop sustainable aerobic rhythm with frequent low-stress resets.',
-    steps:[['Warm-up',8,'Gradually settle into RPE 2–3'],['Aerobic intervals',24,'3 × 7 min at RPE 3 with 90 sec easy between efforts; remaining 1 min easy'],['Cool-down',8,'RPE 1–2 easy spinning']]},
+    steps:[['Warm-up',8,'Gradually settle into RPE 2–3'],['Aerobic intervals',24,'3 × 7 min at RPE 3 with 1 min easy between efforts; finish with 1 min easy'],['Cool-down',8,'RPE 1–2 easy spinning']]},
    {title:'Cadence control ride',purpose:'Improve smooth pedalling and comfortable aerobic control.',
     steps:[['Warm-up',8,'Easy spinning, RPE 2'],['Technique intervals',24,'4 × 5 min relaxed cadence focus at RPE 3 with 1 min easy between blocks; finish with 1 min easy'],['Cool-down',8,'Easy spinning, RPE 1–2']]}
   ],
@@ -30,7 +30,7 @@ export function foundationPrescription(sport, minutes, week=0) {
    {title:'Easy run or run/walk',purpose:'Establish comfortable running rhythm without forcing pace.',
     steps:[['Warm-up',5,'Brisk walk progressing to easy jog if comfortable'],['Main set',20,'Easy conversational running; walk whenever needed to maintain RPE 2–3'],['Cool-down',5,'Easy walk']]},
    {title:'Relaxed run/walk rhythm',purpose:'Build consistency while keeping the effort conversational.',
-    steps:[['Warm-up',5,'Brisk walk'],['Main set',20,'4 × 4 min easy running with 1 min walking between blocks'],['Cool-down',5,'Easy walking']]}
+    steps:[['Warm-up',5,'Brisk walk'],['Main set',20,'4 × 4 min easy running with 1 min walking between blocks; finish with 1 min easy'],['Cool-down',5,'Easy walking']]}
   ]
  };
  const recipe=recipes[sport]?.[variant];
