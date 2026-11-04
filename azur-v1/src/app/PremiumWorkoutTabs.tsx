@@ -3,7 +3,7 @@ import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity'
 import WorkoutTargetDetails from './WorkoutTargetDetails';
 type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null};
 export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource}:Props){
- const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('intervals');
+ const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('overview');
  const source=prescription?.azurWorkout as {steps?:unknown}|undefined;
  const intervals=normalizeWorkoutIntervals(source?.steps);
  const valid=intervals.filter(x=>x.durationSec!==null);
