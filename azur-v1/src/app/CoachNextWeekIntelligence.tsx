@@ -14,7 +14,9 @@ type Advice={
 type ProposedSession={date:string;sport:string;title:string;duration_min:number;selection_reason:string};
 type ProposedWeek={status:'ready_for_coach'|'blocked';reason?:string|null;week_start?:string|null;
  source_week_start:string;source_minutes:number;proposed_minutes:number;adaptation:string;
- confidence:string;evidence_status:string;sessions:ProposedSession[];coach_approval_required:boolean};
+ confidence:string;evidence_status:string;sessions:ProposedSession[];coach_approval_required:boolean;
+ race_phase:string;race_date:string|null;race_distance:string;weeks_to_race:number|null;
+ race_reason:string;development_sport:string|null;sport_priority_reason:string;race_guidance_only:boolean};
 type Athlete={id:string;display_name:string};
 export default function CoachNextWeekIntelligence(){
  const [athletes,setAthletes]=useState<Athlete[]>([]);
@@ -181,6 +183,19 @@ export default function CoachNextWeekIntelligence(){
              proposal.adaptation.replaceAll('_',' ')+' · '+proposal.proposed_minutes+' minutes · '+
              proposal.sessions.length+' prescribed workouts'}
          </p>
+         <div style={{margin:'10px 0',padding:12,border:'1px solid #d8e4eb',borderRadius:10,background:'#f5f9fc'}}>
+           <strong style={{fontSize:13}}>Race-aware coaching context</strong>
+           <p style={{fontSize:12,margin:'6px 0'}}>
+             {proposal.race_distance==='ironman'?'Ironman':
+               proposal.race_distance==='70.3'?'Ironman 70.3':'Race not set'}
+             {proposal.race_date?' · '+proposal.race_date:''}
+             {' · '}{proposal.race_phase?.replaceAll('_',' ')}
+             {proposal.weeks_to_race!==null?' · '+proposal.weeks_to_race+' weeks to race':''}
+           </p>
+           <p style={{fontSize:12,lineHeight:1.5,margin:'7px 0'}}>{proposal.race_reason}</p>
+           <p style={{fontSize:12,lineHeight:1.5,margin:'7px 0'}}>{proposal.sport_priority_reason}</p>
+           <small>Race and sport context is guidance, not permission to prescribe harder sessions.</small>
+         </div>
          {proposal.status==='ready_for_coach'&&<>
            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:8}}>
              {proposal.sessions.map((session,i)=><div key={session.date+'-'+i}

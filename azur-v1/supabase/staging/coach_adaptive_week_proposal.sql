@@ -48,6 +48,14 @@ declare
  v_target_date date;
  v_mode text;
  v_limit numeric;
+ v_race_weeks integer;
+ v_race_phase text;
+ v_race_reason text;
+ v_distance text;
+ v_development_sport text;
+ v_strongest_sport text;
+ v_priority_reason text;
+ v_target_window text;
 begin
  if v_coach is null or auth.jwt()->'app_metadata'->>'role' is distinct from 'coach'
  then raise exception 'Assigned AZUR coach required';end if;
@@ -89,6 +97,36 @@ begin
   where d.athlete_id=p_athlete_id and d.week_start=candidate)
  order by candidate limit 1;
 
+ -- Race-aware policy: classify relative to the actual target week.
+ -- Classification is guidance; it never authorises higher intensity or volume.
+ v_distance:=lower(coalesce(v_onboarding.race_distance,'unknown'));
+ select nullif(b.development_sport,''),nullif(b.strongest_sport,'')
+ into v_development_sport,v_strongest_sport
+ from public.athlete_training_baseline b where b.athlete_id=p_athlete_id;
+ v_development_sport:=case when v_development_sport in ('swim','bike','run')
+   then v_development_sport else null end;
+ v_strongest_sport:=case when v_strongest_sport in ('swim','bike','run')
+   then v_strongest_sport else null end;
+ v_race_weeks:=case when v_onboarding.race_date is null or v_target is null
+   then null else floor((v_onboarding.race_date-v_target)::numeric/7)::int end;
+ v_race_phase:=case
+   when v_onboarding.race_date is null then 'race_unset'
+   when v_target>v_onboarding.race_date then 'post_race'
+   when v_race_weeks<=3 then 'taper_or_race'
+   when v_race_weeks<=11 then 'build'
+   else 'base' end;
+ v_target_window:=case when v_target is null then 'no_target_week'
+  else v_target::text end;
+ v_race_reason:=case v_race_phase
+   when 'base' then 'Base phase: maintain easy aerobic frequency and technique with no unverified intensity progression.'
+   when 'build' then 'Build phase: validate sport-specific progression and race durability with the coach before increasing intensity or volume.'
+   when 'taper_or_race' then 'Taper/race phase: bespoke coach-managed sessions and race-week reduction required; continuation is blocked.'
+   when 'post_race' then 'Post-race recovery and return-to-training must be coach-reviewed; continuation is blocked.'
+   else 'Set a race date before AZUR can make race-specific training recommendations.' end;
+ v_priority_reason:=case when v_development_sport is null
+   then 'Development sport not confirmed: do not infer weaknesses from missing activities.'
+   else 'Athlete-confirmed development sport: '||v_development_sport||
+    '. Coach to assess technique and suitable frequency, without automatically adding load.' end;
  v_mode:=case when v_basis->>'status'='recovery_review'
    then 'recovery_reduction' else 'easy_continuation' end;
  if exists(select 1 from public.coach_adaptive_week_decision d
@@ -102,9 +140,8 @@ begin
   v_block:='No empty, unlocked training week available within the four-week planning horizon';
  elsif v_block<>'' then
   null;
- elsif v_onboarding.race_date is not null and
-   v_onboarding.race_date between v_target-7 and v_target+14 then
-  v_block:='Race or taper proximity requires a bespoke coach-managed plan';
+ elsif v_race_phase in ('taper_or_race','post_race') then
+  v_block:='Race phase safety hold: '||v_race_reason;
  elsif v_basis->>'status' not in ('conservative_reference','recovery_review') then
   v_block:='Insufficient validated evidence or unresolved safety concern: '||coalesce(v_basis->>'reason','review required');
  elsif v_source_count<3 or v_source_count>7 or v_source_sports<2 then
@@ -179,6 +216,15 @@ begin
    'source_minutes',v_source_min,
    'proposed_minutes',v_total,
    'adaptation',v_mode,
+   'race_phase',v_race_phase,
+   'race_date',v_onboarding.race_date,
+   'race_distance',v_distance,
+   'weeks_to_race',v_race_weeks,
+   'race_reason',v_race_reason,
+   'development_sport',v_development_sport,
+   'strongest_sport',v_strongest_sport,
+   'sport_priority_reason',v_priority_reason,
+   'race_guidance_only',true,
    'evidence_status',v_basis->>'status',
    'validated_28d_hours',v_basis->>'validated_28d_hours',
    'confidence',v_basis->>'confidence',
@@ -274,12 +320,17 @@ begin
        'generation_source','coach_adaptive_continuation',
        'adaptive_source_session_id',v_item->>'source_session_id',
        'adaptation',v_actual->>'adaptation',
+       'race_phase',v_actual->>'race_phase',
+       'race_distance',v_actual->>'race_distance',
+       'race_date',v_actual->>'race_date',
+       'development_sport',v_actual->>'development_sport',
+       'race_guidance_only',true,
        'coach_approved',true,'coach_user_id',v_coach,
        'evidence_status',v_actual->>'evidence_status',
        'rpe_min',2,'rpe_max',4,
        'requires_coach_review_for_progression',true),
      v_item->'prescription',
-     'AZUR adaptive easy-training continuation reviewed and automatically published by assigned coach. No unverified intensity targets.',
+     'AZUR race-aware easy-training continuation, reviewed and published by assigned coach. Race phase recorded for audit; no automatic intensity or load progression.',
      'planned',false,true);
    v_minutes:=v_minutes+(v_item->>'duration_min')::int;
    v_count:=v_count+1;
