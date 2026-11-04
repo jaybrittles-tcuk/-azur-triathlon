@@ -200,27 +200,5 @@ revoke all on function public.decide_foundation_reassessment(uuid,text,text)
 grant execute on function public.decide_foundation_reassessment(uuid,text,text)
  to authenticated;
 
--- Previously the athlete needed a second confirmation to activate a coach
--- decision. Remove that alternative for reviewed proposals; only the coach's
--- atomic decision endpoint can publish an increase now.
-create or replace function public.apply_foundation_reassessment(
- p_inputs jsonb,p_expected_preview jsonb,p_confirm boolean)
-returns jsonb
-language plpgsql security invoker set search_path=public,pg_temp
-as $legacy$
-declare v_plan jsonb;v_user uuid:=auth.uid();
-begin
- if v_user is null then raise exception 'Athlete authentication required';end if;
- v_plan:=public.preview_foundation_reassessment(p_inputs);
- if v_plan is distinct from p_expected_preview then
-   raise exception 'Preview changed; refresh the proposal';
- end if;
- if v_plan->>'status'='coach_review_required' then
-   raise exception 'Coach-reviewed increases are published automatically by the coach. Refresh your calendar';
- end if;
- -- For routine, coach-free changes the legacy function must retain the
- -- existing atomic implementation. This wrapper is intentionally not used
- -- for such writes; see follow-up migration before removing legacy flow.
- raise exception 'Routine reassessment must use an updated safe publication path';
-end;
-$legacy$;
+-- Legacy athlete routine-change apply remains intact. The athlete UI no longer
+-- offers an extra apply action for coach-reviewed proposals.
