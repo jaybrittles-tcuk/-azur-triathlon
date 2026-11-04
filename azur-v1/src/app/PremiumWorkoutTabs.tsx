@@ -24,7 +24,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {(['overview','intervals','notes'] as const).map(t=><button type="button" key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t[0].toUpperCase()+t.slice(1)}</button>)}
   </div>
   {tab==='overview'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <p>{rationale||'Review this session and its prescribed training objective.'}</p>
+   <div className="azur-v103-purpose"><small>WHY THIS SESSION MATTERS</small><p>{rationale||'Review this session and its prescribed training objective.'}</p></div>
    <div className="azur-workout-facts">
     <div><small>Scheduled</small><strong>{plannedMinutes} min</strong></div>
     <div><small>Recorded</small><strong>{completedMinutes==null?'Awaiting activity':completedMinutes+' min'}</strong></div>
