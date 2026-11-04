@@ -31,7 +31,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
     <div><small>Workout structure</small><strong>{intervals.length?intervals.length+' timed blocks':'Coach-prescribed'}</strong></div>
    </div>
    {completedMinutes!=null&&<p>Recorded duration difference: {completedMinutes-plannedMinutes>=0?'+':''}{completedMinutes-plannedMinutes} min{completedSource?' · '+completedSource:''}. Duration alone does not establish intensity compliance.</p>}
-   {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Intervals for prescribed targets.</p>}
+   {intervals.length>0&&<><CalendarIntensityProfile steps={source?.steps}/><WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts} compact/><p className="azur-workout-footnote">Structured duration: {Math.round(duration)} min. Open Intervals for full targets.</p></>}
   </div>}
   {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
    {intervals.length ? <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/> : <p>Workout instructions are listed in the detailed prescription below. Review warm-up, main set and cool-down before starting.</p>}
