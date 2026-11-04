@@ -268,7 +268,7 @@ try {
  await page.getByRole('region',{name:'Week of '+new Date(new Date().setDate(new Date().getDate()+((8-new Date().getDay())%7||7))).toISOString().slice(0,10)}).waitFor();
  await page.getByText('RPE-based foundation',{exact:true}).first().waitFor();
  await page.getByText('Rest / no planned session',{exact:true}).first().waitFor();
- await page.getByRole('button',{name:'Confirm and update future calendar'}).click();
+ await page.getByRole('button',{name:'Confirm routine update'}).click();
  await page.getByText('Reassessment applied: 1 future sessions published.',{exact:false}).waitFor();
  assert.equal(demoSessions.some(s=>s.id==='reassessed-1'),true,'Reassessment must save only after confirmation');
  console.log('PASS: athlete reassessment → preview → explicit confirm → future calendar refresh');
