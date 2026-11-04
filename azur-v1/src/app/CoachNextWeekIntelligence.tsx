@@ -11,6 +11,10 @@ type Advice={
  suggested_max_weekly_hours:number|null;training_concern:string;
  workout_selection_guidance:string;publication_status:string;
 };
+type ProposedSession={date:string;sport:string;title:string;duration_min:number;selection_reason:string};
+type ProposedWeek={status:'ready_for_coach'|'blocked';reason?:string|null;week_start?:string|null;
+ source_week_start:string;source_minutes:number;proposed_minutes:number;adaptation:string;
+ confidence:string;evidence_status:string;sessions:ProposedSession[];coach_approval_required:boolean};
 type Athlete={id:string;display_name:string};
 export default function CoachNextWeekIntelligence(){
  const [athletes,setAthletes]=useState<Athlete[]>([]);
@@ -18,6 +22,10 @@ export default function CoachNextWeekIntelligence(){
  const [advice,setAdvice]=useState<Advice|null>(null);
  const [busy,setBusy]=useState(false);
  const [message,setMessage]=useState('');
+ const [proposal,setProposal]=useState<ProposedWeek|null>(null);
+ const [rationale,setRationale]=useState('');
+ const [decisionBusy,setDecisionBusy]=useState(false);
+ const [resultMessage,setResultMessage]=useState('');
  useEffect(()=>{
    let live=true;
    (async()=>{
@@ -40,11 +48,41 @@ export default function CoachNextWeekIntelligence(){
  },[]);
  async function refresh(){
    if(!selected||busy)return;
-   setBusy(true);setMessage('');setAdvice(null);
+   setBusy(true);setMessage('');setAdvice(null);setProposal(null);setResultMessage('');
    const result=await supabase.rpc('coach_next_week_adaptive_preview',{p_athlete_id:selected});
    if(result.error)setMessage('Next-week recommendation unavailable: '+result.error.message);
    else if(result.data)setAdvice(result.data as Advice);
    setBusy(false);
+ }
+ async function generateWeek(){
+   if(!selected||busy||decisionBusy)return;
+   setBusy(true);setProposal(null);setMessage('');setResultMessage('');
+   const response=await supabase.rpc('coach_adaptive_week_proposal',{p_athlete_id:selected});
+   setBusy(false);
+   if(response.error){setMessage('Unable to create safe proposal: '+response.error.message);return;}
+   setProposal(response.data as ProposedWeek);
+ }
+ async function decideWeek(decision:'approved'|'declined'){
+   if(!selected||!proposal||proposal.status!=='ready_for_coach'||decisionBusy)return;
+   if(rationale.trim().length<15){
+     setResultMessage('A coaching rationale of at least 15 characters is required.');return;
+   }
+   setDecisionBusy(true);setResultMessage('');
+   const response=await supabase.rpc('coach_decide_adaptive_week',{
+     p_athlete_id:selected,p_preview:proposal,p_decision:decision,p_rationale:rationale.trim()
+   });
+   setDecisionBusy(false);
+   if(response.error){
+     setResultMessage('No calendar changes made: '+response.error.message);return;
+   }
+   if(response.data?.status==='approved_and_published'){
+     setResultMessage(response.data.sessions+' easy sessions published to the athlete calendar for '+response.data.week_start+'. No athlete confirmation needed.');
+     setProposal(null);setRationale('');
+     await refresh();
+   }else if(response.data?.status==='declined'){
+     setResultMessage('Proposal declined. Athlete calendar unchanged.');
+     setProposal(null);setRationale('');
+   }else setResultMessage('Decision outcome could not be confirmed. Refresh before retrying.');
  }
  const status=advice?.status;
  return <section aria-label="Adaptive next-week planning" style={{
@@ -59,7 +97,7 @@ export default function CoachNextWeekIntelligence(){
     <label style={{flex:'1 1 160px',fontSize:13}}>
      Assigned athlete
      <select style={{display:'block',width:'100%',marginTop:5,padding:10,borderRadius:9}}
-      value={selected} onChange={e=>{setSelected(e.target.value);setAdvice(null);setMessage('');}}>
+      value={selected} onChange={e=>{setSelected(e.target.value);setAdvice(null);setProposal(null);setRationale('');setMessage('');setResultMessage('');}}>
       {!athletes.length&&<option value="">No athletes assigned</option>}
       {athletes.map(a=><option key={a.id} value={a.id}>{a.display_name||'Athlete'}</option>)}
      </select>
@@ -121,8 +159,64 @@ export default function CoachNextWeekIntelligence(){
        {advice.workout_selection_guidance}
      </p>
      <strong style={{display:'block',fontSize:12,marginTop:9}}>
-       Read-only recommendation — no calendar changes made.
+       Evidence assessment only — no calendar changes made.
      </strong>
+     <div style={{borderTop:'1px solid #c9deec',marginTop:14,paddingTop:13}}>
+       <strong>Generate an adaptive week</strong>
+       <p style={{fontSize:12,lineHeight:1.5,margin:'7px 0'}}>
+         Creates a complete future-week proposal from eligible, previously approved
+         easy workouts. It never changes existing sessions. Insufficient history,
+         a race/taper or a safety concern blocks publication.
+       </p>
+       <button type="button" onClick={()=>void generateWeek()} disabled={busy||decisionBusy}>
+         {busy?'Generating…':'Preview next available week'}
+       </button>
+       {proposal&&<div style={{marginTop:12,padding:12,borderRadius:12,background:'#fff'}}>
+         <strong style={{fontSize:14}}>
+           {proposal.status==='blocked'?'Proposal not safe to publish':
+             'Proposed week of '+proposal.week_start}
+         </strong>
+         <p style={{fontSize:12,margin:'7px 0'}}>
+           {proposal.status==='blocked'?proposal.reason:
+             proposal.adaptation.replaceAll('_',' ')+' · '+proposal.proposed_minutes+' minutes · '+
+             proposal.sessions.length+' prescribed workouts'}
+         </p>
+         {proposal.status==='ready_for_coach'&&<>
+           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:8}}>
+             {proposal.sessions.map((session,i)=><div key={session.date+'-'+i}
+              style={{padding:10,border:'1px solid #d7e4eb',borderRadius:10}}>
+               <small style={{display:'block',fontWeight:650,color:'#4f6e81'}}>
+                 {session.date} · {session.sport.toUpperCase()}</small>
+               <strong style={{display:'block',fontSize:13,margin:'5px 0'}}>
+                 {session.title}</strong>
+               <span style={{fontSize:13}}>{session.duration_min} minutes</span>
+             </div>)}
+           </div>
+           <p style={{fontSize:12,lineHeight:1.45,marginTop:12}}>
+             This proposal uses only existing easy, structured RPE workouts.
+             Approving publishes this exact future week automatically.
+             Declining leaves the calendar unchanged.
+           </p>
+           <label style={{display:'block',fontSize:13}}>
+             Coaching rationale (required)
+             <textarea style={{display:'block',width:'100%',minHeight:75,
+               boxSizing:'border-box',marginTop:5,padding:9,borderRadius:9}}
+               value={rationale} onChange={e=>setRationale(e.target.value)}
+               placeholder="Review completed training, available days, safety and why this week is suitable…"/>
+           </label>
+           <div style={{display:'flex',flexWrap:'wrap',gap:9,marginTop:10}}>
+             <button type="button" disabled={decisionBusy} onClick={()=>void decideWeek('approved')}>
+               {decisionBusy?'Saving…':'Approve & publish future week'}
+             </button>
+             <button type="button" disabled={decisionBusy} onClick={()=>void decideWeek('declined')}>
+               Decline proposal
+             </button>
+           </div>
+         </>}
+       </div>}
+       {resultMessage&&<p role="status" style={{fontSize:13,fontWeight:650,marginTop:10}}>
+         {resultMessage}</p>}
+     </div>
    </div>}
  </section>;
 }
