@@ -105,11 +105,22 @@ begin
      else v_sport:=(array['bike','run'])[v_seq%2+1]; end if;
      if v_sport='bike' then
        v_duration:=case v_tier when 'established_continuation' then 120 when 'regular_continuation' then 75 else 40 end;
-       v_title:='Foundation easy aerobic ride';
-       v_steps:=jsonb_build_array(
-         jsonb_build_object('durationMin',10,'target','Easy spin, RPE 2–3'),
-         jsonb_build_object('durationMin',v_duration-15,'target','Conversational aerobic riding, RPE 3–4'),
-         jsonb_build_object('durationMin',5,'target','Easy cooldown, RPE 2'));
+       -- A second weekly ride has a different easy aerobic purpose rather than
+       -- repeating a long ride. No numerical thresholds or intensity progressions.
+       if v_seq>0 and v_tier<>'foundation' then
+         v_duration:=case when v_tier='established_continuation' then 90 else 55 end;
+         v_title:='Aerobic cadence and pedalling skills';
+         v_steps:=jsonb_build_array(
+           jsonb_build_object('durationMin',10,'target','Easy spin RPE 2–3, settle into a comfortable cadence'),
+           jsonb_build_object('durationMin',v_duration-15,'target','Easy aerobic riding RPE 3; practise relaxed, smooth pedalling and natural cadence changes without forcing high cadence'),
+           jsonb_build_object('durationMin',5,'target','Very easy cooldown RPE 2'));
+       else
+         v_title:='Foundation easy aerobic ride';
+         v_steps:=jsonb_build_array(
+           jsonb_build_object('durationMin',10,'target','Easy spin, RPE 2–3'),
+           jsonb_build_object('durationMin',v_duration-15,'target','Conversational aerobic riding, RPE 3–4'),
+           jsonb_build_object('durationMin',5,'target','Easy cooldown, RPE 2'));
+       end if;
      elsif v_sport='run' then
        v_duration:=case v_tier when 'established_continuation' then 55 when 'regular_continuation' then 40 else 25 end;
        v_title:=case when v_tier='foundation' then 'Foundation walk-run' else 'Foundation easy run' end;
@@ -120,10 +131,14 @@ begin
          jsonb_build_object('durationMin',5,'target','Walk to cool down'));
      else
        v_duration:=case v_tier when 'established_continuation' then 45 when 'regular_continuation' then 35 else 30 end;
-       v_title:='Foundation relaxed swim';
+       v_title:=case when v_seq>2 then 'Foundation relaxed aerobic swim'
+         else 'Foundation swim technique and confidence' end;
        v_steps:=jsonb_build_array(
          jsonb_build_object('durationMin',5,'target','Very easy swimming, RPE 2'),
-         jsonb_build_object('durationMin',v_duration-10,'target','Technique-focused easy swimming and breaks, RPE 2–3, supervised pool'),
+         jsonb_build_object('durationMin',v_duration-10,'target',
+           case when v_seq>2
+             then 'Relaxed easy aerobic swimming, RPE 2–3; take frequent rests as required and never force pace'
+             else 'Technique-focused easy swimming with ample rests; breathing and body position, RPE 2–3' end),
          jsonb_build_object('durationMin',5,'target','Easy cooldown or rest'));
      end if;
      -- Coach-approved library first, but only when an entire prescription is
