@@ -1,44 +1,53 @@
-import { useState } from 'react';
-import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity';
+import {useState} from 'react';
+import {normalizeWorkoutIntervals} from '../lib/calculations/workoutIntensity';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
-type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null};
+
+type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;
+ ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null};
 export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource}:Props){
- const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('intervals');
+ const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('overview');
  const source=prescription?.azurWorkout as {steps?:unknown}|undefined;
  const intervals=normalizeWorkoutIntervals(source?.steps);
- const valid=intervals.filter(x=>x.durationSec!==null);
- const duration=valid.reduce((n,x)=>n+(x.durationSec||0),0)/60;
- const cadenceNotes:string[]=[];
- const addCadence=(item:unknown)=>{
-  if(!item||typeof item!=='object')return;
-  const rec=item as Record<string,unknown>;
-  const cadence=rec.cadenceRpm;
-  if(Array.isArray(cadence)&&cadence.length===2&&cadence.every(x=>typeof x==='number'))cadenceNotes.push(cadence.join('–')+' rpm');
-  if(rec.type==='repeat'){addCadence(rec.work);addCadence(rec.recovery);}
- };
- if(Array.isArray(source?.steps))source.steps.forEach(addCadence);
- return <section className="azur-premium-workout-tabs">
+ const why=typeof prescription?.why_today_matters==='string'?prescription.why_today_matters:rationale;
+ const focus=typeof prescription?.focus==='string'?prescription.focus:null;
+ const sportNote=typeof prescription?.swim_duration_note==='string'?prescription.swim_duration_note:null;
+ const sessionWhy=(why||'The objective and targets for this session are set out below.')
+  .replace(/^Why today matters:\s*/i,'');
+ const tabs=[{key:'overview',label:'At a glance'},{key:'intervals',label:'Intervals'},{key:'notes',label:'Coach notes'}] as const;
+ return <section className="azur-premium-workout-tabs azur-v11-tabs">
   <div className="azur-workout-tab-nav" role="tablist" aria-label="Workout information">
-   {(['overview','intervals','notes'] as const).map(t=><button type="button" key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t[0].toUpperCase()+t.slice(1)}</button>)}
+   {tabs.map(t=><button type="button" key={t.key} role="tab" aria-selected={tab===t.key}
+    onClick={()=>setTab(t.key)}>{t.label}</button>)}
   </div>
-  {tab==='overview'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <p>{rationale||'Review this session and its prescribed training objective.'}</p>
-   <div className="azur-workout-facts">
-    <div><small>Scheduled</small><strong>{plannedMinutes} min</strong></div>
-    <div><small>Recorded</small><strong>{completedMinutes==null?'Awaiting activity':completedMinutes+' min'}</strong></div>
-    <div><small>Workout structure</small><strong>{intervals.length?intervals.length+' timed blocks':'Coach-prescribed'}</strong></div>
+  {tab==='overview'&&<div role="tabpanel" className="azur-workout-tab-content azur-v11-overview">
+   <div className="azur-v11-purpose">
+    <span className="azur-v11-kicker">WHY THIS SESSION</span>
+    <p>{sessionWhy}</p>
    </div>
-   {completedMinutes!=null&&<p>Recorded duration difference: {completedMinutes-plannedMinutes>=0?'+':''}{completedMinutes-plannedMinutes} min{completedSource?' · '+completedSource:''}. Duration alone does not establish intensity compliance.</p>}
-   {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Intervals for prescribed targets.</p>}
+   <div className="azur-v11-facts">
+    <div><small>Duration</small><strong>{plannedMinutes} <em>min</em></strong></div>
+    <div><small>Structure</small><strong>{intervals.length||'—'} <em>blocks</em></strong></div>
+    <div><small>Status</small><strong>{completedMinutes==null?'Planned':'Completed'}</strong></div>
+   </div>
+   {focus&&<div className="azur-v11-focus"><span className="azur-v11-kicker">TODAY'S FOCUS</span><p>{focus}</p></div>}
+   {intervals.length>0&&<button type="button" className="azur-v11-see-intervals" onClick={()=>setTab('intervals')}>
+    Explore your workout intervals <span aria-hidden="true">→</span>
+   </button>}
+   {completedMinutes!=null&&<p className="azur-v11-completion-note">
+    Recorded {completedMinutes} min{completedSource?' via '+completedSource:''}.
+    Duration alone doesn't confirm target intensity was achieved.
+   </p>}
   </div>}
-  {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
-   {intervals.length ? <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/> : <p>Workout instructions are listed in the detailed prescription below. Review warm-up, main set and cool-down before starting.</p>}
-   {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
+  {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content azur-v11-interval-panel">
+   <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/>
+   {sportNote&&<p className="azur-v11-context-note">{sportNote}</p>}
   </div>}
-  {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <h4>Coach guidance</h4><p>{rationale||'No additional coaching rationale recorded.'}</p>
-   <p>{typeof prescription?.focus==='string'?prescription.focus:'No additional focus notes supplied.'}</p>
-   <small>Additional workout notes and editable athlete feedback remain in the detailed sections below.</small>
+  {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content azur-v11-notes">
+   <span className="azur-v11-kicker">COACH GUIDANCE</span>
+   <p>{sessionWhy}</p>
+   {focus&&<div className="azur-v11-focus"><span className="azur-v11-kicker">EXECUTION CUE</span><p>{focus}</p></div>}
+   {sportNote&&<p>{sportNote}</p>}
+   <small>Use the detailed prescription below if you need the complete written steps.</small>
   </div>}
  </section>;
 }
