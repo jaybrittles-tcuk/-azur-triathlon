@@ -126,12 +126,11 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
    return acc;
  },{})??{};
  return <section aria-label="Reassess your training baseline" style={{
-   padding:16,border:'1px solid #9ac4dd',borderRadius:16,
-   background:'#f2f8fd',marginBottom:16,color:'#17354b'}}>
-   <strong style={{fontSize:17}}>Review your training baseline</strong>
-   <p style={{fontSize:13,lineHeight:1.5,margin:'7px 0 12px'}}>
-     Recent training changed? Preview a more personalised easy-training programme.
-     Routine adjustments need your confirmation. For larger increases, your coach's approval automatically updates eligible future workouts; a decline keeps your calendar unchanged.
+   padding:12,border:'1px solid #9ac4dd',borderRadius:14,
+   background:'#f2f8fd',marginBottom:10,color:'#17354b'}}>
+   <strong style={{fontSize:15}}>Review your training baseline</strong>
+   <p style={{fontSize:12,lineHeight:1.4,margin:'4px 0 8px'}}>
+     Has your training changed? Preview an updated programme. Your current calendar stays unchanged until you confirm; larger increases require coach approval.
    </p>
    {latestDecision?.status==='approved_and_applied'&&<div role="status" style={{
      background:'#eaf6ef',border:'1px solid #a9cfb9',borderRadius:10,padding:12,margin:'10px 0',fontSize:13}}>
