@@ -27,6 +27,7 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
  const [loading,setLoading]=useState(false);
  const [reviewStatus,setReviewStatus]=useState<'none'|'pending'|'approved'|'rejected'>('none');
  const [reviewNote,setReviewNote]=useState('');
+ const [latestDecision,setLatestDecision]=useState<{status:string;coach_note?:string;active_sessions?:number}|null>(null);
  const [reviewSubmissionMessage,setReviewSubmissionMessage]=useState('');
  const [reviewNeedsAssignment,setReviewNeedsAssignment]=useState(false);
  const [message,setMessage]=useState('');
@@ -40,6 +41,8 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
     .eq('user_id',user.id).maybeSingle();
    if(cancelled||error||!setup||setup.onboarding_step!==3)return;
    setEligible(true);
+   const recentDecision=await supabase.rpc('latest_foundation_coach_decision');
+   if(!cancelled&&!recentDecision.error)setLatestDecision(recentDecision.data);
    setInputs({
     training_background:setup.training_background||'unknown',
     training_consistency:setup.training_consistency||'unknown',
@@ -99,7 +102,7 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
  }
  async function confirm(){
   if(!preview||!previewInputs||loading||
-   (preview.status!=='ready_for_confirmation'&&reviewStatus!=='approved'))return;
+   preview.status!=='ready_for_confirmation')return;
   setLoading(true);setMessage('');
   const {data,error}=await supabase.rpc('apply_foundation_reassessment',{
     p_inputs:previewInputs,p_expected_preview:preview,p_confirm:true
@@ -128,8 +131,18 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
    <strong style={{fontSize:17}}>Review your training baseline</strong>
    <p style={{fontSize:13,lineHeight:1.5,margin:'7px 0 12px'}}>
      Recent training changed? Preview a more personalised easy-training programme.
-     Your calendar won't change unless you confirm; large increases require coach approval.
+     Routine adjustments need your confirmation. For larger increases, your coach's approval automatically updates eligible future workouts; a decline keeps your calendar unchanged.
    </p>
+   {latestDecision?.status==='approved_and_applied'&&<div role="status" style={{
+     background:'#eaf6ef',border:'1px solid #a9cfb9',borderRadius:10,padding:12,margin:'10px 0',fontSize:13}}>
+     <strong>Coach-approved programme now active.</strong> {latestDecision.active_sessions||0} future sessions were saved automatically.
+     Refresh the calendar if necessary to view the updated training.
+   </div>}
+   {latestDecision?.status==='declined'&&<div role="status" style={{
+     background:'#fff4e6',border:'1px solid #d6b486',borderRadius:10,padding:12,margin:'10px 0',fontSize:13}}>
+     Your coach declined the latest proposed revision. Your existing calendar is unchanged.
+     {latestDecision.coach_note&&<p>Coach feedback: {latestDecision.coach_note}</p>}
+   </div>}
    {!open?<button type="button" onClick={()=>setOpen(true)}
       style={{padding:'10px 14px',borderRadius:10}}>Reassess my programme</button>:<div style={{display:'grid',gap:12}}>
      <label>Current endurance training background
@@ -258,14 +271,18 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
        {reviewStatus==='rejected'&&<p role="status" style={{fontSize:13,fontWeight:600}}>
          Your coach has declined this version. Revise your training baseline or contact your coach.
        </p>}
-       {(preview.status==='ready_for_confirmation'||reviewStatus==='approved')&&<>
+       {reviewStatus==='approved'&&<p role="status" style={{fontSize:13,fontWeight:650}}>
+         Your coach approved this proposal. AZUR applies approvals automatically.
+         Refresh Calendar to see the resulting programme; do not confirm a second time.
+       </p>}
+       {preview.status==='ready_for_confirmation'&&<>
          <p style={{fontSize:12}}>
-           {reviewStatus==='approved'?'Your assigned coach approved this exact programme. You must still confirm it. ':''}
+           Routine change: 
            Only future, uncompleted and unlocked starter sessions will be replaced.
            This week's sessions and coach-created workouts remain protected.
          </p>
          <button type="button" disabled={loading} onClick={()=>void confirm()}>
-           {loading?'Applying…':reviewStatus==='approved'?'Confirm coach-approved programme':'Confirm and update future calendar'}
+           {loading?'Applying…':'Confirm routine update'}
          </button>
        </>}
      </div>}
