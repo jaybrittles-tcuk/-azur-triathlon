@@ -379,7 +379,7 @@ try {
  assert.equal(await completedRide.locator('strong').evaluate(el=>getComputedStyle(el).color),'rgb(20, 46, 67)');
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  const plannedRide=calendar.locator('.calendar-session').filter({hasText:'Long Aerobic Ride'});
- await plannedRide.getByText('View workout',{exact:true}).waitFor();
+ await plannedRide.locator('.azur-v11-open-session').waitFor();
  await plannedRide.hover();
  assert.equal(await surface(plannedRide),'rgb(255, 255, 255)','Hover must preserve the light calendar card');
  await plannedRide.click();
