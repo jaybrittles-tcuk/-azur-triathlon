@@ -76,9 +76,9 @@ export default function CoachNextWeekIntelligence(){
      setResultMessage('No calendar changes made: '+response.error.message);return;
    }
    if(response.data?.status==='approved_and_published'){
-     setResultMessage(response.data.sessions+' easy sessions published to the athlete calendar for '+response.data.week_start+'. No athlete confirmation needed.');
      setProposal(null);setRationale('');
      await refresh();
+     setResultMessage(response.data.sessions+' easy sessions published to the athlete calendar for '+response.data.week_start+'. No athlete confirmation needed.');
    }else if(response.data?.status==='declined'){
      setResultMessage('Proposal declined. Athlete calendar unchanged.');
      setProposal(null);setRationale('');
