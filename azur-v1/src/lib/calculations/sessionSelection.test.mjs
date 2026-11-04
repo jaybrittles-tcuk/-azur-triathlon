@@ -23,3 +23,25 @@ test('selection is stable across equal candidates',()=>{
  const r=selectCoachSession([entry('z'),entry('a')],base);
  assert.equal(r.session.id,'a');
 });
+
+test('training history constrains selected level',()=>{
+ const pool=[entry('easy',{level:1}),entry('advanced',{level:3})];
+ const beginner=selectCoachSession(pool,{...base,maxLevel:3,recentWeeklyHours:2,benchmarksVerified:false});
+ const experienced=selectCoachSession(pool,{...base,maxLevel:3,recentWeeklyHours:12,benchmarksVerified:true});
+ assert.equal(beginner.session.id,'easy');
+ assert.equal(experienced.session.id,'advanced');
+});
+
+test('sport-specific load prevents cycling fitness from unlocking hard run work',()=>{
+ const runEntries=[entry('gentle',{sport:'run',level:1}),entry('hard-run',{sport:'run',level:3})];
+ const result=selectCoachSession(runEntries,{...base,sport:'run',maxLevel:3,recentWeeklyHours:14,sportRecentWeeklyHours:1,benchmarksVerified:true});
+ assert.equal(result.session.id,'gentle');
+});
+test('recovery concern blocks demanding sessions',()=>{
+ const result=selectCoachSession([entry('hard')],{...base,recoveryConcern:true});
+ assert.equal(result.status,'unavailable');
+});
+test('sport clearance constrains otherwise qualified athletes',()=>{
+ const result=selectCoachSession([entry('easy',{level:1}),entry('hard',{level:3})],{...base,maxLevel:3,recentWeeklyHours:12,sportRecentWeeklyHours:8,benchmarksVerified:true,sportClearedLevel:1});
+ assert.equal(result.session.id,'easy');
+});

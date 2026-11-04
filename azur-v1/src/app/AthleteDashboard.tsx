@@ -1,3 +1,4 @@
+import {athleteBetaHomeState} from '../lib/athleteBetaReadiness.mjs';
 import {useId} from 'react';
 import {Bike, Waves, Footprints, ArrowUpRight, ChevronRight, UserRound} from 'lucide-react';
 type Workout={id:string;title:string;sport:string;plannedDate:string;durationMin:number;status:string;rationale?:string;prescription?:Record<string,any>};
@@ -15,11 +16,23 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
  const done=week.filter(s=>s.status==='completed').length,total=week.length;
  const plannedMinutes=week.reduce((sum,s)=>sum+(Number(s.durationMin)||0),0);
  const raceDays=race.raceDate?Math.ceil((new Date(race.raceDate+'T12:00:00').getTime()-day.getTime())/86400000):null;
- const readyLabel=!readiness?'Readiness unavailable':readiness.color==='green'?'Ready for planned training':readiness.color==='amber'?'Review your recovery':'Recovery needs attention';
+ const betaHome=athleteBetaHomeState({onboarded:true,hasPlan:active.length>0,completedCount:active.filter(s=>s.status==='completed').length});
+  const readyLabel=!readiness?'Readiness unavailable':readiness.color==='green'?'Ready for planned training':readiness.color==='amber'?'Review your recovery':'Recovery needs attention';
  const shortRationale=current?.rationale?.trim();const insight=shortRationale?(shortRationale.length>150?shortRationale.slice(0,147)+'…':shortRationale):current?'Follow the prescribed targets. Open the session for its full structure.':'No session is scheduled today. Check your calendar for what is next.';
  return <div className="azur-white-dashboard" aria-label="Athlete dashboard">
   <header className="awd-hero"><div className="awd-brand"><img src="/brand/azur-logo-250.png" alt="Azur Triathlon Coaching"/><button type="button" aria-label="Open athlete profile" onClick={()=>onNavigate('Profile')}>{avatar?<img src={avatar} alt=""/>:<UserRound size={21}/>}</button></div><p className="awd-greeting">Your day, {name?.split(' ')[0]||'athlete'}.</p><h1>{race.name||'Your next goal'}</h1><div className="awd-race-meta"><span>{phase||'Training plan'}</span><span>{raceDays===null?'Set your race date in Profile':raceDays<0?'Review your next race goal':raceDays===0?'Race day':`${raceDays} days to race day`}</span></div></header>
   <div className="awd-body">
+   {betaHome.stage==='await_plan'&&<section className="awd-card" aria-label="Getting started with AZUR" style={{border:'1px solid rgba(57,166,226,.45)',padding:'20px',marginBottom:16}}>
+    <span className="awd-eyebrow">GETTING STARTED</span>
+    <h2 style={{margin:'7px 0 9px',fontSize:'clamp(19px, 5vw, 24px)'}}>{betaHome.label}</h2>
+    <p style={{fontSize:14,lineHeight:1.6,margin:'0 0 16px'}}>{betaHome.detail}</p>
+    <div style={{display:'grid',gap:10,marginBottom:16,fontSize:14}}>
+     <div><span aria-hidden="true" style={{color:'#41bfe9',marginRight:9}}>✓</span> Athlete profile created</div>
+     <div><span aria-hidden="true" style={{color:'#f3c35f',marginRight:9}}>◷</span> Waiting for a published training week</div>
+     <div><span aria-hidden="true" style={{color:'#92b6c9',marginRight:9}}>○</span> Open your first workout when it arrives</div>
+    </div>
+    <button type="button" className="awd-primary" onClick={()=>onNavigate('More')}>Explore your account <ArrowUpRight size={17}/></button>
+   </section>}
    <section className="awd-card awd-session" aria-labelledby={todayHeading}><div className="awd-heading"><h2 id={todayHeading}>Today’s session{todays.length>1?'s':''}</h2><span className="awd-tag">{todays.length?`${todays.length} planned`:'Unscheduled'}</span></div>
     {todays.length?todays.map(s=>{const Icon=icons[s.sport as keyof typeof icons]??Bike;const blocks=['warmup','main_set','cooldown'].flatMap(key=>Array.isArray(s.prescription?.[key])?s.prescription[key].map((b:any)=>({...b,kind:key})):[]).filter(b=>Number(b.duration_min)>0);return <article key={s.id} className={`awd-workout ${s.sport}`}><div className="awd-workout-title"><span className="awd-sport-icon"><Icon size={22}/></span><div><h3>{s.title}</h3><p>{s.sport.toUpperCase()} · {minutes(Number(s.durationMin)||0)} · {s.status==='completed'?'Recorded complete':'Planned'}</p></div></div>{blocks.length>0&&<><div className="awd-prescription" aria-hidden="true">{blocks.map((b:any,i:number)=><span key={i} className={b.kind} style={{flex:Number(b.duration_min)}}/>)}</div><p className="awd-target">{blocks.find((b:any)=>b.kind==='main_set')?.target||'Structured session'}<span>Prescribed effort</span></p></>}<button type="button" className="awd-primary" onClick={()=>onSession(s.id)}>View session <ArrowUpRight size={17}/></button></article>}):<div className="awd-unscheduled"><h3>No workout scheduled</h3><p>Your calendar has no session for today.</p><button type="button" className="awd-primary" onClick={()=>onNavigate('Calendar')}>View calendar <ArrowUpRight size={17}/></button></div>}
    </section>

@@ -1,5 +1,4 @@
-import CoachWorkoutLibrary from './CoachWorkoutLibrary';
-import CoachWeekReconciliationPreview from './CoachWeekReconciliationPreview';
+import WorkoutPrescriptionView from './WorkoutPrescriptionView';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 type Draft={id:string;athlete_id:string;week_start:string;revision:number;phase:string;sessions:unknown;proposal_fingerprint:string;created_at:string};
@@ -20,6 +19,7 @@ export default function CoachWeeklyReview(){
  const [busy,setBusy]=useState('');
  const [note,setNote]=useState('');
  const [reload,setReload]=useState(0);
+ const publishingEnabled=import.meta.env.VITE_AZUR_STAGING==='true'; // Only isolated staging may expose the coach-authorised publishing path.
  useEffect(()=>{let live=true;(async()=>{
   setLoading(true);setError('');
   try{
@@ -52,9 +52,20 @@ export default function CoachWeeklyReview(){
    const {data:{session}}=await supabase.auth.getSession();
    if(!session?.access_token)throw new Error('Coach sign-in required');
    if(readiness(row).length)throw new Error(readiness(row).join('; '));
-   const response=await fetch('/api/publish-week',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token},body:JSON.stringify({draftId:row.id,mode})});
-   const payload=await response.json();
-   if(!response.ok)throw new Error(payload.error||'Publication declined');
+   if(!publishingEnabled||mode!=='full')throw new Error('Only staging full-week publication is permitted');
+   const {data:payload,error:publishError}=await supabase.functions.invoke('publish-approved-week',{
+     body:{draftId:row.id,mode:'full'},
+     headers:{Authorization:'Bearer '+session.access_token}
+   });
+   if(publishError||payload?.status!=='published_verified')throw new Error('Publication declined by the verified staging publisher. Check the audited target, latest approval and calendar before retrying.');
+   const end=new Date(row.week_start+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+7);
+   const {data:actual,error:readError}=await supabase.from('planned_session')
+     .select('id,duration_min').eq('athlete_id',row.athlete_id)
+     .gte('planned_date',row.week_start).lt('planned_date',end.toISOString().slice(0,10))
+     .eq('is_active_version',true);
+   if(readError||!actual||actual.length!==payload.sessions||
+    actual.reduce((sum,x)=>sum+(Number(x.duration_min)||0),0)!==Number(payload.minutes))
+    throw new Error('Publication was accepted, but the coach calendar readback was incomplete. Do not publish again until reviewed.');
    setReload(x=>x+1);
   }catch(e){setError(e instanceof Error?e.message:'Unable to publish');}
   finally{setBusy('')}
@@ -78,17 +89,16 @@ export default function CoachWeeklyReview(){
   finally{setBusy('')}
  }
  return <section className="coach-attention-v2" aria-label="Weekly plan reviews">
-  <CoachWorkoutLibrary/>
-  <CoachWeekReconciliationPreview/>
   <header className="coach-attention-heading"><div><h3>Weekly plan review</h3><p>Review saved drafts before publication. Decisions do not automatically schedule training.</p></div><button type="button" disabled={loading||Boolean(busy)} onClick={()=>setReload(x=>x+1)}>↻ Refresh</button></header>
+  <p>Approved draft publication is available only in the isolated staging environment, after a coach-reviewed target and protected server verification. Approval alone never schedules sessions.</p>
   {error&&<p role="alert">{error}</p>}
   {loading?<p>Loading approved-coach draft records…</p>:rows.length===0?<p>No saved weekly proposals are ready for coach review. The automatic proposal service is not connected yet.</p>:<>
    <label className="coach-attention-heading">Decision notes (optional)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Reason or coach observations" maxLength={500}/></label>
    {rows.map(row=><article key={row.id} className="coach-attention-row"><div><strong>{row.athleteName} · Week of {row.week_start}</strong><p>Revision {row.revision} · {row.phase} · {row.decision}</p><p>{readiness(row).length?`Publication blocked: ${readiness(row).join('; ')}`:'Coach-approved draft · publication requires protected server workflow and calendar readback'}</p>
     <details><summary>Inspect proposed sessions</summary>
-    {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item?.session?.prescription??item?.prescription??{},null,2)}</pre></div>):<p>Draft contains no sessions.</p>}
+    {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><WorkoutPrescriptionView prescription={item?.session?.prescription??item?.prescription??{}}/></div>):<p>Draft contains no sessions.</p>}
     </details></div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
-    {row.decision==='approved'&&<><button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'full')}>Publish complete week</button><button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'additive')}>Publish approved additions</button></>}
+    {row.decision==='approved'&&<><button type="button" disabled={!publishingEnabled||Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'full')}>Publish complete week</button></>}
     {row.decision==='approved'&&<button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Revoke approval</button>}</div></article>)}
   </>}
  </section>;

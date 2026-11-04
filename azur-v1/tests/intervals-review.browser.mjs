@@ -18,7 +18,9 @@ let staged=false,accepted=false,validated=false;
 let profileFtp=250;
 let demoSessions=[];
 let missingProfile=false;
-let onboardingStep=0;
+let reviewMode=false,reviewDecision='none';
+let submitFirstUnassigned=true;
+let onboardingStep=3,onboardingSavedFields={};
 const commands=[];
 const errors=[];
 let coachDebugPage=null;
@@ -41,11 +43,12 @@ const mockSupabase=async (route,coach=false)=>{
   const identity=coach?{...user,id:invitation.coach_user_id,app_metadata:{role:'coach'}}:user;
   if(url.pathname.startsWith('/auth/v1/'))data=identity;
   else if(url.pathname.endsWith('/coach_athlete_invitation')){
-   if(req.method()==='PATCH'){invitationAccepted=true;data={id:invitation.id};}
+   if(req.method()==='PATCH'){const payload=req.postDataJSON();assert.deepEqual(Object.keys(payload),['accepted_at'],'Athlete may only set accepted_at; server trigger owns accepted_by');assert.ok(!Number.isNaN(Date.parse(payload.accepted_at)));invitationAccepted=true;data={id:invitation.id};}
    else data=[{...invitation,accepted_at:invitationAccepted?new Date().toISOString():null}];
   }
   else if(url.pathname.endsWith('/coach_athlete_assignment')) data=invitationAccepted?[{athlete_id:athlete}]:[];
   else if(url.pathname.endsWith('/athlete_profile'))data={id:athlete,user_id:user.id,display_name:'Synthetic Athlete',ftp_w:250,normal_weekly_hours:8};
+  else if(url.pathname.endsWith('/athlete_onboarding')){const setup={user_id:user.id,onboarding_step:3,race_distance:'70.3',race_date:null,weekly_hours:8,device:'garmin',experience:'first'};data=single?setup:[setup];}
   else if(url.pathname.endsWith('/coach_workout_approval_event'))data=[{id:'pilot-approval',workout_id:'BIKE-THR-002',workout_version:1,decision:'approved',level:1,phases:['build'],decided_at:new Date().toISOString()}];
   else if(url.pathname.endsWith('/rpc/coach_schedule_bike_with_week')){
    const body=req.postDataJSON();
@@ -84,8 +87,80 @@ const mockSupabase=async (route,coach=false)=>{
   if(req.method()==='POST')missingProfile=false;
   data=missingProfile?(single?null:[]):(single?profile:[profile]);
  } else if(url.pathname.endsWith('/athlete_onboarding')) {
-  if(req.method()==='POST')onboardingStep=req.postDataJSON().onboarding_step;
-  data=single?null:[];
+  if(req.method()==='POST'){onboardingSavedFields=req.postDataJSON();onboardingStep=onboardingSavedFields.onboarding_step;}
+  const setup={user_id:user.id,onboarding_step:onboardingStep,race_distance:'70.3',race_date:null,experience:'first',weekly_hours:8,device:'garmin',...onboardingSavedFields};
+  data=single?setup:[setup];
+ } else if(url.pathname.endsWith('/rpc/complete_athlete_onboarding_and_plan')) {
+  const body=req.postDataJSON();
+  assert.equal(body.p_inputs.display_name,'New Athlete','Atomic completion retains athlete identity');
+  assert.deepEqual(body.p_inputs.training_days,[0,2,4],'Athlete availability passed atomically');
+  assert.equal(body.p_inputs.training_background,'established');
+  assert.equal(body.p_inputs.swim_css_seconds_per_100m,105);
+  assert.equal(body.p_inputs.run_threshold_seconds_per_km,260);
+  missingProfile=false;onboardingStep=3;
+  onboardingSavedFields={...body.p_inputs,onboarding_step:3};
+  const firstSessionDate=new Date().toISOString().slice(0,10);
+  demoSessions=[{id:'00000000-0000-4000-8000-000000000077',athlete_id:athlete,
+   planned_date:firstSessionDate,sport:'bike',title:'Foundation easy aerobic ride',
+   session_class:'easy',priority:2,duration_min:40,status:'planned',locked:false,
+   version:1,is_active_version:true,
+   targets:{rpe_min:2,rpe_max:4,generation_source:'onboarding_foundation'},
+   prescription:{steps:[{durationMin:10,target:'Warm-up RPE 2'},
+    {durationMin:25,target:'Easy aerobic RPE 3'},
+    {durationMin:5,target:'Easy cooldown'}]}}];
+  data={status:'ready',sessions:1,first_date:firstSessionDate,
+   calendar:[{date:firstSessionDate,title:'Foundation easy aerobic ride',duration_min:40,sport:'bike'}]};
+ } else if(url.pathname.endsWith('/rpc/generate_onboarding_foundation')) {
+  assert.equal(onboardingStep,3,'Generation must follow completed onboarding');
+  demoSessions=[{id:'00000000-0000-4000-8000-000000000077',athlete_id:athlete,
+    planned_date:new Date().toISOString().slice(0,10),sport:'bike',
+    title:'Foundation easy aerobic ride',session_class:'easy',priority:2,
+    duration_min:40,status:'planned',locked:false,version:1,is_active_version:true,
+    targets:{rpe_min:2,rpe_max:4},
+    prescription:{steps:[{durationMin:10,target:'Easy spin RPE 2'},
+      {durationMin:25,target:'Conversational RPE 3-4'},
+      {durationMin:5,target:'Easy cool-down'}]}
+  }];
+  data={status:'created',sessions:1,first_date:new Date().toISOString().slice(0,10)};
+ } else if(url.pathname.endsWith('/rpc/preview_foundation_reassessment')) {
+  const body=req.postDataJSON();
+  assert.equal(body.p_inputs.training_background,'established');
+  assert.equal(body.p_inputs.training_consistency,'8plus');
+  assert.equal(body.p_inputs.recent_weekly_hours,10);
+  const date=new Date();date.setDate(date.getDate()+((8-date.getDay())%7||7));
+  const day=date.toISOString().slice(0,10);
+  data={status:reviewMode?'coach_review_required':'ready_for_confirmation',reason:reviewMode?'Material increase beyond 20% of existing weekly training requires coach approval':null,week_start:day,week_cap_minutes:480,
+    training_tier:'established_continuation',capacity_basis:'athlete-reported 8+ consistent weeks',
+    athlete_reported:true,total_minutes:120,calendar_fingerprint:'synthetic',
+    sessions:[{date:day,sport:'bike',title:'Foundation easy aerobic ride',duration_min:120,
+      week_start:day,prescription:{steps:[]}}]};
+ } else if(url.pathname.endsWith('/rpc/latest_foundation_coach_decision')) {
+   data=reviewDecision==='approved'
+      ?{status:'approved_and_applied',active_sessions:1,coach_note:'Coach approved exact safe foundation',decided_at:new Date().toISOString()}
+      :{status:reviewDecision==='rejected'?'declined':'none'};
+ } else if(url.pathname.endsWith('/rpc/foundation_coach_review_state')) {
+  assert.equal(req.postDataJSON().p_expected_preview.status,'coach_review_required');
+  data={status:reviewDecision,request_id:'test-review-request',coach_note:reviewDecision==='approved'?'I checked recent training evidence and readiness':null};
+ } else if(url.pathname.endsWith('/rpc/submit_foundation_coach_review')) {
+  assert.equal(req.postDataJSON().p_expected_preview.status,'coach_review_required');
+  if(submitFirstUnassigned){
+    submitFirstUnassigned=false;
+    data={status:'coach_assignment_required',reason:'Connect to an AZUR coach before requesting a material training increase'};
+  }else{
+    reviewDecision='pending';
+    data={status:'submitted',request_id:'test-review-request'};
+  }
+ } else if(url.pathname.endsWith('/rpc/apply_foundation_reassessment')) {
+  const body=req.postDataJSON();
+  assert.equal(body.p_confirm,true);
+  assert.equal(body.p_expected_preview.calendar_fingerprint,'synthetic');
+  const plan=body.p_expected_preview.sessions[0];
+  demoSessions.push({id:'reassessed-1',athlete_id:athlete,planned_date:plan.date,
+    sport:plan.sport,title:plan.title,session_class:'easy',priority:2,duration_min:plan.duration_min,
+    status:'planned',is_active_version:true,targets:{generation_source:'onboarding_foundation'},
+    prescription:{steps:[{durationMin:10,target:'Easy warmup'}, {durationMin:105,target:'Aerobic'},
+      {durationMin:5,target:'Cooldown'}]}});
+  data={status:'applied',sessions:1,week_start:body.p_expected_preview.week_start};
  } else if(url.pathname.endsWith('/planned_session')) data=demoSessions;
  else if(url.pathname.endsWith('/completed_activity')) data=accepted?[{...recorded(),...(demoSessions.length?{start_time:new Date().toISOString()}: {})}]:[];
  const emptySingle=single&&data===null;
@@ -109,6 +184,21 @@ await context.route('**/api/**',async route=>{
 });
 const page=await context.newPage();page.on('pageerror',e=>errors.push(e.stack||e.message));
 try {
+ // The primary browser context is already signed in. Registration needs a
+ // separate, clean context to reproduce a first-time athlete experience.
+ const registrationContext=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+ try {
+  const newAthlete=await registrationContext.newPage();
+  await newAthlete.goto(base);
+  await newAthlete.getByRole('link',{name:'New to AZUR? Create an athlete account'}).click();
+  await newAthlete.waitForURL('**/register');
+  await newAthlete.getByRole('heading',{name:'Create your athlete account'}).waitFor();
+  await newAthlete.getByRole('button',{name:'Create athlete account',exact:true}).waitFor();
+  assert.equal(await newAthlete.getByRole('heading',{name:'Welcome to Azur'}).count(),0);
+  await newAthlete.getByRole('link',{name:'Already registered? Sign in'}).click();
+  await newAthlete.waitForURL(base+'/');
+  await newAthlete.getByRole('heading',{name:'Welcome to Azur'}).waitFor();
+ } finally { await registrationContext.close(); }
  await page.goto(base);
  await page.getByRole('button',{name:'Data Sources',exact:true}).click();
  await page.getByRole('button',{name:'Preview rides',exact:true}).click();
@@ -140,6 +230,7 @@ try {
  assert.deepEqual(errors,[]);
  console.log('PASS: browser preview → stage → accept → load approval → dashboard, with no planned sessions');
  await page.setViewportSize({width:390,height:844});
+ onboardingStep=0; // Explicitly exercise a new athlete's first-run wizard.
  await page.goto(base+'/onboarding');
  await page.getByRole('heading',{name:'Welcome to AZUR',exact:true}).waitFor();
  await page.getByRole('heading',{name:'Your training goal',exact:true}).waitFor();
@@ -148,21 +239,85 @@ try {
  assert.deepEqual(errors,[]);
  console.log('PASS: standalone mobile onboarding, no sidebar or horizontal overflow');
  missingProfile=true;
- await page.goto(base);
- await page.waitForURL('**/onboarding');
+ onboardingStep=0;
+ // The app deliberately replaces the initial navigation with /onboarding.
+ // Waiting for 'load' on the replaced page can race with frame detachment.
+ await page.goto(base,{waitUntil:'commit'}).catch(error=>{
+  if(!String(error).includes('ERR_ABORTED'))throw error;
+ });
+ await page.getByRole('heading',{name:'Your training goal',exact:true}).waitFor();
+ assert.match(page.url(),/\/onboarding$/);
  await page.getByLabel('Your name',{exact:true}).fill('New Athlete');
  await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByRole('heading',{name:'Your training availability',exact:true}).waitFor();
+ await page.getByRole('checkbox',{name:'Mon',exact:true}).check();
+ await page.getByRole('checkbox',{name:'Wed',exact:true}).check();
+ await page.getByRole('checkbox',{name:'Fri',exact:true}).check();
+ await page.getByRole('checkbox',{name:'I can swim 200 metres comfortably and safely'}).check();
+ await page.getByLabel('Current endurance training background').selectOption('established');
+ await page.getByLabel('How consistently have you trained recently?').selectOption('8plus');
+ await page.getByLabel('Average training actually completed in recent weeks (hours, if known)').fill('10');
  await page.getByRole('button',{name:'Continue',exact:true}).click();
- await page.getByRole('button',{name:'Review setup',exact:true}).click();
- await page.waitForURL(base+'/');
+ await page.getByRole('heading',{name:'How do you track training?',exact:true}).waitFor();
+ await page.getByText('Do you already know your training thresholds?',{exact:true}).waitFor();
+ await page.getByRole('checkbox',{name:'I have recent test values to enter'}).check();
+ await page.getByLabel('Bike FTP (watts, if known)').fill('280');
+ await page.getByLabel('Swim CSS (min:sec per 100m, e.g. 1:45 or 1.45)').fill('1.45');
+ await page.getByLabel('Run threshold pace (min:sec per km, e.g. 4:20 or 4.20)').fill('4.20');
+ await page.getByRole('button',{name:'Finish & build my programme',exact:true}).click();
+ await page.waitForURL('**/?start=calendar*');
+ assert.match(page.url(),/focus=\d{4}-\d{2}-\d{2}/,'Calendar is focused on the first automatically scheduled session');
  assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
  assert.equal(onboardingStep,3,'Final onboarding step must be saved');
- await page.getByRole('heading',{name:'No workout scheduled',exact:true}).waitFor();
- await page.locator('.azur-white-dashboard:visible').getByRole('button',{name:'View calendar',exact:false}).waitFor();
+ assert.deepEqual(onboardingSavedFields.training_days,[0,2,4],'Athlete availability days saved');
+ assert.equal(onboardingSavedFields.ftp_watts,280,'Reported FTP persists unchanged');
+ assert.equal(onboardingSavedFields.can_swim_200m,true,'Swim safety confirmation persists');
+ assert.equal(onboardingSavedFields.training_background,'established','Endurance background is independent from first race distance');
+ assert.equal(onboardingSavedFields.training_consistency,'8plus','Consistent recent endurance training is recorded');
+ assert.equal(onboardingSavedFields.recent_weekly_hours,10,'Actual recent hours are distinguished from available hours');
+ assert.equal(onboardingSavedFields.swim_css_seconds_per_100m,105,'1.45 parsed as 105 seconds, not decimal minutes');
+ assert.equal(onboardingSavedFields.run_threshold_seconds_per_km,260,'4.20 parsed as 260 seconds, not decimal minutes');
+ await page.locator('.athlete-agenda:visible').waitFor();
+ await page.getByText('Foundation easy aerobic ride',{exact:true}).first().waitFor();
+ assert.equal(demoSessions.length,1,'Generated starter must be present in calendar');
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'White dashboard must fit phone width');
  assert.deepEqual(errors,[]);
- console.log('PASS: signed-in athlete without profile → automatic onboarding → saved profile → dashboard');
+ console.log('PASS: signed-in new athlete → onboarding → saved profile → generated starter → calendar');
+ await page.getByRole('button',{name:'Reassess my programme'}).click();
+ await page.getByRole('button',{name:'Preview next two weeks'}).click();
+ await page.getByText('Preview · established continuation',{exact:true}).waitFor();
+ await page.getByRole('region',{name:'Week of '+new Date(new Date().setDate(new Date().getDate()+((8-new Date().getDay())%7||7))).toISOString().slice(0,10)}).waitFor();
+ await page.getByText('RPE-based foundation',{exact:true}).first().waitFor();
+ await page.getByText('Rest / no planned session',{exact:true}).first().waitFor();
+ await page.getByRole('button',{name:'Confirm routine update'}).click();
+ await page.getByText('Reassessment applied: 1 future sessions published.',{exact:false}).waitFor();
+ assert.equal(demoSessions.some(s=>s.id==='reassessed-1'),true,'Reassessment must save only after confirmation');
+ console.log('PASS: athlete reassessment → preview → explicit confirm → future calendar refresh');
+ reviewMode=true;
+ await page.getByRole('button',{name:'Reassess my programme'}).click();
+ await page.getByRole('button',{name:'Preview next two weeks'}).click();
+ await page.getByRole('button',{name:'Request review from my coach'}).click();
+ await page.getByRole('alert').getByText('Request NOT sent.',{exact:false}).waitFor();
+ assert.equal(reviewDecision,'none','Unassigned athlete cannot create a coach review request');
+ await page.getByRole('button',{name:'Request review from my coach'}).click();
+ await page.getByRole('alert').getByText('Request saved and sent to your assigned AZUR coach.',{exact:false}).waitFor();
+ assert.equal(reviewDecision,'pending','Coach request should remain pending after athlete action');
+ // Simulate the database's atomic assigned-coach decision, which now writes
+ // the calendar without a second athlete action.
+ reviewDecision='approved';
+ demoSessions.push({id:'coach-auto-applied-1',athlete_id:athlete,
+   planned_date:new Date().toISOString().slice(0,10),
+   sport:'bike',title:'Coach approved foundation ride',
+   session_class:'easy',priority:2,duration_min:120,status:'planned',is_active_version:true,
+   targets:{approval_request_id:'test-review-request',coach_approved_increase:true},
+   prescription:{steps:[{durationMin:10,target:'Easy spin RPE 2'},
+     {durationMin:105,target:'Aerobic RPE 3'},{durationMin:5,target:'Easy cooldown'}]}});
+ await page.reload();
+ await page.getByText('Coach-approved programme now active.',{exact:false}).waitFor();
+ assert.equal(await page.getByRole('button',{name:'Confirm coach-approved programme'}).count(),0,
+   'Coach approval must not require another athlete confirmation');
+ assert.equal(demoSessions.some(session=>session.id==='coach-auto-applied-1'),true);
+ console.log('PASS: assigned coach approval automatically updates athlete programme; no second confirmation');
  await page.getByRole('button',{name:'Chat',exact:true}).click();
  await page.getByRole('heading',{name:'Chat',exact:true }).waitFor();
  await page.getByText('Coming soon',{exact:true}).waitFor();
@@ -195,6 +350,11 @@ try {
  await home.getByRole('button',{name:'View session',exact:true}).click();
  await page.locator('.session-detail-modal:visible').waitFor();
  const sheet=page.locator('.session-detail-modal:visible');
+ await sheet.getByText("TODAY'S OBJECTIVE",{exact:true}).first().waitFor();
+ await sheet.getByRole('tab',{name:'At a glance'}).waitFor();
+ const detailed=sheet.locator('details.azur-v11-disclosure');
+ assert.equal(await detailed.evaluate(el=>el.open),false,'Full written prescription should be collapsed by default');
+ await detailed.locator(':scope > summary').click();
  for(const label of ['WARM-UP','MAIN SET','Recovery between efforts','4 min','COOL-DOWN','65–75% FTP']){
   await sheet.locator('.session-prescription-sections').getByText(label,{exact:true}).first().waitFor();
  }
@@ -219,6 +379,7 @@ try {
  assert.equal(await completedRide.locator('strong').evaluate(el=>getComputedStyle(el).color),'rgb(20, 46, 67)');
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  const plannedRide=calendar.locator('.calendar-session').filter({hasText:'Long Aerobic Ride'});
+ await plannedRide.locator('.azur-v11-open-session').waitFor();
  await plannedRide.hover();
  assert.equal(await surface(plannedRide),'rgb(255, 255, 255)','Hover must preserve the light calendar card');
  await plannedRide.click();
@@ -273,14 +434,23 @@ try {
  await reviews.getByText('Reported effort · 5/10',{exact:true}).waitFor();
  await reviews.getByText('Updated after checking my recording',{exact:true}).waitFor();
  await coachPage.getByRole('button',{name:'Monitoring',exact:true}).click();
+ const monitoringNav=coachPage.getByRole('navigation',{name:'Monitoring sections'});
+ await monitoringNav.getByRole('button',{name:'Athlete Actions'}).waitFor();
+ await monitoringNav.getByRole('button',{name:'Training Analysis'}).click();
+ await coachPage.getByRole('button',{name:/Device workout matching/}).click();
+ await coachPage.getByRole('region',{name:'Workout association review'}).waitFor();
+ await monitoringNav.getByRole('button',{name:'Planning Tools'}).click();
+ await coachPage.getByText('Weekly planning tools are not enabled in this environment.',{exact:true}).waitFor();
+ await monitoringNav.getByRole('button',{name:'Athlete Actions'}).click();
+ await coachPage.getByText('Athlete notes and setup',{exact:false}).click();
  const inbox=coachPage.getByRole('region',{name:'Needs your attention'});
  await inbox.getByText('Updated after checking my recording',{exact:true}).waitFor();
  await inbox.getByRole('button',{name:'Mark reviewed'}).click();
  await inbox.getByText('You’re up to date on the records checked.').waitFor();
- await coachPage.getByRole('button',{name:/Refresh/}).click();
+ await coachPage.getByRole('region',{name:'Coach attention inbox'}).getByRole('button',{name:/Refresh/}).click();
  await inbox.getByText('You’re up to date on the records checked.').waitFor();
  athleteFeedback={...athleteFeedback,notes:'Legs felt heavy today',updated_at:new Date(Date.now()+1000).toISOString()};
- await coachPage.getByRole('button',{name:/Refresh/}).click();
+ await coachPage.getByRole('region',{name:'Coach attention inbox'}).getByRole('button',{name:/Refresh/}).click();
  await inbox.getByText('Legs felt heavy today',{exact:true}).waitFor();
  console.log('PASS: reviewed notes survive refresh and revised feedback returns to the coach queue');
  console.log('PASS: athlete accepts invitation → coach schedules → athlete completes and changes feedback → coach sees latest records');

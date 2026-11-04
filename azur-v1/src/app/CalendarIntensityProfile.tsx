@@ -1,40 +1,35 @@
 import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity';
 
-export default function CalendarIntensityProfile({ steps }: { steps: unknown }) {
-  const intervals = normalizeWorkoutIntervals(steps);
-  if (!intervals.length || intervals.length > 60 || intervals.some((step) => step.durationSec === null)) return null;
-  const total = intervals.reduce((sum, step) => sum + (step.durationSec ?? 0), 0);
-  const targets = intervals.map((step) => step.target).filter((target) => target !== null);
-  if (!total || targets.length !== intervals.length) return null;
-  const metric = targets[0].metric;
-  if (!targets.every((target) => target.metric === metric)) return null;
-  const values = targets.map((target) => (target.low + target.high) / 2);
-  const isPace = metric === 'pace_sec_per_km' || metric === 'swim_pace_sec_per_100m';
-  const performance = values.map((value) => isPace ? 1 / value : value);
-  if (performance.some((value) => !Number.isFinite(value) || value <= 0)) return null;
-  const min = Math.min(...performance);
-  const max = Math.max(...performance);
-  const span = max - min;
-  return (
-    <div className="calendar-intensity-profile">
-      <div className="calendar-intensity-profile-head">
-        <strong>Prescribed intensity</strong>
-        <span>{targets[0].unit} · relative scale</span>
-      </div>
-      <div className="calendar-intensity-bars" role="img"
-        aria-label={`Workout intensity profile: ${intervals.length} timed segments; relative bar heights compare ${targets[0].unit} within this workout`}>
-        {intervals.map((part, index) => {
-          const height = span === 0 ? 62 : 20 + 80 * (performance[index] - min) / span;
-          return (
-            <span key={index}
-              className={`calendar-intensity-bar ${part.kind}`}
-              style={{ flexGrow: part.durationSec ?? 0, flexBasis: 0, height: `${height}%`, minWidth: 2 }}
-              title={`${part.kind}: ${Math.round((part.durationSec ?? 0) / 60 * 10) / 10} min · ${targets[index].low}–${targets[index].high} ${targets[index].unit}`}
-            />
-          );
-        })}
-      </div>
-      <small>Widths = duration · Heights = relative prescribed target (not measured performance)</small>
-    </div>
-  );
+/** Compact *prescription* preview, not measured workout performance.
+ * Accessible time-proportional segments with no chart labels laid over bars. */
+export default function CalendarIntensityProfile({steps}:{steps:unknown}){
+ const intervals=normalizeWorkoutIntervals(steps);
+ if(!intervals.length||intervals.length>80||intervals.some(x=>x.durationSec===null))return null;
+ const total=intervals.reduce((n,x)=>n+(x.durationSec||0),0);
+ if(total<=0)return null;
+ const metric=intervals[0].target?.metric;
+ const comparable=Boolean(metric)&&intervals.every(x=>x.target?.metric===metric);
+ const values=comparable?intervals.map(x=>(x.target!.low+x.target!.high)/2):[];
+ const min=values.length?Math.min(...values):0;
+ const max=values.length?Math.max(...values):0;
+ const span=max-min;
+ return <div className="azur-mini-interval" aria-label="Workout interval preview">
+  <div className="azur-mini-interval-top">
+   <span>Workout structure</span>
+   <span>{intervals.length} blocks · {Math.round(total/60)} min</span>
+  </div>
+  <div className="azur-mini-interval-track" role="img"
+   aria-label={intervals.map(x=>x.kind+' '+Math.round((x.durationSec||0)/60)+' minutes').join(', ')}>
+   {intervals.map((x,i)=>{
+    const level=comparable&&span>0?0.35+0.65*(values[i]-min)/span:0.6;
+    return <span key={i} className={'azur-mini-interval-part '+x.kind}
+     style={{flexGrow:x.durationSec||1,flexBasis:0}}
+     title={x.kind+' · '+Math.round((x.durationSec||0)/60)+' min'+
+      (x.target?' · '+x.target.low+'–'+x.target.high+' '+x.target.unit:'')}>
+     <i style={{height:Math.round(level*100)+'%'}}/>
+    </span>;
+   })}
+  </div>
+  <div className="azur-mini-interval-legend"><span>Warm-up</span><span>Work</span><span>Recovery</span><span>Cool-down</span></div>
+ </div>;
 }
