@@ -10,6 +10,12 @@ type Request={
  inputs:{recent_weekly_hours:number|null;training_consistency:string;training_background:string;weekly_hours:number};
 };
 type Decision={request_id:string;decision:string;review_note:string;decided_at:string};
+type TrainingEvidence={
+ window_days:number;validated_device_activities:number;manual_activities:number;
+ pending_or_rejected_activities:number;active_days:number;weeks_with_activity:number;
+ validated_device_hours_28d:number;manual_reported_hours_28d:number;
+ verified_weekly_average_hours:number;history_adequacy:string;note:string;
+};
 type Display=Request&{athleteName:string;decision?:Decision};
 
 export default function CoachFoundationApprovals(){
@@ -19,11 +25,13 @@ export default function CoachFoundationApprovals(){
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState('');
  const [notes,setNotes]=useState<Record<string,string>>({});
+ const [evidence,setEvidence]=useState<Record<string,TrainingEvidence>>({});
+ const [evidenceBusy,setEvidenceBusy]=useState('');
  const [reload,setReload]=useState(0);
  useEffect(()=>{
   let active=true;
   (async()=>{
-   setLoading(true);setMessage('');
+   setLoading(true);
    const {data:{user}}=await supabase.auth.getUser();
    if(!user||user.app_metadata?.role!=='coach'){
     if(active){setMessage('Verified AZUR coach account required');setLoading(false);}return;
@@ -54,20 +62,29 @@ export default function CoachFoundationApprovals(){
   })();
   return ()=>{active=false};
  },[reload]);
+ async function loadEvidence(requestId:string){
+  setEvidenceBusy(requestId);setMessage('');
+  const response=await supabase.rpc('coach_foundation_training_evidence',{p_request_id:requestId});
+  if(response.error)setMessage('Training evidence not available: '+response.error.message);
+  else if(response.data)setEvidence(prev=>({...prev,[requestId]:response.data as TrainingEvidence}));
+  setEvidenceBusy('');
+ }
  async function decide(row:Display,decision:'approved'|'rejected'){
   const note=(notes[row.id]||'').trim();
   if(note.length<15){setMessage('Enter a coach review note of at least 15 characters.');return;}
   setBusy(row.id);setMessage('');
   const {data:{user}}=await supabase.auth.getUser();
   if(!user||user.app_metadata?.role!=='coach'){setMessage('Coach sign-in required');setBusy('');return;}
-  const result=await supabase.from('foundation_reassessment_decision').insert({
-   request_id:row.id,coach_user_id:user.id,decision,review_note:note
+  const result=await supabase.rpc('decide_foundation_reassessment',{
+   p_request_id:row.id,p_decision:decision,p_review_note:note
   });
-  if(result.error)setMessage('Review was not saved: '+result.error.message);
-  else setMessage(decision==='approved'?
-   'Exact programme approved. The athlete must refresh the preview and explicitly confirm before any future sessions change.':
-   'Request declined. The athlete can review your note.');
-  setBusy('');setReload(x=>x+1);
+  if(result.error)setMessage('Decision NOT saved; calendar unchanged: '+result.error.message);
+  else if(decision==='approved'&&result.data?.status==='approved_and_applied')
+    setMessage('Programme approved and automatically published: '+result.data.sessions+' future sessions. The athlete calendar will show the update on refresh.');
+  else if(decision==='rejected'&&result.data?.status==='declined')
+    setMessage('Proposal declined. Existing athlete calendar preserved and your rationale recorded.');
+  else setMessage('Could not verify the coaching decision. Refresh before trying again.');
+  setBusy('');if(!result.error&&((decision==='approved'&&result.data?.status==='approved_and_applied')||(decision==='rejected'&&result.data?.status==='declined')))setReload(x=>x+1);
  }
  const pending=rows.filter(x=>!x.decision);
  return <section aria-label="Foundation training approval requests" style={{
@@ -99,9 +116,32 @@ export default function CoachFoundationApprovals(){
       Reported recently completed training: {row.inputs.recent_weekly_hours??'unknown'}h/week.
       Maximum availability: {row.inputs.weekly_hours}h/week.
     </div>
+    <div style={{margin:'11px 0',padding:12,borderRadius:10,background:'#edf4f8',fontSize:13}}>
+      <strong>Recent training evidence</strong>
+      {!evidence[row.id]?<div style={{marginTop:7}}>
+        <button type="button" disabled={!!evidenceBusy} onClick={()=>void loadEvidence(row.id)}>
+          {evidenceBusy===row.id?'Checking…':'Check validated activity history'}
+        </button>
+      </div>:<>
+        <p style={{margin:'7px 0'}}>Validated device training (last 28 days): <strong>{evidence[row.id].validated_device_hours_28d}h</strong>,
+         or {evidence[row.id].verified_weekly_average_hours}h/week averaged over four weeks.</p>
+        <p style={{margin:'7px 0'}}>
+         {evidence[row.id].validated_device_activities} validated device activities;
+         {' '}{evidence[row.id].manual_activities} manually entered;
+         {' '}{evidence[row.id].pending_or_rejected_activities} pending/rejected;
+         {' '}{evidence[row.id].weeks_with_activity} weeks with activity.
+        </p>
+        {evidence[row.id].history_adequacy==='insufficient_validated_history'&&
+          <p style={{color:'#8a531c',fontWeight:650}}>
+            Insufficient validated history to corroborate the athlete's reported training volume.
+            Review additional evidence before increasing the plan.
+          </p>}
+        <small>Manual and pending/rejected sessions are not counted as verified device training.</small>
+      </>}
+    </div>
     <p style={{fontSize:12,color:'#77502d',margin:'8px 0'}}>
       History and training consistency are athlete-reported, not verified device evidence.
-      Approval authorises this exact RPE-based proposal only; it does not authorise harder intervals or ongoing progression.
+      Approving automatically replaces only eligible future foundation sessions with this exact RPE-based proposal. Declining preserves the current calendar. Neither action authorises harder intervals or ongoing progression.
     </p>
     <details>
       <summary style={{cursor:'pointer'}}>Review exact proposed sessions</summary>
@@ -119,7 +159,7 @@ export default function CoachFoundationApprovals(){
     </label>
     <div style={{display:'flex',gap:9,marginTop:10,flexWrap:'wrap'}}>
      <button type="button" disabled={!!busy} onClick={()=>void decide(row,'approved')}>
-      {busy===row.id?'Saving…':'Approve exact programme'}
+      {busy===row.id?'Approving…':'Approve & publish programme'}
      </button>
      <button type="button" disabled={!!busy} onClick={()=>void decide(row,'rejected')}>Decline</button>
     </div>
