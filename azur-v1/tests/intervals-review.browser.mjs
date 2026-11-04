@@ -114,6 +114,10 @@ const mockSupabase=async (route,coach=false)=>{
     athlete_reported:true,total_minutes:120,calendar_fingerprint:'synthetic',
     sessions:[{date:day,sport:'bike',title:'Foundation easy aerobic ride',duration_min:120,
       week_start:day,prescription:{steps:[]}}]};
+ } else if(url.pathname.endsWith('/rpc/latest_foundation_coach_decision')) {
+   data=reviewDecision==='approved'
+      ?{status:'approved_and_applied',active_sessions:1,coach_note:'Coach approved exact safe foundation',decided_at:new Date().toISOString()}
+      :{status:reviewDecision==='rejected'?'declined':'none'};
  } else if(url.pathname.endsWith('/rpc/foundation_coach_review_state')) {
   assert.equal(req.postDataJSON().p_expected_preview.status,'coach_review_required');
   data={status:reviewDecision,request_id:'test-review-request',coach_note:reviewDecision==='approved'?'I checked recent training evidence and readiness':null};
@@ -277,11 +281,22 @@ try {
  await page.getByRole('button',{name:'Request review from my coach'}).click();
  await page.getByRole('alert').getByText('Request saved and sent to your assigned AZUR coach.',{exact:false}).waitFor();
  assert.equal(reviewDecision,'pending','Coach request should remain pending after athlete action');
- reviewDecision='approved'; // synthetic assigned coach decision was recorded separately
- await page.getByRole('button',{name:'Preview next two weeks'}).click();
- await page.getByRole('button',{name:'Confirm coach-approved programme'}).click();
- await page.getByText('Reassessment applied:',{exact:false}).waitFor();
- console.log('PASS: material increase requires assigned coach decision plus fresh athlete confirmation');
+ // Simulate the database's atomic assigned-coach decision, which now writes
+ // the calendar without a second athlete action.
+ reviewDecision='approved';
+ demoSessions.push({id:'coach-auto-applied-1',athlete_id:athlete,
+   planned_date:new Date().toISOString().slice(0,10),
+   sport:'bike',title:'Coach approved foundation ride',
+   session_class:'easy',priority:2,duration_min:120,status:'planned',is_active_version:true,
+   targets:{approval_request_id:'test-review-request',coach_approved_increase:true},
+   prescription:{steps:[{durationMin:10,target:'Easy spin RPE 2'},
+     {durationMin:105,target:'Aerobic RPE 3'},{durationMin:5,target:'Easy cooldown'}]}});
+ await page.reload();
+ await page.getByText('Coach-approved programme now active.',{exact:false}).waitFor();
+ assert.equal(await page.getByRole('button',{name:'Confirm coach-approved programme'}).count(),0,
+   'Coach approval must not require another athlete confirmation');
+ assert.equal(demoSessions.some(session=>session.id==='coach-auto-applied-1'),true);
+ console.log('PASS: assigned coach approval automatically updates athlete programme; no second confirmation');
  await page.getByRole('button',{name:'Chat',exact:true}).click();
  await page.getByRole('heading',{name:'Chat',exact:true }).waitFor();
  await page.getByText('Coming soon',{exact:true}).waitFor();
