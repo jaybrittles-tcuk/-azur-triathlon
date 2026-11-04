@@ -112,6 +112,16 @@ begin
  elsif exists(
   select 1 from public.planned_session p
   where p.athlete_id=p_athlete_id and p.is_active_version
+   and p.planned_date>=v_start and p.planned_date<v_start+7
+   and (not (extract(isodow from p.planned_date)::int-1=any(v_onboarding.training_days))
+     or (p.sport='swim' and not coalesce(v_onboarding.can_swim_200m,false))))
+ then
+   v_block:='The source week conflicts with current training availability or swim safety confirmation';
+ elsif v_onboarding.weekly_hours is null or v_onboarding.weekly_hours<2 then
+   v_block:='Athlete training availability must be confirmed before continuation';
+ elsif exists(
+  select 1 from public.planned_session p
+  where p.athlete_id=p_athlete_id and p.is_active_version
   and p.planned_date>=v_start and p.planned_date<v_start+7
   and (p.status<>'planned' or p.locked or p.session_class<>'easy'
     or jsonb_typeof(p.prescription->'steps') is distinct from 'array'
@@ -156,7 +166,8 @@ begin
    v_total:=v_total+v_duration;
   end loop;
  end if;
- if v_block='' and (v_total>480 or v_total<=0) then
+ if v_block='' and (v_total>480 or v_total<=0
+    or v_total>v_onboarding.weekly_hours*60) then
    v_block:='Resulting training volume is outside safe foundation limits';
  end if;
  return jsonb_build_object(
