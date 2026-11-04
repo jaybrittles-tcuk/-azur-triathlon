@@ -237,3 +237,60 @@ end;
 $latest$;
 revoke all on function public.latest_foundation_coach_decision() from public,anon;
 grant execute on function public.latest_foundation_coach_decision() to authenticated;
+
+-- Read-only evidence: source of training history is shown to the assigned coach.
+-- No reported hours are silently promoted to verified completed volume.
+create or replace function public.coach_foundation_training_evidence(p_request_id uuid)
+returns jsonb language plpgsql security definer
+set search_path=public,pg_temp
+as $evidence$
+declare
+ v_coach uuid:=auth.uid();
+ v_athlete uuid;
+ v_summary record;
+begin
+ if v_coach is null or auth.jwt()->'app_metadata'->>'role' is distinct from 'coach'
+ then raise exception 'AZUR coach account required';end if;
+ select r.athlete_id into v_athlete from public.foundation_reassessment_request r
+ join public.coach_athlete_assignment a on a.athlete_id=r.athlete_id
+ and a.coach_user_id=v_coach
+ where r.id=p_request_id;
+ if v_athlete is null then raise exception 'Review request is not assigned to your coach account';end if;
+ select
+  count(*)::int as total_activities,
+  count(*) filter(where source='manual')::int as manually_entered,
+  count(*) filter(where source<>'manual'
+    and processed_metrics->>'load_status'='validated')::int as validated_device_activities,
+  count(*) filter(where coalesce(processed_metrics->>'load_status','') in
+    ('rejected','pending_validation'))::int as awaiting_or_rejected,
+  count(distinct (start_time at time zone 'Europe/London')::date)::int as active_days,
+  coalesce(sum(duration_sec) filter(
+    where source<>'manual' and processed_metrics->>'load_status'='validated'
+      and duration_sec between 60 and 86400),0)::bigint as validated_device_seconds,
+  coalesce(sum(duration_sec) filter(where source='manual'
+     and duration_sec between 60 and 86400),0)::bigint as manually_reported_seconds,
+  count(distinct date_trunc('week',start_time at time zone 'Europe/London'))::int as weeks_with_activity
+ into v_summary
+ from public.completed_activity
+ where athlete_id=v_athlete and start_time>=now()-interval '28 days'
+   and start_time<=now();
+ return jsonb_build_object(
+   'window_days',28,
+   'total_recorded_activities',v_summary.total_activities,
+   'validated_device_activities',v_summary.validated_device_activities,
+   'manual_activities',v_summary.manually_entered,
+   'pending_or_rejected_activities',v_summary.awaiting_or_rejected,
+   'active_days',v_summary.active_days,
+   'weeks_with_activity',v_summary.weeks_with_activity,
+   'validated_device_hours_28d',round(v_summary.validated_device_seconds::numeric/3600,1),
+   'manual_reported_hours_28d',round(v_summary.manually_reported_seconds::numeric/3600,1),
+   'verified_weekly_average_hours',round(v_summary.validated_device_seconds::numeric/3600/4,1),
+   'history_adequacy',case when v_summary.validated_device_activities<4
+     or v_summary.weeks_with_activity<3 then 'insufficient_validated_history'
+     else 'some_validated_history' end,
+   'note','Only activity records with validated device load_status contribute to verified volume. Manual, pending and rejected records never count towards verified weekly hours.'
+ );
+end;
+$evidence$;
+revoke all on function public.coach_foundation_training_evidence(uuid) from public,anon;
+grant execute on function public.coach_foundation_training_evidence(uuid) to authenticated;
