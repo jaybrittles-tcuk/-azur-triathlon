@@ -7,7 +7,7 @@ export default function FoundationWorkoutVariety({onUpdated}:{onUpdated?:()=>Pro
  async function refresh(){
    if(busy)return;
    setBusy(true);setMessage('');
-   const balanced=await supabase.rpc('athlete_balance_foundation_bikes');
+   const balanced=await supabase.rpc('athlete_balance_foundation_week');
    if(balanced.error){
      setMessage('Unable to balance the starter week: '+balanced.error.message);
      setBusy(false);return;
@@ -28,10 +28,10 @@ export default function FoundationWorkoutVariety({onUpdated}:{onUpdated?:()=>Pro
    try{
      await onUpdated?.();
      const count=Number(data?.sessions_enriched||0);
-     const shortened=Number(balanced.data?.bike_sessions_balanced||0);
+     const shortened=Number(balanced.data?.bike_sessions_balanced||0)+Number(balanced.data?.swim_sessions_balanced||0)+Number(balanced.data?.run_sessions_balanced||0);
      const restored=Number(balanced.data?.minutes_returned_to_recovery||0);
      setMessage(shortened||count?
-       (shortened?shortened+' second bike session(s) shortened, freeing '+restored+' minutes for recovery. ':'')+
+       (shortened?shortened+' technique session(s) shortened, freeing '+restored+' minutes for recovery. ':'')+
        count+' upcoming easy workout(s) refreshed with structured intervals and coaching purpose. No session became harder or longer.':
        'Your upcoming eligible foundation workouts are already balanced and structured, or have been protected from changes.');
    }catch(error){
