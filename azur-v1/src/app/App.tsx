@@ -1332,8 +1332,24 @@ const [primaryRace, setPrimaryRace] = useState({
   const [weekSessions, setWeekSessions] = useState<Session[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [sessionDetailOpen, setSessionDetailOpen] = useState(false);
-  const [calendarWeekOffset, setCalendarWeekOffset] = useState(0);
-  const [calendarFocusedDate, setCalendarFocusedDate] = useState<string | null>(null);
+  // Completing onboarding opens the week containing the first real workout.
+  // This is especially important when someone signs up after their only
+  // available training day has already passed this week.
+  const [calendarWeekOffset, setCalendarWeekOffset] = useState(() => {
+    const focus=new URLSearchParams(window.location.search).get('focus');
+    if(!focus||!/^\d{4}-\d{2}-\d{2}$/.test(focus))return 0;
+    const target=new Date(focus+'T12:00:00');
+    if(Number.isNaN(target.getTime()))return 0;
+    const now=new Date();
+    now.setHours(12,0,0,0);
+    now.setDate(now.getDate()-(now.getDay()+6)%7);
+    target.setDate(target.getDate()-(target.getDay()+6)%7);
+    return Math.max(0,Math.min(2,Math.round((target.getTime()-now.getTime())/(7*86400000))));
+  });
+  const [calendarFocusedDate, setCalendarFocusedDate] = useState<string | null>(() => {
+    const focus=new URLSearchParams(window.location.search).get('focus');
+    return focus&&/^\d{4}-\d{2}-\d{2}$/.test(focus)?focus:null;
+  });
   const [movingSessionId, setMovingSessionId] = useState<string | null>(null);
   const [moveTargetDate, setMoveTargetDate] = useState('');
   const [moveMessage, setMoveMessage] = useState('');
