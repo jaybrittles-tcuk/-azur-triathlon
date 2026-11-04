@@ -90,6 +90,26 @@ const mockSupabase=async (route,coach=false)=>{
   if(req.method()==='POST'){onboardingSavedFields=req.postDataJSON();onboardingStep=onboardingSavedFields.onboarding_step;}
   const setup={user_id:user.id,onboarding_step:onboardingStep,race_distance:'70.3',race_date:null,experience:'first',weekly_hours:8,device:'garmin',...onboardingSavedFields};
   data=single?setup:[setup];
+ } else if(url.pathname.endsWith('/rpc/complete_athlete_onboarding_and_plan')) {
+  const body=req.postDataJSON();
+  assert.equal(body.p_inputs.display_name,'New Athlete','Atomic completion retains athlete identity');
+  assert.deepEqual(body.p_inputs.training_days,[0,2,4],'Athlete availability passed atomically');
+  assert.equal(body.p_inputs.training_background,'established');
+  assert.equal(body.p_inputs.swim_css_seconds_per_100m,105);
+  assert.equal(body.p_inputs.run_threshold_seconds_per_km,260);
+  missingProfile=false;onboardingStep=3;
+  onboardingSavedFields={...body.p_inputs,onboarding_step:3};
+  const firstSessionDate=new Date().toISOString().slice(0,10);
+  demoSessions=[{id:'00000000-0000-4000-8000-000000000077',athlete_id:athlete,
+   planned_date:firstSessionDate,sport:'bike',title:'Foundation easy aerobic ride',
+   session_class:'easy',priority:2,duration_min:40,status:'planned',locked:false,
+   version:1,is_active_version:true,
+   targets:{rpe_min:2,rpe_max:4,generation_source:'onboarding_foundation'},
+   prescription:{steps:[{durationMin:10,target:'Warm-up RPE 2'},
+    {durationMin:25,target:'Easy aerobic RPE 3'},
+    {durationMin:5,target:'Easy cooldown'}]}}];
+  data={status:'ready',sessions:1,first_date:firstSessionDate,
+   calendar:[{date:firstSessionDate,title:'Foundation easy aerobic ride',duration_min:40,sport:'bike'}]};
  } else if(url.pathname.endsWith('/rpc/generate_onboarding_foundation')) {
   assert.equal(onboardingStep,3,'Generation must follow completed onboarding');
   demoSessions=[{id:'00000000-0000-4000-8000-000000000077',athlete_id:athlete,
@@ -245,7 +265,8 @@ try {
  await page.getByLabel('Swim CSS (min:sec per 100m, e.g. 1:45 or 1.45)').fill('1.45');
  await page.getByLabel('Run threshold pace (min:sec per km, e.g. 4:20 or 4.20)').fill('4.20');
  await page.getByRole('button',{name:'Finish & build my programme',exact:true}).click();
- await page.waitForURL('**/?start=calendar');
+ await page.waitForURL('**/?start=calendar*');
+ assert.match(page.url(),/focus=\d{4}-\d{2}-\d{2}/,'Calendar is focused on the first automatically scheduled session');
  assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
  assert.equal(onboardingStep,3,'Final onboarding step must be saved');
  assert.deepEqual(onboardingSavedFields.training_days,[0,2,4],'Athlete availability days saved');

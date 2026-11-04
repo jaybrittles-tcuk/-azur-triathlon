@@ -84,6 +84,46 @@ export default function AthleteOnboardingDraft(){
   if(nextStep===3 && (trainingBackground==='unknown'||trainingConsistency==='unknown')){setMessage('Please confirm your training background and recent consistency.');setStep(1);return;}
   if(nextStep===3 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
+  if(nextStep===3){
+    setMessage('Building and checking your first two weeks of training…');
+    const payload={
+      display_name:displayName.trim(),race_distance:race,race_date:raceDate||null,
+      experience,weekly_hours:hours,device,
+      training_days:[...trainingDays].sort((a,b)=>a-b),
+      recent_weekly_hours:recent,current_training_concern:trainingConcern,
+      training_background:trainingBackground,training_consistency:trainingConsistency,
+      can_swim_200m:canSwim,
+      ftp_watts:ftp,swim_css_seconds_per_100m:css,
+      run_threshold_seconds_per_km:run,
+    };
+    // The RPC commits onboarding + profile + safe foundation workouts as one
+    // transaction. A failed publication cannot strand a completed setup
+    // with zero calendar sessions.
+    const {data:result,error:finishError}=await supabase.rpc(
+      'complete_athlete_onboarding_and_plan',{p_inputs:payload});
+    if(finishError){
+      setSaving(false);
+      setMessage('We could not finish and verify your programme. Your earlier setup answers are saved; retry Finish setup: '+finishError.message);
+      return;
+    }
+    if(result?.status==='review_required'){
+      setSaving(false);setReady(true);
+      setMessage(result.reason||'A training concern needs coach review before exercise is prescribed.');
+      return;
+    }
+    if(result?.status!=='ready'||!(result.sessions>0)){
+      setSaving(false);setMessage('We could not verify a safe starter programme. Please retry.');return;
+    }
+    // The server has already checked the committed calendar and exact
+    // generated-session count. Keep the user on the setup page if the
+    // calendar cannot be confirmed.
+    setSaving(false);
+    setMessage('Your '+result.sessions+' training sessions are ready. Opening your calendar…');
+    const firstSessionDate=String(result.calendar?.[0]?.date||result.first_date||'');
+    const focusDate=/^\d{4}-\d{2}-\d{2}$/.test(firstSessionDate)?firstSessionDate:'';
+    window.location.assign('/?start=calendar'+(focusDate?'&focus='+encodeURIComponent(focusDate):''));
+    return;
+  }
   const {error}=await supabase.from('athlete_onboarding').upsert({
    user_id:userId,race_distance:race,race_date:raceDate||null,
    experience,weekly_hours:hours,device,onboarding_step:nextStep,
@@ -95,55 +135,7 @@ export default function AthleteOnboardingDraft(){
    updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
   if(error){setSaving(false);setMessage('Unable to save setup: '+error.message);return;}
-  if(nextStep===3){
-   const {data:existing,error:lookupError}=await supabase.from('athlete_profile')
-     .select('id').eq('user_id',userId).maybeSingle();
-   if(lookupError){setSaving(false);setMessage('Unable to verify athlete profile: '+lookupError.message);return;}
-   if(!existing){
-    const {error:profileError}=await supabase.from('athlete_profile')
-      .insert({user_id:userId,display_name:displayName.trim()});
-    if(profileError){setSaving(false);setMessage('Setup preferences saved, but your athlete profile could not be created. Please try Finish setup again: '+profileError.message);return;}
-   }
-  }
   setStep(Math.min(2,nextStep));
-  if(nextStep===3){
-    setMessage('Creating your first two weeks of training…');
-    const {data:result,error:generatorError}=await supabase.rpc('generate_onboarding_foundation');
-    if(generatorError){
-      setSaving(false);
-      setMessage('Your setup was saved but the training programme could not be created: '+generatorError.message);
-      return;
-    }
-    if(result?.status==='review_required'){
-      setSaving(false);setReady(true);
-      setMessage(result.reason||'Your training setup needs review before we can activate sessions.');
-      return;
-    }
-    if(result?.status!=='created'&&result?.status!=='already_planned'){
-      setSaving(false);setMessage('Unable to confirm your first training programme. Please retry.');return;
-    }
-    // Correct previously generated foundation plans when an athlete updates
-    // swimming capability. The database replaces only safe, future workouts.
-    const {data:swimResult,error:swimError}=await supabase.rpc('update_foundation_swim_preference',{p_can_swim:canSwim});
-    if(swimError){setSaving(false);setMessage('Training was saved, but swimming preference could not be applied: '+swimError.message);return;}
-    if(swimResult?.status==='review_required'){setSaving(false);setMessage(swimResult.reason);return;}
-
-    const {data:athlete,error:athleteError}=await supabase.from('athlete_profile')
-      .select('id').eq('user_id',userId).single();
-    if(athleteError||!athlete){setSaving(false);setMessage('Your plan was prepared, but your athlete account could not be verified.');return;}
-    // The calendar can only be opened after committed sessions have been read back.
-    const fromDate=result.first_date||new Date().toISOString().slice(0,10);
-    const {data:calendar,error:calendarError}=await supabase.from('planned_session')
-      .select('id').eq('athlete_id',athlete.id).eq('is_active_version',true)
-      .gte('planned_date',fromDate).limit(1);
-    setSaving(false);
-    if(calendarError||!calendar?.length){
-      setMessage('Your programme was generated, but we could not confirm it in your calendar. Please reopen the app.');
-      return;
-    }
-    window.location.assign('/?start=calendar');
-    return;
-  }
   setSaving(false);setMessage('Progress saved.');
  }
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
