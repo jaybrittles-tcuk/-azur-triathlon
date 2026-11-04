@@ -8,6 +8,40 @@ const basicTypes={
  bike:{title:'Easy aerobic ride',minutes:40,intensity:'Conversational effort, RPE 2–3; no power targets'},
  run:{title:'Easy run or run/walk',minutes:30,intensity:'Conversational effort, RPE 2–3; coach confirms run readiness'},
 };
+
+// Conservative, time-based prescriptions: no unverified pace, power or CSS targets.
+// Every step has a duration; repeated work and recovery are represented explicitly.
+export function foundationPrescription(sport, minutes, week=0) {
+ const variant=week===0?0:1;
+ const recipes={
+  swim:[
+   {title:'Relaxed technique swim',purpose:'Build water confidence and relaxed technique before introducing swim intensity.',
+    steps:[['Warm-up',5,'Easy swimming, relaxed breathing'],['Technique',10,'Alternate 2 min easy drill focus with 1 min relaxed swimming; repeat, using the remaining minute to reset'],['Aerobic',10,'Comfortable continuous swimming with breaks whenever needed'],['Cool-down',5,'Very easy swimming']]},
+   {title:'Technique and rhythm swim',purpose:'Practise repeatable technique and pacing without adding intensity.',
+    steps:[['Warm-up',5,'Easy swimming'],['Technique',10,'Five 2-minute technique blocks; take recovery as needed within each block'],['Aerobic',10,'Alternate 2 min comfortable swimming and 1 min easy swimming, then finish with 1 min relaxed swimming'],['Cool-down',5,'Easy swimming']]}
+  ],
+  bike:[
+   {title:'Aerobic rhythm ride',purpose:'Develop sustainable aerobic rhythm with frequent low-stress resets.',
+    steps:[['Warm-up',8,'Gradually settle into RPE 2–3'],['Aerobic intervals',24,'3 × 7 min at RPE 3 with 1 min easy between efforts; finish with 1 min easy'],['Cool-down',8,'RPE 1–2 easy spinning']]},
+   {title:'Cadence control ride',purpose:'Improve smooth pedalling and comfortable aerobic control.',
+    steps:[['Warm-up',8,'Easy spinning, RPE 2'],['Technique intervals',24,'4 × 5 min relaxed cadence focus at RPE 3 with 1 min easy between blocks; finish with 1 min easy'],['Cool-down',8,'Easy spinning, RPE 1–2']]}
+  ],
+  run:[
+   {title:'Easy run or run/walk',purpose:'Establish comfortable running rhythm without forcing pace.',
+    steps:[['Warm-up',5,'Brisk walk progressing to easy jog if comfortable'],['Main set',20,'Easy conversational running; walk whenever needed to maintain RPE 2–3'],['Cool-down',5,'Easy walk']]},
+   {title:'Relaxed run/walk rhythm',purpose:'Build consistency while keeping the effort conversational.',
+    steps:[['Warm-up',5,'Brisk walk'],['Main set',20,'4 × 4 min easy running with 1 min walking between blocks; finish with 1 min easy'],['Cool-down',5,'Easy walking']]}
+  ]
+ };
+ const recipe=recipes[sport]?.[variant];
+ if(!recipe || minutes!==({swim:30,bike:40,run:30}[sport]))return null;
+ return {title:recipe.title,purpose:recipe.purpose,
+  intensity:'RPE 2–3, conversational effort',
+  steps:recipe.steps.map(([name,durationMinutes,instructions])=>({name,durationMinutes,instructions})),
+  totalMinutes:recipe.steps.reduce((sum,step)=>sum+step[1],0),
+  status:'coach_review_required'};
+}
+
 const days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const numberOrNull=(n,min,max)=>Number.isFinite(n)&&n>=min&&n<=max?n:null;
 const weekDate=(monday,index)=>{const date=new Date(monday+'T12:00:00Z');date.setUTCDate(date.getUTCDate()+index);return date.toISOString().slice(0,10)};
@@ -65,9 +99,12 @@ export function twoWeekFoundationPreview({
     if(minutes+t.minutes>cap)continue;
     // Keep both foundation weeks equally conservative, with no automatic
     // progression ahead of an assessment of the first week's response.
+    const prescription=foundationPrescription(t.sport,t.minutes,week);
     sessions.push({date:weekDate(weekStart,t.day+7*week),
-     day:days[t.day],sport:t.sport,title:t.title,minutes:t.minutes,
-     intensity:t.intensity,status:'unapproved_proposal'});
+     day:days[t.day],sport:t.sport,title:prescription?.title??t.title,minutes:t.minutes,
+     intensity:prescription?.intensity??t.intensity,
+     purpose:prescription?.purpose??null,steps:prescription?.steps??[],
+     status:'unapproved_proposal'});
     minutes+=t.minutes;
    }
    weeks.push({weekStart:weekDate(weekStart,week*7),sessions,totalMinutes:minutes,restDays:7-new Set(sessions.map(x=>x.day)).size});

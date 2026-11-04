@@ -65,3 +65,22 @@ test('all seven days available still results in rest days rather than seven work
  assert.ok(result.weeks.every(w=>w.sessions.length<=5&&w.restDays>=2));
  assert.equal(result.canPublish,false);
 });
+
+test('foundation previews include purposeful structured steps with exact duration',()=>{
+ const result=twoWeekFoundationPreview(valid);
+ for(const session of result.weeks.flatMap(w=>w.sessions)){
+  assert.ok(session.purpose?.length>20);
+  assert.ok(session.steps.length>=3);
+  assert.equal(session.steps.reduce((sum,step)=>sum+step.durationMinutes,0),session.minutes);
+  assert.ok(session.steps.some(step=>step.name==='Warm-up'));
+  assert.ok(session.steps.some(step=>step.name==='Cool-down'));
+  assert.equal(session.status,'unapproved_proposal');
+  assert.doesNotMatch(JSON.stringify(session.steps),/\\b(?:FTP|CSS|threshold pace)\\b/i);
+ }
+});
+test('week two changes session structure without increasing planned load',()=>{
+ const result=twoWeekFoundationPreview(valid);
+ assert.equal(result.weeks[0].totalMinutes,result.weeks[1].totalMinutes);
+ assert.notDeepEqual(result.weeks[0].sessions.map(s=>s.title),result.weeks[1].sessions.map(s=>s.title));
+ assert.equal(result.canPublish,false);
+});
