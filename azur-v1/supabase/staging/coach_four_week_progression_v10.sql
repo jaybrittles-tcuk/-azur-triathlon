@@ -18,6 +18,7 @@ declare
  v_week_sessions integer;
  v_cap integer;
  v_week_cap integer;
+ v_previous_minutes integer;
  v_week_minutes integer;
  v_recovery integer;
  v_start date;
@@ -112,7 +113,13 @@ begin
    when v_base->>'status'='safety_hold' then 'Unresolved athlete training concern; coach must assess before any multiweek progression.'
    when v_base->>'status'='recovery_review' then 'Recent high exertion: recovery assessment must precede progression.'
    when v_age_covered<3 or (v_base->>'validated_sessions')::int<8 then 'At least three weeks and eight deduplicated validated device sessions are needed; incomplete sync is not low fitness.'
-   when v_week_sessions<3 or v_original_sum<>v_source_minutes then 'A complete unmodified, unlocked and coach-approved source training week is required.'
+   when v_week_sessions<3 or v_original_sum<>v_source_minutes or exists(
+     select 1 from public.planned_session ps where ps.athlete_id=p_athlete_id
+      and ps.is_active_version and ps.planned_date>=v_source and ps.planned_date<v_source+7
+      and (ps.locked or ps.status<>'planned' or ps.session_class<>'easy'))
+     or exists(select 1 from public.season_week sw where sw.athlete_id=p_athlete_id
+      and sw.week_start=v_source and (sw.locked or sw.phase<>'Foundation'))
+   then 'A complete, unlocked, easy foundation source week is required.'
    when v_race is null then 'Race date not set: this four-week block cannot be race aware.'
    when v_distance not in ('70.3','ironman') then 'Race distance must be confirmed.'
    when v_onboarding.weekly_hours is null or v_onboarding.weekly_hours<2 then 'Training availability not confirmed.'
@@ -125,6 +132,7 @@ begin
   v_block_reason:='Validated history and available hours do not support a safe weekly recommendation';
  end if;
  
+ v_previous_minutes:=least(v_source_minutes,v_cap);
  for v_n in 1..4 loop
   v_start:=v_source+v_n*7;
   v_end:=v_start+7;
@@ -143,16 +151,22 @@ begin
     v_status:='coach_review';
     v_reason:=case when v_n=4 then
      'Recovery/deload week. Reduce overall easy aerobic time; confirm recent exertion and readiness.'
-     else 'Conservative easy-training continuation within observed volume and availability. No automatic intensity increase.' end;
+     else 'Coach-reviewed volume change up to 5% from the previous week, capped by observed training and availability. No automatic intensity increase.' end;
   end if;
   v_week_minutes:=null;v_sport_minutes:=null;
   if v_status='coach_review' then
-    -- No progression above source week without explicit ongoing validation.
-    -- Suggested maintenance is bounded by verified recent training and capacity.
-    -- The fourth week is deliberately a 25% deload.
-    v_week_minutes:=least(v_source_minutes,v_cap);
-    if v_n=4 then v_week_minutes:=floor(v_week_minutes*0.75/5)*5;end if;
+    -- Coach-reviewed advisory, never an automated publication.
+    -- Max +5% between weeks, always capped by observed device volume,
+    -- athlete availability, and the 8-hour conservative planning ceiling.
+    if v_n=1 then
+      v_week_minutes:=least(v_source_minutes,v_cap);
+    elsif v_n=4 then
+      v_week_minutes:=floor(v_previous_minutes*0.75/5)*5;
+    else
+      v_week_minutes:=least(v_cap,floor(v_previous_minutes*1.05/5)*5);
+    end if;
     v_week_minutes:=greatest(0,floor(v_week_minutes/5)*5);
+    v_previous_minutes:=v_week_minutes;
     if v_week_minutes<60 then
       v_status:='hold';
       v_reason:='No safe positive training volume recommended from current evidence.';
