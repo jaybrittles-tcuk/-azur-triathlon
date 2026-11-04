@@ -60,13 +60,15 @@ export default function CoachFoundationApprovals(){
   setBusy(row.id);setMessage('');
   const {data:{user}}=await supabase.auth.getUser();
   if(!user||user.app_metadata?.role!=='coach'){setMessage('Coach sign-in required');setBusy('');return;}
-  const result=await supabase.from('foundation_reassessment_decision').insert({
-   request_id:row.id,coach_user_id:user.id,decision,review_note:note
+  const result=await supabase.rpc('decide_foundation_reassessment',{
+   p_request_id:row.id,p_decision:decision,p_review_note:note
   });
-  if(result.error)setMessage('Review was not saved: '+result.error.message);
-  else setMessage(decision==='approved'?
-   'Exact programme approved. The athlete must refresh the preview and explicitly confirm before any future sessions change.':
-   'Request declined. The athlete can review your note.');
+  if(result.error)setMessage('Decision NOT saved; calendar unchanged: '+result.error.message);
+  else if(decision==='approved'&&result.data?.status==='approved_and_applied')
+    setMessage('Programme approved and automatically published: '+result.data.sessions+' future sessions. The athlete calendar will show the update on refresh.');
+  else if(decision==='rejected'&&result.data?.status==='declined')
+    setMessage('Proposal declined. Existing athlete calendar preserved and your rationale recorded.');
+  else setMessage('Could not verify the coaching decision. Refresh before trying again.');
   setBusy('');setReload(x=>x+1);
  }
  const pending=rows.filter(x=>!x.decision);
@@ -101,7 +103,7 @@ export default function CoachFoundationApprovals(){
     </div>
     <p style={{fontSize:12,color:'#77502d',margin:'8px 0'}}>
       History and training consistency are athlete-reported, not verified device evidence.
-      Approval authorises this exact RPE-based proposal only; it does not authorise harder intervals or ongoing progression.
+      Approving automatically replaces only eligible future foundation sessions with this exact RPE-based proposal. Declining preserves the current calendar. Neither action authorises harder intervals or ongoing progression.
     </p>
     <details>
       <summary style={{cursor:'pointer'}}>Review exact proposed sessions</summary>
@@ -119,7 +121,7 @@ export default function CoachFoundationApprovals(){
     </label>
     <div style={{display:'flex',gap:9,marginTop:10,flexWrap:'wrap'}}>
      <button type="button" disabled={!!busy} onClick={()=>void decide(row,'approved')}>
-      {busy===row.id?'Saving…':'Approve exact programme'}
+      {busy===row.id?'Approving…':'Approve & publish programme'}
      </button>
      <button type="button" disabled={!!busy} onClick={()=>void decide(row,'rejected')}>Decline</button>
     </div>
