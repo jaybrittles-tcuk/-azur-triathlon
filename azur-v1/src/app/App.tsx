@@ -36,6 +36,7 @@ import CoachAttentionInbox from './CoachAttentionInbox';
 import CoachSwimFocusReview from './CoachSwimFocusReview';
 import CoachWeeklyReview from './CoachWeeklyReview';
 import CoachFoundationApprovals from './CoachFoundationApprovals';
+import CoachNextWeekIntelligence from './CoachNextWeekIntelligence';
 import CoachTrainingExceptions from './CoachTrainingExceptions';
 import CoachTrainingPatterns from './CoachTrainingPatterns';
 import CoachActionCentre from './CoachActionCentre';
@@ -10318,6 +10319,7 @@ style={
     </div>
   </>}
   {coachWorkspace==='monitoring'&&<>
+    <CoachNextWeekIntelligence/>
     <CoachFoundationApprovals/>
     <CoachMonitoringWorkspace onSelectAthlete={(a)=>{setCoachSelectedAthlete(a);setCoachWorkspace('overview')}}/>
   </>}
