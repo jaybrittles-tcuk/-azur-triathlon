@@ -12,9 +12,13 @@ type Request={
 type Decision={request_id:string;decision:string;review_note:string;decided_at:string};
 type TrainingEvidence={
  window_days:number;validated_device_activities:number;manual_activities:number;
- pending_or_rejected_activities:number;active_days:number;weeks_with_activity:number;
+ pending_or_rejected_activities:number;weeks_with_activity:number;
  validated_device_hours_28d:number;manual_reported_hours_28d:number;
- verified_weekly_average_hours:number;history_adequacy:string;note:string;
+ verified_weekly_average_hours:number;reported_weekly_hours:number|null;
+ proposed_weekly_hours:number;duplicate_records_excluded:number;
+ history_adequacy:string;decision_guidance:string;note:string;
+ weekly_validated_load:Array<{week_start:string;validated_hours:number;validated_sessions:number}>;
+ sport_distribution:Array<{sport:string;validated_hours:number;sessions:number}>;
 };
 type Display=Request&{athleteName:string;decision?:Decision};
 
@@ -120,23 +124,44 @@ export default function CoachFoundationApprovals(){
       <strong>Recent training evidence</strong>
       {!evidence[row.id]?<div style={{marginTop:7}}>
         <button type="button" disabled={!!evidenceBusy} onClick={()=>void loadEvidence(row.id)}>
-          {evidenceBusy===row.id?'Checking…':'Check validated activity history'}
+          {evidenceBusy===row.id?'Checking…':'Review verified training history'}
         </button>
       </div>:<>
-        <p style={{margin:'7px 0'}}>Validated device training (last 28 days): <strong>{evidence[row.id].validated_device_hours_28d}h</strong>,
-         or {evidence[row.id].verified_weekly_average_hours}h/week averaged over four weeks.</p>
-        <p style={{margin:'7px 0'}}>
-         {evidence[row.id].validated_device_activities} validated device activities;
-         {' '}{evidence[row.id].manual_activities} manually entered;
-         {' '}{evidence[row.id].pending_or_rejected_activities} pending/rejected;
-         {' '}{evidence[row.id].weeks_with_activity} weeks with activity.
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(95px,1fr))',gap:8,marginTop:10}}>
+          {[
+            {label:'Athlete reports',value:String(evidence[row.id].reported_weekly_hours??'Unknown')+'h/wk'},
+            {label:'Device observed',value:String(evidence[row.id].verified_weekly_average_hours)+'h/wk'},
+            {label:'Proposed plan',value:String(evidence[row.id].proposed_weekly_hours)+'h/wk'}
+          ].map(item=><div key={item.label} style={{background:'#fff',padding:9,borderRadius:9}}>
+            <small style={{color:'#45637a'}}>{item.label}</small>
+            <strong style={{display:'block',fontSize:18,marginTop:5}}>{item.value}</strong>
+          </div>)}
+        </div>
+        <div style={{marginTop:11}}>
+          <strong style={{fontSize:12}}>Last four weeks — validated device sessions only</strong>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,minmax(0,1fr))',gap:6,marginTop:7}}>
+          {evidence[row.id].weekly_validated_load?.map(week=><div key={week.week_start}
+            style={{borderRadius:8,padding:6,background:'#fff',textAlign:'center'}}>
+            <small style={{display:'block',color:'#526d7e',fontSize:10}}>{week.week_start.slice(5)}</small>
+            <strong style={{fontSize:14}}>{week.validated_hours}h</strong>
+            <small style={{display:'block',fontSize:10}}>{week.validated_sessions} sessions</small>
+          </div>)}
+          </div>
+        </div>
+        {evidence[row.id].sport_distribution?.length>0&&<p style={{fontSize:12}}>
+          By discipline: {evidence[row.id].sport_distribution.map(x=>x.sport+' '+x.validated_hours+'h').join(' · ')}
+        </p>}
+        <p style={{fontSize:12,margin:'8px 0'}}>
+          {evidence[row.id].validated_device_activities} validated device activities;
+          {' '}{evidence[row.id].manual_activities} manual;
+          {' '}{evidence[row.id].pending_or_rejected_activities} pending/rejected;
+          {' '}{evidence[row.id].duplicate_records_excluded} duplicates excluded.
         </p>
-        {evidence[row.id].history_adequacy==='insufficient_validated_history'&&
-          <p style={{color:'#8a531c',fontWeight:650}}>
-            Insufficient validated history to corroborate the athlete's reported training volume.
-            Review additional evidence before increasing the plan.
-          </p>}
-        <small>Manual and pending/rejected sessions are not counted as verified device training.</small>
+        <p role="status" style={{
+          color:evidence[row.id].history_adequacy==='insufficient_validated_history'?'#89501a':'#235a44',
+          background:'#fff',padding:10,borderRadius:9,fontWeight:600,fontSize:12
+        }}>{evidence[row.id].decision_guidance}</p>
+        <small>Device observations may be incomplete if integrations or imports are missing. Reported hours are not independently verified. Review readiness and injuries before approving.</small>
       </>}
     </div>
     <p style={{fontSize:12,color:'#77502d',margin:'8px 0'}}>
