@@ -36,7 +36,7 @@ export function foundationPrescription(sport, minutes, week=0) {
  const recipe=recipes[sport]?.[variant];
  if(!recipe || minutes!==({swim:30,bike:40,run:30}[sport]))return null;
  return {title:recipe.title,purpose:recipe.purpose,
-  intensity:'RPE 2–3, conversational; no unverified threshold targets',
+  intensity:'RPE 2–3, conversational effort',
   steps:recipe.steps.map(([name,durationMinutes,instructions])=>({name,durationMinutes,instructions})),
   totalMinutes:recipe.steps.reduce((sum,step)=>sum+step[1],0),
   status:'coach_review_required'};
