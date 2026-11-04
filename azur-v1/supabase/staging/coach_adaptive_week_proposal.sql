@@ -108,7 +108,7 @@ begin
   and (p.status<>'planned' or p.locked or p.session_class<>'easy'
     or jsonb_typeof(p.prescription->'steps') is distinct from 'array'
     or jsonb_array_length(p.prescription->'steps')<>3
-    or p.prescription::text ~* '(FTP|CSS|%|threshold|zone[[:space:]]*[1-9])'
+    or p.prescription::text ~* '(FTP|CSS|%|threshold[[:space:]]*(pace|power|[0-9])|zone[[:space:]]*[1-9])'
     or (select sum((x.value->>'durationMin')::int)
         from jsonb_array_elements(p.prescription->'steps') x)<>p.duration_min)
  ) then
@@ -148,7 +148,7 @@ begin
    v_total:=v_total+v_duration;
   end loop;
  end if;
- if v_total>480 or v_total<=0 then
+ if v_block='' and (v_total>480 or v_total<=0) then
    v_block:='Resulting training volume is outside safe foundation limits';
  end if;
  return jsonb_build_object(
