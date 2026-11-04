@@ -27,15 +27,7 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   const {error}=await supabase.from('coach_athlete_invitation').insert({coach_user_id:user.id,invitee_email:normalized});
   setBusy(false);
   if(error){setMessage(error.message);return;}
-  setEmail('');setMessage('Invitation created. Share the onboarding link with the athlete; they must register using the invited email address.');
-  await refresh();
- }
- async function sendEmail(inv:Invitation){
-  setBusy(true);setMessage('');
-  const {data,error}=await supabase.functions.invoke('send-coach-invitation',{body:{invitation_id:inv.id}});
-  setBusy(false);
-  if(error||data?.error){setMessage(data?.error || error?.message || 'Unable to send invitation email.');return;}
-  setMessage('The email provider accepted the invitation. Inbox delivery is not yet confirmed.');
+  setEmail('');setMessage('Invitation created. An existing athlete can sign in and accept under More → Coach Invitations. Email sending is not configured on staging.');
   await refresh();
  }
  async function copyInstructions(inv:Invitation){
@@ -61,10 +53,10 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   {message&&<p role="status">{message}</p>}
   {loading?<p>Loading invitations…</p>:items.length===0?<p>No invitations yet.</p>:<div className="azur-invite-list">{items.map(inv=><div key={inv.id} className="azur-invite-row">
    <div><strong>{mode==='coach'?inv.invitee_email:'AZUR coach invitation'}</strong><small>{inv.accepted_at?'Accepted':new Date(inv.expires_at).getTime()<Date.now()?'Expired':'Awaiting acceptance'}</small></div>
-   {mode==='coach'&&!inv.accepted_at&&new Date(inv.expires_at).getTime()>Date.now()&&<button type="button" disabled={busy} onClick={()=>void sendEmail(inv)}>{inv.email_sent_at?'Resend email':'Send email'}</button>}
+   
    {mode==='coach'&&!inv.accepted_at&&<button type="button" onClick={()=>void copyInstructions(inv)}>Copy instructions</button>}
    {mode==='athlete'&&!inv.accepted_at&&new Date(inv.expires_at).getTime()>Date.now()&&<button disabled={busy} onClick={()=>void accept(inv)}>Accept</button>}
   </div>)}</div>}
-  {mode==='coach'&&<p className="azur-invite-note">Create the invitation, then use Copy instructions to share the setup steps with your athlete. They can accept from More after completing setup.</p>}
+  {mode==='coach'&&<p className="azur-invite-note">Invitations are saved immediately. Email sending is not configured on this staging environment. Use Copy instructions if needed; an existing athlete can sign in and accept directly from More → Coach Invitations.</p>}
  </section>;
 }
