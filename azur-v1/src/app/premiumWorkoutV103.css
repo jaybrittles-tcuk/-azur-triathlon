@@ -6,3 +6,5 @@
 .azur-v103-profile svg{display:block;width:100%;height:108px;overflow:hidden}
 .azur-v103-bar{fill:#4896d8}.azur-v103-bar.work{fill:#f0bb54}.azur-v103-bar.recovery{fill:#7899b3}.azur-v103-bar.cooldown{fill:#5bb4a5}
 .azur-v103-profile-footer{margin:5px 0 8px}.azur-v103-profile small{display:block;line-height:1.4}
+
+.azur-v103-purpose{border-radius:14px;padding:15px;background:#18344b;border:1px solid #355773;margin:0 0 15px}.azur-v103-purpose small{font-size:.7rem;font-weight:700;letter-spacing:.08em;color:#e9bb60}.azur-v103-purpose p{margin:8px 0 0;line-height:1.5;color:#e9f2fc}.azur-workout-tab-content .azur-v103-profile{margin:14px 0}.azur-workout-tab-content .azur-v103-steps{margin:14px 0}
