@@ -60,11 +60,19 @@ begin
      and p.status='planned' and p.session_class='easy' and not p.locked
      and w.phase='Foundation' and not w.locked
      and p.targets->>'generation_source'='onboarding_foundation'
-     and coalesce(p.targets->>'enhanced_rpe_structure_v1','')<>'true'
    order by p.planned_date,p.id
    for update of p
  loop
   v_sport:=v_s.sport;v_duration:=v_s.duration_min;
+  -- Count previously enriched sessions too, preserving two distinct
+  -- objectives if only the SECOND bike was shortened and reset for re-enrichment.
+  if coalesce(v_s.targets->>'enhanced_rpe_structure_v1','')='true' then
+    if v_sport='bike' then v_seen_bike:=v_seen_bike+1;
+    elsif v_sport='swim' then v_seen_swim:=v_seen_swim+1;
+    elsif v_sport='run' then v_seen_run:=v_seen_run+1;
+    end if;
+    continue;
+  end if;
   -- Do not alter coach-edited or malformed workouts.
   if v_duration<20 or v_duration>180 or
     jsonb_typeof(v_s.prescription->'steps') is distinct from 'array' or
