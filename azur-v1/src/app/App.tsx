@@ -7781,9 +7781,7 @@ const sessionVerdict =
   <span className="eyebrow">ATHLETE FEEDBACK</span>
 
   <div className="session-block-item">
-    <label>
-      <WorkoutRpePicker value={sessionFeedback.rpe} disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} onChange={(rpe)=>setSessionFeedback({...sessionFeedback,rpe})}/>
-    </label>
+    <WorkoutRpePicker value={sessionFeedback.rpe} disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} onChange={(rpe)=>setSessionFeedback({...sessionFeedback,rpe})}/>
   </div>
 
   <div className="session-block-item">
