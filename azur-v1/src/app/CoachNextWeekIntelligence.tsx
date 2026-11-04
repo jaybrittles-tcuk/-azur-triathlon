@@ -17,6 +17,18 @@ type ProposedWeek={status:'ready_for_coach'|'blocked';reason?:string|null;week_s
  confidence:string;evidence_status:string;sessions:ProposedSession[];coach_approval_required:boolean;
  race_phase:string;race_date:string|null;race_distance:string;weeks_to_race:number|null;
  race_reason:string;development_sport:string|null;sport_priority_reason:string;race_guidance_only:boolean};
+type RaceReadiness={
+ race_distance:string;race_date:string|null;race_phase:string;weeks_to_race:number|null;
+ simulation_12_week_date:string|null;simulation_4_week_date:string|null;
+ development_sport:string|null;training_evidence_status:string;validated_activity_count:number;
+ threshold_prescription_allowed:boolean;race_simulation_auto_publish_allowed:boolean;
+ reported_thresholds:{ftp_watts:number|null;swim_css_seconds_per_100m:number|null;
+  run_threshold_seconds_per_km:number|null;provenance:string};
+ approved_easy_run_options:Array<{workout_key:string;title:string;duration_min:number}>;
+ gated_coach_library_workouts:Array<{title:string;sport:string;block_reason:string}>;
+ observed_sport_training:Record<string,{validated_sessions:number;observed_hours_28d:number}>;
+ guidance:string[];
+};
 type Athlete={id:string;display_name:string};
 export default function CoachNextWeekIntelligence(){
  const [athletes,setAthletes]=useState<Athlete[]>([]);
@@ -28,6 +40,8 @@ export default function CoachNextWeekIntelligence(){
  const [rationale,setRationale]=useState('');
  const [decisionBusy,setDecisionBusy]=useState(false);
  const [resultMessage,setResultMessage]=useState('');
+ const [readiness,setReadiness]=useState<RaceReadiness|null>(null);
+ const [readinessBusy,setReadinessBusy]=useState(false);
  useEffect(()=>{
    let live=true;
    (async()=>{
@@ -50,11 +64,19 @@ export default function CoachNextWeekIntelligence(){
  },[]);
  async function refresh(){
    if(!selected||busy)return;
-   setBusy(true);setMessage('');setAdvice(null);setProposal(null);setResultMessage('');
+   setBusy(true);setMessage('');setAdvice(null);setProposal(null);setReadiness(null);setResultMessage('');
    const result=await supabase.rpc('coach_next_week_adaptive_preview',{p_athlete_id:selected});
    if(result.error)setMessage('Next-week recommendation unavailable: '+result.error.message);
    else if(result.data)setAdvice(result.data as Advice);
    setBusy(false);
+ }
+ async function checkRaceReadiness(){
+   if(!selected||readinessBusy)return;
+   setReadinessBusy(true);setReadiness(null);setMessage('');
+   const result=await supabase.rpc('coach_race_workout_readiness',{p_athlete_id:selected});
+   setReadinessBusy(false);
+   if(result.error){setMessage('Cannot assess race-specific workouts: '+result.error.message);return;}
+   setReadiness(result.data as RaceReadiness);
  }
  async function generateWeek(){
    if(!selected||busy||decisionBusy)return;
@@ -99,7 +121,7 @@ export default function CoachNextWeekIntelligence(){
     <label style={{flex:'1 1 160px',fontSize:13}}>
      Assigned athlete
      <select style={{display:'block',width:'100%',marginTop:5,padding:10,borderRadius:9}}
-      value={selected} onChange={e=>{setSelected(e.target.value);setAdvice(null);setProposal(null);setRationale('');setMessage('');setResultMessage('');}}>
+      value={selected} onChange={e=>{setSelected(e.target.value);setAdvice(null);setProposal(null);setReadiness(null);setRationale('');setMessage('');setResultMessage('');}}>
       {!athletes.length&&<option value="">No athletes assigned</option>}
       {athletes.map(a=><option key={a.id} value={a.id}>{a.display_name||'Athlete'}</option>)}
      </select>
@@ -163,6 +185,72 @@ export default function CoachNextWeekIntelligence(){
      <strong style={{display:'block',fontSize:12,marginTop:9}}>
        Evidence assessment only — no calendar changes made.
      </strong>
+     <div style={{borderTop:'1px solid #c9deec',marginTop:14,paddingTop:13}}>
+       <strong>Race-specific workout readiness</strong>
+       <p style={{fontSize:12,lineHeight:1.5,margin:'7px 0'}}>
+         See which approved sessions AZUR can safely prescribe, which still need
+         verified thresholds, and when race simulations need coach planning.
+       </p>
+       <button type="button" onClick={()=>void checkRaceReadiness()} disabled={readinessBusy||busy}>
+         {readinessBusy?'Checking…':'Check race-specific readiness'}
+       </button>
+       {readiness&&<div style={{background:'#fff',borderRadius:12,padding:12,marginTop:10}}>
+         <p style={{fontSize:13,margin:'0 0 9px'}}>
+           <strong>{readiness.race_distance==='70.3'?'IRONMAN 70.3':
+             readiness.race_distance==='ironman'?'IRONMAN': 'Race not set'}</strong>
+           {readiness.race_date?' · '+readiness.race_date:''}
+           {' · '}{readiness.race_phase.replaceAll('_',' ')}
+           {readiness.weeks_to_race!==null?' · '+readiness.weeks_to_race+' weeks away':''}
+         </p>
+         <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:8}}>
+           <div style={{padding:9,background:'#eef4fa',borderRadius:9}}>
+             <small style={{display:'block'}}>12-week simulation checkpoint</small>
+             <strong style={{fontSize:13}}>{readiness.simulation_12_week_date||'Not set'}</strong>
+           </div>
+           <div style={{padding:9,background:'#eef4fa',borderRadius:9}}>
+             <small style={{display:'block'}}>4-week simulation checkpoint</small>
+             <strong style={{fontSize:13}}>{readiness.simulation_4_week_date||'Not set'}</strong>
+           </div>
+         </div>
+         <p style={{fontSize:12,lineHeight:1.5,fontWeight:650,margin:'10px 0'}}>
+           Athlete-entered benchmarks are not yet verified. No automatic FTP,
+           CSS, threshold-pace or race-simulation prescription is permitted.
+         </p>
+         <details>
+           <summary style={{fontSize:12,cursor:'pointer'}}>Entered benchmark values (unverified)</summary>
+           <p style={{fontSize:12,lineHeight:1.5}}>
+             Bike FTP: {readiness.reported_thresholds.ftp_watts??'Not entered'} W ·
+             Swim CSS: {readiness.reported_thresholds.swim_css_seconds_per_100m??'Not entered'} s/100m ·
+             Run threshold: {readiness.reported_thresholds.run_threshold_seconds_per_km??'Not entered'} s/km
+           </p>
+         </details>
+         <p style={{fontSize:12,fontWeight:650,margin:'11px 0 6px'}}>
+           Approved easy-run options ({readiness.approved_easy_run_options.length})
+         </p>
+         {readiness.approved_easy_run_options.map(w=><div key={w.workout_key}
+           style={{fontSize:12,borderBottom:'1px solid #e5edf3',padding:'5px 0'}}>
+           {w.title} · {w.duration_min} minutes
+         </div>)}
+         <details style={{marginTop:11}}>
+           <summary style={{fontSize:12,cursor:'pointer'}}>
+             {readiness.gated_coach_library_workouts.length} gated bike/swim or higher-intensity workouts
+           </summary>
+           {readiness.gated_coach_library_workouts.map((w,i)=><div key={i}
+             style={{fontSize:12,borderBottom:'1px solid #e5edf3',padding:'7px 0'}}>
+             <strong>{w.title}</strong> · {w.block_reason}
+           </div>)}
+         </details>
+         <details style={{marginTop:10}}>
+           <summary style={{fontSize:12,cursor:'pointer'}}>Training and simulation guidance</summary>
+           {readiness.guidance.map((line,i)=><p key={i}
+             style={{fontSize:12,lineHeight:1.5,margin:'7px 0'}}>{line}</p>)}
+         </details>
+         <small style={{display:'block',marginTop:9}}>
+           This is a read-only prescription assessment. Simulation dates are checkpoints,
+           not calendar bookings, and workout intensity remains coach-controlled.
+         </small>
+       </div>}
+     </div>
      <div style={{borderTop:'1px solid #c9deec',marginTop:14,paddingTop:13}}>
        <strong>Generate an adaptive week</strong>
        <p style={{fontSize:12,lineHeight:1.5,margin:'7px 0'}}>
