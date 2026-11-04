@@ -7043,56 +7043,23 @@ onClick={() => {
 </div>
 </div>
 
-                        <strong>{session.title}</strong>
+                        <strong className="azur-v11-calendar-title">{session.title}</strong>
+<div className="azur-v11-calendar-quickstats">
+ <span>{formatDuration(session.durationMin)}</span>
+ <span>{session.sessionClass.replaceAll('_',' ')} effort</span>
+</div>
 <CalendarIntensityProfile steps={(session.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
-<div className="calendar-session-purpose">
-  {session.status === 'completed' && session.completedDurationSec != null ? (
-    <div className="calendar-actual-comparison">
-      <strong>Planned {formatDuration(session.durationMin)} · Actual {formatDuration(Math.round(session.completedDurationSec / 60))}</strong>
-      <span>
-        {session.durationMin > 0
-          ? `${Math.round((session.completedDurationSec / 60 / session.durationMin) * 100)}% of prescribed time · `
-          : ''}
-        {Math.round(session.completedDurationSec / 60 - session.durationMin) >= 0 ? '+' : ''}
-        {Math.round(session.completedDurationSec / 60 - session.durationMin)} min
-      </span>
-      {session.completedSource && (
-        <small>Recorded via {session.completedSource === 'manual_fit' ? 'FIT upload' : session.completedSource === 'garmin' ? 'Garmin' : session.completedSource}</small>
-      )}
-    </div>
-  ) : (
-    <span>{session.rationale || `${session.sessionClass.replace(/_/g, ' ')} session · ${formatDuration(session.durationMin)} planned`}</span>
-  )}
+<div className="azur-v11-card-purpose">
+ <span className="azur-v11-card-purpose-label">{session.status==='completed'?'RECORDED':'SESSION PURPOSE'}</span>
+ <p>{session.status==='completed'&&session.completedDurationSec!=null?
+  'Actual '+formatDuration(Math.round(session.completedDurationSec/60))+
+    (session.completedSource?' · '+session.completedSource:''):
+  typeof session.prescription?.focus==='string'?
+    session.prescription.focus:session.rationale?
+      session.rationale.replace(/^Why today matters:\s*/i,'').slice(0,130):
+      'Open your workout to see the session objective and intervals.'}</p>
 </div>
-<span className="calendar-move-hint" aria-hidden="true">View session details ›</span>
-<div className="calendar-session-meta">
-  <span>
-    {session.status === 'completed' &&
-    session.completedDurationSec
-      ? `Actual ${formatDuration(
-          Math.round(session.completedDurationSec / 60),
-        )}`
-      : formatDuration(session.durationMin)}
-  </span>
-
-  <span>
-    {session.status === 'completed' &&
-    session.completedMatchConfidence != null
-      ? `${Math.round(
-          session.completedMatchConfidence,
-        )}% match`
-      : `Priority ${session.priority}`}
-  </span>
-</div>
-
-<span className="calendar-session-target">
-  {session.status === 'completed' &&
-  session.completedSource === 'garmin'
-    ? `Garmin · Planned ${formatDuration(
-        session.durationMin,
-      )}`
-    : Object.values(session.targets)[0]?.toString()}
-</span>
+<div className="azur-v11-open-session">View workout <span aria-hidden="true">→</span></div>
                       </button>
                       </div>
                     ))}
@@ -7156,11 +7123,15 @@ onClick={() => {
         <div><small>Sessions</small><strong>{calendarWeekSessions.length}</strong></div>
         <div><small>Completed</small><strong>{calendarWeekSessions.filter(session => session.status === 'completed').length}</strong></div>
       </div>
-      <p className="calendar-week-overview-note">
-        {calendarWeekSessions.some(session => session.rationale?.trim())
-          ? calendarWeekSessions.find(session => session.rationale?.trim())?.rationale
-          : 'Open a session to see its purpose and targets.'}
-      </p>
+      <div className="azur-v11-week-focus">
+       <span className="azur-v11-kicker">YOUR WEEK AT A GLANCE</span>
+       <p>{[
+        calendarWeekSessions.filter(x=>x.sport==='swim').length+' swims',
+        calendarWeekSessions.filter(x=>x.sport==='bike').length+' rides',
+        calendarWeekSessions.filter(x=>x.sport==='run').length+' runs'
+       ].join(' · ')}</p>
+       <small>Mix aerobic development and technique across the week. Open each session for its specific purpose, intervals and recovery guidance.</small>
+      </div>
     </>
   ) : (
     <div className="calendar-week-overview-empty">
@@ -7190,7 +7161,7 @@ onClick={() => {
         ×
       </button>
           <div className={`azur-v2-session-hero azur-v2-sport-${selected.sport}`}>
-            <div className="azur-v2-hero-label">SESSION DETAILS</div>
+            <div className="azur-v2-hero-label">YOUR WORKOUT</div>
             <div className="azur-v2-hero-sport">{sportName(selected.sport)} · {selected.status === "completed" ? "Completed" : "Planned"}</div>
           </div>
           <div className="section-heading">
@@ -7212,7 +7183,7 @@ onClick={() => {
 
   <span>{formatDuration(selected.durationMin)}</span>
 
-  <span>Priority {selected.priority}</span>
+  <span>{selected.status==='completed'?'Completed':'Ready to train'}</span>
 </div>
             </div>
 
@@ -7225,6 +7196,12 @@ onClick={() => {
             </button>
           </div>
 
+          <div className="azur-v11-detail-intro">
+           <span className="azur-v11-kicker">TODAY'S OBJECTIVE</span>
+           <p>{typeof displayPrescription?.focus==='string'?displayPrescription.focus:
+             selected.rationale?.replace(/^Why today matters:\s*/i,'')||
+             'Follow the prescribed effort and recovery for this session.'}</p>
+          </div>
           {(() => {
             const check = auditAthleteInstructions(displayPrescription);
             if (check.complete) return null;
@@ -7237,8 +7214,8 @@ onClick={() => {
           {[displayPrescription?.warmup, displayPrescription?.main_set, displayPrescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || displayPrescription?.fueling || displayPrescription?.focus || (Array.isArray(displayPrescription?.azurWorkout?.steps) && displayPrescription.azurWorkout.steps.length > 0) ? (
           <>
           <PremiumWorkoutTabs prescription={displayPrescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
-<details open={!(Array.isArray(displayPrescription?.azurWorkout?.steps) && displayPrescription.azurWorkout.steps.length > 0)} key={selected.id} className="session-prescription-disclosure session-prescription-v2">
-            <summary><span><strong>Detailed workout instructions</strong><small>Warm-up · Main set · Cool-down · Fuelling</small></span><span aria-hidden="true">⌄</span></summary>
+<details key={selected.id} className="session-prescription-disclosure session-prescription-v2 azur-v11-disclosure">
+            <summary><span><strong>Full coaching instructions</strong><small>Detailed cues · Recovery · Fuelling</small></span><span aria-hidden="true">⌄</span></summary>
             <div className="session-prescription-sections">
             <details><summary>View workout timeline</summary><CalendarPrescriptionSteps prescription={displayPrescription} /></details>
             {displayPrescription?.focus && (
