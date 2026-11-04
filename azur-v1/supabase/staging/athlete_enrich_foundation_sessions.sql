@@ -78,7 +78,7 @@ begin
     v_unchanged:=v_unchanged+1;continue;
   end if;
   v_steps:='[]'::jsonb;v_target_steps:='[]'::jsonb;v_segments:='[]'::jsonb;
-  v_warm:=case when v_duration>=75 then 15 else when v_duration>=40 then 10 else 5 end end;
+  v_warm:=case when v_duration>=75 then 15 when v_duration>=40 then 10 else 5 end;
   v_cool:=case when v_duration>=75 then 10 else 5 end;
   if v_sport='bike' then
     v_variant:=v_seen_bike%2;v_seen_bike:=v_seen_bike+1;
