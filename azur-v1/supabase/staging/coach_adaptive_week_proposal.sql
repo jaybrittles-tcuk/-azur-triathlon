@@ -91,9 +91,17 @@ begin
 
  v_mode:=case when v_basis->>'status'='recovery_review'
    then 'recovery_reduction' else 'easy_continuation' end;
+ if exists(select 1 from public.coach_adaptive_week_decision d
+   where d.athlete_id=p_athlete_id and d.decision='approved'
+     and d.proposal_snapshot->>'source_week_start'=v_start::text)
+ then
+   v_block:='An adaptive future week has already been published from this source. Review completed training before generating another.';
+ end if;
  v_limit:=(v_basis->>'suggested_max_weekly_hours')::numeric;
  if v_target is null then
   v_block:='No empty, unlocked training week available within the four-week planning horizon';
+ elsif v_block<>'' then
+  null;
  elsif v_onboarding.race_date is not null and
    v_onboarding.race_date between v_target-7 and v_target+14 then
   v_block:='Race or taper proximity requires a bespoke coach-managed plan';
