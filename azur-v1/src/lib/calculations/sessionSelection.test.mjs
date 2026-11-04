@@ -23,3 +23,11 @@ test('selection is stable across equal candidates',()=>{
  const r=selectCoachSession([entry('z'),entry('a')],base);
  assert.equal(r.session.id,'a');
 });
+
+test('training history constrains selected level',()=>{
+ const pool=[entry('easy',{level:1}),entry('advanced',{level:3})];
+ const beginner=selectCoachSession(pool,{...base,maxLevel:3,recentWeeklyHours:2,benchmarksVerified:false});
+ const experienced=selectCoachSession(pool,{...base,maxLevel:3,recentWeeklyHours:12,benchmarksVerified:true});
+ assert.equal(beginner.session.id,'easy');
+ assert.equal(experienced.session.id,'advanced');
+});
