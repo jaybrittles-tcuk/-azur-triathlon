@@ -28,6 +28,7 @@ import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import FoundationSwimPreference from './FoundationSwimPreference';
+import FoundationWorkoutVariety from './FoundationWorkoutVariety';
 import FoundationReassessment from './FoundationReassessment';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
@@ -6838,6 +6839,10 @@ color:
     return (
       <div className="calendar-layout athlete-agenda">
         <div>
+          <FoundationWorkoutVariety onUpdated={async()=>{
+            const {data:{user}}=await supabase.auth.getUser();
+            if(user)await loadPlannedSessions(user.id);
+          }}/>
           <FoundationReassessment onApplied={async()=>{
             const {data:{user}}=await supabase.auth.getUser();
             if(user)await loadPlannedSessions(user.id);
