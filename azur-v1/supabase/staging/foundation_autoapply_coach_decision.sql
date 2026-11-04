@@ -202,3 +202,38 @@ grant execute on function public.decide_foundation_reassessment(uuid,text,text)
 
 -- Legacy athlete routine-change apply remains intact. The athlete UI no longer
 -- offers an extra apply action for coach-reviewed proposals.
+
+-- Athlete sees the most recent coach decision and whether it actually changed
+-- the active calendar. A declined proposal never counts as applied.
+create or replace function public.latest_foundation_coach_decision()
+returns jsonb language plpgsql security invoker
+set search_path=public,pg_temp
+as $latest$
+declare v_user uuid:=auth.uid();v_athlete uuid;v_review record;
+ v_applied int;
+begin
+ if v_user is null then raise exception 'Athlete authentication required';end if;
+ select id into v_athlete from public.athlete_profile where user_id=v_user;
+ if v_athlete is null then return jsonb_build_object('status','none');end if;
+ select r.id as request_id,d.decision,d.review_note,d.decided_at
+ into v_review
+ from public.foundation_reassessment_request r
+ join public.foundation_reassessment_decision d on d.request_id=r.id
+ where r.athlete_id=v_athlete
+ order by d.decided_at desc limit 1;
+ if not found then return jsonb_build_object('status','none');end if;
+ select count(*) into v_applied from public.planned_session p
+ where p.athlete_id=v_athlete
+ and p.is_active_version
+ and p.targets->>'approval_request_id'=v_review.request_id::text;
+ return jsonb_build_object(
+   'status',case when v_review.decision='rejected' then 'declined'
+                 when v_applied>0 then 'approved_and_applied'
+                 else 'approved_pending_recheck' end,
+   'coach_note',v_review.review_note,'decided_at',v_review.decided_at,
+   'active_sessions',v_applied
+ );
+end;
+$latest$;
+revoke all on function public.latest_foundation_coach_decision() from public,anon;
+grant execute on function public.latest_foundation_coach_decision() to authenticated;
