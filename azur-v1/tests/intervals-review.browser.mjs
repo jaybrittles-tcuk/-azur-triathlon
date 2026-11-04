@@ -19,6 +19,7 @@ let profileFtp=250;
 let demoSessions=[];
 let missingProfile=false;
 let reviewMode=false,reviewDecision='none';
+let submitFirstUnassigned=true;
 let onboardingStep=3,onboardingSavedFields={};
 const commands=[];
 const errors=[];
@@ -118,8 +119,13 @@ const mockSupabase=async (route,coach=false)=>{
   data={status:reviewDecision,request_id:'test-review-request',coach_note:reviewDecision==='approved'?'I checked recent training evidence and readiness':null};
  } else if(url.pathname.endsWith('/rpc/submit_foundation_coach_review')) {
   assert.equal(req.postDataJSON().p_expected_preview.status,'coach_review_required');
-  reviewDecision='pending';
-  data={status:'submitted',request_id:'test-review-request'};
+  if(submitFirstUnassigned){
+    submitFirstUnassigned=false;
+    data={status:'coach_assignment_required',reason:'Connect to an AZUR coach before requesting a material training increase'};
+  }else{
+    reviewDecision='pending';
+    data={status:'submitted',request_id:'test-review-request'};
+  }
  } else if(url.pathname.endsWith('/rpc/apply_foundation_reassessment')) {
   const body=req.postDataJSON();
   assert.equal(body.p_confirm,true);
@@ -266,7 +272,10 @@ try {
  await page.getByRole('button',{name:'Reassess my programme'}).click();
  await page.getByRole('button',{name:'Preview next two weeks'}).click();
  await page.getByRole('button',{name:'Request review from my coach'}).click();
- await page.getByText('Review request sent to your assigned AZUR coach.',{exact:false}).waitFor();
+ await page.getByRole('alert').getByText('Request NOT sent.',{exact:false}).waitFor();
+ assert.equal(reviewDecision,'none','Unassigned athlete cannot create a coach review request');
+ await page.getByRole('button',{name:'Request review from my coach'}).click();
+ await page.getByRole('alert').getByText('Request saved and sent to your assigned AZUR coach.',{exact:false}).waitFor();
  assert.equal(reviewDecision,'pending','Coach request should remain pending after athlete action');
  reviewDecision='approved'; // synthetic assigned coach decision was recorded separately
  await page.getByRole('button',{name:'Preview next two weeks'}).click();
