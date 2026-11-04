@@ -11,10 +11,14 @@ type Advice={
  suggested_max_weekly_hours:number|null;training_concern:string;
  workout_selection_guidance:string;publication_status:string;
 };
-type ProposedSession={date:string;sport:string;title:string;duration_min:number;selection_reason:string};
+type ProposedSession={date:string;sport:string;title:string;duration_min:number;
+ selection_reason:string;personalized?:boolean;workout_key?:string|null;
+ prescription?:{steps?:Array<{durationMin:number;target:string;powerMinWatts?:number|null;powerMaxWatts?:number|null}>;
+ poolSegments?:Array<{repeats:number;distanceMeters:number;restSeconds:number;target:string;
+ paceMinSecondsPer100m?:number|null;paceMaxSecondsPer100m?:number|null}>};};
 type ProposedWeek={status:'ready_for_coach'|'blocked';reason?:string|null;week_start?:string|null;
  source_week_start:string;source_minutes:number;proposed_minutes:number;adaptation:string;
- confidence:string;evidence_status:string;sessions:ProposedSession[];coach_approval_required:boolean;
+ confidence:string;evidence_status:string;sessions:ProposedSession[];coach_approval_required:boolean;personalized_sessions?:number;planner_version?:string;
  race_phase:string;race_date:string|null;race_distance:string;weeks_to_race:number|null;
  race_reason:string;development_sport:string|null;sport_priority_reason:string;race_guidance_only:boolean};
 type RaceReadiness={
@@ -81,7 +85,7 @@ export default function CoachNextWeekIntelligence(){
  async function generateWeek(){
    if(!selected||busy||decisionBusy)return;
    setBusy(true);setProposal(null);setMessage('');setResultMessage('');
-   const response=await supabase.rpc('coach_adaptive_week_proposal',{p_athlete_id:selected});
+   const response=await supabase.rpc('coach_personalized_week_preview',{p_athlete_id:selected});
    setBusy(false);
    if(response.error){setMessage('Unable to create safe proposal: '+response.error.message);return;}
    setProposal(response.data as ProposedWeek);
@@ -92,7 +96,7 @@ export default function CoachNextWeekIntelligence(){
      setResultMessage('A coaching rationale of at least 15 characters is required.');return;
    }
    setDecisionBusy(true);setResultMessage('');
-   const response=await supabase.rpc('coach_decide_adaptive_week',{
+   const response=await supabase.rpc('coach_decide_personalized_week',{
      p_athlete_id:selected,p_preview:proposal,p_decision:decision,p_rationale:rationale.trim()
    });
    setDecisionBusy(false);
@@ -102,7 +106,7 @@ export default function CoachNextWeekIntelligence(){
    if(response.data?.status==='approved_and_published'){
      setProposal(null);setRationale('');
      await refresh();
-     setResultMessage(response.data.sessions+' easy sessions published to the athlete calendar for '+response.data.week_start+'. No athlete confirmation needed.');
+     setResultMessage(response.data.sessions+' sessions published automatically to the athlete calendar for '+response.data.week_start+', including '+response.data.personalized_sessions+' with verified individual targets. No athlete confirmation needed.');
    }else if(response.data?.status==='declined'){
      setResultMessage('Proposal declined. Athlete calendar unchanged.');
      setProposal(null);setRationale('');
@@ -254,12 +258,10 @@ export default function CoachNextWeekIntelligence(){
      <div style={{borderTop:'1px solid #c9deec',marginTop:14,paddingTop:13}}>
        <strong>Generate an adaptive week</strong>
        <p style={{fontSize:12,lineHeight:1.5,margin:'7px 0'}}>
-         Creates a complete future-week proposal from eligible, previously approved
-         easy workouts. It never changes existing sessions. Insufficient history,
-         a race/taper or a safety concern blocks publication.
+         Builds a complete future-week proposal using approved easy workouts. Where a current coach-verified FTP or CSS exists, compatible exact-duration sessions gain personal targets without increasing weekly time. Missing history, race/taper, or safety concerns block publication.
        </p>
        <button type="button" onClick={()=>void generateWeek()} disabled={busy||decisionBusy}>
-         {busy?'Generating…':'Preview next available week'}
+         {busy?'Generating…':'Preview personalised next week'}
        </button>
        {proposal&&<div style={{marginTop:12,padding:12,borderRadius:12,background:'#fff'}}>
          <strong style={{fontSize:14}}>
@@ -269,7 +271,7 @@ export default function CoachNextWeekIntelligence(){
          <p style={{fontSize:12,margin:'7px 0'}}>
            {proposal.status==='blocked'?proposal.reason:
              proposal.adaptation.replaceAll('_',' ')+' · '+proposal.proposed_minutes+' minutes · '+
-             proposal.sessions.length+' prescribed workouts'}
+             proposal.sessions.length+' prescribed workouts · '+(proposal.personalized_sessions||0)+' individually targeted'}
          </p>
          <div style={{margin:'10px 0',padding:12,border:'1px solid #d8e4eb',borderRadius:10,background:'#f5f9fc'}}>
            <strong style={{fontSize:13}}>Race-aware coaching context</strong>
@@ -293,11 +295,28 @@ export default function CoachNextWeekIntelligence(){
                <strong style={{display:'block',fontSize:13,margin:'5px 0'}}>
                  {session.title}</strong>
                <span style={{fontSize:13}}>{session.duration_min} minutes</span>
+               <span style={{fontSize:11,display:'block',marginTop:5,
+                 color:session.personalized?'#19764b':'#55748a',fontWeight:650}}>
+                 {session.personalized?'Verified individual targets':'Safe RPE-based prescription'}
+               </span>
+               {session.personalized&&<details style={{fontSize:11,marginTop:7}}>
+                 <summary style={{cursor:'pointer'}}>View intervals and recovery</summary>
+                 {session.prescription?.steps?.map((step,i)=><div key={i} style={{padding:'5px 0'}}>
+                   {step.durationMin}min · {step.target}
+                   {step.powerMaxWatts!=null?' · '+(step.powerMinWatts??'up to')+
+                     '–'+step.powerMaxWatts+' W':''}
+                 </div>)}
+                 {session.prescription?.poolSegments?.map((seg,i)=><div key={i} style={{padding:'5px 0'}}>
+                   {seg.repeats}×{seg.distanceMeters}m · {seg.target}
+                   {' · '+seg.restSeconds+'s rest'}
+                   {seg.paceMinSecondsPer100m!=null?
+                     ' · '+seg.paceMinSecondsPer100m+'–'+seg.paceMaxSecondsPer100m+'s/100m':''}
+                 </div>)}
+               </details>}
              </div>)}
            </div>
            <p style={{fontSize:12,lineHeight:1.45,marginTop:12}}>
-             This proposal uses only existing easy, structured RPE workouts.
-             Approving publishes this exact future week automatically.
+             This proposal preserves the existing approved weekly duration. It uses verified individual aerobic targets only for exact-compatible templates and RPE-based workouts otherwise. Approving publishes the exact future week automatically.
              Declining leaves the calendar unchanged.
            </p>
            <label style={{display:'block',fontSize:13}}>
