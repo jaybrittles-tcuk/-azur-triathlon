@@ -45,11 +45,11 @@ export default function FoundationSwimPreference({onUpdated}:{onUpdated:()=>Prom
    setSaving(false);
  }
  return <section aria-label="Swimming preference for starter programme" style={{
-    border:'1px solid #9cc9e8',borderRadius:16,padding:16,
-    background:'#f0f8ff',marginBottom:16,color:'#17354b'
+    border:'1px solid #9cc9e8',borderRadius:14,padding:12,
+    background:'#f0f8ff',marginBottom:10,color:'#17354b'
    }}>
-   <strong style={{fontSize:16}}>Swimming in your starter programme</strong>
-   <p style={{fontSize:13,lineHeight:1.5,margin:'8px 0'}}>
+   <strong style={{fontSize:15}}>Swimming in your starter programme</strong>
+   <p style={{fontSize:12,lineHeight:1.4,margin:'4px 0 8px'}}>
      {confirmed?'Swimming ability confirmed. You can change this if your circumstances change.':
        'No swim sessions are planned until you confirm you can swim 200m comfortably and safely.'}
    </p>
