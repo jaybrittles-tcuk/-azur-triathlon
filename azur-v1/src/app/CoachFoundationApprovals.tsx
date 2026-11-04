@@ -31,7 +31,7 @@ export default function CoachFoundationApprovals(){
  useEffect(()=>{
   let active=true;
   (async()=>{
-   setLoading(true);setMessage('');
+   setLoading(true);
    const {data:{user}}=await supabase.auth.getUser();
    if(!user||user.app_metadata?.role!=='coach'){
     if(active){setMessage('Verified AZUR coach account required');setLoading(false);}return;
@@ -84,7 +84,7 @@ export default function CoachFoundationApprovals(){
   else if(decision==='rejected'&&result.data?.status==='declined')
     setMessage('Proposal declined. Existing athlete calendar preserved and your rationale recorded.');
   else setMessage('Could not verify the coaching decision. Refresh before trying again.');
-  setBusy('');setReload(x=>x+1);
+  setBusy('');if(!result.error&&((decision==='approved'&&result.data?.status==='approved_and_applied')||(decision==='rejected'&&result.data?.status==='declined')))setReload(x=>x+1);
  }
  const pending=rows.filter(x=>!x.decision);
  return <section aria-label="Foundation training approval requests" style={{
