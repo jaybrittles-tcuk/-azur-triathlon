@@ -4,6 +4,7 @@ import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
+import WorkoutRpePicker from './WorkoutRpePicker';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
 import CoachAttentionInbox from './CoachAttentionInbox';
@@ -7781,21 +7782,7 @@ const sessionVerdict =
 
   <div className="session-block-item">
     <label>
-      <span>Session RPE</span>
-
-      <input
-        type="number"
-        min="1"
-        max="10"
-        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe}
-        onChange={(event) =>
-          setSessionFeedback({
-            ...sessionFeedback,
-            rpe: event.target.value,
-          })
-        }
-        placeholder="1–10"
-      />
+      <WorkoutRpePicker value={sessionFeedback.rpe} disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} onChange={(rpe)=>setSessionFeedback({...sessionFeedback,rpe})}/>
     </label>
   </div>
 
