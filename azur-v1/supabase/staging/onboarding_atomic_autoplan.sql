@@ -130,6 +130,9 @@ begin
  end if;
  if v_profile is null then raise exception 'Athlete profile could not be created';end if;
  v_result:=public.generate_onboarding_foundation();
+ -- Enrich only compatible unlocked, as-yet-uncompleted foundation workouts.
+ -- Still RPE-led and time-neutral; any failure rolls back onboarding.
+ perform public.athlete_enrich_foundation_sessions();
  if v_result->>'status'='review_required' then
    return jsonb_build_object('status','review_required',
     'reason',v_result->>'reason','setup_saved',true,
