@@ -10,6 +10,12 @@ type Request={
  inputs:{recent_weekly_hours:number|null;training_consistency:string;training_background:string;weekly_hours:number};
 };
 type Decision={request_id:string;decision:string;review_note:string;decided_at:string};
+type TrainingEvidence={
+ window_days:number;validated_device_activities:number;manual_activities:number;
+ pending_or_rejected_activities:number;active_days:number;weeks_with_activity:number;
+ validated_device_hours_28d:number;manual_reported_hours_28d:number;
+ verified_weekly_average_hours:number;history_adequacy:string;note:string;
+};
 type Display=Request&{athleteName:string;decision?:Decision};
 
 export default function CoachFoundationApprovals(){
@@ -19,6 +25,8 @@ export default function CoachFoundationApprovals(){
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState('');
  const [notes,setNotes]=useState<Record<string,string>>({});
+ const [evidence,setEvidence]=useState<Record<string,TrainingEvidence>>({});
+ const [evidenceBusy,setEvidenceBusy]=useState('');
  const [reload,setReload]=useState(0);
  useEffect(()=>{
   let active=true;
@@ -54,6 +62,13 @@ export default function CoachFoundationApprovals(){
   })();
   return ()=>{active=false};
  },[reload]);
+ async function loadEvidence(requestId:string){
+  setEvidenceBusy(requestId);setMessage('');
+  const response=await supabase.rpc('coach_foundation_training_evidence',{p_request_id:requestId});
+  if(response.error)setMessage('Training evidence not available: '+response.error.message);
+  else if(response.data)setEvidence(prev=>({...prev,[requestId]:response.data as TrainingEvidence}));
+  setEvidenceBusy('');
+ }
  async function decide(row:Display,decision:'approved'|'rejected'){
   const note=(notes[row.id]||'').trim();
   if(note.length<15){setMessage('Enter a coach review note of at least 15 characters.');return;}
@@ -100,6 +115,29 @@ export default function CoachFoundationApprovals(){
       (two-week sum {row.preview.total_minutes}m).
       Reported recently completed training: {row.inputs.recent_weekly_hours??'unknown'}h/week.
       Maximum availability: {row.inputs.weekly_hours}h/week.
+    </div>
+    <div style={{margin:'11px 0',padding:12,borderRadius:10,background:'#edf4f8',fontSize:13}}>
+      <strong>Recent training evidence</strong>
+      {!evidence[row.id]?<div style={{marginTop:7}}>
+        <button type="button" disabled={!!evidenceBusy} onClick={()=>void loadEvidence(row.id)}>
+          {evidenceBusy===row.id?'Checking…':'Check validated activity history'}
+        </button>
+      </div>:<>
+        <p style={{margin:'7px 0'}}>Validated device training (last 28 days): <strong>{evidence[row.id].validated_device_hours_28d}h</strong>,
+         or {evidence[row.id].verified_weekly_average_hours}h/week averaged over four weeks.</p>
+        <p style={{margin:'7px 0'}}>
+         {evidence[row.id].validated_device_activities} validated device activities;
+         {' '}{evidence[row.id].manual_activities} manually entered;
+         {' '}{evidence[row.id].pending_or_rejected_activities} pending/rejected;
+         {' '}{evidence[row.id].weeks_with_activity} weeks with activity.
+        </p>
+        {evidence[row.id].history_adequacy==='insufficient_validated_history'&&
+          <p style={{color:'#8a531c',fontWeight:650}}>
+            Insufficient validated history to corroborate the athlete's reported training volume.
+            Review additional evidence before increasing the plan.
+          </p>}
+        <small>Manual and pending/rejected sessions are not counted as verified device training.</small>
+      </>}
     </div>
     <p style={{fontSize:12,color:'#77502d',margin:'8px 0'}}>
       History and training consistency are athlete-reported, not verified device evidence.
