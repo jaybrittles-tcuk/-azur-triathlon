@@ -119,7 +119,9 @@ export default function AthleteOnboardingDraft(){
     // calendar cannot be confirmed.
     setSaving(false);
     setMessage('Your '+result.sessions+' training sessions are ready. Opening your calendar…');
-    window.location.assign('/?start=calendar');
+    const firstSessionDate=String(result.calendar?.[0]?.date||result.first_date||'');
+    const focusDate=/^\d{4}-\d{2}-\d{2}$/.test(firstSessionDate)?firstSessionDate:'';
+    window.location.assign('/?start=calendar'+(focusDate?'&focus='+encodeURIComponent(focusDate):''));
     return;
   }
   const {error}=await supabase.from('athlete_onboarding').upsert({
