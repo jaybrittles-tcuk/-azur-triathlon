@@ -14,6 +14,7 @@ type Display=Request&{athleteName:string;decision?:Decision};
 
 export default function CoachFoundationApprovals(){
  const [rows,setRows]=useState<Display[]>([]);
+ const [assignedCount,setAssignedCount]=useState(0);
  const [loading,setLoading]=useState(true);
  const [message,setMessage]=useState('');
  const [busy,setBusy]=useState('');
@@ -31,6 +32,7 @@ export default function CoachFoundationApprovals(){
       .select('athlete_id').eq('coach_user_id',user.id);
    if(assignment.error){if(active){setMessage(assignment.error.message);setLoading(false);}return;}
    const ids=(assignment.data??[]).map(x=>x.athlete_id);
+   if(active)setAssignedCount(ids.length);
    if(!ids.length){if(active){setRows([]);setLoading(false);}return;}
    const [requests,profiles]=await Promise.all([
     supabase.from('foundation_reassessment_request')
@@ -78,7 +80,12 @@ export default function CoachFoundationApprovals(){
    Review completed training, readiness and injury history before approving.
   </p>
   {loading?<p>Loading assigned athlete requests…</p>:
-   !pending.length?<p>No pending athlete baseline approvals.</p>:
+   !pending.length?<div style={{fontSize:13,lineHeight:1.55}}>
+     <p style={{fontWeight:650}}>{assignedCount===0?'No athletes are assigned to this coach account.':'No submitted, pending baseline approvals from your '+assignedCount+' assigned athlete(s).'}</p>
+     <p>Only requests actually submitted by an athlete linked to this coach appear here. A generated preview alone does not create a request.</p>
+     <p>To connect a test athlete, open Invitations in Coach Mode, invite the athlete’s signup email, and have them accept it in their own account under More → Coach Invitations. Then they can resubmit the blocked preview.</p>
+     <button type="button" onClick={()=>setReload(x=>x+1)} disabled={!!busy}>Refresh approval queue</button>
+   </div>:
    pending.map(row=><article key={row.id} style={{
     border:'1px solid #c5d7e5',background:'#fff',borderRadius:12,padding:14,marginTop:12}}>
     <strong>{row.athleteName}</strong>
