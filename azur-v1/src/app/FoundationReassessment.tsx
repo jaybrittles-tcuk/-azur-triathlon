@@ -27,6 +27,8 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
  const [loading,setLoading]=useState(false);
  const [reviewStatus,setReviewStatus]=useState<'none'|'pending'|'approved'|'rejected'>('none');
  const [reviewNote,setReviewNote]=useState('');
+ const [reviewSubmissionMessage,setReviewSubmissionMessage]=useState('');
+ const [reviewNeedsAssignment,setReviewNeedsAssignment]=useState(false);
  const [message,setMessage]=useState('');
  useEffect(()=>{
   let cancelled=false;
@@ -52,7 +54,7 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
   })();
   return ()=>{cancelled=true};
  },[]);
- function edit(patch:Partial<Inputs>){setInputs(i=>({...i,...patch}));setPreview(null);setPreviewInputs(null);setReviewStatus('none');setMessage('');}
+ function edit(patch:Partial<Inputs>){setInputs(i=>({...i,...patch}));setPreview(null);setPreviewInputs(null);setReviewStatus('none');setReviewSubmissionMessage('');setReviewNeedsAssignment(false);setMessage('');}
  async function loadReviewState(proposed:Inputs,data:PlanPreview){
   if(data.status!=='coach_review_required')return;
   const response=await supabase.rpc('foundation_coach_review_state',{p_inputs:proposed,p_expected_preview:data});
@@ -62,15 +64,16 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
  }
  async function requestCoachReview(){
   if(!preview||!previewInputs||loading)return;
-  setLoading(true);setMessage('');
+  setLoading(true);setMessage('');setReviewSubmissionMessage('');setReviewNeedsAssignment(false);
   const response=await supabase.rpc('submit_foundation_coach_review',{p_inputs:previewInputs,p_expected_preview:preview});
   setLoading(false);
-  if(response.error){setMessage('Could not request coach approval: '+response.error.message);return;}
+  if(response.error){setReviewSubmissionMessage('Request not sent: '+response.error.message);return;}
   if(response.data?.status==='coach_assignment_required'){
-    setMessage(response.data.reason||'An assigned coach is required before this increase can be reviewed.');return;
+    setReviewNeedsAssignment(true);
+    setReviewSubmissionMessage('Request NOT sent. This athlete account is not connected to an AZUR coach. Go to More → Coach Invitations and accept an invitation from your coach, then retry here.');return;
   }
-  if(response.data?.status!=='submitted'){setMessage(response.data?.reason||'Coach review not available.');return;}
-  setReviewStatus('pending');setMessage('Review request sent to your assigned AZUR coach. Your current training remains unchanged.');
+  if(response.data?.status!=='submitted'){setReviewSubmissionMessage('Request not sent: '+(response.data?.reason||'Coach review not available.'));return;}
+  setReviewStatus('pending');setReviewSubmissionMessage('Request saved and sent to your assigned AZUR coach. Your current training remains unchanged.');
  }
  async function makePreview(){
   const recent=recentInput.trim()===''?null:Number(recentInput);
@@ -84,7 +87,7 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
    setMessage('Check available days and training hours (0–25 completed hours; 2–25 available).');return;
   }
   const proposed:Inputs={...inputs,recent_weekly_hours:recent};
-  setLoading(true);setMessage('');setPreview(null);setReviewStatus('none');
+  setLoading(true);setMessage('');setPreview(null);setReviewStatus('none');setReviewSubmissionMessage('');setReviewNeedsAssignment(false);
   const {data,error}=await supabase.rpc('preview_foundation_reassessment',{p_inputs:proposed});
   setLoading(false);
   if(error){setMessage('Unable to preview: '+error.message);return;}
@@ -239,6 +242,15 @@ export default function FoundationReassessment({onApplied}:{onApplied:()=>Promis
          <button type="button" disabled={loading} onClick={()=>void requestCoachReview()}>
            {loading?'Submitting…':'Request review from my coach'}
          </button>}
+       {reviewSubmissionMessage&&<div role="alert" style={{
+         margin:'12px 0',padding:12,border:'1px solid #d3a259',borderRadius:10,
+         background:'#fff7e7',color:'#5b3b15',fontSize:13,fontWeight:650,lineHeight:1.5
+       }}>
+         {reviewSubmissionMessage}
+         {reviewNeedsAssignment&&<div style={{marginTop:7,fontWeight:500}}>
+           The programme stays in preview; this account has no coach approval request in the queue.
+         </div>}
+       </div>}
        {reviewStatus==='pending'&&<p role="status" style={{fontSize:13,fontWeight:600}}>
          Waiting for your assigned coach to review this exact programme.
          Preview again to refresh the decision.
