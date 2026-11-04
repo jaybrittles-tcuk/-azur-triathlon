@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
+import CalendarIntensityProfile from './CalendarIntensityProfile';
+import './premiumWorkoutV103.css';
 type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null};
 export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource}:Props){
  const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('overview');
