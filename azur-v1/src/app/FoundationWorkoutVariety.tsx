@@ -7,6 +7,15 @@ export default function FoundationWorkoutVariety({onUpdated}:{onUpdated?:()=>Pro
  async function refresh(){
    if(busy)return;
    setBusy(true);setMessage('');
+   const balanced=await supabase.rpc('athlete_balance_foundation_bikes');
+   if(balanced.error){
+     setMessage('Unable to balance the starter week: '+balanced.error.message);
+     setBusy(false);return;
+   }
+   if(balanced.data?.status==='review_required'){
+     setMessage(balanced.data.reason||'Safety review needed before adjusting sessions.');
+     setBusy(false);return;
+   }
    const {data,error}=await supabase.rpc('athlete_enrich_foundation_sessions');
    if(error){
      setMessage('Unable to refresh workouts: '+error.message);
@@ -19,9 +28,12 @@ export default function FoundationWorkoutVariety({onUpdated}:{onUpdated?:()=>Pro
    try{
      await onUpdated?.();
      const count=Number(data?.sessions_enriched||0);
-     setMessage(count>0?
-       count+' upcoming easy sessions now have varied intervals and coaching explanations. Dates, duration and intensity remain unchanged.':
-       'Your upcoming eligible starter workouts already have their latest structure, or no changes are appropriate.');
+     const shortened=Number(balanced.data?.bike_sessions_balanced||0);
+     const restored=Number(balanced.data?.minutes_returned_to_recovery||0);
+     setMessage(shortened||count?
+       (shortened?shortened+' second bike session(s) shortened, freeing '+restored+' minutes for recovery. ':'')+
+       count+' upcoming easy workout(s) refreshed with structured intervals and coaching purpose. No session became harder or longer.':
+       'Your upcoming eligible foundation workouts are already balanced and structured, or have been protected from changes.');
    }catch(error){
      setMessage('Workout details were saved, but the calendar refresh failed. Reopen Calendar to see the latest version.');
    }finally{setBusy(false);}
@@ -34,8 +46,9 @@ export default function FoundationWorkoutVariety({onUpdated}:{onUpdated?:()=>Pro
    <p style={{fontSize:12,lineHeight:1.5,margin:'9px 0'}}>
      Your starter sessions should explain what you're developing, with clear work,
      recovery and coaching cues. Refreshing updates only future, unlocked,
-     uncompleted easy foundation workouts. Your training days, duration and
-     intensity stay unchanged.
+     uncompleted easy foundation workouts. When two long rides appear in one week,
+     AZUR can shorten the second to a technique session. Dates, the longer ride
+     and easy intensity remain unchanged.
    </p>
    <p style={{fontSize:12,lineHeight:1.5,margin:'8px 0'}}>
      Aerobic bike intervals, gentle cadence work, swim drills and repeat sets,
@@ -45,7 +58,7 @@ export default function FoundationWorkoutVariety({onUpdated}:{onUpdated?:()=>Pro
    <button type="button" onClick={()=>void refresh()} disabled={busy}
      style={{padding:'10px 14px',borderRadius:10,border:'1px solid #2d85bf',
        background:'#126394',color:'#fff',fontWeight:650,cursor:'pointer'}}>
-     {busy?'Improving workouts…':'Improve remaining starter workouts'}
+     {busy?'Improving workouts…':'Balance and improve remaining workouts'}
    </button>
    {message&&<p role="status" style={{fontSize:12,fontWeight:600,margin:'9px 0 0'}}>
      {message}
