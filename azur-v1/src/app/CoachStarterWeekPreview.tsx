@@ -221,19 +221,18 @@ export default function CoachStarterWeekPreview(){
       <p style={{margin:'5px 0'}}>Entered benchmarks: FTP {athleteEvidence.ftp??'unknown'} W · CSS {athleteEvidence.css??'unknown'} sec/100m · Run threshold {athleteEvidence.runThreshold??'unknown'} sec/km</p>
       <p style={{margin:'5px 0',color:'#ffda9c'}}>These values are contextual only. No threshold-based zones, load increases or automatic publication are authorised by these entries.</p>
     </div>}
-    {existingWeekSessions.slice().sort((a,b)=>a.planned_date.localeCompare(b.planned_date)).map(x=><div key={'why-'+x.id} style={{margin:'8px 0',paddingBottom:8,borderBottom:'1px solid #345c77'}}>
-     <strong style={{fontSize:13}}>{x.planned_date} · {x.sport.toUpperCase()} · {x.duration_min} min</strong>
-     <p style={{margin:'4px 0',fontSize:12,color:'#b9d5e8'}}>{x.sport.toLowerCase()==='bike'?'Aerobic cycling builds sustainable endurance; confirm this duration fits the athlete’s demonstrated riding history and recovery.':x.sport.toLowerCase()==='run'?'Easy running develops consistent aerobic durability; monitor impact tolerance and keep effort controlled.':x.sport.toLowerCase()==='swim'?'Relaxed swimming supports technique and efficient aerobic movement; assess stroke quality before adding intensity.':'Review the purpose, tolerance and recovery demands of this workout.'}</p>
-     {(()=>{const candidate=foundationSessionCandidate(x);return candidate.status==='coach_review_required'?<div style={{marginTop:8,padding:9,borderRadius:8,background:'#163d57'}}>
-      <strong style={{fontSize:12}}>Automatic Foundation structure · coach review required</strong>
+    {existingWeekSessions.slice().sort((a,b)=>a.planned_date.localeCompare(b.planned_date)).map(x=>{const candidate=foundationSessionCandidate(x);return <details key={'why-'+x.id} style={{margin:'8px 0',padding:'11px',border:'1px solid #345c77',borderRadius:10,background:'#163d57'}}>
+     <summary style={{cursor:'pointer',listStyle:'revert',fontSize:13,fontWeight:700,lineHeight:1.5}}>{x.planned_date.slice(5)} · {x.sport.toUpperCase()} · {x.duration_min} min <span style={{fontSize:11,fontWeight:400,color:'#a9c9dc'}}>· View session rationale</span></summary>
+     {candidate.status==='coach_review_required'?<div style={{paddingTop:9}}>
+      <p style={{fontSize:12,color:'#d7e9f3',margin:'0 0 9px'}}>{candidate.why}</p>
       {candidate.blocks.map((block,index)=><p key={index} style={{fontSize:12,margin:'5px 0'}}>{block.name}: {block.minutes} min · {block.effort}</p>)}
-      <p style={{fontSize:12,color:'#b9d5e8'}}>{candidate.why}</p>
-      <p style={{fontSize:12,margin:'5px 0'}}><strong>Race relevance:</strong> {candidate.rationale.raceRelevance}</p>
-      <p style={{fontSize:12,margin:'5px 0'}}><strong>What could change this:</strong> {candidate.rationale.adaptationTrigger}</p>
+      <p style={{fontSize:12,margin:'8px 0 4px'}}><strong>Race relevance:</strong> {candidate.rationale.raceRelevance}</p>
+      <p style={{fontSize:12,margin:'5px 0'}}><strong>Adaptation trigger:</strong> {candidate.rationale.adaptationTrigger}</p>
       <p style={{fontSize:12,color:'#b9d5e8',margin:'5px 0'}}><strong>Evidence:</strong> {candidate.rationale.athleteEvidence}</p>
-      <p style={{fontSize:12,color:'#ffda9c'}}>RPE guidance only. Pool distances, pace/power targets and publication require validated athlete data and coach clearance.</p>
-     </div>:<p style={{fontSize:12,color:'#ffda9c'}}>{candidate.reason}</p>})()}
-    </div>)}
+      <p style={{fontSize:12,color:'#ffda9c',margin:'8px 0 0'}}>Unapproved RPE-based suggestion. No calendar changes.</p>
+     </div>:<p style={{fontSize:12,color:'#ffda9c'}}>{candidate.reason}</p>}
+    </details>})}
+
    </div>
    <p style={{fontSize:12,color:'#b9d5e8'}}>Target approval does not approve workout prescriptions or authorise publication. Reconcile durations and training safety in the coach planning workflow.</p>
   </section>}
