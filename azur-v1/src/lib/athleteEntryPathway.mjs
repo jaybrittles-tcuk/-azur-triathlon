@@ -56,7 +56,10 @@ export function entrySessionDistribution({pathway,targetMinutes,trainingDays,wor
  if(chosen.length<3)warnings.push('Too few available training days for a balanced triathlon plan');
  if(isContinuing&&targetMinutes>=600&&chosen.length<5)
   warnings.push('High-volume continuation needs five or more available days; coach must review double-session feasibility');
- const base=isContinuing?[
+ const compactContinuation=isContinuing&&targetMinutes<600;
+ const base=compactContinuation?[
+  [['swim',45]],[['bike',60]],[['run',50]],[['swim',45]],[['bike',100]],[['run',65]]
+ ]:isContinuing?[
   [['swim',60],['bike',90]],
   [['run',60],['swim',45]],
   [['bike',90],['run',45]],
@@ -73,6 +76,18 @@ export function entrySessionDistribution({pathway,targetMinutes,trainingDays,wor
    sport,minutes:Math.max(20,Math.round(minutes*factor/5)*5)
   }))
  }));
+ // Preserve the reviewed weekly target exactly when the available sessions can
+ // absorb five-minute rounding changes without breaching minimum durations.
+ const flatDesired=desired.flatMap(day=>day.sessions);
+ let difference=targetMinutes-flatDesired.reduce((sum,slot)=>sum+slot.minutes,0);
+ for(const slot of [...flatDesired].sort((a,b)=>b.minutes-a.minutes)){
+  if(difference===0)break;
+  const adjustment=difference>0?Math.min(difference,15):Math.max(difference,20-slot.minutes);
+  if(adjustment===0)continue;
+  slot.minutes+=adjustment;
+  difference-=adjustment;
+ }
+ if(difference!==0)warnings.push('Exact target cannot be safely distributed; coach review required');
  const slots=desired.flatMap(day=>day.sessions.map(entry=>({
   day:day.day,sport:entry.sport,minutes:entry.minutes,
   approvedMatches:workouts.filter(w=>safeRpeWorkout(w)&&w.sport===entry.sport&&
