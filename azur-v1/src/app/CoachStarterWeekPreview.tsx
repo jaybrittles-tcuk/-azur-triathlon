@@ -105,9 +105,15 @@ export default function CoachStarterWeekPreview(){
    const info=setup.data,target=targets.data,approval=approvals.data;
    if(!info||info.onboarding_step!==3||info.current_training_concern!=='none')
     throw new Error('Onboarding or training safety check is incomplete');
-   if(!target||target.locked||target.phase!=='base'||!approval||
-      approval.coach_user_id!==user.id||Number(approval.target_hours)!==Number(target.target_hours))
-    throw new Error('A coach-audited baseline week target is required first');
+   if(!target)throw new Error('No weekly target exists for this date. Establish a coach-reviewed baseline first.');
+   if(target.locked)throw new Error('This week is locked. Review the existing plan before generating another draft.');
+   if(!['base','foundation'].includes(String(target.phase).toLowerCase()))
+    throw new Error('This training phase needs a separate coach review before drafting.');
+   if(!approval)throw new Error('Eight-hour target found, but the separate coach baseline approval is missing. Review and approve the athlete baseline before drafting; do not repeat onboarding.');
+   if(approval.coach_user_id!==user.id||Number(approval.target_hours)!==Number(target.target_hours))
+    throw new Error('The existing baseline approval does not match this coach and weekly target. Reconcile the approval before drafting.');
+   if(String(target.phase).toLowerCase()==='foundation')
+    throw new Error('Foundation week detected. This established-athlete Base draft generator cannot publish Foundation workouts; use the Foundation planning pathway or obtain an explicit coach-approved phase transition.');
    if(active.data?.length||drafts.data?.length)
     throw new Error('A calendar session or existing weekly draft must be reconciled before another is generated');
    const assessment=assessEntryPathway({experience:info.experience,
