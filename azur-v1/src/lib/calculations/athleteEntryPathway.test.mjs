@@ -83,3 +83,18 @@ test('only exact duration matching is labelled ready for athlete session',()=>{
  const x=entrySessionDistribution({pathway:'continuation',targetMinutes:960,trainingDays:[0,1,2,3,4,5,6],workouts:[rpe]});
  assert.ok(x.slots.filter(slot=>slot.sport==='run'&&slot.minutes!==50).every(slot=>slot.approvedMatches.length===0));
 });
+
+test('eight-hour approved continuation produces six sessions and exact target',()=>{
+ const result=entrySessionDistribution({pathway:'continuation',targetMinutes:480,trainingDays:[0,1,2,3,4,5,6],workouts:[]});
+ assert.equal(result.proposedMinutes,480);
+ assert.equal(result.slots.length,6);
+ assert.equal(result.restDays,1);
+ assert.ok(result.slots.every(s=>s.minutes>=20));
+ assert.deepEqual(new Set(result.slots.map(s=>s.sport)),new Set(['swim','bike','run']));
+ assert.equal(result.ready,false);
+});
+test('high-volume continuation retains existing doubles and total',()=>{
+ const result=entrySessionDistribution({pathway:'continuation',targetMinutes:960,trainingDays:[0,1,2,3,4,5,6],workouts:[]});
+ assert.equal(result.proposedMinutes,960);
+ assert.equal(result.slots.length,12);
+});
