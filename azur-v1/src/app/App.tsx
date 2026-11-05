@@ -9356,7 +9356,7 @@ function DataSourcesView() {
   }
   async function refreshRideInbox() {
     const data = await rideRequest('accept-activity');
-    setRideInbox(data.activities ?? []);
+    setRideInbox((data.activities ?? []).filter((ride:any) => ride.status !== 'reviewed'));
   }
   async function refreshLoadReview() {
     const data = await rideRequest('validate-load');
@@ -9382,6 +9382,7 @@ function DataSourcesView() {
         : 'Ride recorded. Training-load validation is still pending.');
       if (intervalsPreview?.acceptanceEnabled) await refreshRideInbox();
       if (intervalsPreview?.loadValidationEnabled) await refreshLoadReview();
+      if (path === 'accept-activity') setIntervalsPreview(previous => previous ? {...previous, activities:previous.activities?.map(activity => String(activity.sourceId) === String(rideInbox.find(ride => ride.id === key)?.source_activity_id) ? {...activity,alreadyImported:true,status:'already_imported'} : activity)} : previous);
     } catch (error) {
       setRideMessage(error instanceof Error ? error.message : 'Ride confirmation failed');
     } finally { setRideAction(null); }
@@ -9483,7 +9484,7 @@ function DataSourcesView() {
                     <p>Confirming records the ride. Training-load validation and planned workout completion remain pending.</p>
                     {rideInbox.filter(ride => !rideLoadReview.some(record => record.source_activity_id === ride.source_activity_id)).map(ride => (
                       <article className="azur-intervals-preview-ride" key={ride.id}>
-                        <strong>{ride.start_time} · {Math.round(ride.duration_sec / 60)} min</strong>
+                        <strong>{new Date(ride.start_time).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · {Math.round(ride.duration_sec / 60)} min</strong>
                         <small>{ride.status === 'possible_duplicate' ? 'Possible duplicate — further review required' : ride.status === 'rejected' ? 'Rejected' : 'Awaiting acceptance or training-load validation'}</small>
                         {['pending_review','reviewed'].includes(ride.status) && <button type="button" className="primary-button" disabled={rideAction !== null} onClick={() => void confirmRideAction(ride.id,'accept-activity',{stageId:ride.id,confirm:true})}>{rideAction === ride.id ? 'Confirming…' : 'Confirm and record ride'}</button>}
                       </article>
