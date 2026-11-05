@@ -141,6 +141,22 @@ export default function CoachStarterWeekPreview(){
   }catch(e){setDraftStatus(e instanceof Error?e.message:'Unable to generate a safe weekly draft')}
   finally{setBusy(false)}
  }
+ async function auditFoundation(){
+  if(!confirmHistory||existingTarget===null||targetAudit?.phase?.toLowerCase()!=='foundation'||targetAudit.approved||targetAudit.locked)return;
+  setBusy(true);setTargetStatus('');
+  try{
+   const {data:{user}}=await supabase.auth.getUser();
+   if(!user||user.app_metadata?.role!=='coach')throw new Error('Verified coach required');
+   const {data,error}=await supabase.rpc('audit_existing_foundation_target',{p_coach_id:user.id,p_athlete_id:selected,p_week_start:week,p_confirmed_history:true});
+   if(error)throw error;
+   if(!data||data.status!=='foundation_target_audited'||Number(data.target_hours)!==existingTarget)throw new Error('Foundation audit not confirmed');
+   const {data:check,error:readError}=await supabase.from('coach_initial_target_approval').select('coach_user_id,target_hours').eq('athlete_id',selected).eq('week_start',week).maybeSingle();
+   if(readError||!check||check.coach_user_id!==user.id||Number(check.target_hours)!==existingTarget)throw new Error('Approval readback failed; reconcile before retry');
+   setTargetAudit({...targetAudit,approved:true});
+   setTargetStatus('Foundation target audited. No training sessions or phases changed.');
+  }catch(e){setTargetStatus(e instanceof Error?e.message:'Foundation audit failed')}
+  finally{setBusy(false)}
+ }
  async function confirmTarget(){
   if(!entry||!confirmHistory||existingTarget!==null||entry.pathway!=='continuation')return;
   setBusy(true);setTargetStatus('');
@@ -198,7 +214,7 @@ export default function CoachStarterWeekPreview(){
    {entry.pathway==='continuation'&&<section style={{padding:12,marginTop:12,border:'1px solid #4e8ab0',borderRadius:12}}>
     <strong style={{fontSize:14}}>Coach-approved weekly target</strong>
     <p style={{fontSize:12,color:'#b5d2e4'}}>Only confirm if you've checked the athlete's recent training and readiness. The athlete's availability is not proof of capacity.</p>
-    {existingTarget!==null?<div role="status" style={{fontSize:13,lineHeight:1.5,color:'#dceef9'}}><p>Existing weekly target: <strong>{existingTarget} h</strong> · Phase: <strong>{targetAudit?.phase??'Unknown'}</strong></p><p style={{color:targetAudit?.approved?'#a9f0bd':'#ffd18a'}}>{targetAudit?.approved?'Separate coach baseline approval recorded.':'Separate coach baseline approval missing. An existing target alone is not a recorded approval.'}</p>{targetAudit?.phase?.toLowerCase()==='foundation'&&<p>Foundation training is active. The Base-only draft workflow needs a reviewed Foundation pathway or explicit phase transition.</p>}</div>:<>
+    {existingTarget!==null?<div role="status" style={{fontSize:13,lineHeight:1.5,color:'#dceef9'}}><p>Existing weekly target: <strong>{existingTarget} h</strong> · Phase: <strong>{targetAudit?.phase??'Unknown'}</strong></p><p style={{color:targetAudit?.approved?'#a9f0bd':'#ffd18a'}}>{targetAudit?.approved?'Separate coach baseline approval recorded.':'Separate coach baseline approval missing. An existing target alone is not a recorded approval.'}</p>{targetAudit?.phase?.toLowerCase()==='foundation'&&<><p>Foundation phase remains unchanged. This review records a coach decision only.</p>{!targetAudit.approved&&!targetAudit.locked&&<><label style={{display:'flex',gap:10,margin:'12px 0'}}><input type="checkbox" checked={confirmHistory} onChange={e=>setConfirmHistory(e.target.checked)}/>I have reviewed actual recent training and readiness for this target.</label><button type="button" disabled={busy||!confirmHistory} onClick={()=>void auditFoundation()}>{busy?'Auditing…':'Audit existing Foundation target'}</button></>}</>}</div>:<>
      <label style={{display:'block',fontSize:13}}>Target hours (maximum {entry.targetMinutes===null?'—':(entry.targetMinutes/60).toFixed(1)} h)
       <input type="number" min={2} max={entry.targetMinutes===null?2:entry.targetMinutes/60} step={0.5} value={targetHours} onChange={e=>setTargetHours(e.target.value)} style={{display:'block',minHeight:44,width:'100%',margin:'6px 0 12px'}}/>
      </label>
