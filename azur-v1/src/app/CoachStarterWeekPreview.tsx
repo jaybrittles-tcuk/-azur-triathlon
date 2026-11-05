@@ -214,6 +214,9 @@ export default function CoachStarterWeekPreview(){
       <strong style={{fontSize:12}}>Automatic Foundation structure · coach review required</strong>
       {candidate.blocks.map((block,index)=><p key={index} style={{fontSize:12,margin:'5px 0'}}>{block.name}: {block.minutes} min · {block.effort}</p>)}
       <p style={{fontSize:12,color:'#b9d5e8'}}>{candidate.why}</p>
+      <p style={{fontSize:12,margin:'5px 0'}}><strong>Race relevance:</strong> {candidate.rationale.raceRelevance}</p>
+      <p style={{fontSize:12,margin:'5px 0'}}><strong>What could change this:</strong> {candidate.rationale.adaptationTrigger}</p>
+      <p style={{fontSize:12,color:'#b9d5e8',margin:'5px 0'}}><strong>Evidence:</strong> {candidate.rationale.athleteEvidence}</p>
       <p style={{fontSize:12,color:'#ffda9c'}}>RPE guidance only. Pool distances, pace/power targets and publication require validated athlete data and coach clearance.</p>
      </div>:<p style={{fontSize:12,color:'#ffda9c'}}>{candidate.reason}</p>})()}
     </div>)}
