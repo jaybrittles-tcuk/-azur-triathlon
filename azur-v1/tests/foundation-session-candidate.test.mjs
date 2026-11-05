@@ -14,3 +14,13 @@ test('Invalid sessions do not receive fabricated prescriptions',()=>{
  assert.equal(foundationSessionCandidate({sport:'run',duration_min:0}).status,'needs_coach_design');
  assert.equal(foundationSessionCandidate({sport:'unknown',duration_min:60}).status,'needs_coach_design');
 });
+
+test('Every candidate explains race relevance, evidence limitations and adaptation triggers',()=>{
+ for(const sport of ['swim','bike','run']){
+  const candidate=foundationSessionCandidate({sport,duration_min:45});
+  assert.equal(candidate.rationale.confidence,'limited');
+  assert.ok(candidate.rationale.raceRelevance.length>15);
+  assert.match(candidate.rationale.athleteEvidence,/not verified/);
+  assert.match(candidate.rationale.adaptationTrigger,/fatigue/);
+ }
+});
