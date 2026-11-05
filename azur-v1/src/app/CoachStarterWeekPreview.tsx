@@ -27,6 +27,7 @@ export default function CoachStarterWeekPreview(){
  const [targetAudit,setTargetAudit]=useState<{phase:string;approved:boolean;locked:boolean}|null>(null);
  const [targetStatus,setTargetStatus]=useState('');
  const [draftStatus,setDraftStatus]=useState('');
+ const [athleteEvidence,setAthleteEvidence]=useState<{recentHours:number|null;concern:string;ftp:number|null;css:number|null;runThreshold:number|null}|null>(null);
  const [existingWeekSessions,setExistingWeekSessions]=useState<{id:string;planned_date:string;sport:string;title:string;duration_min:number;status:string;locked:boolean}[]>([]);
  useEffect(()=>{let active=true;(async()=>{
   try{
@@ -42,9 +43,9 @@ export default function CoachStarterWeekPreview(){
   }catch(e){if(active)setMessage(e instanceof Error?e.message:'Unable to load assigned athletes')}
   finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[]);
- useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setTargetAudit(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('');setDraftStatus('');setExistingWeekSessions([])},[selected,week]);
+ useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setTargetAudit(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('');setDraftStatus('');setExistingWeekSessions([]);setAthleteEvidence(null)},[selected,week]);
  async function preview(){
-  setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setTargetStatus('');setExistingWeekSessions([]);
+  setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setTargetStatus('');setExistingWeekSessions([]);setAthleteEvidence(null);
   try{
    const athlete=athletes.find(a=>a.id===selected);
    if(!athlete?.user_id)throw new Error('Select an athlete with a verified account');
@@ -64,6 +65,13 @@ export default function CoachStarterWeekPreview(){
    setTargetAudit(targetRecord.data?{phase:String(targetRecord.data.phase),locked:!!targetRecord.data.locked,approved:!!targetApproval.data&&Number(targetApproval.data.target_hours)===approvedHours}:null);
    if(!setup.data)throw new Error('No onboarding preferences available for this athlete. Ask them to finish setup.');
    const info=setup.data;
+   setAthleteEvidence({
+    recentHours:info.recent_weekly_hours==null?null:Number(info.recent_weekly_hours),
+    concern:String(info.current_training_concern||'Not reported'),
+    ftp:info.ftp_watts==null?null:Number(info.ftp_watts),
+    css:info.swim_css_seconds_per_100m==null?null:Number(info.swim_css_seconds_per_100m),
+    runThreshold:info.run_threshold_seconds_per_km==null?null:Number(info.run_threshold_seconds_per_km)
+   });
    const entryResult=assessEntryPathway({
       experience:info.experience,recentHours:info.recent_weekly_hours==null?null:Number(info.recent_weekly_hours),
       availableHours:Number(info.weekly_hours),trainingConcern:info.current_training_concern||'unsure',
@@ -207,6 +215,12 @@ export default function CoachStarterWeekPreview(){
    </div>
    <div style={{marginTop:12,padding:12,borderRadius:10,background:'#102e47',border:'1px solid #3d7291'}}>
     <h5 style={{margin:'0 0 8px',fontSize:15}}>Why today matters · coaching review prompts</h5>
+    {athleteEvidence&&<div style={{padding:9,borderRadius:8,background:'#163d57',marginBottom:10,fontSize:12}}>
+      <strong>Athlete-reported context · not independently verified</strong>
+      <p style={{margin:'5px 0'}}>Recent weekly training: {athleteEvidence.recentHours===null?'Not supplied':athleteEvidence.recentHours+' h'} · Training concern: {athleteEvidence.concern}</p>
+      <p style={{margin:'5px 0'}}>Entered benchmarks: FTP {athleteEvidence.ftp??'unknown'} W · CSS {athleteEvidence.css??'unknown'} sec/100m · Run threshold {athleteEvidence.runThreshold??'unknown'} sec/km</p>
+      <p style={{margin:'5px 0',color:'#ffda9c'}}>These values are contextual only. No threshold-based zones, load increases or automatic publication are authorised by these entries.</p>
+    </div>}
     {existingWeekSessions.slice().sort((a,b)=>a.planned_date.localeCompare(b.planned_date)).map(x=><div key={'why-'+x.id} style={{margin:'8px 0',paddingBottom:8,borderBottom:'1px solid #345c77'}}>
      <strong style={{fontSize:13}}>{x.planned_date} · {x.sport.toUpperCase()} · {x.duration_min} min</strong>
      <p style={{margin:'4px 0',fontSize:12,color:'#b9d5e8'}}>{x.sport.toLowerCase()==='bike'?'Aerobic cycling builds sustainable endurance; confirm this duration fits the athlete’s demonstrated riding history and recovery.':x.sport.toLowerCase()==='run'?'Easy running develops consistent aerobic durability; monitor impact tolerance and keep effort controlled.':x.sport.toLowerCase()==='swim'?'Relaxed swimming supports technique and efficient aerobic movement; assess stroke quality before adding intensity.':'Review the purpose, tolerance and recovery demands of this workout.'}</p>
