@@ -33,6 +33,9 @@ export default async function handler(req:any,res:any){
     const planned=await get('planned_session?athlete_id=eq.'+athleteId+'&planned_date=gte.'+oldest+'&planned_date=lte.'+newest+'&select=id,sport,planned_date,status,is_active_version&limit=500');
     for(const a of activities.slice(0,100)){
      const decision=assessBackgroundImport(a,existing,planned);
+     // Existing staging/acceptance RPCs are ride-only. Do not write swim/run
+     // records using a bike-specific database function.
+     if(decision.allowed && decision.sport!=='bike'){review++;continue;}
      if(!decision.allowed && !['planned_session_requires_review'].includes(decision.reason)){if(decision.reason!=='already_imported'&&decision.reason!=='unsupported_sport')review++;continue;}
      const duration=Number(a.elapsed_time??a.moving_time),distance=a.distance==null?null:Number(a.distance);
      const avg=a.icu_average_watts??a.average_watts??null,weighted=a.icu_weighted_avg_watts??null;
