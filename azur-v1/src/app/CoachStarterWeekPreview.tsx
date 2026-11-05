@@ -198,7 +198,7 @@ export default function CoachStarterWeekPreview(){
    {entry.pathway==='continuation'&&<section style={{padding:12,marginTop:12,border:'1px solid #4e8ab0',borderRadius:12}}>
     <strong style={{fontSize:14}}>Coach-approved weekly target</strong>
     <p style={{fontSize:12,color:'#b5d2e4'}}>Only confirm if you've checked the athlete's recent training and readiness. The athlete's availability is not proof of capacity.</p>
-    {existingTarget!==null?<p role="status" style={{fontSize:13,color:'#a9f0bd'}}>Target already exists: {existingTarget} h. No new target will be created.</p>:<>
+    {existingTarget!==null?<div role="status" style={{fontSize:13,lineHeight:1.5,color:'#dceef9'}}><p>Existing weekly target: <strong>{existingTarget} h</strong> · Phase: <strong>{targetAudit?.phase??'Unknown'}</strong></p><p style={{color:targetAudit?.approved?'#a9f0bd':'#ffd18a'}}>{targetAudit?.approved?'Separate coach baseline approval recorded.':'Separate coach baseline approval missing. An existing target alone is not a recorded approval.'}</p>{targetAudit?.phase?.toLowerCase()==='foundation'&&<p>Foundation training is active. The Base-only draft workflow needs a reviewed Foundation pathway or explicit phase transition.</p>}</div>:<>
      <label style={{display:'block',fontSize:13}}>Target hours (maximum {entry.targetMinutes===null?'—':(entry.targetMinutes/60).toFixed(1)} h)
       <input type="number" min={2} max={entry.targetMinutes===null?2:entry.targetMinutes/60} step={0.5} value={targetHours} onChange={e=>setTargetHours(e.target.value)} style={{display:'block',minHeight:44,width:'100%',margin:'6px 0 12px'}}/>
      </label>
