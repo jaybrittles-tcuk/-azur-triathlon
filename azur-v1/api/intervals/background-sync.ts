@@ -9,7 +9,7 @@ export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
  if(!process.env.CRON_SECRET||req.headers.authorization!=='Bearer '+process.env.CRON_SECRET)return res.status(401).json({error:'Unauthorized'});
  if(process.env.INTERVALS_BACKGROUND_IMPORT_ENABLED!=='true')return res.status(503).json({error:'Background import disabled'});
- const url=process.env.VITE_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ const url=process.env.SUPABASE_URL??process.env.VITE_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!url||!key)return res.status(503).json({error:'Backend unavailable'});
  const headers={apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'};
  const get=async(path:string)=>{const r=await fetch(url+'/rest/v1/'+path,{headers});if(!r.ok)throw Error('Database read failed');return r.json();};
@@ -33,7 +33,7 @@ export default async function handler(req:any,res:any){
     const planned=await get('planned_session?athlete_id=eq.'+athleteId+'&planned_date=gte.'+oldest+'&planned_date=lte.'+newest+'&select=id,sport,planned_date,status,is_active_version&limit=500');
     for(const a of activities.slice(0,100)){
      const decision=assessBackgroundImport(a,existing,planned);
-     if(!decision.allowed && !['planned_session_requires_review'].includes(decision.reason)){if(decision.reason!=='already_imported'&&decision.reason!=='unsupported_sport')review++;continue;}
+     if(!decision.allowed){if(decision.reason!=='already_imported'&&decision.reason!=='unsupported_sport')review++;continue;}
      const duration=Number(a.elapsed_time??a.moving_time),distance=a.distance==null?null:Number(a.distance);
      const avg=a.icu_average_watts??a.average_watts??null,weighted=a.icu_weighted_avg_watts??null;
      if([distance,avg,weighted].some(v=>v!==null&&(!Number.isFinite(Number(v))||Number(v)<0))){review++;continue;}
