@@ -27,7 +27,7 @@ export default async function handler(req:any,res:any){
    checked++;
    try{
     const upstream=await fetch('https://intervals.icu/api/v1/athlete/0/activities?oldest='+oldest+'&newest='+newest,{headers:{Authorization:'Bearer '+integration.access_token,Accept:'application/json'}});
-    if(!upstream.ok)throw Error('Intervals read failed');
+    if(!upstream.ok)throw Error('Intervals read failed, status '+upstream.status);
     const activities=await upstream.json();if(!Array.isArray(activities))throw Error('Unexpected activity data');
     const athleteId=encodeURIComponent(integration.athlete_id);
     const existing=await get('completed_activity?athlete_id=eq.'+athleteId+'&start_time=gte.'+encodeURIComponent(oldest+'T00:00:00Z')+'&select=source,source_activity_id,sport,start_time,duration_sec&limit=500');
