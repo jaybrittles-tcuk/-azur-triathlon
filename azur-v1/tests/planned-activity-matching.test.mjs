@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {suggestPlannedMatch} from '../src/lib/plannedActivityMatching.mjs';
+const ride={type:'VirtualRide',start_date:'2026-11-05T06:52:33Z',start_date_local:'2026-11-05T06:52:33',elapsed_time:3600};
+const plan=(overrides={})=>({id:'bike-1',planned_date:'2026-11-05',sport:'bike',duration_sec:3600,is_active_version:true,status:'planned',...overrides});
+test('suggests a close single bike match without mutating plan',()=>{const p=plan();assert.equal(suggestPlannedMatch(ride,[p]).status,'suggested');assert.equal(p.status,'planned')});
+test('does not match wrong sport or day',()=>assert.equal(suggestPlannedMatch(ride,[plan({sport:'run'}),plan({planned_date:'2026-11-06'})]).status,'unmatched'));
+test('flags similarly timed plans as ambiguous',()=>assert.equal(suggestPlannedMatch(ride,[plan(),plan({id:'bike-2',duration_sec:3650})]).status,'ambiguous'));
+test('excludes completed and inactive plans',()=>assert.equal(suggestPlannedMatch(ride,[plan({status:'completed'}),plan({is_active_version:false})]).status,'unmatched'));
+test('rejects invalid activity',()=>assert.equal(suggestPlannedMatch({type:'Soccer'},[plan()]).status,'invalid'));
+test('requires review for moderately different duration',()=>assert.equal(suggestPlannedMatch({...ride,elapsed_time:2850},[plan()]).status,'review'));
