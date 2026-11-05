@@ -23,6 +23,15 @@ export function draftApprovedTrainingWeek(input:{
   existingActiveSessions:number; athleteProfileReady:boolean;
   recentSessionIds?:readonly string[];
   targetWeekMinutes?:number;
+  /** Optional observed history and clearance; missing evidence does not imply readiness. */
+  athleteEvidence?: {
+    recentWeeklyHours?:number|null;
+    sportRecentWeeklyHours?:Partial<Record<SessionEntry['sport'],number|null>>;
+    benchmarksVerified?:boolean;
+    demonstratedLevel?:1|2|3;
+    sportClearedLevel?:Partial<Record<SessionEntry['sport'],1|2|3>>;
+    recoveryConcern?:boolean;
+  };
 }):DraftResult {
   const reasons:string[]=[];
   if(mondayOf(input.weekStart)!==input.weekStart)reasons.push('Week must start on Monday');
@@ -42,6 +51,12 @@ export function draftApprovedTrainingWeek(input:{
       maxMinutes:Math.min(slot.maxMinutes,input.weeklyLimitMinutes-totalMinutes),
       maxLevel:slot.maxLevel,excludeIds:used,
       recentIds:input.recentSessionIds,
+      recentWeeklyHours:input.athleteEvidence?.recentWeeklyHours,
+      sportRecentWeeklyHours:input.athleteEvidence?.sportRecentWeeklyHours?.[slot.sport],
+      benchmarksVerified:input.athleteEvidence?.benchmarksVerified,
+      demonstratedLevel:input.athleteEvidence?.demonstratedLevel,
+      sportClearedLevel:input.athleteEvidence?.sportClearedLevel?.[slot.sport],
+      recoveryConcern:input.athleteEvidence?.recoveryConcern,
       rotationIndex:Math.floor(Date.parse(input.weekStart+'T12:00:00Z')/604800000)
     });
     if(result.status==='unavailable'){
