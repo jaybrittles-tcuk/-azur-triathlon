@@ -4,6 +4,7 @@ import {starterWeekPreview} from '../lib/starterWeekPreview.mjs';
 import {twoWeekFoundationPreview} from '../lib/twoWeekFoundation.mjs';
 import {assessEntryPathway,entrySessionDistribution} from '../lib/athleteEntryPathway.mjs';
 import {mapAutoWeek,proposeMissingRpeWorkout} from '../lib/automaticWeekDraft.mjs';
+import {foundationSessionCandidate} from '../lib/foundationSessionCandidate.mjs';
 
 type Athlete={id:string;display_name:string;user_id:string|null};
 type Workout={workout_key:string;title:string;sport:string;family:string;duration_min:number;level:number;phases:string[];prescription:unknown;approved:boolean};
@@ -209,7 +210,12 @@ export default function CoachStarterWeekPreview(){
     {existingWeekSessions.slice().sort((a,b)=>a.planned_date.localeCompare(b.planned_date)).map(x=><div key={'why-'+x.id} style={{margin:'8px 0',paddingBottom:8,borderBottom:'1px solid #345c77'}}>
      <strong style={{fontSize:13}}>{x.planned_date} · {x.sport.toUpperCase()} · {x.duration_min} min</strong>
      <p style={{margin:'4px 0',fontSize:12,color:'#b9d5e8'}}>{x.sport.toLowerCase()==='bike'?'Aerobic cycling builds sustainable endurance; confirm this duration fits the athlete’s demonstrated riding history and recovery.':x.sport.toLowerCase()==='run'?'Easy running develops consistent aerobic durability; monitor impact tolerance and keep effort controlled.':x.sport.toLowerCase()==='swim'?'Relaxed swimming supports technique and efficient aerobic movement; assess stroke quality before adding intensity.':'Review the purpose, tolerance and recovery demands of this workout.'}</p>
-     <p style={{margin:'4px 0',fontSize:12,color:'#ffda9c'}}>Education prompt only — specific intervals, zones and progression require verified athlete data and coach approval.</p>
+     {(()=>{const candidate=foundationSessionCandidate(x);return candidate.status==='coach_review_required'?<div style={{marginTop:8,padding:9,borderRadius:8,background:'#163d57'}}>
+      <strong style={{fontSize:12}}>Automatic Foundation structure · coach review required</strong>
+      {candidate.blocks.map((block,index)=><p key={index} style={{fontSize:12,margin:'5px 0'}}>{block.name}: {block.minutes} min · {block.effort}</p>)}
+      <p style={{fontSize:12,color:'#b9d5e8'}}>{candidate.why}</p>
+      <p style={{fontSize:12,color:'#ffda9c'}}>RPE guidance only. Pool distances, pace/power targets and publication require validated athlete data and coach clearance.</p>
+     </div>:<p style={{fontSize:12,color:'#ffda9c'}}>{candidate.reason}</p>})()}
     </div>)}
    </div>
    <p style={{fontSize:12,color:'#b9d5e8'}}>Target approval does not approve workout prescriptions or authorise publication. Reconcile durations and training safety in the coach planning workflow.</p>
