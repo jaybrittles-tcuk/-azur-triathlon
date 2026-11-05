@@ -10,7 +10,7 @@ export function suggestPlannedMatch(activity, planned = []) {
    String(p.sport).toLowerCase() === sport && p.is_active_version === true &&
    !['completed','skipped','cancelled'].includes(String(p.status).toLowerCase()));
  const scored = candidates.map(p => {
-   const expected = Number(p.duration_sec ?? (Number(p.duration_minutes) * 60));
+   const expected = Number(p.duration_sec ?? (Number(p.duration_min) * 60));
    if (!Number.isFinite(expected) || expected <= 0) return null;
    const ratio = Math.abs(duration - expected) / expected;
    if (ratio > .35) return null;
