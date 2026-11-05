@@ -9,3 +9,5 @@ test('flags similarly timed plans as ambiguous',()=>assert.equal(suggestPlannedM
 test('excludes completed and inactive plans',()=>assert.equal(suggestPlannedMatch(ride,[plan({status:'completed'}),plan({is_active_version:false})]).status,'unmatched'));
 test('rejects invalid activity',()=>assert.equal(suggestPlannedMatch({type:'Soccer'},[plan()]).status,'invalid'));
 test('requires review for moderately different duration',()=>assert.equal(suggestPlannedMatch({...ride,elapsed_time:2850},[plan()]).status,'review'));
+
+test('matches actual planned_session duration_min column',()=>assert.equal(suggestPlannedMatch(ride,[plan({duration_sec:undefined,duration_min:60})]).status,'suggested'));
