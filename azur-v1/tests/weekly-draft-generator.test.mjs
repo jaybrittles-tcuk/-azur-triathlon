@@ -21,3 +21,23 @@ test('unapproved or wrong phase sessions never selected',()=>{
  assert.equal(draftApprovedTrainingWeek({...base,library:[{...library[0],approved:false}]}).status,'blocked');
  assert.equal(draftApprovedTrainingWeek({...base,phase:'taper'}).status,'blocked');
 });
+
+test('actual draft engine does not borrow cycling fitness to justify advanced running',()=>{
+ const runLibrary=[
+  {id:'run-easy',sport:'run',family:'aerobic_endurance',title:'Easy run',durationMin:45,level:1,phases:['base'],approved:true,prescription:{main_set:[{duration_min:45,target:'easy'}]}},
+  {id:'run-hard',sport:'run',family:'aerobic_endurance',title:'Advanced run',durationMin:45,level:3,phases:['base'],approved:true,prescription:{main_set:[{duration_min:45,target:'advanced'}]}}
+ ];
+ const runBase={...base,slots:[{day:0,sport:'run',family:'aerobic_endurance',maxMinutes:60,maxLevel:3}],library:runLibrary};
+ const novice=draftApprovedTrainingWeek({...runBase,athleteEvidence:{recentWeeklyHours:12,sportRecentWeeklyHours:{run:1},benchmarksVerified:true}});
+ const experienced=draftApprovedTrainingWeek({...runBase,athleteEvidence:{recentWeeklyHours:12,sportRecentWeeklyHours:{run:7},benchmarksVerified:true}});
+ assert.equal(novice.status,'ready_for_coach_review');
+ assert.equal(novice.sessions[0].session.id,'run-easy');
+ assert.equal(experienced.status,'ready_for_coach_review');
+ assert.equal(experienced.sessions[0].session.id,'run-hard');
+});
+test('recovery concern prevents demanding session in real weekly draft',()=>{
+ const threshold={...library[0],id:'threshold',family:'threshold',level:2};
+ const result=draftApprovedTrainingWeek({...base,slots:[{...base.slots[0],family:'threshold',maxLevel:3}],library:[threshold],athleteEvidence:{recentWeeklyHours:10,sportRecentWeeklyHours:{bike:5},benchmarksVerified:true,recoveryConcern:true}});
+ assert.equal(result.status,'blocked');
+ assert.match(result.reasons.join(' '),/Missing approved bike threshold/);
+});
