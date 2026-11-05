@@ -7849,7 +7849,7 @@ const sessionVerdict =
       onClick={() => setSelectedStravaActivity(null)}
     >
       <aside
-        className="editor-panel session-detail-modal"
+        className="editor-panel session-detail-modal completed-activity-modal"
         onClick={(event) => event.stopPropagation()}
       >
         <button

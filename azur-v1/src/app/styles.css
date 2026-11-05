@@ -6163,3 +6163,33 @@ strong {
 .session-detail-modal .azur-coach-review-cue strong{display:block;margin:.4rem 0;color:#f4f8ff!important;font-size:1rem}
 .session-detail-modal .azur-coach-review-cue p{margin:.3rem 0 .6rem;color:#e0eaf4!important;line-height:1.48}
 .session-detail-modal .azur-coach-review-cue small{color:#b4c7da!important;line-height:1.4}
+
+/* Completed activity detail: explicit light-surface contrast on iOS.
+   Scoped to the imported activity modal; do not alter session editor styling. */
+.session-detail-overlay .completed-activity-modal {
+  background: #edf4fa !important;
+  color: #132b42 !important;
+  -webkit-text-fill-color: #132b42;
+}
+.session-detail-overlay .completed-activity-modal > h2,
+.session-detail-overlay .completed-activity-modal > p,
+.session-detail-overlay .completed-activity-modal .completed-activity-grid strong {
+  color: #132b42 !important;
+  -webkit-text-fill-color: #132b42 !important;
+  opacity: 1 !important;
+}
+.session-detail-overlay .completed-activity-modal > .eyebrow {
+  color: #187cbe !important;
+  -webkit-text-fill-color: #187cbe !important;
+}
+.session-detail-overlay .completed-activity-modal .completed-activity-grid span {
+  color: #55728a !important;
+  -webkit-text-fill-color: #55728a !important;
+}
+.session-detail-overlay .completed-activity-modal .completed-activity-grid > div {
+  border-color: #c6d8e5 !important;
+}
+.session-detail-overlay .completed-activity-modal .session-detail-close {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
