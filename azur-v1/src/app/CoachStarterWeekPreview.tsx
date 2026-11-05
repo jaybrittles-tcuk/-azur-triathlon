@@ -154,7 +154,7 @@ export default function CoachStarterWeekPreview(){
    if(readError||!check||check.coach_user_id!==user.id||Number(check.target_hours)!==existingTarget)throw new Error('Approval readback failed; reconcile before retry');
    setTargetAudit({...targetAudit,approved:true});
    setTargetStatus('Foundation target audited. No training sessions or phases changed.');
-  }catch(e){setTargetStatus(e instanceof Error?e.message:'Foundation audit failed')}
+  }catch(e){const err=e as {message?:string;details?:string;hint?:string;code?:string}|null;setTargetStatus([err?.message||'Foundation audit request failed',err?.code&&'Code: '+err.code,err?.details,err?.hint].filter(Boolean).join(' · '))}
   finally{setBusy(false)}
  }
  async function confirmTarget(){
