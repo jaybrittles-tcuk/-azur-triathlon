@@ -198,6 +198,20 @@ export default function CoachStarterWeekPreview(){
    <p style={{fontWeight:700}}>Target {Math.round(existingTarget*60)} min · scheduled {existingWeekSessions.reduce((n,x)=>n+x.duration_min,0)} min · {existingWeekSessions.length} sessions</p>
    <p style={{color:'#ffda9c'}}>Difference: {Math.round(existingTarget*60)-existingWeekSessions.reduce((n,x)=>n+x.duration_min,0)} min. {existingWeekSessions.some(x=>x.locked||x.status!=='planned')?'Some sessions are locked or progressed; review before making changes.':'Existing sessions are editable but must be individually reviewed before adjusting volume.'}</p>
    {existingWeekSessions.slice().sort((a,b)=>a.planned_date.localeCompare(b.planned_date)).map(x=><div key={x.id} style={{padding:'7px 0',borderBottom:'1px solid #345c77',fontSize:13}}>{x.planned_date} · {x.sport.toUpperCase()} · {x.title} · {x.duration_min} min · {x.status}{x.locked?' · locked':''}</div>)}
+   <div style={{marginTop:14,padding:12,borderRadius:10,background:'#102e47',border:'1px solid #3d7291'}}>
+    <h5 style={{margin:'0 0 8px',fontSize:15}}>Coach review · weekly balance</h5>
+    {(['swim','bike','run'] as const).map(sport=>{const items=existingWeekSessions.filter(x=>x.sport.toLowerCase()===sport);const mins=items.reduce((n,x)=>n+x.duration_min,0);const total=existingWeekSessions.reduce((n,x)=>n+x.duration_min,0);return <p key={sport} style={{margin:'5px 0',fontSize:13}}>{sport.toUpperCase()}: {mins} min · {total?Math.round(mins/total*100):0}% of scheduled time · {items.length} sessions</p>})}
+    <p style={{fontSize:13,color:'#ffda9c'}}>Coach decision needed: retain the current {existingWeekSessions.reduce((n,x)=>n+x.duration_min,0)}-minute week or review up to {Math.max(0,Math.round(existingTarget*60)-existingWeekSessions.reduce((n,x)=>n+x.duration_min,0))} additional minutes. The target is a ceiling for review, not an instruction to add training.</p>
+    <p style={{fontSize:12,color:'#b9d5e8'}}>Consider long-ride tolerance, recent sport-specific volume, injury concerns, session spacing and recovery. No automatic increase is proposed.</p>
+   </div>
+   <div style={{marginTop:12,padding:12,borderRadius:10,background:'#102e47',border:'1px solid #3d7291'}}>
+    <h5 style={{margin:'0 0 8px',fontSize:15}}>Why today matters · coaching review prompts</h5>
+    {existingWeekSessions.slice().sort((a,b)=>a.planned_date.localeCompare(b.planned_date)).map(x=><div key={'why-'+x.id} style={{margin:'8px 0',paddingBottom:8,borderBottom:'1px solid #345c77'}}>
+     <strong style={{fontSize:13}}>{x.planned_date} · {x.sport.toUpperCase()} · {x.duration_min} min</strong>
+     <p style={{margin:'4px 0',fontSize:12,color:'#b9d5e8'}}>{x.sport.toLowerCase()==='bike'?'Aerobic cycling builds sustainable endurance; confirm this duration fits the athlete’s demonstrated riding history and recovery.':x.sport.toLowerCase()==='run'?'Easy running develops consistent aerobic durability; monitor impact tolerance and keep effort controlled.':x.sport.toLowerCase()==='swim'?'Relaxed swimming supports technique and efficient aerobic movement; assess stroke quality before adding intensity.':'Review the purpose, tolerance and recovery demands of this workout.'}</p>
+     <p style={{margin:'4px 0',fontSize:12,color:'#ffda9c'}}>Education prompt only — specific intervals, zones and progression require verified athlete data and coach approval.</p>
+    </div>)}
+   </div>
    <p style={{fontSize:12,color:'#b9d5e8'}}>Target approval does not approve workout prescriptions or authorise publication. Reconcile durations and training safety in the coach planning workflow.</p>
   </section>}
   {entry&&<section style={{marginTop:16,padding:13,borderRadius:12,border:'1px solid #39748d',background:'#133951'}}>
