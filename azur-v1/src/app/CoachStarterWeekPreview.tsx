@@ -23,6 +23,7 @@ export default function CoachStarterWeekPreview(){
  const [confirmHistory,setConfirmHistory]=useState(false);
  const [targetHours,setTargetHours]=useState('');
  const [existingTarget,setExistingTarget]=useState<number|null>(null);
+ const [targetAudit,setTargetAudit]=useState<{phase:string;approved:boolean;locked:boolean}|null>(null);
  const [targetStatus,setTargetStatus]=useState('');
  const [draftStatus,setDraftStatus]=useState('');
  useEffect(()=>{let active=true;(async()=>{
@@ -39,23 +40,25 @@ export default function CoachStarterWeekPreview(){
   }catch(e){if(active)setMessage(e instanceof Error?e.message:'Unable to load assigned athletes')}
   finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[]);
- useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('');setDraftStatus('')},[selected,week]);
+ useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setTargetAudit(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('');setDraftStatus('')},[selected,week]);
  async function preview(){
   setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setTargetStatus('');
   try{
    const athlete=athletes.find(a=>a.id===selected);
    if(!athlete?.user_id)throw new Error('Select an athlete with a verified account');
    const end=new Date(week+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+14);
-   const [setup,workouts,existing,targetRecord]=await Promise.all([
+   const [setup,workouts,existing,targetRecord,targetApproval]=await Promise.all([
     supabase.from('athlete_onboarding').select('weekly_hours,experience,onboarding_step,training_days,recent_weekly_hours,current_training_concern,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km').eq('user_id',athlete.user_id).maybeSingle(),
     supabase.from('coach_workout_library').select('workout_key,title,sport,family,duration_min,level,phases,prescription,approved').eq('approved',true),
     supabase.from('planned_session').select('id').eq('athlete_id',athlete.id).gte('planned_date',week).lt('planned_date',end.toISOString().slice(0,10)).eq('is_active_version',true).neq('status','cancelled'),
-    supabase.from('season_week').select('id,target_hours').eq('athlete_id',athlete.id).eq('week_start',week).maybeSingle()
+    supabase.from('season_week').select('id,target_hours,phase,locked').eq('athlete_id',athlete.id).eq('week_start',week).maybeSingle(),
+    supabase.from('coach_initial_target_approval').select('coach_user_id,target_hours').eq('athlete_id',athlete.id).eq('week_start',week).maybeSingle()
    ]);
-   if(setup.error||workouts.error||existing.error||targetRecord.error)throw new Error(setup.error?.message||workouts.error?.message||existing.error?.message||targetRecord.error?.message||'Data validation failed');
+   if(setup.error||workouts.error||existing.error||targetRecord.error||targetApproval.error)throw new Error(setup.error?.message||workouts.error?.message||existing.error?.message||targetRecord.error?.message||targetApproval.error?.message||'Data validation failed');
    const approvedHours=targetRecord.data?Number(targetRecord.data.target_hours):null;
    if(approvedHours!==null&&(!Number.isFinite(approvedHours)||approvedHours<=0))throw new Error('Invalid coach-approved weekly target');
    setExistingTarget(approvedHours);
+   setTargetAudit(targetRecord.data?{phase:String(targetRecord.data.phase),locked:!!targetRecord.data.locked,approved:!!targetApproval.data&&Number(targetApproval.data.target_hours)===approvedHours}:null);
    if(!setup.data)throw new Error('No onboarding preferences available for this athlete. Ask them to finish setup.');
    const info=setup.data;
    const entryResult=assessEntryPathway({
