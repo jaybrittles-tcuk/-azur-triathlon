@@ -20,9 +20,14 @@ begin
  then raise exception 'Only an unlocked existing Foundation week can be audited';end if;
  if exists(select 1 from public.coach_initial_target_approval where athlete_id=p_athlete_id and week_start=p_week_start)
  then raise exception 'Existing approval requires reconciliation; do not overwrite';end if;
+ -- A baseline target audit is independent of existing, editable planned workouts.
+ -- Never alter those workouts, and refuse locked or non-planned sessions.
  if exists(select 1 from public.weekly_plan_draft where athlete_id=p_athlete_id and week_start=p_week_start)
- or exists(select 1 from public.planned_session where athlete_id=p_athlete_id and planned_date between p_week_start and p_week_start+6 and is_active_version)
- then raise exception 'Existing draft or sessions require reconciliation';end if;
+ then raise exception 'Existing weekly draft requires reconciliation';end if;
+ if exists(select 1 from public.planned_session
+   where athlete_id=p_athlete_id and planned_date between p_week_start and p_week_start+6
+   and is_active_version and (locked or status is distinct from 'planned'))
+ then raise exception 'Locked or progressed sessions require reconciliation';end if;
  select user_id into v_user from public.athlete_profile where id=p_athlete_id;
  select onboarding_step,weekly_hours,recent_weekly_hours,current_training_concern,training_days into v_onboard
  from public.athlete_onboarding where user_id=v_user;
