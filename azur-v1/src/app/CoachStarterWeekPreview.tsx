@@ -219,6 +219,7 @@ export default function CoachStarterWeekPreview(){
       <strong>Athlete-reported context · not independently verified</strong>
       <p style={{margin:'5px 0'}}>Recent weekly training: {athleteEvidence.recentHours===null?'Not supplied':athleteEvidence.recentHours+' h'} · Training concern: {athleteEvidence.concern}</p>
       <p style={{margin:'5px 0'}}>Entered benchmarks: FTP {athleteEvidence.ftp??'unknown'} W · CSS {athleteEvidence.css??'unknown'} sec/100m · Run threshold {athleteEvidence.runThreshold??'unknown'} sec/km</p>
+      {athleteEvidence.recentHours!==null&&existingTarget!==null&&athleteEvidence.recentHours>existingTarget*1.5&&<p style={{margin:'7px 0',color:'#ffda9c',fontWeight:700}}>Training-history mismatch: reported {athleteEvidence.recentHours} h/week versus {existingTarget} h target. Check whether this is a deliberate recovery week, a different training phase or outdated onboarding data before changing volume.</p>}
       <p style={{margin:'5px 0',color:'#ffda9c'}}>These values are contextual only. No threshold-based zones, load increases or automatic publication are authorised by these entries.</p>
     </div>}
     {existingWeekSessions.slice().sort((a,b)=>a.planned_date.localeCompare(b.planned_date)).map(x=>{const candidate=foundationSessionCandidate(x);return <details key={'why-'+x.id} style={{margin:'8px 0',padding:'11px',border:'1px solid #345c77',borderRadius:10,background:'#163d57'}}>
