@@ -33,19 +33,23 @@ export default async function handler(req:any,res:any){
     const planned=await get('planned_session?athlete_id=eq.'+athleteId+'&planned_date=gte.'+oldest+'&planned_date=lte.'+newest+'&select=id,sport,planned_date,status,is_active_version&limit=500');
     for(const a of activities.slice(0,100)){
      const decision=assessBackgroundImport(a,existing,planned);
-     // Existing staging/acceptance RPCs are ride-only. Do not write swim/run
-     // records using a bike-specific database function.
-     if(decision.allowed && decision.sport!=='bike'){review++;continue;}
      if(!decision.allowed && !['planned_session_requires_review'].includes(decision.reason)){if(decision.reason!=='already_imported'&&decision.reason!=='unsupported_sport')review++;continue;}
      const duration=Number(a.elapsed_time??a.moving_time),distance=a.distance==null?null:Number(a.distance);
      const avg=a.icu_average_watts??a.average_watts??null,weighted=a.icu_weighted_avg_watts??null;
      if([distance,avg,weighted].some(v=>v!==null&&(!Number.isFinite(Number(v))||Number(v)<0))){review++;continue;}
-     const staged=await rpc('stage_intervals_activity',{p_athlete_id:integration.athlete_id,p_source_id:String(a.id),p_start:a.start_date,p_duration:duration,p_distance:distance,p_avg_power:avg,p_normalized_power:weighted,p_source_payload:{source:'intervals',id:String(a.id),type:a.type,name:a.name,auto:true}});
-     if(!staged?.stage_id||!['pending_review','already_staged'].includes(staged.outcome)){review++;continue;}
-     if(!decision.allowed){review++;continue;}
-     const accepted=await rpc('accept_staged_intervals_ride',{p_athlete_id:integration.athlete_id,p_stage_id:staged.stage_id,p_confirm:true});
-     if(!accepted?.activity_id||!['already_imported','imported_pending_load_review'].includes(accepted.outcome))throw Error('Acceptance failed');
-     if(accepted.outcome==='imported_pending_load_review'){recorded++;existing.push({source:'intervals',source_activity_id:String(a.id),sport:'bike',start_time:a.start_date,duration_sec:duration});}
+     const result=await rpc('import_intervals_endurance_activity',{
+      p_athlete_id:integration.athlete_id,p_source_id:String(a.id),p_sport:decision.sport,
+      p_start:a.start_date,p_duration:duration,p_distance:distance,
+      p_payload:{source:'intervals',id:String(a.id),type:a.type,name:a.name,
+       average_watts:avg,normalized_watts:weighted,auto:true,plan_match:decision.match}
+     });
+     if(result?.outcome==='possible_duplicate'){review++;continue;}
+     if(!result?.activity_id||!['already_imported','imported_pending_load_review'].includes(result.outcome))throw Error('Atomic import failed');
+     if(result.outcome==='imported_pending_load_review'){
+      recorded++;
+      existing.push({source:'intervals',source_activity_id:String(a.id),sport:decision.sport,start_time:a.start_date,duration_sec:duration});
+      if(decision.match==='needs_review')review++;
+     }
     }
    }catch{errors++;}
   }
