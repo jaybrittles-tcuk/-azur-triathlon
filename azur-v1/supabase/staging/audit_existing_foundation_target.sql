@@ -13,7 +13,9 @@ begin
  if not exists(select 1 from public.coach_athlete_assignment where coach_user_id=p_coach_id and athlete_id=p_athlete_id)
  then raise exception 'Assigned coach required';end if;
  perform pg_advisory_xact_lock(hashtextextended(p_athlete_id::text||':'||p_week_start::text,0));
- select * into v_week from public.season_week where athlete_id=p_athlete_id and week_start=p_week_start for update;
+ -- SELECT FOR UPDATE requires a separate UPDATE RLS policy; this audit never updates the week.
+ -- The transaction advisory lock serialises audits for the same athlete and week.
+ select * into v_week from public.season_week where athlete_id=p_athlete_id and week_start=p_week_start;
  if not found or v_week.locked or lower(trim(v_week.phase))<>'foundation'
  then raise exception 'Only an unlocked existing Foundation week can be audited';end if;
  if exists(select 1 from public.coach_initial_target_approval where athlete_id=p_athlete_id and week_start=p_week_start)
