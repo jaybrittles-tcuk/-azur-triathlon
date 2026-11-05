@@ -4,6 +4,7 @@ import {starterWeekPreview} from '../lib/starterWeekPreview.mjs';
 import {twoWeekFoundationPreview} from '../lib/twoWeekFoundation.mjs';
 import {assessEntryPathway,entrySessionDistribution} from '../lib/athleteEntryPathway.mjs';
 import {mapAutoWeek,proposeMissingRpeWorkout} from '../lib/automaticWeekDraft.mjs';
+import {foundationSessionCandidate} from '../lib/foundationSessionCandidate.mjs';
 
 type Athlete={id:string;display_name:string;user_id:string|null};
 type Workout={workout_key:string;title:string;sport:string;family:string;duration_min:number;level:number;phases:string[];prescription:unknown;approved:boolean};
@@ -26,6 +27,8 @@ export default function CoachStarterWeekPreview(){
  const [targetAudit,setTargetAudit]=useState<{phase:string;approved:boolean;locked:boolean}|null>(null);
  const [targetStatus,setTargetStatus]=useState('');
  const [draftStatus,setDraftStatus]=useState('');
+ const [athleteEvidence,setAthleteEvidence]=useState<{recentHours:number|null;concern:string;ftp:number|null;css:number|null;runThreshold:number|null}|null>(null);
+ const [existingWeekSessions,setExistingWeekSessions]=useState<{id:string;planned_date:string;sport:string;title:string;duration_min:number;status:string;locked:boolean}[]>([]);
  useEffect(()=>{let active=true;(async()=>{
   try{
    const {data:{user}}=await supabase.auth.getUser();
@@ -40,27 +43,35 @@ export default function CoachStarterWeekPreview(){
   }catch(e){if(active)setMessage(e instanceof Error?e.message:'Unable to load assigned athletes')}
   finally{if(active)setLoading(false)}
  })();return()=>{active=false}},[]);
- useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setTargetAudit(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('');setDraftStatus('')},[selected,week]);
+ useEffect(()=>{setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setExistingTarget(null);setTargetAudit(null);setConfirmHistory(false);setTargetHours('');setTargetStatus('');setDraftStatus('');setExistingWeekSessions([]);setAthleteEvidence(null)},[selected,week]);
  async function preview(){
-  setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setTargetStatus('');
+  setBusy(true);setMessage('');setResult(null);setFoundation(null);setEntry(null);setDistribution(null);setTargetStatus('');setExistingWeekSessions([]);setAthleteEvidence(null);
   try{
    const athlete=athletes.find(a=>a.id===selected);
    if(!athlete?.user_id)throw new Error('Select an athlete with a verified account');
-   const end=new Date(week+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+14);
+   const end=new Date(week+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+7);
    const [setup,workouts,existing,targetRecord,targetApproval]=await Promise.all([
     supabase.from('athlete_onboarding').select('weekly_hours,experience,onboarding_step,training_days,recent_weekly_hours,current_training_concern,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km').eq('user_id',athlete.user_id).maybeSingle(),
     supabase.from('coach_workout_library').select('workout_key,title,sport,family,duration_min,level,phases,prescription,approved').eq('approved',true),
-    supabase.from('planned_session').select('id').eq('athlete_id',athlete.id).gte('planned_date',week).lt('planned_date',end.toISOString().slice(0,10)).eq('is_active_version',true).neq('status','cancelled'),
+    supabase.from('planned_session').select('id,planned_date,sport,title,duration_min,status,locked').eq('athlete_id',athlete.id).gte('planned_date',week).lt('planned_date',end.toISOString().slice(0,10)).eq('is_active_version',true).neq('status','cancelled'),
     supabase.from('season_week').select('id,target_hours,phase,locked').eq('athlete_id',athlete.id).eq('week_start',week).maybeSingle(),
     supabase.from('coach_initial_target_approval').select('coach_user_id,target_hours').eq('athlete_id',athlete.id).eq('week_start',week).maybeSingle()
    ]);
    if(setup.error||workouts.error||existing.error||targetRecord.error||targetApproval.error)throw new Error(setup.error?.message||workouts.error?.message||existing.error?.message||targetRecord.error?.message||targetApproval.error?.message||'Data validation failed');
    const approvedHours=targetRecord.data?Number(targetRecord.data.target_hours):null;
    if(approvedHours!==null&&(!Number.isFinite(approvedHours)||approvedHours<=0))throw new Error('Invalid coach-approved weekly target');
+   setExistingWeekSessions((existing.data||[]).map(x=>({id:x.id,planned_date:x.planned_date,sport:x.sport,title:x.title,duration_min:Number(x.duration_min),status:x.status,locked:!!x.locked})));
    setExistingTarget(approvedHours);
    setTargetAudit(targetRecord.data?{phase:String(targetRecord.data.phase),locked:!!targetRecord.data.locked,approved:!!targetApproval.data&&Number(targetApproval.data.target_hours)===approvedHours}:null);
    if(!setup.data)throw new Error('No onboarding preferences available for this athlete. Ask them to finish setup.');
    const info=setup.data;
+   setAthleteEvidence({
+    recentHours:info.recent_weekly_hours==null?null:Number(info.recent_weekly_hours),
+    concern:String(info.current_training_concern||'Not reported'),
+    ftp:info.ftp_watts==null?null:Number(info.ftp_watts),
+    css:info.swim_css_seconds_per_100m==null?null:Number(info.swim_css_seconds_per_100m),
+    runThreshold:info.run_threshold_seconds_per_km==null?null:Number(info.run_threshold_seconds_per_km)
+   });
    const entryResult=assessEntryPathway({
       experience:info.experience,recentHours:info.recent_weekly_hours==null?null:Number(info.recent_weekly_hours),
       availableHours:Number(info.weekly_hours),trainingConcern:info.current_training_concern||'unsure',
@@ -141,6 +152,22 @@ export default function CoachStarterWeekPreview(){
   }catch(e){setDraftStatus(e instanceof Error?e.message:'Unable to generate a safe weekly draft')}
   finally{setBusy(false)}
  }
+ async function auditFoundation(){
+  if(!confirmHistory||existingTarget===null||targetAudit?.phase?.toLowerCase()!=='foundation'||targetAudit.approved||targetAudit.locked)return;
+  setBusy(true);setTargetStatus('');
+  try{
+   const {data:{user}}=await supabase.auth.getUser();
+   if(!user||user.app_metadata?.role!=='coach')throw new Error('Verified coach required');
+   const {data,error}=await supabase.rpc('audit_existing_foundation_target',{p_coach_id:user.id,p_athlete_id:selected,p_week_start:week,p_confirmed_history:true});
+   if(error)throw error;
+   if(!data||data.status!=='foundation_target_audited'||Number(data.target_hours)!==existingTarget)throw new Error('Foundation audit not confirmed');
+   const {data:check,error:readError}=await supabase.from('coach_initial_target_approval').select('coach_user_id,target_hours').eq('athlete_id',selected).eq('week_start',week).maybeSingle();
+   if(readError||!check||check.coach_user_id!==user.id||Number(check.target_hours)!==existingTarget)throw new Error('Approval readback failed; reconcile before retry');
+   setTargetAudit({...targetAudit,approved:true});
+   setTargetStatus('Foundation target audited. No training sessions or phases changed.');
+  }catch(e){const err=e as {message?:string;details?:string;hint?:string;code?:string}|null;setTargetStatus([err?.message||'Foundation audit request failed',err?.code&&'Code: '+err.code,err?.details,err?.hint].filter(Boolean).join(' · '))}
+  finally{setBusy(false)}
+ }
  async function confirmTarget(){
   if(!entry||!confirmHistory||existingTarget!==null||entry.pathway!=='continuation')return;
   setBusy(true);setTargetStatus('');
@@ -174,6 +201,42 @@ export default function CoachStarterWeekPreview(){
   </div>
   <button type="button" disabled={loading||busy||!selected} onClick={()=>void preview()} style={{minHeight:46,padding:'10px 17px',borderRadius:12,border:'1px solid #53bce9',background:'#1576ab',fontWeight:700,color:'#fff'}}>{busy?'Checking…':'Generate training preview'}</button>
   {message&&<p role="alert">{message}</p>}
+  {existingTarget!==null&&targetAudit?.phase.toLowerCase()==='foundation'&&<section style={{marginTop:16,padding:16,borderRadius:12,border:'1px solid #447b99',background:'#173750'}}>
+   <h4 style={{margin:'0 0 8px'}}>Existing Foundation calendar · read-only reconciliation</h4>
+   <p style={{fontSize:13,color:'#b9d5e8'}}>This is the actual athlete calendar, not the proposed training distribution. No changes are made here.</p>
+   <p style={{fontWeight:700}}>Target {Math.round(existingTarget*60)} min · scheduled {existingWeekSessions.reduce((n,x)=>n+x.duration_min,0)} min · {existingWeekSessions.length} sessions</p>
+   <p style={{color:'#ffda9c'}}>Difference: {Math.round(existingTarget*60)-existingWeekSessions.reduce((n,x)=>n+x.duration_min,0)} min. {existingWeekSessions.some(x=>x.locked||x.status!=='planned')?'Some sessions are locked or progressed; review before making changes.':'Existing sessions are editable but must be individually reviewed before adjusting volume.'}</p>
+   {existingWeekSessions.slice().sort((a,b)=>a.planned_date.localeCompare(b.planned_date)).map(x=><div key={x.id} style={{padding:'7px 0',borderBottom:'1px solid #345c77',fontSize:13}}>{x.planned_date} · {x.sport.toUpperCase()} · {x.title} · {x.duration_min} min · {x.status}{x.locked?' · locked':''}</div>)}
+   <div style={{marginTop:14,padding:12,borderRadius:10,background:'#102e47',border:'1px solid #3d7291'}}>
+    <h5 style={{margin:'0 0 8px',fontSize:15}}>Coach review · weekly balance</h5>
+    {(['swim','bike','run'] as const).map(sport=>{const items=existingWeekSessions.filter(x=>x.sport.toLowerCase()===sport);const mins=items.reduce((n,x)=>n+x.duration_min,0);const total=existingWeekSessions.reduce((n,x)=>n+x.duration_min,0);return <p key={sport} style={{margin:'5px 0',fontSize:13}}>{sport.toUpperCase()}: {mins} min · {total?Math.round(mins/total*100):0}% of scheduled time · {items.length} sessions</p>})}
+    <p style={{fontSize:13,color:'#ffda9c'}}>Coach decision needed: retain the current {existingWeekSessions.reduce((n,x)=>n+x.duration_min,0)}-minute week or review up to {Math.max(0,Math.round(existingTarget*60)-existingWeekSessions.reduce((n,x)=>n+x.duration_min,0))} additional minutes. The target is a ceiling for review, not an instruction to add training.</p>
+    <p style={{fontSize:12,color:'#b9d5e8'}}>Consider long-ride tolerance, recent sport-specific volume, injury concerns, session spacing and recovery. No automatic increase is proposed.</p>
+   </div>
+   <div style={{marginTop:12,padding:12,borderRadius:10,background:'#102e47',border:'1px solid #3d7291'}}>
+    <h5 style={{margin:'0 0 8px',fontSize:15}}>Why today matters · coaching review prompts</h5>
+    {athleteEvidence&&<div style={{padding:9,borderRadius:8,background:'#163d57',marginBottom:10,fontSize:12}}>
+      <strong>Athlete-reported context · not independently verified</strong>
+      <p style={{margin:'5px 0'}}>Recent weekly training: {athleteEvidence.recentHours===null?'Not supplied':athleteEvidence.recentHours+' h'} · Training concern: {athleteEvidence.concern}</p>
+      <p style={{margin:'5px 0'}}>Entered benchmarks: FTP {athleteEvidence.ftp??'unknown'} W · CSS {athleteEvidence.css??'unknown'} sec/100m · Run threshold {athleteEvidence.runThreshold??'unknown'} sec/km</p>
+      {athleteEvidence.recentHours!==null&&existingTarget!==null&&athleteEvidence.recentHours>existingTarget*1.5&&<p style={{margin:'7px 0',color:'#ffda9c',fontWeight:700}}>Training-history mismatch: reported {athleteEvidence.recentHours} h/week versus {existingTarget} h target. Check whether this is a deliberate recovery week, a different training phase or outdated onboarding data before changing volume.</p>}
+      <p style={{margin:'5px 0',color:'#ffda9c'}}>These values are contextual only. No threshold-based zones, load increases or automatic publication are authorised by these entries.</p>
+    </div>}
+    {existingWeekSessions.slice().sort((a,b)=>a.planned_date.localeCompare(b.planned_date)).map(x=>{const candidate=foundationSessionCandidate(x);return <details key={'why-'+x.id} style={{margin:'8px 0',padding:'11px',border:'1px solid #345c77',borderRadius:10,background:'#163d57'}}>
+     <summary style={{cursor:'pointer',listStyle:'revert',fontSize:13,fontWeight:700,lineHeight:1.5}}>{x.planned_date.slice(5)} · {x.sport.toUpperCase()} · {x.duration_min} min <span style={{fontSize:11,fontWeight:400,color:'#a9c9dc'}}>· View session rationale</span></summary>
+     {candidate.status==='coach_review_required'?<div style={{paddingTop:9}}>
+      <p style={{fontSize:12,color:'#d7e9f3',margin:'0 0 9px'}}>{candidate.why}</p>
+      {candidate.blocks.map((block,index)=><p key={index} style={{fontSize:12,margin:'5px 0'}}>{block.name}: {block.minutes} min · {block.effort}</p>)}
+      <p style={{fontSize:12,margin:'8px 0 4px'}}><strong>Race relevance:</strong> {candidate.rationale.raceRelevance}</p>
+      <p style={{fontSize:12,margin:'5px 0'}}><strong>Adaptation trigger:</strong> {candidate.rationale.adaptationTrigger}</p>
+      <p style={{fontSize:12,color:'#b9d5e8',margin:'5px 0'}}><strong>Evidence:</strong> {candidate.rationale.athleteEvidence}</p>
+      <p style={{fontSize:12,color:'#ffda9c',margin:'8px 0 0'}}>Unapproved RPE-based suggestion. No calendar changes.</p>
+     </div>:<p style={{fontSize:12,color:'#ffda9c'}}>{candidate.reason}</p>}
+    </details>})}
+
+   </div>
+   <p style={{fontSize:12,color:'#b9d5e8'}}>Target approval does not approve workout prescriptions or authorise publication. Reconcile durations and training safety in the coach planning workflow.</p>
+  </section>}
   {entry&&<section style={{marginTop:16,padding:13,borderRadius:12,border:'1px solid #39748d',background:'#133951'}}>
    <span style={{fontSize:11,color:'#83d5ff',fontWeight:700,letterSpacing:'0.07em'}}>AUTOMATIC ATHLETE CLASSIFICATION</span>
    <h4 style={{margin:'8px 0',fontSize:19}}>{entry.pathway==='continuation'?'Established-athlete continuation':entry.pathway==='return_to_training'?'Return-to-training review':entry.pathway==='continuation_review'?'Continuation needs checking':'Beginner foundation'}</h4>
@@ -198,7 +261,7 @@ export default function CoachStarterWeekPreview(){
    {entry.pathway==='continuation'&&<section style={{padding:12,marginTop:12,border:'1px solid #4e8ab0',borderRadius:12}}>
     <strong style={{fontSize:14}}>Coach-approved weekly target</strong>
     <p style={{fontSize:12,color:'#b5d2e4'}}>Only confirm if you've checked the athlete's recent training and readiness. The athlete's availability is not proof of capacity.</p>
-    {existingTarget!==null?<div role="status" style={{fontSize:13,lineHeight:1.5,color:'#dceef9'}}><p>Existing weekly target: <strong>{existingTarget} h</strong> · Phase: <strong>{targetAudit?.phase??'Unknown'}</strong></p><p style={{color:targetAudit?.approved?'#a9f0bd':'#ffd18a'}}>{targetAudit?.approved?'Separate coach baseline approval recorded.':'Separate coach baseline approval missing. An existing target alone is not a recorded approval.'}</p>{targetAudit?.phase?.toLowerCase()==='foundation'&&<p>Foundation training is active. The Base-only draft workflow needs a reviewed Foundation pathway or explicit phase transition.</p>}</div>:<>
+    {existingTarget!==null?<div role="status" style={{fontSize:13,lineHeight:1.5,color:'#dceef9'}}><p>Existing weekly target: <strong>{existingTarget} h</strong> · Phase: <strong>{targetAudit?.phase??'Unknown'}</strong></p><p style={{color:targetAudit?.approved?'#a9f0bd':'#ffd18a'}}>{targetAudit?.approved?'Separate coach baseline approval recorded.':'Separate coach baseline approval missing. An existing target alone is not a recorded approval.'}</p>{targetAudit?.phase?.toLowerCase()==='foundation'&&<><p>Foundation phase remains unchanged. This review records a coach decision only.</p>{!targetAudit.approved&&!targetAudit.locked&&<><label style={{display:'flex',gap:10,margin:'12px 0'}}><input type="checkbox" checked={confirmHistory} onChange={e=>setConfirmHistory(e.target.checked)}/>I have reviewed actual recent training and readiness for this target.</label><button type="button" disabled={busy||!confirmHistory} onClick={()=>void auditFoundation()}>{busy?'Auditing…':'Audit existing Foundation target'}</button></>}</>}</div>:<>
      <label style={{display:'block',fontSize:13}}>Target hours (maximum {entry.targetMinutes===null?'—':(entry.targetMinutes/60).toFixed(1)} h)
       <input type="number" min={2} max={entry.targetMinutes===null?2:entry.targetMinutes/60} step={0.5} value={targetHours} onChange={e=>setTargetHours(e.target.value)} style={{display:'block',minHeight:44,width:'100%',margin:'6px 0 12px'}}/>
      </label>
