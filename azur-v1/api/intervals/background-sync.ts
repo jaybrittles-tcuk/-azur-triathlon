@@ -9,6 +9,8 @@ export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
  if(!process.env.CRON_SECRET||req.headers.authorization!=='Bearer '+process.env.CRON_SECRET)return res.status(401).json({error:'Unauthorized'});
  if(process.env.INTERVALS_BACKGROUND_IMPORT_ENABLED!=='true')return res.status(503).json({error:'Background import disabled'});
+ const rolloutAthleteId=String(process.env.INTERVALS_IMPORT_ATHLETE_ID??'').trim();
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(rolloutAthleteId))return res.status(503).json({error:'Single-athlete rollout not configured'});
  const url=process.env.SUPABASE_URL??process.env.VITE_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!url||!key)return res.status(503).json({error:'Backend unavailable'});
  const headers={apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'};
@@ -19,7 +21,8 @@ export default async function handler(req:any,res:any){
  console.info('[AZUR intervals sync] started');
  try{
   // Bounded batch; production rollout must monitor pagination/backlog.
-  const integrations=await get('athlete_integration?provider=eq.intervals&select=athlete_id,access_token&limit=100');
+  const integrations=await get('athlete_integration?provider=eq.intervals&athlete_id=eq.'+encodeURIComponent(rolloutAthleteId)+'&select=athlete_id,access_token&limit=2');
+  if(integrations.length!==1||String(integrations[0].athlete_id).toLowerCase()!==rolloutAthleteId.toLowerCase())return res.status(503).json({error:'Rollout athlete connection unavailable or ambiguous'});
   // Fail closed on truncated athlete batches rather than silently claiming full coverage.
   if(integrations.length===100) return res.status(503).json({error:'Integration pagination required before enabling for more than 99 connected accounts'});
   for(const integration of integrations){
