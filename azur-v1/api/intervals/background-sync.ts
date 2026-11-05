@@ -16,6 +16,7 @@ export default async function handler(req:any,res:any){
  const rpc=async(name:string,body:object)=>{const r=await fetch(url+'/rest/v1/rpc/'+name,{method:'POST',headers,body:JSON.stringify(body)});if(!r.ok)throw Error('Import transaction failed');return (await r.json())?.[0];};
  const now=new Date(),newest=now.toISOString().slice(0,10),oldest=new Date(now.getTime()-3*86400000).toISOString().slice(0,10);
  let checked=0,recorded=0,review=0,errors=0;
+ console.info('[AZUR intervals sync] started');
  try{
   // Bounded batch; production rollout must monitor pagination/backlog.
   const integrations=await get('athlete_integration?provider=eq.intervals&select=athlete_id,access_token&limit=100');
@@ -51,8 +52,9 @@ export default async function handler(req:any,res:any){
       if(decision.match==='needs_review')review++;
      }
     }
-   }catch{errors++;}
+   }catch(error){errors++;console.error('[AZUR intervals sync] athlete sync failed',error instanceof Error?error.message:'unknown');}
   }
+  console.info('[AZUR intervals sync] finished',JSON.stringify({checked,recorded,review,errors}));
   return res.status(errors?207:200).json({checked,recorded,review,errors,loadValidated:false,plannedSessionsCompleted:false});
- }catch{return res.status(502).json({error:'Background sync unavailable'});}
+ }catch(error){console.error('[AZUR intervals sync] failed',error instanceof Error?error.message:'unknown');return res.status(502).json({error:'Background sync unavailable'});}
 }
