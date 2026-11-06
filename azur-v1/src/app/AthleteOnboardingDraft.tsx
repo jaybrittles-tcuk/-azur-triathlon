@@ -22,6 +22,10 @@ export default function AthleteOnboardingDraft(){
  const [css,setCss]=useState('');
  const [runThreshold,setRunThreshold]=useState('');
  const [experience,setExperience]=useState('first');
+ const [background,setBackground]=useState('regular');
+ const [consistency,setConsistency]=useState('4to7');
+ const [concern,setConcern]=useState('none');
+ const [canSwim,setCanSwim]=useState(true);
  const [ready,setReady]=useState(false);
  const [displayName,setDisplayName]=useState('');
  const [userId,setUserId]=useState<string|null>(null);
@@ -39,14 +43,15 @@ export default function AthleteOnboardingDraft(){
    setUserId(user.id);
    const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
    if(!cancelled && profile?.display_name) setDisplayName(profile.display_name);
-   const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,training_days,recent_weekly_hours,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,device,onboarding_step').eq('user_id',user.id).maybeSingle();
+   const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,training_days,recent_weekly_hours,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,training_background,training_consistency,current_training_concern,can_swim_200m,device,onboarding_step').eq('user_id',user.id).maybeSingle();
    if(cancelled)return;
    if(error)setMessage('Could not load your saved setup: '+error.message);
    else if(data){
     setRace(data.race_distance as Race);setRaceDate(data.race_date||'');
     setExperience(data.experience);setHours(Number(data.weekly_hours));
     setDevice(data.device as Device);
-    setTrainingDays(data.training_days||[]);setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
+    setBackground(data.training_background||'regular');setConsistency(data.training_consistency||'4to7');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);
+    setTrainingDays((data.training_days||[]).map((day:number)=>weekdays[day]).filter(Boolean));setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
     setFtp(data.ftp_watts==null?'':String(data.ftp_watts));setCss(data.swim_css_seconds_per_100m==null?'':String(data.swim_css_seconds_per_100m));setRunThreshold(data.run_threshold_seconds_per_km==null?'':String(data.run_threshold_seconds_per_km));setStep(Math.min(2,Math.max(0,data.onboarding_step)));
    }
    setLoading(false);
@@ -58,8 +63,8 @@ export default function AthleteOnboardingDraft(){
   if(!userId){setMessage('Sign in to save your setup.');return;}
   if(!Number.isFinite(hours)||hours<2||hours>25){setMessage('Weekly hours must be between 2 and 25.');return;}
   if(trainingDays.length===0 && nextStep>=2){setMessage('Choose at least one day you can train.');return;}
-  if(recentHours!=='' && (!Number.isFinite(Number(recentHours))||Number(recentHours)<0||Number(recentHours)>35)){setMessage('Recent weekly training must be between 0 and 35 hours.');return;}
-  for(const [label,value,min,max] of [['FTP',ftp,50,600],['Swim CSS',css,45,300],['Run threshold',runThreshold,120,900]] as const){if(value!==''&&(!Number.isFinite(Number(value))||Number(value)<min||Number(value)>max)){setMessage(`${label} is outside the expected range. Leave blank if unknown.`);return;}}
+  if(recentHours!=='' && (!Number.isFinite(Number(recentHours))||Number(recentHours)<0||Number(recentHours)>25)){setMessage('Recent weekly training must be between 0 and 25 hours.');return;}
+  for(const [label,value,min,max] of [['FTP',ftp,60,650],['Swim CSS',css,50,300],['Run threshold',runThreshold,150,900]] as const){if(value!==''&&(!Number.isFinite(Number(value))||Number(value)<min||Number(value)>max)){setMessage(`${label} is outside the expected range. Leave blank if unknown.`);return;}}
   if(nextStep===3 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
   if(nextStep===3){
@@ -72,7 +77,7 @@ export default function AthleteOnboardingDraft(){
   }
   const {error}=await supabase.from('athlete_onboarding').upsert({
    user_id:userId,race_distance:race,race_date:raceDate||null,
-   experience,weekly_hours:hours,training_days:trainingDays,recent_weekly_hours:recentHours===''?null:Number(recentHours),
+   experience,weekly_hours:hours,training_days:trainingDays.map(day=>weekdays.indexOf(day)),training_background:background,training_consistency:consistency,current_training_concern:concern,can_swim_200m:canSwim,recent_weekly_hours:recentHours===''?null:Number(recentHours),
    ftp_watts:ftp===''?null:Number(ftp),swim_css_seconds_per_100m:css===''?null:Number(css),run_threshold_seconds_per_km:runThreshold===''?null:Number(runThreshold),device,onboarding_step:nextStep,
    updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
@@ -105,12 +110,16 @@ export default function AthleteOnboardingDraft(){
    <label>Typical hours available per week<input type="number" min={2} max={25} value={hours} onChange={e=>setHours(Number(e.target.value))}/></label>
    <p>Choose the days you can realistically train.</p>
    <div className="azur-onboarding-options">{weekdays.map(day=><label key={day} className={trainingDays.includes(day)?'selected':''}><input type="checkbox" checked={trainingDays.includes(day)} onChange={e=>setTrainingDays(previous=>e.target.checked?[...previous,day]:previous.filter(d=>d!==day))}/>{day}</label>)}</div>
-   <label>Hours actually trained per week recently (optional)<input type="number" min={0} max={35} step="0.5" value={recentHours} onChange={e=>setRecentHours(e.target.value)} placeholder="Unknown"/></label>
+   <label>Hours actually trained per week recently (optional)<input type="number" min={0} max={25} step="0.5" value={recentHours} onChange={e=>setRecentHours(e.target.value)} placeholder="Unknown"/></label>
    <p>Your current volume and available hours are different. We will not assume you can safely train at your maximum availability immediately.</p>
+   <label>Training background<select value={background} onChange={e=>setBackground(e.target.value)}><option value="novice">New to structured training</option><option value="regular">Training regularly</option><option value="established">Established endurance athlete</option></select></label>
+   <label>Training consistency<select value={consistency} onChange={e=>setConsistency(e.target.value)}><option value="under4">Under 4 weeks consistent</option><option value="4to7">4–7 weeks consistent</option><option value="8plus">8+ weeks consistent</option></select></label>
+   <label>Any current injury or training concern?<select value={concern} onChange={e=>setConcern(e.target.value)}><option value="none">No</option><option value="yes">Yes — coach review needed</option><option value="unsure">Unsure — coach review needed</option></select></label>
+   <label>Can you comfortably swim 200m continuously?<select value={canSwim?'yes':'no'} onChange={e=>setCanSwim(e.target.value==='yes')}><option value="yes">Yes</option><option value="no">Not yet</option></select></label>
    <h3>Known training thresholds (optional)</h3>
-   <label>Bike FTP (watts)<input type="number" min={50} max={600} value={ftp} onChange={e=>setFtp(e.target.value)} placeholder="Unknown"/></label>
-   <label>Swim CSS (seconds per 100m)<input type="number" min={45} max={300} value={css} onChange={e=>setCss(e.target.value)} placeholder="Unknown"/></label>
-   <label>Run threshold (seconds per km)<input type="number" min={120} max={900} value={runThreshold} onChange={e=>setRunThreshold(e.target.value)} placeholder="Unknown"/></label>
+   <label>Bike FTP (watts)<input type="number" min={60} max={650} value={ftp} onChange={e=>setFtp(e.target.value)} placeholder="Unknown"/></label>
+   <label>Swim CSS (seconds per 100m)<input type="number" min={50} max={300} value={css} onChange={e=>setCss(e.target.value)} placeholder="Unknown"/></label>
+   <label>Run threshold (seconds per km)<input type="number" min={150} max={900} value={runThreshold} onChange={e=>setRunThreshold(e.target.value)} placeholder="Unknown"/></label>
    <small>If you do not know your thresholds, leave them blank. AZUR should start with safe endurance training before prescribing testing.</small>
   </div>}
   {step===2&&<div>
