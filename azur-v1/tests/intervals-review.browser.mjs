@@ -83,6 +83,15 @@ const mockSupabase=async (route,coach=false)=>{
   const profile={id:athlete,user_id:user.id,display_name:'Synthetic Athlete',ftp_w:profileFtp};
   if(req.method()==='POST')missingProfile=false;
   data=missingProfile?(single?null:[]):(single?profile:[profile]);
+ } else if(url.pathname.endsWith('/rpc/complete_athlete_onboarding_and_plan')) {
+  const inputs=req.postDataJSON().p_inputs;
+  assert.deepEqual(inputs.training_days,[0,2,5]);
+  assert.equal(inputs.training_background,'regular');
+  assert.equal(inputs.weekly_hours,8);
+  assert.equal(inputs.current_training_concern,'none');
+  assert.equal(inputs.can_swim_200m,true);
+  missingProfile=false;onboardingStep=3;
+  data={status:'ready',setup_saved:true,calendar_changed:true,sessions:1,total_minutes:45};
  } else if(url.pathname.endsWith('/athlete_onboarding')) {
   if(req.method()==='POST')onboardingStep=req.postDataJSON().onboarding_step;
   data=single?null:[];
@@ -153,8 +162,11 @@ try {
  await page.getByLabel('Your name',{exact:true}).fill('New Athlete');
  await page.getByRole('button',{name:'Continue',exact:true}).click();
  await page.getByRole('heading',{name:'Your training availability',exact:true}).waitFor();
+ await page.getByLabel('Mon',{exact:true}).check();
+ await page.getByLabel('Wed',{exact:true}).check();
+ await page.getByLabel('Sat',{exact:true}).check();
  await page.getByRole('button',{name:'Continue',exact:true}).click();
- await page.getByRole('button',{name:'Review setup',exact:true}).click();
+ await page.getByRole('button',{name:'Finish setup & create plan',exact:true}).click();
  await page.waitForURL(base+'/');
  assert.equal(missingProfile,false,'Profile must be created before leaving onboarding');
  assert.equal(onboardingStep,3,'Final onboarding step must be saved');
