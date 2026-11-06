@@ -64,8 +64,29 @@ export default function AthleteOnboardingDraft(){
    experience,weekly_hours:hours,device,onboarding_step:nextStep,
    updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
+  if(error){setSaving(false);setMessage('Unable to save setup: '+error.message);return;}
+  // Onboarding is the source of availability. Seed only missing baseline values;
+  // never overwrite coach-confirmed limits, previous training, or session history.
+  if(nextStep===3){
+   const {data:profile,error:profileError}=await supabase.from('athlete_profile').select('id,normal_weekly_hours').eq('user_id',userId).maybeSingle();
+   if(profileError||!profile){setSaving(false);setMessage('Setup saved, but the athlete profile could not be checked. Please retry.');return;}
+   const {data:baseline,error:baselineError}=await supabase.from('athlete_training_baseline').select('athlete_id,weekly_hours,max_weekly_hours').eq('athlete_id',profile.id).maybeSingle();
+   if(baselineError){setSaving(false);setMessage('Setup saved, but the training baseline could not be checked. Please retry.');return;}
+   const baselinePatch: {athlete_id:string;weekly_hours?:number;max_weekly_hours?:number}={athlete_id:profile.id};
+   if(baseline?.weekly_hours==null)baselinePatch.weekly_hours=hours;
+   if(baseline?.max_weekly_hours==null)baselinePatch.max_weekly_hours=hours;
+   if(Object.keys(baselinePatch).length>1){
+    const result=baseline
+     ?await supabase.from('athlete_training_baseline').update(baselinePatch).eq('athlete_id',profile.id)
+     :await supabase.from('athlete_training_baseline').insert(baselinePatch);
+    if(result.error){setSaving(false);setMessage('Setup saved, but training baseline needs attention: '+result.error.message);return;}
+   }
+   if(profile.normal_weekly_hours==null){
+    const {error:hoursError}=await supabase.from('athlete_profile').update({normal_weekly_hours:hours}).eq('id',profile.id).is('normal_weekly_hours',null);
+    if(hoursError){setSaving(false);setMessage('Setup saved, but weekly hours could not be added to your profile: '+hoursError.message);return;}
+   }
+  }
   setSaving(false);
-  if(error){setMessage('Unable to save setup: '+error.message);return;}
   setStep(Math.min(2,nextStep));
   if(nextStep===3){if(window.location.pathname==='/onboarding'){window.location.assign('/');return;}setReady(true);setMessage('Your preferences have been saved. A coach assignment and training plan are separate steps.');}
   else setMessage('Progress saved.');
