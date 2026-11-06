@@ -9,7 +9,7 @@ const devices: {id:Device;label:string}[]=[
  {id:'polar',label:'Polar / Wahoo'}, {id:'apple',label:'Apple Watch'},
  {id:'other',label:'Another device'}, {id:'none',label:'No training watch'},
 ];
-/** Athlete-owned setup; does not create a coach assignment or activate training. */
+/** Athlete-owned setup. Finalisation invokes the staging atomic onboarding-and-plan RPC. */
 export default function AthleteOnboardingDraft(){
  const [step,setStep]=useState(0);
  const [device,setDevice]=useState<Device>('garmin');
@@ -68,12 +68,31 @@ export default function AthleteOnboardingDraft(){
   if(nextStep===3 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
   if(nextStep===3){
-   const {data:existing,error:lookupError}=await supabase.from('athlete_profile').select('id').eq('user_id',userId).maybeSingle();
-   if(lookupError){setSaving(false);setMessage('Unable to check athlete profile: '+lookupError.message);return;}
-   if(!existing){
-    const {error:profileError}=await supabase.from('athlete_profile').insert({user_id:userId,display_name:displayName.trim()});
-    if(profileError){setSaving(false);setMessage('Unable to create athlete profile: '+profileError.message);return;}
+   const {data,error}=await supabase.rpc('complete_athlete_onboarding_and_plan',{
+    p_inputs:{
+     display_name:displayName.trim(),race_distance:race,race_date:raceDate||null,
+     experience,weekly_hours:hours,training_days:trainingDays.map(day=>weekdays.indexOf(day)),
+     recent_weekly_hours:recentHours===''?null:Number(recentHours),
+     training_background:background,training_consistency:consistency,
+     current_training_concern:concern,can_swim_200m:canSwim,
+     ftp_watts:ftp===''?null:Number(ftp),
+     swim_css_seconds_per_100m:css===''?null:Number(css),
+     run_threshold_seconds_per_km:runThreshold===''?null:Number(runThreshold),device
+    }
+   });
+   setSaving(false);
+   if(error){setMessage('Unable to finish setup and create your training plan: '+error.message);return;}
+   if(data?.status==='review_required'){
+    setMessage('Your setup is saved. Coach review is required before training can be allocated: '+(data.reason||'safety review'));
+    setReady(true);return;
    }
+   if(data?.status!=='ready'||!Number.isInteger(data.sessions)||data.sessions<1){
+    setMessage('Training setup could not be verified. Please contact your coach.');return;
+   }
+   setMessage(`Your training plan is ready: ${data.sessions} sessions.`);
+   setReady(true);
+   if(window.location.pathname==='/onboarding')window.location.assign('/');
+   return;
   }
   const {error}=await supabase.from('athlete_onboarding').upsert({
    user_id:userId,race_distance:race,race_date:raceDate||null,
@@ -84,8 +103,7 @@ export default function AthleteOnboardingDraft(){
   setSaving(false);
   if(error){setMessage('Unable to save setup: '+error.message);return;}
   setStep(Math.min(2,nextStep));
-  if(nextStep===3){if(window.location.pathname==='/onboarding'){window.location.assign('/');return;}setReady(true);setMessage('Your preferences have been saved. A coach assignment and training plan are separate steps.');}
-  else setMessage('Progress saved.');
+  setMessage('Progress saved.');
  }
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
  if(isCoach)return <section className="azur-onboarding-draft"><h3>Athlete onboarding</h3><p>This setup is for athlete accounts. Coach access and assignments are managed separately.</p></section>;
@@ -132,7 +150,7 @@ export default function AthleteOnboardingDraft(){
   <div className="azur-onboarding-actions">
    {step>0&&<button type="button" onClick={()=>{setStep(s=>s-1);setReady(false)}}>Back</button>}
    {step<2?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>Continue</button>
-   :<button type="button" disabled={saving} onClick={()=>void save(3)}>Review setup</button>}
+   :<button type="button" disabled={saving} onClick={()=>void save(3)}>{saving?'Creating plan…':'Finish setup & create plan'}</button>}
   </div>
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
   {ready&&<div role="status" className="azur-onboarding-recap"><strong>Draft setup</strong>
