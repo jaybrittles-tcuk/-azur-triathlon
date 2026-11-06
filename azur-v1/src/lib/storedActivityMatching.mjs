@@ -47,5 +47,6 @@ export function suggestStoredActivityMatch(activity, plannedSessions = [], compl
     Math.abs(plan.duration_min * 60 - activity.duration_sec) <=
     Math.max(900, activity.duration_sec * 0.35));
   if (candidates.length === 1) return result('candidate_match', candidates.map(p => p.id), candidates[0].id);
-  return result('ambiguous_session', matches.map(p => p.id));
+  if (candidates.length === 0) return result('duration_mismatch', matches.map(p => p.id));
+  return result('ambiguous_session', candidates.map(p => p.id));
 }
