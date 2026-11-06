@@ -1202,6 +1202,10 @@ export function App() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordResetMode, setPasswordResetMode] = useState(() => window.location.pathname === '/reset-password');
+  const [newPassword, setNewPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true';
   const [registrationMode, setRegistrationMode] = useState(() => new URLSearchParams(window.location.search).get('join') === '1');
   const [registrationNotice, setRegistrationNotice] = useState('');
@@ -9827,6 +9831,27 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     );
   }
 
+  if (passwordResetMode) {
+    return <div className="login-screen"><form className="login-card" onSubmit={async (event) => {
+      event.preventDefault();setAuthLoading(true);setAuthError('');setRegistrationNotice('');
+      if(newPassword.length<8){setAuthError('Use a password of at least 8 characters.');setAuthLoading(false);return;}
+      const {error}=await supabase.auth.updateUser({password:newPassword});
+      setAuthLoading(false);
+      if(error){setAuthError(error.message);return;}
+      setNewPassword('');setRegistrationNotice('Password updated. You can now continue to AZUR.');
+      setPasswordResetMode(false);
+      window.history.replaceState({},'', '/');
+    }}>
+      <img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" className="login-logo"/>
+      <h2>Set a new password</h2>
+      <p>Enter your new AZUR account password.</p>
+      <label><span>New password</span><input type={showNewPassword?'text':'password'} autoComplete="new-password" value={newPassword} onChange={e=>setNewPassword(e.target.value)} required minLength={8}/></label>
+      <button type="button" className="azur-auth-switch" onClick={()=>setShowNewPassword(v=>!v)}>{showNewPassword?'Hide password':'Show password'}</button>
+      {authError&&<div className="login-error" role="alert">{authError}</div>}
+      <button className="primary-button" type="submit" disabled={authLoading}>{authLoading?'Updating…':'Save new password'}</button>
+    </form></div>;
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="login-screen">
@@ -9860,13 +9885,24 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
             <span>Password</span>
 
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete={registrationMode?'new-password':'current-password'}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
             />
           </label>
 
+          <button type="button" className="azur-auth-switch" onClick={()=>setShowPassword(v=>!v)}>{showPassword?'Hide password':'Show password'}</button>
+          {!registrationMode&&<button type="button" className="azur-auth-switch" disabled={authLoading} onClick={async ()=>{
+            setAuthError('');setRegistrationNotice('');
+            if(!email.trim()){setAuthError('Enter your email address first, then select Forgot password.');return;}
+            setAuthLoading(true);
+            const {error}=await supabase.auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.origin+'/reset-password'});
+            setAuthLoading(false);
+            if(error){setAuthError(error.message);return;}
+            setRegistrationNotice('If this account exists, a password reset link has been sent. Check your inbox.');
+          }}>Forgot password?</button>}
           {authError && (
             <div className="login-error">{authError}</div>
           )}
