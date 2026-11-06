@@ -29,7 +29,7 @@ export function suggestStoredActivityMatch(activity, plannedSessions = [], compl
   if (activity.planned_session_id) return result('already_linked');
   if (activity.source !== 'intervals' || !activity.source_activity_id) return result('manual_review');
   const sourceDuplicates = completedActivities.filter(other =>
-    other.id !== activity.id && other.source === activity.source &&
+    other.id !== activity.id && other.athlete_id === activity.athlete_id && other.source === activity.source &&
     other.source_activity_id === activity.source_activity_id);
   if (sourceDuplicates.length) return result('duplicate_source');
   const matches = plannedSessions.filter(plan =>
@@ -40,7 +40,7 @@ export function suggestStoredActivityMatch(activity, plannedSessions = [], compl
     !plan.locked &&
     ['planned', 'edited'].includes(plan.status) &&
     finitePositive(plan.duration_min) &&
-    !completedActivities.some(other => other.id !== activity.id && other.planned_session_id === plan.id)
+    !completedActivities.some(other => other.id !== activity.id && other.athlete_id === activity.athlete_id && other.planned_session_id === plan.id)
   );
   if (!matches.length) return result('unmatched_activity');
   const candidates = matches.filter(plan =>
