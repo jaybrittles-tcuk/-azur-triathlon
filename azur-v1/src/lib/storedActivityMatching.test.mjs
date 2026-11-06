@@ -24,3 +24,17 @@ test('local training date takes precedence over UTC date',()=>{
  assert.equal(suggestStoredActivityMatch(overnight,[plan]).status,'candidate_match');
 });
 test('already linked activity never rematches',()=>assert.equal(suggestStoredActivityMatch({...activity,planned_session_id:'plan-1'},[plan]).status,'already_linked'));
+
+test('large duration discrepancy is flagged for review rather than treated as ambiguous',()=>{
+ const result=suggestStoredActivityMatch({...activity,duration_sec:10800},[plan]);
+ assert.equal(result.status,'duration_mismatch');
+ assert.deepEqual(result.candidateIds,['plan-1']);
+ assert.equal(result.candidateId,null);
+ assert.equal(result.trainingLoadEligible,false);
+ assert.equal(result.sessionCompleted,false);
+});
+test('ambiguous candidates include only duration-compatible sessions',()=>{
+ const result=suggestStoredActivityMatch(activity,[plan,{...plan,id:'plan-2',duration_min:62},{...plan,id:'plan-3',duration_min:180}]);
+ assert.equal(result.status,'ambiguous_session');
+ assert.deepEqual(result.candidateIds,['plan-1','plan-2']);
+});
