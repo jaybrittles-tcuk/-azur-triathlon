@@ -13,8 +13,8 @@ test('one candidate is only a suggestion and never completion or load validation
 });
 test('different athlete cannot match',()=>assert.equal(suggestStoredActivityMatch(activity,[{...plan,athlete_id:'athlete-2'}]).status,'unmatched_activity'));
 test('multiple possible plans require review',()=>assert.equal(suggestStoredActivityMatch(activity,[plan,{...plan,id:'plan-2'}]).status,'ambiguous_session'));
-test('existing linked activity blocks second match',()=>assert.equal(suggestStoredActivityMatch(activity,[plan],[{id:'other',planned_session_id:'plan-1'}]).status,'unmatched_activity'));
-test('duplicate source requires review',()=>assert.equal(suggestStoredActivityMatch(activity,[plan],[{id:'other',source:'intervals',source_activity_id:'i123'}]).status,'duplicate_source'));
+test('existing linked activity blocks second match',()=>assert.equal(suggestStoredActivityMatch(activity,[plan],[{id:'other',athlete_id:'athlete-1',planned_session_id:'plan-1'}]).status,'unmatched_activity'));
+test('duplicate source requires review',()=>assert.equal(suggestStoredActivityMatch(activity,[plan],[{id:'other',athlete_id:'athlete-1',source:'intervals',source_activity_id:'i123'}]).status,'duplicate_source'));
 test('completed and locked plans cannot match',()=>{
  assert.equal(suggestStoredActivityMatch(activity,[{...plan,status:'completed'}]).status,'unmatched_activity');
  assert.equal(suggestStoredActivityMatch(activity,[{...plan,locked:true}]).status,'unmatched_activity');
@@ -37,4 +37,11 @@ test('ambiguous candidates include only duration-compatible sessions',()=>{
  const result=suggestStoredActivityMatch(activity,[plan,{...plan,id:'plan-2',duration_min:62},{...plan,id:'plan-3',duration_min:180}]);
  assert.equal(result.status,'ambiguous_session');
  assert.deepEqual(result.candidateIds,['plan-1','plan-2']);
+});
+
+test('another athlete source identifier never blocks this athlete',()=>{
+ const other={id:'other',athlete_id:'athlete-2',source:'intervals',source_activity_id:'i123',planned_session_id:'plan-1'};
+ const result=suggestStoredActivityMatch(activity,[plan],[other]);
+ assert.equal(result.status,'candidate_match');
+ assert.equal(result.candidateId,'plan-1');
 });
