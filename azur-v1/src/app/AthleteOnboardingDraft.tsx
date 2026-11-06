@@ -16,6 +16,11 @@ export default function AthleteOnboardingDraft(){
  const [raceDate,setRaceDate]=useState('');
  const [hours,setHours]=useState(8);
  const [experience,setExperience]=useState('first');
+ const [sessionsPerWeek,setSessionsPerWeek]=useState('');
+ const [swimsPerWeek,setSwimsPerWeek]=useState('');
+ const [longestRide,setLongestRide]=useState('');
+ const [longestRun,setLongestRun]=useState('');
+ const [baselineConfirmed,setBaselineConfirmed]=useState(false);
  const [ready,setReady]=useState(false);
  const [displayName,setDisplayName]=useState('');
  const [userId,setUserId]=useState<string|null>(null);
@@ -73,6 +78,24 @@ export default function AthleteOnboardingDraft(){
    // A confirmed training baseline requires session frequency and longest
    // ride/run evidence. Do not invent those values from weekly availability.
    // A coach or the dedicated baseline assessment must confirm them.
+   if(baselineConfirmed){
+    const values=[sessionsPerWeek,swimsPerWeek,longestRide,longestRun];
+    const parsed=values.map(value=>Number(value));
+    if(values.some(value=>value.trim()==='') || parsed.some(value=>!Number.isInteger(value)||value<0)
+      || parsed[0]>21 || parsed[1]>parsed[0] || parsed[2]>600 || parsed[3]>300){
+     setSaving(false);setMessage('Check session counts and longest ride/run minutes before confirming your training baseline.');return;
+    }
+    const {data:existingBaseline,error:baselineLookupError}=await supabase.from('athlete_training_baseline').select('athlete_id').eq('athlete_id',profile.id).maybeSingle();
+    if(baselineLookupError){setSaving(false);setMessage('Unable to check your existing training baseline: '+baselineLookupError.message);return;}
+    if(!existingBaseline){
+     const {error:baselineSaveError}=await supabase.from('athlete_training_baseline').insert({
+      athlete_id:profile.id,weekly_hours:hours,max_weekly_hours:hours,
+      sessions_per_week:parsed[0],swims_per_week:parsed[1],
+      longest_ride_minutes:parsed[2],longest_run_minutes:parsed[3]
+     });
+     if(baselineSaveError){setSaving(false);setMessage('Your setup was saved, but baseline confirmation failed: '+baselineSaveError.message);return;}
+    }
+   }
    if(profile.normal_weekly_hours==null){
     const {error:hoursError}=await supabase.from('athlete_profile').update({normal_weekly_hours:hours}).eq('id',profile.id).is('normal_weekly_hours',null);
     if(hoursError){setSaving(false);setMessage('Setup saved, but weekly hours could not be added to your profile: '+hoursError.message);return;}
@@ -80,7 +103,7 @@ export default function AthleteOnboardingDraft(){
   }
   setSaving(false);
   setStep(Math.min(2,nextStep));
-  if(nextStep===3){if(window.location.pathname==='/onboarding'){window.location.assign('/');return;}setReady(true);setMessage('Your weekly availability has been saved. A training baseline assessment and coach review are needed before generating your plan.');}
+  if(nextStep===3){if(window.location.pathname==='/onboarding'){window.location.assign('/');return;}setReady(true);setMessage('Your weekly availability has been saved. Any confirmed training baseline is recorded separately; a coach review is still required before publishing your plan.');}
   else setMessage('Progress saved.');
  }
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
@@ -105,6 +128,13 @@ export default function AthleteOnboardingDraft(){
    <h3>Your training availability</h3>
    <label>Typical hours available per week<input type="number" min={2} max={25} value={hours} onChange={e=>setHours(Number(e.target.value))}/></label>
    <p>We use your availability to design training that fits your life, not the other way around.</p>
+   <h4>Your recent training baseline (optional)</h4>
+   <p>Enter real recent training figures, not your goal workload. Leave this unconfirmed if you're unsure; your coach can assess it safely.</p>
+   <label>Typical sessions per week<input type="number" min="0" max="21" value={sessionsPerWeek} onChange={e=>setSessionsPerWeek(e.target.value)}/></label>
+   <label>Swim sessions per week<input type="number" min="0" max="21" value={swimsPerWeek} onChange={e=>setSwimsPerWeek(e.target.value)}/></label>
+   <label>Longest recent bike ride (minutes)<input type="number" min="0" max="600" value={longestRide} onChange={e=>setLongestRide(e.target.value)}/></label>
+   <label>Longest recent run (minutes)<input type="number" min="0" max="300" value={longestRun} onChange={e=>setLongestRun(e.target.value)}/></label>
+   <label><input type="checkbox" checked={baselineConfirmed} onChange={e=>setBaselineConfirmed(e.target.checked)}/> I confirm these reflect my recent training</label>
   </div>}
   {step===2&&<div>
    <h3>How do you track training?</h3>
