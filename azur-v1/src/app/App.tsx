@@ -1617,7 +1617,7 @@ async function loadAthleteProfile(userId: string, isCoach = false) {
     return;
   }
 
-  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/accept-invitation' && window.location.pathname !== '/privacy') {
+  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/accept-invitation' && window.location.pathname !== '/reset-password' && window.location.pathname !== '/privacy') {
     onboardingRedirectStarted.current = true;
     window.location.replace('/onboarding');
     return;
