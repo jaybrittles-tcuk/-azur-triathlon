@@ -2,6 +2,7 @@ import BenchmarkHistory from './BenchmarkHistory';
 import BenchmarkTrainingZones from './BenchmarkTrainingZones';
 import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
+import AcceptCoachInvitation from './AcceptCoachInvitation';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
@@ -1202,11 +1203,14 @@ export function App() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true';
+  const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true' || (new URLSearchParams(window.location.search).get('join') === '1' && /^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(new URLSearchParams(window.location.search).get('invitation') || ''));
   const [registrationMode, setRegistrationMode] = useState(() => new URLSearchParams(window.location.search).get('join') === '1');
   const [registrationNotice, setRegistrationNotice] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [recoveryMode,setRecoveryMode]=useState(false);
+  const [passwordRecoverySession,setPasswordRecoverySession]=useState(() => window.location.pathname === '/reset-password' || new URLSearchParams(window.location.hash.slice(1)).get('type') === 'recovery');
+  const [showAuthPassword,setShowAuthPassword]=useState(false);
   const [athleteName, setAthleteName] = useState('Athlete');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -1613,7 +1617,7 @@ async function loadAthleteProfile(userId: string, isCoach = false) {
     return;
   }
 
-  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/privacy') {
+  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/accept-invitation' && window.location.pathname !== '/privacy') {
     onboardingRedirectStarted.current = true;
     window.location.replace('/onboarding');
     return;
@@ -1908,6 +1912,7 @@ if (data.session?.user) {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange((_event, session) => {
+    if(_event==='PASSWORD_RECOVERY')setPasswordRecoverySession(true);
     syncIntervalsReviewOwner(session?.user.id ?? null);
     setIsAuthenticated(!!session);
 
@@ -9598,6 +9603,20 @@ onClick={handleImportActivities}
     );
   }
 
+  async function handleRecoveryRequest(event:React.FormEvent){
+    event.preventDefault();setAuthLoading(true);setAuthError('');setRegistrationNotice('');
+    const {error}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:window.location.origin+'/reset-password'});
+    setAuthLoading(false);
+    if(error){setAuthError(error.message);return;}
+    setRegistrationNotice('If this email belongs to an AZUR account, a password reset link has been sent. Check your inbox and spam folder.');
+  }
+  async function handleRecoveryUpdate(event:React.FormEvent){
+    event.preventDefault();if(password.length<12){setAuthError('Use a password of at least 12 characters.');return;}
+    setAuthLoading(true);setAuthError('');
+    const {error}=await supabase.auth.updateUser({password});setAuthLoading(false);
+    if(error){setAuthError(error.message);return;}
+    setPassword('');setPasswordRecoverySession(false);window.history.replaceState({},'', '/');setRegistrationNotice('Password updated. You can now continue to AZUR.');
+  }
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
 
@@ -9619,9 +9638,11 @@ async function handleRegister(event: React.FormEvent) {
   event.preventDefault();
   if (password.length < 12) { setAuthError('Use a password of at least 12 characters.'); return; }
   setAuthLoading(true); setAuthError(''); setRegistrationNotice('');
-  const {data,error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{emailRedirectTo:window.location.origin+'/onboarding'}});
+  const invitationId=new URLSearchParams(window.location.search).get('invitation');
+  const invitationReturn=invitationId?window.location.origin+'/accept-invitation?invitation='+encodeURIComponent(invitationId):window.location.origin+'/onboarding';
+  const {data,error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{emailRedirectTo:invitationReturn}});
   if(error) setAuthError(error.message);
-  else { setPassword(''); if(data.session){window.location.assign('/onboarding');return;} setRegistrationNotice('Check your email to confirm your account. After confirmation, sign in to complete onboarding in its own full-screen view.'); }
+  else { setPassword(''); if(data.session){window.location.assign(invitationReturn);return;} setRegistrationNotice('Check your email to confirm your account. After confirmation, return to your invitation link to accept and begin athlete setup.'); }
   setAuthLoading(false);
 }
 async function handleSignOut() {
@@ -9826,25 +9847,25 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || passwordRecoverySession) {
     return (
       <div className="login-screen">
-        <form className="login-card" onSubmit={registrationMode && betaRegistrationEnabled ? handleRegister : handleLogin}>
+        <form className="login-card" onSubmit={passwordRecoverySession?handleRecoveryUpdate:recoveryMode?handleRecoveryRequest:registrationMode && betaRegistrationEnabled ? handleRegister : handleLogin}>
           <img
             src="/brand/azur-logo.png"
             alt="Azur Triathlon Coaching"
             className="login-logo"
           />
 
-          <span className="eyebrow">{registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
+          <span className="eyebrow">{passwordRecoverySession?'PASSWORD RESET':recoveryMode?'ACCOUNT RECOVERY':registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
 
-          <h2>{registrationMode ? 'Join AZUR' : 'Welcome to Azur'}</h2>
+          <h2>{passwordRecoverySession?'Choose a new password':recoveryMode?'Reset your password':registrationMode ? 'Join AZUR' : 'Welcome to Azur'}</h2>
 
           <p>
-            {registrationMode ? 'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.' : 'Sign in to access your training, performance and recovery data.'}
+            {passwordRecoverySession?'Enter a new password of at least 12 characters.':recoveryMode?'Enter your account email to receive a secure password reset link.':registrationMode ? 'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.' : 'Sign in to access your training, performance and recovery data.'}
           </p>
 
-          <label>
+          {!passwordRecoverySession&&<label>
             <span>Email</span>
 
             <input
@@ -9853,18 +9874,19 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
               onChange={(event) => setEmail(event.target.value)}
               required
             />
-          </label>
+          </label>}
 
-          <label>
+          {!recoveryMode && <label>
             <span>Password</span>
 
             <input
-              type="password"
+              type={showAuthPassword?"text":"password"}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
             />
-          </label>
+          </label>}
+          {!recoveryMode&&<button type="button" className="azur-auth-switch" onClick={()=>setShowAuthPassword(v=>!v)}>{showAuthPassword?"Hide password":"Show password"}</button>}
 
           {authError && (
             <div className="login-error">{authError}</div>
@@ -9875,9 +9897,10 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
             type="submit"
             disabled={authLoading}
           >
-            {authLoading ? (registrationMode ? 'Creating account...' : 'Signing in...') : registrationMode ? 'Create athlete account' : 'Sign in'}
+            {authLoading?'Please wait…':passwordRecoverySession?'Save new password':recoveryMode?'Send password reset email':registrationMode?'Create athlete account':'Sign in'}
           </button>
-        {betaRegistrationEnabled && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
+        {!passwordRecoverySession&&<button type="button" className="azur-auth-switch" onClick={()=>{setRecoveryMode(v=>!v);setAuthError("");setRegistrationNotice("");}}>{recoveryMode?"Back to sign in":"Forgot password?"}</button>}
+        {!recoveryMode&&!passwordRecoverySession&&betaRegistrationEnabled && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
           {registrationNotice && <p className="azur-registration-notice" role="status">{registrationNotice}</p>}
         </form>
 
@@ -9885,8 +9908,10 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     );
   }
 
+  if (window.location.pathname === '/accept-invitation') return <AcceptCoachInvitation />;
+
   if (window.location.pathname === '/onboarding') {
-    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer"><CoachInvitations mode="athlete" /><a href="/" className="azur-onboarding-exit">Go to dashboard</a></div></main>
+    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer"><p>Already linked to your coach? Your training plan will be prepared after setup.</p><a href="/" className="azur-onboarding-exit">Return to dashboard</a></div></main>
   }
 
   return (
