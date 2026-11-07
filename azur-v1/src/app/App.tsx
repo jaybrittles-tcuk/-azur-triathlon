@@ -2,6 +2,7 @@ import BenchmarkHistory from './BenchmarkHistory';
 import BenchmarkTrainingZones from './BenchmarkTrainingZones';
 import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
+import AcceptCoachInvitation from './AcceptCoachInvitation';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
@@ -9884,6 +9885,8 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
       </div>
     );
   }
+
+  if (window.location.pathname === '/accept-invitation') return <AcceptCoachInvitation />;
 
   if (window.location.pathname === '/onboarding') {
     return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer"><p>Already linked to your coach? Your training plan will be prepared after setup.</p><a href="/" className="azur-onboarding-exit">Return to dashboard</a></div></main>
