@@ -139,13 +139,15 @@ export default function AthleteOnboardingDraft(){
    <label>Any current injury or training concern?<select value={concern} onChange={e=>setConcern(e.target.value)}><option value="none">No</option><option value="yes">Yes — coach review needed</option><option value="unsure">Unsure — coach review needed</option></select></label>
    <label>Can you comfortably swim 200m continuously?<select value={canSwim?'yes':'no'} onChange={e=>setCanSwim(e.target.value==='yes')}><option value="yes">Yes</option><option value="no">Not yet</option></select></label>
    <h3>Known training thresholds (optional)</h3>
+   <p>Use your most recent reliable test results. These values help personalise training intensity.</p>
    <label>Bike FTP (watts)<input type="number" min={60} max={650} value={ftp} onChange={e=>setFtp(e.target.value)} placeholder="Unknown"/></label>
-   <label>Swim CSS (seconds per 100m)<input type="number" min={50} max={300} value={css} onChange={e=>setCss(e.target.value)} placeholder="Unknown"/></label>
-   <label>Run threshold (seconds per km)<input type="number" min={150} max={900} value={runThreshold} onChange={e=>setRunThreshold(e.target.value)} placeholder="Unknown"/></label>
-   <small>If you do not know your thresholds, leave them blank. AZUR should start with safe endurance training before prescribing testing.</small>
+   <label>Swim CSS (seconds per 100m) <small>For example, 105 = 1:45/100m.</small><input type="number" min={50} max={300} value={css} onChange={e=>setCss(e.target.value)} placeholder="Unknown"/></label>
+   <label>Run threshold (seconds per km) <small>For example, 260 = 4:20/km.</small><input type="number" min={150} max={900} value={runThreshold} onChange={e=>setRunThreshold(e.target.value)} placeholder="Unknown"/></label>
+   <small>Leave unknown values blank — don't guess. AZUR will begin with appropriate endurance sessions and schedule benchmarks when you are ready.</small>
   </div>}
   {step===2&&<div>
    <h3>How do you track training?</h3>
+   <p>Choose your main training device. You can connect supported services after setup.</p>
    <div className="azur-onboarding-options">{devices.map(d=><label key={d.id} className={device===d.id?'selected':''}>
     <input type="radio" name="azur-device" checked={device===d.id} onChange={()=>setDevice(d.id)}/>{d.label}
    </label>)}</div>
