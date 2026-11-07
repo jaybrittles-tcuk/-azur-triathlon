@@ -9865,7 +9865,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
             {passwordRecoverySession?'Enter a new password of at least 12 characters.':recoveryMode?'Enter your account email to receive a secure password reset link.':registrationMode ? 'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.' : 'Sign in to access your training, performance and recovery data.'}
           </p>
 
-          <label>
+          {!passwordRecoverySession&&<label>
             <span>Email</span>
 
             <input
@@ -9874,7 +9874,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
               onChange={(event) => setEmail(event.target.value)}
               required
             />
-          </label>
+          </label>}
 
           {!recoveryMode && <label>
             <span>Password</span>
