@@ -39,7 +39,7 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   await refresh();
  }
  async function copyInstructions(inv:Invitation){
-  const link=window.location.origin+'/accept-invitation?invitation='+encodeURIComponent(inv.id);
+  const link=window.location.origin+'/?join=1&invitation='+encodeURIComponent(inv.id);
   const msg = `You're invited to AZUR Triathlon Coaching!\n\nYour coach has invited ${inv.invitee_email} to test AZUR beta. Register or sign in with this email, verify it, and accept your invitation before onboarding.\n\nOpen your invitation: ${link}\n\nIn beta, AZUR can help you set race goals, enter training availability and thresholds, view a structured swim/bike/run plan, and give feedback. Training recommendations and integrations are still being tested; some imports, adaptive adjustments and calendar connections may not work reliably. Review sessions with your coach and report anything unexpected.\n\nPlease do not rely on AZUR alone for medical or safety decisions.`;
   try{await navigator.clipboard.writeText(msg);setMessage('Invitation instructions copied. Sharing them does not create an account or activate public registration.');}
   catch{setMessage('Copy unavailable. Share the onboarding URL and invited email address manually.');}
