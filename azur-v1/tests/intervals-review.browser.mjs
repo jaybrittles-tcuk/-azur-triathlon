@@ -92,6 +92,8 @@ const mockSupabase=async (route,coach=false)=>{
   assert.equal(inputs.can_swim_200m,true);
   missingProfile=false;onboardingStep=3;
   data={status:'ready',setup_saved:true,calendar_changed:true,sessions:1,total_minutes:45};
+ } else if(url.pathname.endsWith('/coach_athlete_invitation')) {
+  data=[{...invitation,accepted_at:new Date().toISOString()}];
  } else if(url.pathname.endsWith('/athlete_onboarding')) {
   if(req.method()==='POST')onboardingStep=req.postDataJSON().onboarding_step;
   data=single?null:[];
