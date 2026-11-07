@@ -1203,7 +1203,7 @@ export function App() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true';
+  const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true' || (new URLSearchParams(window.location.search).get('join') === '1' && /^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(new URLSearchParams(window.location.search).get('invitation') || ''));
   const [registrationMode, setRegistrationMode] = useState(() => new URLSearchParams(window.location.search).get('join') === '1');
   const [registrationNotice, setRegistrationNotice] = useState('');
   const [authError, setAuthError] = useState('');
