@@ -27,7 +27,7 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   const {error}=await supabase.from('coach_athlete_invitation').insert({coach_user_id:user.id,invitee_email:normalized});
   setBusy(false);
   if(error){setMessage(error.message);return;}
-  setEmail('');setMessage('Invitation created. Share the onboarding link with the athlete; they must register using the invited email address.');
+  setEmail('');setMessage('Invitation created. Use Send email to deliver the invitation. The invitation must be accepted before onboarding in the new flow.');
   await refresh();
  }
  async function sendEmail(inv:Invitation){
@@ -39,7 +39,7 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   await refresh();
  }
  async function copyInstructions(inv:Invitation){
-  const msg = `Jay has invited you to AZUR using ${inv.invitee_email}. Open https://azur-triathlon.vercel.app in Safari, create your athlete account with this email, confirm your email and complete setup. Then open More and accept the coach invitation. If you already have an account, sign in and open More.`;
+  const msg = `Jay has invited you to AZUR using ${inv.invitee_email}. Open https://azur-triathlon.vercel.app in Safari, create your athlete account with this email, confirm your email and complete setup. Your coach relationship must be accepted before onboarding. Contact your coach if the email invitation link does not work.`;
   try{await navigator.clipboard.writeText(msg);setMessage('Invitation instructions copied. Sharing them does not create an account or activate public registration.');}
   catch{setMessage('Copy unavailable. Share the onboarding URL and invited email address manually.');}
  }
@@ -55,7 +55,7 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
  }
  return <section className="azur-invitations">
   <h3>{mode==='coach'?'Invite beta athletes':'Coach invitations'}</h3>
-  <p>{mode==='coach'?'Create a secure invitation for the athlete’s registration email. Acceptance is required before coach access is granted.':'Invitations addressed to your verified account email appear here. Finish your athlete profile before accepting.'}</p>
+  <p>{mode==='coach'?'Create a secure invitation for the athlete’s registration email. Acceptance is required before coach access is granted.':'Invitations addressed to your verified account email appear here. Accept your invitation before starting athlete onboarding.'}</p>
   {mode==='coach'&&<form onSubmit={createInvite} className="azur-invite-form"><label> Athlete email <input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="athlete@example.com"/></label><button type="submit" disabled={busy}>Create invitation</button></form>}
   <button type="button" disabled={busy || loading} onClick={()=>void refresh()}>Refresh invitations</button>
   {message&&<p role="status">{message}</p>}
@@ -65,6 +65,6 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
    {mode==='coach'&&!inv.accepted_at&&<button type="button" onClick={()=>void copyInstructions(inv)}>Copy instructions</button>}
    {mode==='athlete'&&!inv.accepted_at&&new Date(inv.expires_at).getTime()>Date.now()&&<button disabled={busy} onClick={()=>void accept(inv)}>Accept</button>}
   </div>)}</div>}
-  {mode==='coach'&&<p className="azur-invite-note">Create the invitation, then use Copy instructions to share the setup steps with your athlete. They can accept from More after completing setup.</p>}
+  {mode==='coach'&&<p className="azur-invite-note">Create and email the invitation first. Email-link acceptance before onboarding is being implemented; do not instruct athletes to accept after setup.</p>}
  </section>;
 }
