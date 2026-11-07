@@ -9605,7 +9605,10 @@ onClick={handleImportActivities}
 
   async function handleRecoveryRequest(event:React.FormEvent){
     event.preventDefault();setAuthLoading(true);setAuthError('');setRegistrationNotice('');
-    const {error}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:window.location.origin+'/reset-password'});
+    const invitationId=new URLSearchParams(window.location.search).get('invitation');
+     const recoveryUrl=new URL('/reset-password',window.location.origin);
+     if(invitationId)recoveryUrl.searchParams.set('invitation',invitationId);
+     const {error}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:recoveryUrl.toString()});
     setAuthLoading(false);
     if(error){setAuthError(error.message);return;}
     setRegistrationNotice('If this email belongs to an AZUR account, a password reset link has been sent. Check your inbox and spam folder.');
@@ -9615,7 +9618,9 @@ onClick={handleImportActivities}
     setAuthLoading(true);setAuthError('');
     const {error}=await supabase.auth.updateUser({password});setAuthLoading(false);
     if(error){setAuthError(error.message);return;}
-    setPassword('');setPasswordRecoverySession(false);window.history.replaceState({},'', '/');setRegistrationNotice('Password updated. You can now continue to AZUR.');
+    setPassword('');setPasswordRecoverySession(false);
+     const invitationId=new URLSearchParams(window.location.search).get('invitation');
+     window.location.replace(invitationId?'/accept-invitation?invitation='+encodeURIComponent(invitationId):'/');
   }
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
@@ -9630,6 +9635,9 @@ onClick={handleImportActivities}
 
     if (error) {
       setAuthError(error.message);
+    } else {
+      const invitationId=new URLSearchParams(window.location.search).get('invitation');
+      if(invitationId){window.location.assign('/accept-invitation?invitation='+encodeURIComponent(invitationId));return;}
     }
 
     setAuthLoading(false);
