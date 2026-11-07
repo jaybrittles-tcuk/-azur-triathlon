@@ -9620,9 +9620,11 @@ async function handleRegister(event: React.FormEvent) {
   event.preventDefault();
   if (password.length < 12) { setAuthError('Use a password of at least 12 characters.'); return; }
   setAuthLoading(true); setAuthError(''); setRegistrationNotice('');
-  const {data,error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{emailRedirectTo:window.location.origin+'/onboarding'}});
+  const invitationId=new URLSearchParams(window.location.search).get('invitation');
+  const invitationReturn=invitationId?window.location.origin+'/accept-invitation?invitation='+encodeURIComponent(invitationId):window.location.origin+'/onboarding';
+  const {data,error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{emailRedirectTo:invitationReturn}});
   if(error) setAuthError(error.message);
-  else { setPassword(''); if(data.session){window.location.assign('/onboarding');return;} setRegistrationNotice('Check your email to confirm your account. After confirmation, sign in to complete onboarding in its own full-screen view.'); }
+  else { setPassword(''); if(data.session){window.location.assign(invitationReturn);return;} setRegistrationNotice('Check your email to confirm your account. After confirmation, return to your invitation link to accept and begin athlete setup.'); }
   setAuthLoading(false);
 }
 async function handleSignOut() {
