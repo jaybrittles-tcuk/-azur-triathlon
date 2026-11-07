@@ -23,6 +23,7 @@ export default function AthleteOnboardingDraft(){
  const [runThreshold,setRunThreshold]=useState('');
  const [experience,setExperience]=useState('first');
  const [background,setBackground]=useState('regular');
+ const [backgroundTouched,setBackgroundTouched]=useState(false);
  const [consistency,setConsistency]=useState('4to7');
  const [concern,setConcern]=useState('none');
  const [canSwim,setCanSwim]=useState(true);
@@ -50,9 +51,10 @@ export default function AthleteOnboardingDraft(){
     setRace(data.race_distance as Race);setRaceDate(data.race_date||'');
     setExperience(data.experience);setHours(Number(data.weekly_hours));
     setDevice(data.device as Device);
-    setBackground(data.training_background||'regular');setConsistency(data.training_consistency||'4to7');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);
+    setBackground(data.training_background||'regular');setBackgroundTouched(true);setConsistency(data.training_consistency||'4to7');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);
     setTrainingDays((data.training_days||[]).map((day:number)=>weekdays[day]).filter(Boolean));setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
     setFtp(data.ftp_watts==null?'':String(data.ftp_watts));setCss(data.swim_css_seconds_per_100m==null?'':String(data.swim_css_seconds_per_100m));setRunThreshold(data.run_threshold_seconds_per_km==null?'':String(data.run_threshold_seconds_per_km));setStep(Math.min(2,Math.max(0,data.onboarding_step)));
+    // Existing athlete data is always preserved; no automatic plan changes.
    }
    setLoading(false);
   }
@@ -119,7 +121,7 @@ export default function AthleteOnboardingDraft(){
     <option value="other">Other / general fitness</option>
    </select></label>
    <label>Goal race date (optional)<input type="date" value={raceDate} onChange={e=>setRaceDate(e.target.value)}/></label>
-   <label>Experience<select value={experience} onChange={e=>setExperience(e.target.value)}>
+   <label>Experience at your goal race distance<select value={experience} onChange={e=>{const next=e.target.value;setExperience(next);if(!backgroundTouched)setBackground(next==='experienced'?'established':next==='returning'?'regular':'novice');}}>
     <option value="first">First event at this distance</option><option value="returning">Returning athlete</option><option value="experienced">Experienced competitor</option>
    </select></label>
   </div>}
@@ -129,9 +131,11 @@ export default function AthleteOnboardingDraft(){
    <p>Choose the days you can realistically train.</p>
    <div className="azur-onboarding-options">{weekdays.map(day=><label key={day} className={trainingDays.includes(day)?'selected':''}><input type="checkbox" checked={trainingDays.includes(day)} onChange={e=>setTrainingDays(previous=>e.target.checked?[...previous,day]:previous.filter(d=>d!==day))}/>{day}</label>)}</div>
    <label>Hours actually trained per week recently (optional)<input type="number" min={0} max={25} step="0.5" value={recentHours} onChange={e=>setRecentHours(e.target.value)} placeholder="Unknown"/></label>
-   <p>Your current volume and available hours are different. We will not assume you can safely train at your maximum availability immediately.</p>
-   <label>Training background<select value={background} onChange={e=>setBackground(e.target.value)}><option value="novice">New to structured training</option><option value="regular">Training regularly</option><option value="established">Established endurance athlete</option></select></label>
-   <label>Training consistency<select value={consistency} onChange={e=>setConsistency(e.target.value)}><option value="under4">Under 4 weeks consistent</option><option value="4to7">4–7 weeks consistent</option><option value="8plus">8+ weeks consistent</option></select></label>
+   {recentHours!==''&&Number(recentHours)<hours&&<p role="note">You currently train {recentHours} hours per week and have {hours} hours available. AZUR will build gradually rather than immediately filling your available time.</p>}
+   <p>Your event experience and recent training history are separate. An experienced racer returning after a break may still need a conservative first two weeks.</p>
+   <label>Current training background<select value={background} onChange={e=>{setBackground(e.target.value);setBackgroundTouched(true)}}><option value="novice">New to structured training</option><option value="regular">Training regularly</option><option value="established">Established endurance athlete</option></select></label>
+   {experience==='experienced'&&background==='novice'&&<p role="note">You selected experienced competitor and new to structured training. That's fine if you have race experience but are restarting structured training.</p>}
+   <label>Recent training consistency<select value={consistency} onChange={e=>setConsistency(e.target.value)}><option value="under4">Under 4 weeks consistent</option><option value="4to7">4–7 weeks consistent</option><option value="8plus">8+ weeks consistent</option></select></label>
    <label>Any current injury or training concern?<select value={concern} onChange={e=>setConcern(e.target.value)}><option value="none">No</option><option value="yes">Yes — coach review needed</option><option value="unsure">Unsure — coach review needed</option></select></label>
    <label>Can you comfortably swim 200m continuously?<select value={canSwim?'yes':'no'} onChange={e=>setCanSwim(e.target.value==='yes')}><option value="yes">Yes</option><option value="no">Not yet</option></select></label>
    <h3>Known training thresholds (optional)</h3>
@@ -155,7 +159,7 @@ export default function AthleteOnboardingDraft(){
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
   {ready&&<div role="status" className="azur-onboarding-recap"><strong>Draft setup</strong>
    <p>{race.toUpperCase()} {raceDate?'· '+raceDate:''} · {hours} h/week · {device==='none'?'Manual logging':device.toUpperCase()}</p>
-   <small>These onboarding preferences are saved to your account. No performance profile, coach assignment, Garmin connection or training plan has been created or activated.</small>
+   <small>{message.startsWith('Your training plan is ready')?'Your plan has been created and verified.':'Your setup has been saved; your coach will review it before training is allocated.'}</small>
   </div>}
  </section>;
 }
