@@ -39,7 +39,8 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
   await refresh();
  }
  async function copyInstructions(inv:Invitation){
-  const msg = `Jay has invited you to AZUR using ${inv.invitee_email}. Open https://azur-triathlon.vercel.app in Safari, create your athlete account with this email, confirm your email and complete setup. Your coach relationship must be accepted before onboarding. Contact your coach if the email invitation link does not work.`;
+  const link=window.location.origin+'/accept-invitation?invitation='+encodeURIComponent(inv.id);
+  const msg = `You're invited to AZUR Triathlon Coaching!\n\nYour coach has invited ${inv.invitee_email} to test AZUR beta. Register or sign in with this email, verify it, and accept your invitation before onboarding.\n\nOpen your invitation: ${link}\n\nIn beta, AZUR can help you set race goals, enter training availability and thresholds, view a structured swim/bike/run plan, and give feedback. Training recommendations and integrations are still being tested; some imports, adaptive adjustments and calendar connections may not work reliably. Review sessions with your coach and report anything unexpected.\n\nPlease do not rely on AZUR alone for medical or safety decisions.`;
   try{await navigator.clipboard.writeText(msg);setMessage('Invitation instructions copied. Sharing them does not create an account or activate public registration.');}
   catch{setMessage('Copy unavailable. Share the onboarding URL and invited email address manually.');}
  }
@@ -65,6 +66,6 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
    {mode==='coach'&&!inv.accepted_at&&<button type="button" onClick={()=>void copyInstructions(inv)}>Copy instructions</button>}
    {mode==='athlete'&&!inv.accepted_at&&new Date(inv.expires_at).getTime()>Date.now()&&<button disabled={busy} onClick={()=>void accept(inv)}>Accept</button>}
   </div>)}</div>}
-  {mode==='coach'&&<p className="azur-invite-note">Create and email the invitation first. Email-link acceptance before onboarding is being implemented; do not instruct athletes to accept after setup.</p>}
+  {mode==='coach'&&<p className="azur-invite-note">Create an invitation first. Use Copy instructions to share its unique staging link while email delivery is being configured. Athletes must accept before onboarding.</p>}
  </section>;
 }
