@@ -34,6 +34,7 @@ export default function AthleteOnboardingDraft(){
  const [saving,setSaving]=useState(false);
  const [message,setMessage]=useState('');
  const [isCoach,setIsCoach]=useState(false);
+ const [invitationVerified,setInvitationVerified]=useState(false);
  useEffect(()=>{
   let cancelled=false;
   async function load(){
@@ -42,6 +43,10 @@ export default function AthleteOnboardingDraft(){
    if(authError || !user){setMessage('Sign in to save your athlete setup.');setLoading(false);return;}
    if(user.app_metadata?.role==='coach'){setIsCoach(true);setLoading(false);return;}
    setUserId(user.id);
+   const {data:acceptedInvite,error:inviteError}=await supabase.from('coach_athlete_invitation').select('id').not('accepted_at','is',null).limit(1);
+   if(cancelled)return;
+   if(inviteError||!acceptedInvite?.length){setMessage('A coach invitation must be accepted from your email before you can begin setup. Please contact your coach for an invitation.');setLoading(false);return;}
+   setInvitationVerified(true);
    const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
    if(!cancelled && profile?.display_name) setDisplayName(profile.display_name);
    const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,training_days,recent_weekly_hours,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,training_background,training_consistency,current_training_concern,can_swim_200m,device,onboarding_step').eq('user_id',user.id).maybeSingle();
@@ -108,6 +113,7 @@ export default function AthleteOnboardingDraft(){
   setMessage('Progress saved.');
  }
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
+ if(!invitationVerified)return <section className="azur-onboarding-draft" role="status"><h3>Invitation required</h3><p>{message||'Please accept your coach invitation before onboarding.'}</p><p>Open the invitation email sent by your coach, sign in with that address, and accept the invitation.</p></section>;
  if(isCoach)return <section className="azur-onboarding-draft"><h3>Athlete onboarding</h3><p>This setup is for athlete accounts. Coach access and assignments are managed separately.</p></section>;
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
   <div className="azur-onboarding-progress"><strong>Getting started</strong><span>Step {step+1} of 3</span></div>
