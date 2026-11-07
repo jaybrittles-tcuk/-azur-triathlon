@@ -1209,7 +1209,7 @@ export function App() {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [recoveryMode,setRecoveryMode]=useState(false);
-  const [passwordRecoverySession,setPasswordRecoverySession]=useState(false);
+  const [passwordRecoverySession,setPasswordRecoverySession]=useState(() => window.location.pathname === '/reset-password' || new URLSearchParams(window.location.hash.slice(1)).get('type') === 'recovery');
   const [showAuthPassword,setShowAuthPassword]=useState(false);
   const [athleteName, setAthleteName] = useState('Athlete');
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -9605,7 +9605,7 @@ onClick={handleImportActivities}
 
   async function handleRecoveryRequest(event:React.FormEvent){
     event.preventDefault();setAuthLoading(true);setAuthError('');setRegistrationNotice('');
-    const {error}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:window.location.origin+'/'});
+    const {error}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:window.location.origin+'/reset-password'});
     setAuthLoading(false);
     if(error){setAuthError(error.message);return;}
     setRegistrationNotice('If this email belongs to an AZUR account, a password reset link has been sent. Check your inbox and spam folder.');
@@ -9615,7 +9615,7 @@ onClick={handleImportActivities}
     setAuthLoading(true);setAuthError('');
     const {error}=await supabase.auth.updateUser({password});setAuthLoading(false);
     if(error){setAuthError(error.message);return;}
-    setPassword('');setPasswordRecoverySession(false);setRegistrationNotice('Password updated. You can now continue to AZUR.');
+    setPassword('');setPasswordRecoverySession(false);window.history.replaceState({},'', '/');setRegistrationNotice('Password updated. You can now continue to AZUR.');
   }
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
