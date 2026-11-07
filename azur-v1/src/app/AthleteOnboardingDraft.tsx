@@ -28,6 +28,7 @@ export default function AthleteOnboardingDraft(){
  const [concern,setConcern]=useState('none');
  const [canSwim,setCanSwim]=useState(true);
  const [ready,setReady]=useState(false);
+ const [betaAcknowledged,setBetaAcknowledged]=useState(false);
  const [displayName,setDisplayName]=useState('');
  const [userId,setUserId]=useState<string|null>(null);
  const [loading,setLoading]=useState(true);
@@ -72,6 +73,7 @@ export default function AthleteOnboardingDraft(){
   if(trainingDays.length===0 && nextStep>=2){setMessage('Choose at least one day you can train.');return;}
   if(recentHours!=='' && (!Number.isFinite(Number(recentHours))||Number(recentHours)<0||Number(recentHours)>25)){setMessage('Recent weekly training must be between 0 and 25 hours.');return;}
   for(const [label,value,min,max] of [['FTP',ftp,60,650],['Swim CSS',css,50,300],['Run threshold',runThreshold,150,900]] as const){if(value!==''&&(!Number.isFinite(Number(value))||Number(value)<min||Number(value)>max)){setMessage(`${label} is outside the expected range. Leave blank if unknown.`);return;}}
+  if(nextStep===3 && !betaAcknowledged){setMessage('Please acknowledge the beta limitations before creating your plan.');return;}
   if(nextStep===3 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
   if(nextStep===3){
@@ -159,6 +161,7 @@ export default function AthleteOnboardingDraft(){
    </label>)}</div>
    <p>{device==='garmin'?'Garmin connection will be offered after setup where available.':device==='none'?'You can record workouts, RPE and benchmarks manually.':'You can start with manual workout logging. Direct syncing for this device is not yet available.'}</p>
   </div>}
+  {step===2&&<div className="azur-beta-disclosure" role="group" aria-label="AZUR beta participation"><h3>Before you begin: AZUR beta</h3><p><strong>What AZUR offers:</strong> race-goal and availability-based setup, structured training plans, workout explanations, feedback and supported activity connections.</p><p><strong>What is still being tested:</strong> training adaptations, device imports, calendar syncing and some coaching insights may be incomplete or inaccurate. Training sessions may require coach review. Do not follow a workout that feels unsafe; report problems to your coach. AZUR is not medical advice.</p><label><input type="checkbox" checked={betaAcknowledged} onChange={e=>setBetaAcknowledged(e.target.checked)}/> I understand that AZUR is a beta product and will review any unsuitable sessions or missing data with my coach.</label><small>This acknowledgement is required to finish setup. It is not yet stored as a permanent consent record.</small></div>}
   <div className="azur-onboarding-actions">
    {step>0&&<button type="button" onClick={()=>{setStep(s=>s-1);setReady(false)}}>Back</button>}
    {step<2?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>Continue</button>
