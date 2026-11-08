@@ -7,12 +7,12 @@ const icons={bike:Bike,swim:Waves,run:Footprints};
 const minutes=(n:number)=>n>=60?`${Math.floor(n/60)}h ${Math.round(n%60)}m`:`${Math.round(n)} min`;
 export default function AthleteDashboard({name,avatar,race,phase,today,sessions,readiness,weeklyStress,onSession,onNavigate}:Props){
  const todayHeading=useId();
- const [strategy,setStrategy]=useState<{weekly_hours:number|null;recent_weekly_hours:number|null;race_distance:string|null;race_date:string|null;swim_css_seconds_per_100m:number|null;ftp_watts:number|null;run_threshold_seconds_per_km:number|null}|null>(null);
+ const [strategy,setStrategy]=useState<{weekly_hours:number|null;recent_weekly_hours:number|null;training_background:string|null;training_consistency:string|null;race_distance:string|null;race_date:string|null;swim_css_seconds_per_100m:number|null;ftp_watts:number|null;run_threshold_seconds_per_km:number|null}|null>(null);
  const [strategyLoading,setStrategyLoading]=useState(false);
  const [strategyError,setStrategyError]=useState(false);
  useEffect(()=>{let active=true;setStrategyLoading(true);supabase.auth.getUser().then(async({data,error})=>{
   if(error||!data.user){if(active){setStrategyError(true);setStrategyLoading(false);}return;}
-  const result=await supabase.from('athlete_onboarding').select('weekly_hours,recent_weekly_hours,race_distance,race_date,swim_css_seconds_per_100m,ftp_watts,run_threshold_seconds_per_km').eq('user_id',data.user.id).maybeSingle();
+  const result=await supabase.from('athlete_onboarding').select('weekly_hours,recent_weekly_hours,training_background,training_consistency,race_distance,race_date,swim_css_seconds_per_100m,ftp_watts,run_threshold_seconds_per_km').eq('user_id',data.user.id).maybeSingle();
   if(active){setStrategy(result.data);setStrategyError(!!result.error);setStrategyLoading(false);}
  }).catch(()=>{if(active){setStrategyError(true);setStrategyLoading(false);}});return()=>{active=false;};},[]);
  const pace=(seconds:number|null|undefined)=>seconds&&seconds>0?Math.floor(seconds/60)+':'+String(Math.round(seconds%60)).padStart(2,'0'):null;
@@ -48,6 +48,12 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
        ['Race date',strategy.race_date?new Date(strategy.race_date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set']
       ].map(([label,value])=><div key={label} style={{background:'#16394f',borderRadius:12,padding:11,minWidth:0}}><small style={{display:'block',color:'#9cbcd0'}}>{label}</small><strong style={{display:'block',marginTop:5,overflowWrap:'anywhere'}}>{value}</strong></div>)}
      </div>
+     {strategy.recent_weekly_hours!=null&&strategy.recent_weekly_hours>=8&&strategy.training_consistency==='under4'&&<div role="status" style={{background:'#3c3320',border:'1px solid #b68b40',borderRadius:12,padding:12,marginTop:12}}>
+      <strong style={{color:'#ffda91'}}>Training baseline needs review</strong>
+      <p style={{color:'#f3e6ce',lineHeight:1.5,margin:'6px 0'}}>You reported {strategy.recent_weekly_hours} hours of recent training but fewer than four consistent weeks. AZUR currently treats this as limited training history and may prescribe a much smaller foundation week. That does not mean your established fitness has been assessed.</p>
+      <p style={{color:'#f3e6ce',margin:'6px 0'}}>Confirm how many weeks you've sustained this volume and ask your coach to review the starting load before changing the plan.</p>
+      <button type="button" onClick={()=>onNavigate('Profile')} style={{border:0,borderRadius:8,background:'#c9943b',color:'#142331',padding:'9px 12px',fontWeight:700}}>Review athlete profile →</button>
+     </div>}
      <details style={{border:'1px solid #315c72',borderRadius:12,padding:12,marginTop:12,background:'#133348'}}>
       <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>This week's coaching signals <small style={{color:'#82cde8',fontWeight:500}}>· live calendar</small></summary>
       <div style={{display:'grid',gap:10,marginTop:12,lineHeight:1.5}}>
