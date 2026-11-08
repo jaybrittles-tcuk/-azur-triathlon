@@ -21,7 +21,7 @@ export default function AcceptCoachInvitation(){
  async function accept(){
   if(!invitation||busy)return;
   setBusy(true);setStatus('Accepting your invitation…');
-  const {data,error}=await supabase.from('coach_athlete_invitation').update({accepted_at:new Date().toISOString()}).eq('id',invitation.id).is('accepted_at',null).select('id').maybeSingle();
+  const {data,error}=await supabase.from('coach_athlete_invitation').update({accepted_at:new Date().toISOString(),accepted_by:(await supabase.auth.getUser()).data.user?.id}).eq('id',invitation.id).is('accepted_at',null).select('id').maybeSingle();
   setBusy(false);
   if(error||!data){setStatus('We could not verify acceptance: '+(error?.message||'Please request a new link.'));return;}
   window.location.assign('/onboarding');
