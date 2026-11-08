@@ -32,8 +32,8 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     ? `${target.low}–${target.high} seconds/100 m`
     : null;
   const structure = repeatCount > 1
-    ? `This session contains ${repeatCount} work intervals${recovery.length ? ' with recovery between efforts' : ''}.`
-    : repeatCount === 1 ? 'This session contains one prescribed work interval.' : 'Follow the workout structure shown in the Workout tab.';
+    ? `The structured prescription contains ${repeatCount} work intervals${recovery.length ? ' with recovery between efforts' : ''}.`
+    : 'Use the full workout instructions for the session structure; the available structured data does not confirm a complete repeat count.';
   const execution = input.sport === 'bike'
     ? 'Aim for repeatable power or effort across the work intervals; avoid turning an aerobic session into a maximal test.'
     : input.sport === 'run'
@@ -48,12 +48,24 @@ export function sessionCoaching(input: Input): { execution: string; context: str
       ? `With recorded FTP ${input.ftpWatts} W, the prescribed range is approximately ${Math.round(input.ftpWatts! * target.low / 100)}–${Math.round(input.ftpWatts! * target.high / 100)} W; confirm your threshold is current.`
       : 'An FTP-based target is prescribed, but no validated FTP is available; confirm an appropriate effort target with your coach.'
     : '';
-  const effort = input.completed && input.sessionRpe != null && Number.isFinite(input.sessionRpe) &&
-    input.sessionRpe >= 1 && input.sessionRpe <= 10
-    ? ` You reported RPE ${input.sessionRpe}/10. Compare that subjective effort with the session intention; unexpectedly high effort warrants coach review.`
-    : '';
+  const rpe = input.completed && input.sessionRpe != null && Number.isFinite(input.sessionRpe) &&
+    input.sessionRpe >= 1 && input.sessionRpe <= 10 ? input.sessionRpe : null;
+  const expectedRpe = target?.metric === 'rpe' ? target : null;
+  const response = rpe === null ? ''
+    : expectedRpe && rpe > expectedRpe.high + 1
+    ? `You reported RPE ${rpe}/10 against prescribed RPE ${expectedRpe.low}–${expectedRpe.high}/10. That gap deserves coach review before progressing intensity; it does not diagnose fatigue.`
+    : expectedRpe
+    ? `You reported RPE ${rpe}/10 against prescribed RPE ${expectedRpe.low}–${expectedRpe.high}/10. Review the difference with your coach alongside the completed session.`
+    : `You reported RPE ${rpe}/10. The workout has no uniform explicit RPE target for a direct comparison.`;
+  const sportGuidance = input.sport === 'bike'
+    ? 'After riding, note whether power or perceived effort stayed consistent across repeats. If the same target becomes unexpectedly harder, flag it before the next quality ride.'
+    : input.sport === 'run'
+    ? 'After running, note whether breathing and form remained controlled at the prescribed effort. If easy running felt unusually demanding, flag it before increasing pace or volume.'
+    : input.sport === 'swim'
+    ? 'After swimming, note whether breathing, body position and stroke quality stayed consistent. If technique broke down, tell your coach which part of the set was affected before progressing the session.'
+    : 'Record whether the prescribed effort was sustainable and flag unexpected difficulty to your coach.';
   return {
     execution: [structure, targetDescription ? `Work target: ${targetDescription}.` : '', execution].filter(Boolean).join(' '),
-    context: [power, effort].filter(Boolean).join(' ') || 'Use the prescribed targets and record how the session felt. Device metrics and athlete feedback are considered separately; plan changes require coach approval.',
+    context: [power, response, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
   };
 }
