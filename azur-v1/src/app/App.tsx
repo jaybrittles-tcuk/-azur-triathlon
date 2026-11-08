@@ -7276,10 +7276,7 @@ onClick={() => {
           <div className="editor-grid">
 
 
-{selected.status !== 'completed' && <div className="session-block">
-  <span className="eyebrow">PLANNED DURATION</span>
-  <strong>{formatDuration(selected.durationMin)}</strong>
-</div>}
+{/* Planned duration is already visible in the workout header and Overview tab. */}
 {selected.status === 'completed' &&
   selected.completedDurationSec && (
     <div className="wide session-block completed-session-summary session-analysis-v3-summary">
@@ -7798,13 +7795,15 @@ const sessionVerdict =
   </div>
 )}
 
-<div className="wide session-block session-intent-v2" aria-label="Why this session matters">
+<details className="wide session-block session-intent-v2 azur-premium-disclosure" aria-label="Why this session matters">
+  <summary><strong>Why today matters</strong><span>{selected.prescription?.focus || 'Your training purpose'}</span></summary>
   <span className="eyebrow">SESSION PURPOSE</span>
   <strong>{selected.prescription?.focus || (Array.isArray(selected.prescription?.steps) && selected.prescription.steps.length ? 'Controlled aerobic endurance and consistent pacing' : 'Session-specific training focus')}</strong>
   {selected.rationale && <p>{selected.rationale}</p>}
-</div>
+</details>
 {(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2" open={Boolean(editableManualId)}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
-<div className="wide session-block session-analysis-v3-feedback">
+<details className="wide session-block session-analysis-v3-feedback azur-premium-disclosure" open={selected.status==='completed'}>
+  <summary><strong>Athlete feedback</strong><span>Session effort and notes</span></summary>
   <span className="eyebrow">ATHLETE FEEDBACK</span>
 
   <div className="session-block-item">
@@ -7845,14 +7844,11 @@ const sessionVerdict =
       />
     </label>
   </div>
-</div>
-
-          </div>
 
 <button
   type="button"
   className="primary-button"
-  onClick={()=>void handleSessionFeedbackSave()}
+  onClick={()=>void handleSessionFeedbackSave()
   disabled={sessionFeedbackSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed}
 >
   <Save size={17} />
@@ -7866,7 +7862,9 @@ const sessionVerdict =
   <small className="feedback-message">
     {sessionFeedbackMessage}
   </small>
-)}         
+)}
+</details>
+          </div>
           </aside>
   </div>
 )}
