@@ -4,7 +4,7 @@ type Props={prescription:Record<string,unknown>|null|undefined; ftpWatts?:number
 export default function WorkoutTargetDetails({prescription,ftpWatts,compact=false}:Props){
  const workout=prescription?.azurWorkout as {steps?:unknown}|undefined;
  const intervals=normalizeWorkoutIntervals(workout?.steps);
- if(!intervals.length)return compact?null:<div className="azur-target-empty">Structured interval targets are not available for this session.</div>;
+ if(!intervals.length){if(Array.isArray(prescription?.steps)&&prescription.steps.length>0)return null;return compact?null:<div className="azur-target-empty">Structured interval targets are not available for this session.</div>;}
  const rows=compact?intervals.slice(0,4):intervals;
  return <div className={compact?'azur-workout-targets compact':'azur-workout-targets'}>
   {!compact&&<h4>Structured intervals <small>{intervals.length} blocks</small></h4>}
