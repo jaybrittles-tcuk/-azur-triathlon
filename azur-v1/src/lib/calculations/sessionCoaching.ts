@@ -24,6 +24,7 @@ export function sessionCoaching(input: Input): { execution: string; context: str
   const countWords: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
   const repeatMatch = narrative.match(/\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:relaxed\s+|easy\s+|aerobic\s+|hard\s+|controlled\s+)*(?:efforts|repeats|intervals)\b/i);
   const statedCount = repeatMatch ? (countWords[repeatMatch[1].toLowerCase()] ?? Number(repeatMatch[1])) : null;
+  // A different count is a possible mismatch, not proof the narrative is wrong: the parser may omit nested steps.
   const countMismatch = statedCount !== null && Number.isInteger(statedCount) && statedCount > 0 && work.length > 0 && statedCount !== work.length;
   const explicitTargets = work.map(step => step.target).filter(target => target !== null);
   const sameTarget = explicitTargets.length === repeatCount && repeatCount > 0 &&
@@ -81,7 +82,7 @@ export function sessionCoaching(input: Input): { execution: string; context: str
   const missingFtp = target?.metric === 'ftp_percent' && !ftpValid
     ? 'Ask your coach to confirm your current FTP before using a wattage conversion.' : '';
   const consistencyGuidance = countMismatch
-    ? 'The written session and workout interval structure show different repeat counts. Follow your coach-confirmed session instructions and ask for clarification before starting.'
+    ? 'The written session and structured intervals may describe different repeat counts. Check the full workout with your coach before starting; some repeats may not be represented in the structured view.'
     : '';
   const feedbackPrompt = input.completed && rpe === null
     ? 'If you have not yet recorded session RPE, add it so your coach can compare the planned session with your experience.'
