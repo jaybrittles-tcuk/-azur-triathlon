@@ -44,6 +44,7 @@ export default function AthleteOnboardingDraft(){
  const [message,setMessage]=useState('');
  const [isCoach,setIsCoach]=useState(false);
  const [invitationVerified,setInvitationVerified]=useState(false);
+ const [pendingInvitationId,setPendingInvitationId]=useState<string|null>(null);
  useEffect(()=>{
   let cancelled=false;
   async function load(){
@@ -54,7 +55,10 @@ export default function AthleteOnboardingDraft(){
    setUserId(user.id);
    const {data:acceptedInvite,error:inviteError}=await supabase.from('coach_athlete_invitation').select('id').not('accepted_at','is',null).limit(1);
    if(cancelled)return;
-   if(inviteError||!acceptedInvite?.length){setMessage('A coach invitation must be accepted from your email before you can begin setup. Please contact your coach for an invitation.');setLoading(false);return;}
+   if(inviteError||!acceptedInvite?.length){
+    const {data:pending}=await supabase.from('coach_athlete_invitation').select('id,expires_at').is('accepted_at',null).gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(1);
+    if(!cancelled)setPendingInvitationId(pending?.[0]?.id||null);
+    setMessage(pending?.length?'Your email is confirmed. Accept your existing coach invitation to begin setup.':'No active coach invitation was found for this email. Please contact your coach.');setLoading(false);return;}
    setInvitationVerified(true);
    const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
    if(!cancelled && profile?.display_name) setDisplayName(profile.display_name);
