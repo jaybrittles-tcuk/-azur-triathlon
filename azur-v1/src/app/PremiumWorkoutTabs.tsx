@@ -19,7 +19,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
  if(Array.isArray(source?.steps))source.steps.forEach(addCadence);
  return <section className="azur-premium-workout-tabs">
   <div className="azur-workout-tab-nav" role="tablist" aria-label="Workout information">
-   {(['overview','intervals','notes'] as const).map(t=><button type="button" key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t[0].toUpperCase()+t.slice(1)}</button>)}
+   {(['overview','intervals','notes'] as const).map(t=><button type="button" key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t==='intervals'?'Workout':t==='notes'?'Coaching':'Overview'}</button>)}
   </div>
   {tab==='overview'&&<div role="tabpanel" className="azur-workout-tab-content">
    <p>{rationale||'Review this session and its prescribed training objective.'}</p>
@@ -32,7 +32,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Intervals for prescribed targets.</p>}
   </div>}
   {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
-   {intervals.length ? <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/> : <p>Workout instructions are listed in the detailed prescription below. Review warm-up, main set and cool-down before starting.</p>}
+   {intervals.length ? <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/> : <p>Review the coach-prescribed warm-up, main set and cool-down in the detailed instructions below.</p>}
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
   {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content">
