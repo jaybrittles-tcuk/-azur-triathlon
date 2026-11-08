@@ -1192,6 +1192,7 @@ export function App() {
     error?:string;
   } | null>(null);
   const [intervalsLoading, setIntervalsLoading] = useState(false);
+  const [intervalsHistoryMode, setIntervalsHistoryMode] = useState(false);
   const [rideAction, setRideAction] = useState<string | null>(null);
   const [rideMessage, setRideMessage] = useState('');
   const [rideInbox, setRideInbox] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;status:string}>>([]);
@@ -9498,13 +9499,14 @@ function DataSourcesView() {
       setRideMessage(error instanceof Error ? error.message : 'Ride confirmation failed');
     } finally { setRideAction(null); }
   }
-  async function previewIntervals() {
+  async function previewIntervals(historyMode = false) {
+    setIntervalsHistoryMode(historyMode);
     setIntervalsLoading(true);
     setIntervalsPreview(null);
     try {
       const {data:{session}} = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Please sign in again.');
-      const response = await fetch('/api/intervals/activity-preview?days=7', {
+      const response = await fetch(historyMode ? '/api/intervals/activity-preview?days=90&mode=history' : '/api/intervals/activity-preview?days=7', {
         headers: {Authorization: `Bearer ${session.access_token}`},
       });
       const data = await response.json();
@@ -9582,14 +9584,15 @@ function DataSourcesView() {
               <button type="button" className="primary-button" disabled={intervalsLoading} onClick={() => void previewIntervals()}>
                 {intervalsLoading ? 'Checking…' : 'Preview rides'}
               </button>
+              <button type="button" className="primary-button" disabled={intervalsLoading} onClick={() => void previewIntervals(true)}>{intervalsLoading ? 'Checking…' : 'Review 90-day history'}</button>
             </div>
             {intervalsPreview && (
               <div className="azur-intervals-preview" aria-live="polite">
-                <div className="azur-intervals-review-header"><strong>Ride review</strong><span>Previewing rides leaves your training load unchanged</span></div>
+                <div className="azur-intervals-review-header"><strong>{intervalsHistoryMode ? '90-day swim, bike & run history' : 'Ride review'}</strong><span>Read-only preview · training load unchanged</span></div>
                 {intervalsPreview.error && <p role="alert">{intervalsPreview.error}</p>}
-                {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>No cycling activities returned for the last seven days.</p>}
+                {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>{intervalsHistoryMode ? 'No swim, bike or run activities returned for the last 90 days.' : 'No cycling activities returned for the last seven days.'}</p>}
                 {rideMessage && <p role="status">{rideMessage}</p>}
-                {intervalsPreview.acceptanceEnabled && rideInbox.length > 0 && (
+                {!intervalsHistoryMode && intervalsPreview.acceptanceEnabled && rideInbox.length > 0 && (
                   <section aria-label="Staged rides awaiting review">
                     <h4>Staged rides</h4>
                     <p>Confirming records the ride. Training-load validation and planned workout completion remain pending.</p>
@@ -9602,7 +9605,7 @@ function DataSourcesView() {
                     ))}
                   </section>
                 )}
-                {intervalsPreview.loadValidationEnabled && rideLoadReview.length > 0 && (
+                {!intervalsHistoryMode && intervalsPreview.loadValidationEnabled && rideLoadReview.length > 0 && (
                   <section aria-label="Recorded rides and training load">
                     <h4>Recorded rides · training load</h4>
                     <p>Approval uses the ride’s normalised power and your current FTP. Planned workouts remain unchanged.</p>
@@ -9627,7 +9630,7 @@ function DataSourcesView() {
                         {activity.sessionCandidates.map(candidate => <small key={candidate.id}>{candidate.title || 'Planned bike workout'}</small>)}
                       </div>
                     )}
-                    {intervalsPreview.stagingEnabled && ['candidate_match','unmatched_activity'].includes(activity.status ?? '') && (
+                    {!intervalsHistoryMode && intervalsPreview.stagingEnabled && ['candidate_match','unmatched_activity'].includes(activity.status ?? '') && (
                       <button type="button" className="primary-button" disabled={rideAction !== null} onClick={() => void confirmRideAction(String(activity.sourceId),'stage-activity',{sourceId:String(activity.sourceId),plannedSessionId:activity.proposedPlannedSessionId ?? null,confirm:true})}>
                         {rideAction === String(activity.sourceId) ? 'Staging…' : 'Confirm ride for review'}
                       </button>
