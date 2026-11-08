@@ -35,9 +35,8 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : target?.metric === 'swim_pace_sec_per_100m'
     ? `${target.low}–${target.high} seconds/100 m`
     : null;
-  const structure = repeatCount > 1
-    ? `The structured prescription contains ${repeatCount} work intervals${recovery.length ? ' with recovery between efforts' : ''}.`
-    : '';
+  // The structured interval count may omit narrative repeats. Never present it as the full prescription.
+  const structure = '';
   const execution = input.sport === 'bike'
     ? 'Keep power or effort steady; avoid chasing maximum numbers.'
     : input.sport === 'run'
@@ -89,7 +88,7 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     ? 'After swimming, note whether breathing, body position and stroke quality stayed consistent. If technique broke down, tell your coach which part of the set was affected before progressing the session.'
     : 'Record whether the prescribed effort was sustainable and flag unexpected difficulty to your coach.';
   return {
-    execution: [targetDescription ? `Target: ${targetDescription}.` : '', execution, repeatCount > 1 ? structure : ''].filter(Boolean).join(' '),
+    execution: [targetDescription ? `Target: ${targetDescription}.` : '', execution].filter(Boolean).join(' '),
     context: [explicitFocus ? `Coach-prescribed focus: ${explicitFocus}.` : '', raceContext, power, missingFtp, missingTarget, response, feedbackPrompt, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
   };
 }
