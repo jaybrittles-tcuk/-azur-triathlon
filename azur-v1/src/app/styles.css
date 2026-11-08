@@ -6378,3 +6378,34 @@ strong {
  .calendar-week-strip .agenda-date-nav strong {font-size:15px!important}
  .calendar-week-strip .agenda-dates>button {min-height:47px;padding:6px 1px!important}
 }
+
+/* Workout vNext: unified mobile-first header and intensity overview */
+.athlete-agenda .session-detail-modal .section-heading{
+ background:#142d43!important;color:#f4faff!important;border:1px solid #31546b!important;
+ border-radius:16px!important;padding:18px!important;margin-bottom:12px!important
+}
+.athlete-agenda .session-detail-modal .section-heading h3{
+ color:#f4faff!important;font-size:clamp(22px,5.5vw,30px)!important;
+ line-height:1.15!important;letter-spacing:-.035em!important;margin:8px 0 12px!important
+}
+.athlete-agenda .session-detail-modal .session-detail-meta{
+ display:flex!important;flex-wrap:wrap!important;gap:6px!important
+}
+.athlete-agenda .session-detail-modal .session-detail-meta span{
+ background:#203e55!important;border:1px solid #42637a!important;color:#d5e8f4!important;
+ border-radius:999px!important;padding:6px 10px!important;font-size:12px!important
+}
+.athlete-agenda .session-detail-modal .azur-premium-workout-tabs{
+ background:#10293f!important;border:1px solid #31536b!important;border-radius:17px!important;
+ padding:13px!important;margin:12px 0!important
+}
+.athlete-agenda .session-detail-modal .calendar-intensity-profile{
+ padding:8px 0!important
+}
+.athlete-agenda .session-detail-modal .calendar-intensity-bars{
+ height:72px!important
+}
+@media(max-width:600px){
+ .athlete-agenda .session-detail-modal .section-heading{padding:15px!important}
+ .athlete-agenda .session-detail-modal .section-heading h3{font-size:23px!important}
+}
