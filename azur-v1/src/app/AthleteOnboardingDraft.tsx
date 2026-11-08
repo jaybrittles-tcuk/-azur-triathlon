@@ -20,6 +20,9 @@ export default function AthleteOnboardingDraft(){
  const [hours,setHours]=useState('8');
  const [trainingDays,setTrainingDays]=useState<string[]>([]);
  const [recentHours,setRecentHours]=useState('');
+ const [sportDays,setSportDays]=useState<Record<'swim'|'bike'|'run',string[]>>({swim:[],bike:[],run:[]});
+ const [longBikeDay,setLongBikeDay]=useState('');
+ const [longRunDay,setLongRunDay]=useState('');
  const [schedulePattern,setSchedulePattern]=useState<'fixed'|'variable'|'rotating'>('fixed');
  const [schedulePreference,setSchedulePreference]=useState<'weekly'|'rotating'|'flexible'>('weekly');
  const [ftp,setFtp]=useState('');
@@ -55,10 +58,13 @@ export default function AthleteOnboardingDraft(){
    setInvitationVerified(true);
    const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
    if(!cancelled && profile?.display_name) setDisplayName(profile.display_name);
-   const {data:schedule}=await supabase.from('athlete_schedule_preference').select('schedule_pattern,planning_preference').eq('user_id',user.id).maybeSingle();
+   const {data:schedule}=await supabase.from('athlete_schedule_preference').select('schedule_pattern,planning_preference,swim_days,bike_days,run_days,long_bike_day,long_run_day').eq('user_id',user.id).maybeSingle();
    if(!cancelled&&schedule){
     if(['fixed','variable','rotating'].includes(schedule.schedule_pattern))setSchedulePattern(schedule.schedule_pattern as 'fixed'|'variable'|'rotating');
     if(['weekly','rotating','flexible'].includes(schedule.planning_preference))setSchedulePreference(schedule.planning_preference as 'weekly'|'rotating'|'flexible');
+    setSportDays({swim:(schedule.swim_days||[]).map((i:number)=>weekdays[i]).filter(Boolean),bike:(schedule.bike_days||[]).map((i:number)=>weekdays[i]).filter(Boolean),run:(schedule.run_days||[]).map((i:number)=>weekdays[i]).filter(Boolean)});
+    setLongBikeDay(schedule.long_bike_day==null?'':weekdays[schedule.long_bike_day]);
+    setLongRunDay(schedule.long_run_day==null?'':weekdays[schedule.long_run_day]);
    }
    const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,training_days,recent_weekly_hours,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,training_background,training_consistency,current_training_concern,can_swim_200m,device,onboarding_step').eq('user_id',user.id).maybeSingle();
    if(cancelled)return;
@@ -92,6 +98,7 @@ export default function AthleteOnboardingDraft(){
   setSaving(true);setMessage('');
   const {error:scheduleError}=await supabase.from('athlete_schedule_preference').upsert({
    user_id:userId,schedule_pattern:schedulePattern,planning_preference:schedulePattern==='fixed'?'weekly':schedulePreference,
+   swim_days:sportDays.swim.map(day=>weekdays.indexOf(day)),bike_days:sportDays.bike.map(day=>weekdays.indexOf(day)),run_days:sportDays.run.map(day=>weekdays.indexOf(day)),long_bike_day:longBikeDay?weekdays.indexOf(longBikeDay):null,long_run_day:longRunDay?weekdays.indexOf(longRunDay):null,
    updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
   if(scheduleError){setSaving(false);setMessage('Unable to save your weekly scheduling preference. Please retry: '+scheduleError.message);return;}
@@ -192,6 +199,17 @@ export default function AthleteOnboardingDraft(){
       <option value="flexible">Build a flexible plan I can adjust</option>
     </select></label>}
     {schedulePattern!=='fixed'&&<small role="note">Your preference is saved with your athlete account. The opening plan still uses the training days selected above; automatic weekly shift-aware replanning is not active yet.</small>}
+   </div>
+   <div style={{margin:'18px 0',padding:16,border:'1px solid #35506d',borderRadius:16,background:'#102238'}}>
+    <h4 style={{margin:'0 0 8px'}}>Which days work for each sport?</h4>
+    <p style={{margin:'0 0 12px'}}>Optional. Leave a sport blank if any of your training days work. Pool access may be more restricted than running or cycling.</p>
+    {(['swim','bike','run'] as const).map(sport=><div key={sport} style={{marginBottom:16}}>
+     <strong style={{textTransform:'capitalize'}}>{sport} availability</strong>
+     <div className="azur-onboarding-options" style={{marginTop:8}}>{weekdays.map(day=><label key={day} className={sportDays[sport].includes(day)?'selected':''}><input type="checkbox" checked={sportDays[sport].includes(day)} onChange={e=>setSportDays(previous=>({...previous,[sport]:e.target.checked?[...previous[sport],day]:previous[sport].filter(d=>d!==day)}))}/>{day}</label>)}</div>
+    </div>)}
+    <label>Preferred long bike day (optional)<select value={longBikeDay} onChange={e=>setLongBikeDay(e.target.value)}><option value="">No preference</option>{weekdays.map(day=><option key={day} value={day}>{day}</option>)}</select></label>
+    <label>Preferred long run day (optional)<select value={longRunDay} onChange={e=>setLongRunDay(e.target.value)}><option value="">No preference</option>{weekdays.map(day=><option key={day} value={day}>{day}</option>)}</select></label>
+    <small>These preferences are saved for future scheduling. Your opening plan currently follows the general training days selected above, not these sport-specific restrictions.</small>
    </div>
    <label>Hours actually trained per week recently (optional)<input type="number" min={0} max={25} step="0.5" value={recentHours} onChange={e=>setRecentHours(e.target.value)} placeholder="Unknown"/></label>
    {recentHours!==''&&Number(recentHours)<hours&&<p role="note">You currently train {recentHours} hours per week and have {hours} hours available. AZUR will build gradually rather than immediately filling your available time.</p>}
