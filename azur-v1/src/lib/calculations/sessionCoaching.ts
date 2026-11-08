@@ -22,7 +22,7 @@ export function sessionCoaching(input: Input): { execution: string; context: str
   // Detect explicit repeat-count conflicts only; do not infer counts from general prose.
   const narrative = [input.focus, input.description].filter((part): part is string => typeof part === 'string').join(' ');
   const countWords: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
-  const repeatMatch = narrative.match(/\\b(\\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten)\\s+(?:relaxed\\s+|easy\\s+|aerobic\\s+|hard\\s+|controlled\\s+)*(?:efforts|repeats|intervals)\\b/i);
+  const repeatMatch = narrative.match(/\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:relaxed\s+|easy\s+|aerobic\s+|hard\s+|controlled\s+)*(?:efforts|repeats|intervals)\b/i);
   const statedCount = repeatMatch ? (countWords[repeatMatch[1].toLowerCase()] ?? Number(repeatMatch[1])) : null;
   const countMismatch = statedCount !== null && Number.isInteger(statedCount) && statedCount > 0 && work.length > 0 && statedCount !== work.length;
   const explicitTargets = work.map(step => step.target).filter(target => target !== null);
