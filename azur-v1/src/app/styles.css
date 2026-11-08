@@ -6854,3 +6854,74 @@ strong {
   padding:7px!important;
  }
 }
+
+/* AZUR premium system v1 — athlete calendar and workout surfaces.
+   Scope to the athlete experience; do not alter coach/admin or authentication screens. */
+.calendar-layout.athlete-agenda,
+.athlete-agenda .session-detail-overlay {
+  --azur-premium-bg: #090b0f;
+  --azur-premium-surface: #15181e;
+  --azur-premium-raised: #1b2028;
+  --azur-premium-line: #292f39;
+  --azur-premium-text: #f5f7fa;
+  --azur-premium-muted: #a0aebd;
+  --azur-premium-blue: #38a7e8;
+  --azur-premium-yellow: #f4c65b;
+  --azur-premium-radius: 12px;
+  color: var(--azur-premium-text);
+}
+.calendar-layout.athlete-agenda {
+  background: var(--azur-premium-bg) !important;
+}
+.calendar-layout.athlete-agenda .calendar-day,
+.calendar-layout.athlete-agenda .day-stack {
+  box-shadow: none !important;
+}
+.calendar-layout.athlete-agenda .calendar-day-head {
+  color: var(--azur-premium-muted) !important;
+  letter-spacing: .055em;
+}
+.calendar-layout.athlete-agenda .calendar-session {
+  background: var(--azur-premium-surface) !important;
+  border: 1px solid var(--azur-premium-line) !important;
+  border-radius: var(--azur-premium-radius) !important;
+  box-shadow: none !important;
+}
+.calendar-layout.athlete-agenda .calendar-session:focus-visible,
+.athlete-agenda .session-detail-modal button:focus-visible {
+  outline: 2px solid var(--azur-premium-blue) !important;
+  outline-offset: 3px;
+}
+.athlete-agenda .session-detail-overlay .session-detail-modal {
+  background: var(--azur-premium-bg) !important;
+  color: var(--azur-premium-text) !important;
+}
+.athlete-agenda .session-detail-modal .azur-premium-workout-tabs {
+  background: var(--azur-premium-surface) !important;
+  border-color: var(--azur-premium-line) !important;
+  box-shadow: none !important;
+}
+.athlete-agenda .session-detail-modal .azur-workout-tab-nav button[aria-selected="true"] {
+  background: #194d70 !important;
+  color: #fff !important;
+}
+.athlete-agenda .session-detail-modal .azur-workout-compact-prescription {
+  color: var(--azur-premium-muted);
+  font-size: 14px;
+}
+.athlete-agenda .session-detail-modal .azur-workout-compact-prescription strong,
+.athlete-agenda .session-detail-modal .azur-workout-compact-prescription h4 {
+  color: var(--azur-premium-text);
+}
+.athlete-agenda .session-detail-modal .azur-workout-compact-prescription details {
+  border-top: 1px solid var(--azur-premium-line);
+  padding-top: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .calendar-layout.athlete-agenda *,
+  .athlete-agenda .session-detail-modal * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
