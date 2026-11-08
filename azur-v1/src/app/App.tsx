@@ -7130,9 +7130,9 @@ onClick={() => {
           <>
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} coachingContent={<><section className="azur-coaching-intelligence" aria-label="AZUR coaching intelligence">
   <h4>AZUR Intelligence</h4>
-  <p><strong>Why today matters</strong></p>
+  <p><strong>Today’s objective</strong></p>
   <p>{String(selected.rationale || selected.prescription?.focus || 'Follow the prescribed session and note how your effort responds.').replace(/^Why today matters:\s*/i, '')}</p>
-  <p><strong>Your training intelligence</strong></p>
+  <details className="azur-intelligence-evidence"><summary>AZUR assessment · training history</summary>
   <p>{(() => {
     const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
     const completed = weekSessions.filter(session => {
@@ -7154,7 +7154,8 @@ onClick={() => {
       ? `Recorded training duration is ${Math.round(Math.abs(change))}% ${change > 0 ? 'higher' : 'lower'} than the previous seven days. Discuss unexpected changes with your coach; duration does not measure recovery.`
       : 'Recorded training duration is broadly similar across the last two seven-day windows. Session effort and recovery still need separate consideration.';
   })()}</p>
-  <p><strong>How to execute this session</strong></p>
+  </details>
+  <p><strong>Your execution targets</strong></p>
   <p>{sessionCoaching({
     sport: selected.sport,
     steps: selected.prescription?.azurWorkout?.steps,
@@ -7163,7 +7164,7 @@ onClick={() => {
     completed: selected.status === 'completed',
     sessionRpe: Number(sessionFeedback.rpe) || null,
   }).execution}</p>
-  <p><strong>Coach guidance</strong></p>
+  <details className="azur-intelligence-evidence"><summary>Personalised coach guidance</summary>
   <p>{sessionCoaching({
     sport: selected.sport,
     steps: selected.prescription?.azurWorkout?.steps,
@@ -7172,6 +7173,7 @@ onClick={() => {
     completed: selected.status === 'completed',
     sessionRpe: Number(sessionFeedback.rpe) || null,
   }).context}</p>
+  </details>
   <details className="azur-intelligence-evidence">
     <summary>Training evidence and coaching safeguards</summary>
       <p><strong>Training history signal:</strong> {(() => {
