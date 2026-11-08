@@ -27,7 +27,7 @@ export default function CalendarIntensityProfile({ steps }: { steps: unknown }) 
       <div className="calendar-intensity-bars" style={{display:"flex",alignItems:"flex-end",height:54,width:"100%",minWidth:0,overflow:"hidden",background:"#142b3b",borderRadius:10,padding:"6px",boxSizing:"border-box"}} role="img"
         aria-label={`Workout intensity profile: ${intervals.length} timed segments; relative bar heights compare ${targets[0].unit} within this workout`}>
         {intervals.map((part, index) => {
-          const height = span === 0 ? 62 : 20 + 80 * (performance[index] - min) / span;
+          const height = span === 0 ? 58 : 25 + 75 * (performance[index] - min) / span;
           return (
             <span key={index}
               className={`calendar-intensity-bar ${part.kind}`}
