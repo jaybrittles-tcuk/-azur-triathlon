@@ -1185,6 +1185,7 @@ export function App() {
   const onboardingRedirectStarted = useRef(false);
   // Keep review state stable while background profile/session loads rerender App.
   const [intervalsPreview, setIntervalsPreview] = useState<{
+    upstreamCount?:number; upstreamTypes?:Array<{type:string;count:number}>;
     activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;loadStatus?:string;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
     stagingEnabled?:boolean;
     acceptanceEnabled?:boolean;
@@ -9512,7 +9513,7 @@ function DataSourcesView() {
       const data = await response.json();
       if (intervalsReviewOwner.current !== session.user.id) return;
       if (!response.ok) throw new Error(data?.error ?? 'Unable to retrieve activities');
-      setIntervalsPreview({activities: data.activities ?? [],stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true,loadValidationEnabled:data.loadValidationEnabled===true});
+      setIntervalsPreview({activities: data.activities ?? [],upstreamCount:data.upstreamCount,upstreamTypes:data.upstreamTypes,stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true,loadValidationEnabled:data.loadValidationEnabled===true});
       if (data.acceptanceEnabled===true) await refreshRideInbox();
       if (data.loadValidationEnabled===true) await refreshLoadReview();
     } catch (error) {
@@ -9590,6 +9591,7 @@ function DataSourcesView() {
               <div className="azur-intervals-preview" aria-live="polite">
                 <div className="azur-intervals-review-header"><strong>{intervalsHistoryMode ? '90-day swim, bike & run history' : 'Ride review'}</strong><span>Read-only preview · training load unchanged</span></div>
                 {intervalsPreview.error && <p role="alert">{intervalsPreview.error}</p>}
+                {intervalsHistoryMode && intervalsPreview.upstreamTypes && <p role="status">Intervals.icu returned {intervalsPreview.upstreamCount ?? 0} activities. Types: {intervalsPreview.upstreamTypes.map(item => `${item.type} (${item.count})`).join(', ') || 'none'}.</p>}
                 {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>{intervalsHistoryMode ? 'No swim, bike or run activities returned for the last 90 days.' : 'No cycling activities returned for the last seven days.'}</p>}
                 {rideMessage && <p role="status">{rideMessage}</p>}
                 {!intervalsHistoryMode && intervalsPreview.acceptanceEnabled && rideInbox.length > 0 && (
