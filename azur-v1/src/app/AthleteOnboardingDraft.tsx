@@ -60,7 +60,7 @@ export default function AthleteOnboardingDraft(){
     setRace(data.race_distance as Race);setRaceDate(data.race_date||'');
     setExperience(data.experience);setHours(String(data.weekly_hours));
     setDevice(data.device as Device);
-    setBackground(data.training_background||'regular');setBackgroundTouched(true);setConsistency(data.training_consistency||'4to7');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);
+    setBackground(['novice','regular','established'].includes(data.training_background)?data.training_background:'');setBackgroundTouched(true);setConsistency(['under4','4to7','8plus'].includes(data.training_consistency)?data.training_consistency:'');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);
     setTrainingDays((data.training_days||[]).map((day:number)=>weekdays[day]).filter(Boolean));setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
     setFtp(data.ftp_watts==null?'':String(data.ftp_watts));setCss(data.swim_css_seconds_per_100m==null?'':formatPace(String(data.swim_css_seconds_per_100m)));setRunThreshold(data.run_threshold_seconds_per_km==null?'':formatPace(String(data.run_threshold_seconds_per_km)));setStep(Math.min(4,Math.max(0,data.onboarding_step)));
     // Existing athlete data is always preserved; no automatic plan changes.
@@ -74,10 +74,12 @@ export default function AthleteOnboardingDraft(){
  async function save(nextStep:number){
   if(!userId){setMessage('Sign in to save your setup.');return;}
   if(hours.trim()===''||!Number.isFinite(Number(hours))||Number(hours)<2||Number(hours)>25){setMessage('Weekly hours must be between 2 and 25.');return;}
+  if(nextStep>=2 && (!['novice','regular','established'].includes(background)||!['under4','4to7','8plus'].includes(consistency))){setMessage('Choose your training background and recent consistency to continue.');return;}
   if(trainingDays.length===0 && nextStep>=2){setMessage('Choose at least one day you can train.');return;}
   if(recentHours!=='' && (!Number.isFinite(Number(recentHours))||Number(recentHours)<0||Number(recentHours)>25)){setMessage('Recent weekly training must be between 0 and 25 hours.');return;}
   if(ftp!==''&&(!Number.isFinite(Number(ftp))||Number(ftp)<60||Number(ftp)>650)){setMessage('FTP must be between 60 and 650 watts.');return;}
   for(const [label,value,min,max] of [['Swim CSS',css,50,300],['Run threshold',runThreshold,150,900]] as const){const seconds=parsePace(value);if(value!==''&&(seconds===null||!Number.isFinite(seconds)||seconds<min||seconds>max)){setMessage(`${label}: enter a pace as minutes:seconds (e.g. ${label==='Swim CSS'?'1:45':'5:00'}). Leave blank if unknown.`);return;}}
+  if(nextStep===5 && (!['novice','regular','established'].includes(background)||!['under4','4to7','8plus'].includes(consistency))){setMessage('Please confirm your training background and recent consistency in Step 2 before creating your plan.');setStep(1);return;}
   if(nextStep===5 && !betaAcknowledged){setMessage('Please acknowledge the beta limitations before creating your plan.');return;}
   if(nextStep===5 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
@@ -146,9 +148,9 @@ export default function AthleteOnboardingDraft(){
    <label>Hours actually trained per week recently (optional)<input type="number" min={0} max={25} step="0.5" value={recentHours} onChange={e=>setRecentHours(e.target.value)} placeholder="Unknown"/></label>
    {recentHours!==''&&Number(recentHours)<hours&&<p role="note">You currently train {recentHours} hours per week and have {hours} hours available. AZUR will build gradually rather than immediately filling your available time.</p>}
    <p>Your event experience and recent training history are separate. An experienced racer returning after a break may still need a conservative first two weeks.</p>
-   <label>Current training background<select value={background} onChange={e=>{setBackground(e.target.value);setBackgroundTouched(true)}}><option value="novice">New to structured training</option><option value="regular">Training regularly</option><option value="established">Established endurance athlete</option></select></label>
+   <label>Current training background<select value={background} onChange={e=>{setBackground(e.target.value);setBackgroundTouched(true)}}><option value="" disabled>Choose your current training background</option><option value="novice">New to structured training</option><option value="regular">Training regularly</option><option value="established">Established endurance athlete</option></select></label>
    {experience==='experienced'&&background==='novice'&&<p role="note">You selected experienced competitor and new to structured training. That's fine if you have race experience but are restarting structured training.</p>}
-   <label>Recent training consistency<select value={consistency} onChange={e=>setConsistency(e.target.value)}><option value="under4">Under 4 weeks consistent</option><option value="4to7">4–7 weeks consistent</option><option value="8plus">8+ weeks consistent</option></select></label>
+   <label>Recent training consistency<select value={consistency} onChange={e=>setConsistency(e.target.value)}><option value="" disabled>Choose your recent consistency</option><option value="under4">Under 4 weeks consistent</option><option value="4to7">4–7 weeks consistent</option><option value="8plus">8+ weeks consistent</option></select></label>
    <label>Any current injury or training concern?<select value={concern} onChange={e=>setConcern(e.target.value)}><option value="none">No</option><option value="yes">Yes — coach review needed</option><option value="unsure">Unsure — coach review needed</option></select></label>
    <label>Can you comfortably swim 200m continuously?<select value={canSwim?'yes':'no'} onChange={e=>setCanSwim(e.target.value==='yes')}><option value="yes">Yes</option><option value="no">Not yet</option></select></label>
 
