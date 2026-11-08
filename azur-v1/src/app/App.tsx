@@ -7132,6 +7132,26 @@ onClick={() => {
   <h4>AZUR Intelligence</h4>
   <p><strong>Today’s objective</strong></p>
   <p>{String(selected.rationale || selected.prescription?.focus || 'Follow the prescribed session and note how your effort responds.').replace(/^Why today matters:\s*/i, '')}</p>
+  
+  <p><strong>Your execution targets</strong></p>
+  <p>{sessionCoaching({
+    sport: selected.sport,
+    steps: selected.prescription?.azurWorkout?.steps,
+    focus: typeof selected.prescription?.focus === 'string' ? selected.prescription.focus : null,
+    ftpWatts: Number(athleteProfile.ftp),
+    completed: selected.status === 'completed',
+    sessionRpe: Number(sessionFeedback.rpe) || null,
+  }).execution}</p>
+  <details className="azur-intelligence-evidence"><summary>Personalised coach guidance</summary>
+  <p>{sessionCoaching({
+    sport: selected.sport,
+    steps: selected.prescription?.azurWorkout?.steps,
+    focus: typeof selected.prescription?.focus === 'string' ? selected.prescription.focus : null,
+    ftpWatts: Number(athleteProfile.ftp),
+    completed: selected.status === 'completed',
+    sessionRpe: Number(sessionFeedback.rpe) || null,
+  }).context}</p>
+  </details>
   <details className="azur-intelligence-evidence"><summary>AZUR assessment · training history</summary>
   <p>{(() => {
     const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
@@ -7154,25 +7174,6 @@ onClick={() => {
       ? `Recorded training duration is ${Math.round(Math.abs(change))}% ${change > 0 ? 'higher' : 'lower'} than the previous seven days. Discuss unexpected changes with your coach; duration does not measure recovery.`
       : 'Recorded training duration is broadly similar across the last two seven-day windows. Session effort and recovery still need separate consideration.';
   })()}</p>
-  </details>
-  <p><strong>Your execution targets</strong></p>
-  <p>{sessionCoaching({
-    sport: selected.sport,
-    steps: selected.prescription?.azurWorkout?.steps,
-    focus: typeof selected.prescription?.focus === 'string' ? selected.prescription.focus : null,
-    ftpWatts: Number(athleteProfile.ftp),
-    completed: selected.status === 'completed',
-    sessionRpe: Number(sessionFeedback.rpe) || null,
-  }).execution}</p>
-  <details className="azur-intelligence-evidence"><summary>Personalised coach guidance</summary>
-  <p>{sessionCoaching({
-    sport: selected.sport,
-    steps: selected.prescription?.azurWorkout?.steps,
-    focus: typeof selected.prescription?.focus === 'string' ? selected.prescription.focus : null,
-    ftpWatts: Number(athleteProfile.ftp),
-    completed: selected.status === 'completed',
-    sessionRpe: Number(sessionFeedback.rpe) || null,
-  }).context}</p>
   </details>
   <details className="azur-intelligence-evidence">
     <summary>Training evidence and coaching safeguards</summary>
