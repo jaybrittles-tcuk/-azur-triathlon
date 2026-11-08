@@ -7111,7 +7111,7 @@ onClick={() => {
               <small>Do not infer missing targets or rest periods. Ask your coach before completing an unclear session.</small>
             </div>;
           })()}
-          {Array.isArray(selected.prescription?.steps) && selected.prescription.steps.length > 0 && (
+          {Array.isArray(selected.prescription?.steps) && selected.prescription.steps.length > 0 && !(Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) && (
             <section className="session-foundation-timeline" aria-label="Your prescribed workout">
               <span className="eyebrow">YOUR WORKOUT</span>
               <h3>Follow your session, step by step</h3>
@@ -7128,7 +7128,7 @@ onClick={() => {
           {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || selected.prescription?.focus || (Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) ? (
           <>
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
-<details open={!(Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0)} key={selected.id} className="session-prescription-disclosure session-prescription-v2">
+<details open={false} key={selected.id} className="session-prescription-disclosure session-prescription-v2">
             <summary><span><strong>Detailed workout instructions</strong><small>Warm-up · Main set · Cool-down · Fuelling</small></span><span aria-hidden="true">⌄</span></summary>
             <div className="session-prescription-sections">
             <details><summary>View workout timeline</summary><CalendarPrescriptionSteps prescription={selected.prescription} /></details>
