@@ -34,7 +34,7 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : null;
   const structure = repeatCount > 1
     ? `The structured prescription contains ${repeatCount} work intervals${recovery.length ? ' with recovery between efforts' : ''}.`
-    : 'Use the full workout instructions for the session structure; the available structured data does not confirm a complete repeat count.';
+    : 'Follow the workout instructions for the full session.';
   const execution = input.sport === 'bike'
     ? 'Aim for repeatable power or effort across the work intervals; avoid turning an aerobic session into a maximal test.'
     : input.sport === 'run'
@@ -47,7 +47,7 @@ export function sessionCoaching(input: Input): { execution: string; context: str
   const power = target?.metric === 'ftp_percent'
     ? ftpValid
       ? `With recorded FTP ${input.ftpWatts} W, the prescribed range is approximately ${Math.round(input.ftpWatts! * target.low / 100)}–${Math.round(input.ftpWatts! * target.high / 100)} W; confirm your threshold is current.`
-      : 'An FTP-based target is prescribed, but no validated FTP is available; confirm an appropriate effort target with your coach.'
+      : 'Your workout uses FTP targets. Ask your coach to confirm your current FTP before relying on wattage guidance.'
     : '';
   const rpe = input.completed && input.sessionRpe != null && Number.isFinite(input.sessionRpe) &&
     input.sessionRpe >= 1 && input.sessionRpe <= 10 ? input.sessionRpe : null;
@@ -60,9 +60,9 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : `You reported RPE ${rpe}/10. The workout has no uniform explicit RPE target for a direct comparison.`;
   const explicitFocus = typeof input.focus === 'string' && input.focus.trim().length > 0 ? input.focus.trim() : null;
   const missingTarget = work.length > 0 && explicitTargets.length === 0
-    ? 'No machine-readable intensity target is attached to the work intervals. Follow the coach-written prescription; do not infer a pace, wattage or heart-rate zone.'
+    ? 'Follow the written effort guidance in your workout. If a target is unclear, check with your coach.'
     : work.length > 0 && explicitTargets.length < work.length
-    ? 'Only some work intervals contain structured targets. Check the full workout instructions rather than applying one target to every repeat.'
+    ? 'Targets can vary within this workout. Follow the instructions for each part rather than using the same effort throughout.'
     : '';
   const missingFtp = target?.metric === 'ftp_percent' && !ftpValid
     ? 'Ask your coach to confirm your current FTP before using a wattage conversion.' : '';
