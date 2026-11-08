@@ -8704,11 +8704,13 @@ swimThreshold:
   <button
     className="primary-button"
     onClick={handleProfileSave}
+    disabled={profileSaving}
   >
     <Save size={17} />
-    Save changes
+    {profileSaving ? 'Saving…' : 'Save changes'}
   </button>
 )}
+{profileSaveMessage && <p role="status" className="panel-note">{profileSaveMessage}</p>}
         </section>
 
         <section className="panel">
@@ -9821,49 +9823,44 @@ async function handleSignOut() {
 }
 
 async function handleProfileSave() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return;
-
-  const updatedProfile = {
-    ftp_w: profileDraft.ftp
-      ? Number(profileDraft.ftp)
-      : null,
-run_threshold_sec_per_km: profileDraft.runThreshold
-  ? parsePaceInput(profileDraft.runThreshold)
-  : null,
-swim_threshold_sec_per_100m: profileDraft.swimThreshold
-  ? parsePaceInput(profileDraft.swimThreshold)
-  : null,
-    weight_kg: profileDraft.weight
-      ? Number(profileDraft.weight)
-      : null,
-    target_weight_kg: profileDraft.targetWeight
-      ? Number(profileDraft.targetWeight)
-      : null,
-  };
-
-  const { error } = await supabase
-    .from('athlete_profile')
-    .update(updatedProfile)
-    .eq('user_id', user.id);
-
-  if (error) {
-    console.error('Unable to update athlete profile:', error);
+  if(profileSaving)return;
+  setProfileSaveMessage('');
+  const run = profileDraft.runThreshold.trim();
+  const swim = profileDraft.swimThreshold.trim();
+  if ((run && parsePaceInput(run) == null) || (swim && parsePaceInput(swim) == null)) {
+    setProfileSaveMessage('Use mm:ss for run and swim thresholds, for example 3:40 and 1:30.');
     return;
   }
-
-  setAthleteProfile({
-    ftp: updatedProfile.ftp_w,
-    runThreshold: updatedProfile.run_threshold_sec_per_km,
-    swimThreshold: updatedProfile.swim_threshold_sec_per_100m,
-    weight: updatedProfile.weight_kg,
-    targetWeight: updatedProfile.target_weight_kg,
-  });
-
-  setProfileEditing(false);
+  const ftp=profileDraft.ftp.trim()?Number(profileDraft.ftp):null;
+  if(ftp!==null&&(!Number.isFinite(ftp)||ftp<50||ftp>700)){
+    setProfileSaveMessage('Please enter a realistic FTP between 50 and 700 watts.');return;
+  }
+  setProfileSaving(true);
+  try {
+    const {data:{user},error:authError}=await supabase.auth.getUser();
+    if(authError||!user)throw new Error('Please sign in again before saving.');
+    const updatedProfile={
+      ftp_w:ftp,
+      run_threshold_sec_per_km:run?parsePaceInput(run):null,
+      swim_threshold_sec_per_100m:swim?parsePaceInput(swim):null,
+      weight_kg:profileDraft.weight.trim()?Number(profileDraft.weight):null,
+      target_weight_kg:profileDraft.targetWeight.trim()?Number(profileDraft.targetWeight):null,
+    };
+    const {data,error}=await supabase.from('athlete_profile').update(updatedProfile).eq('user_id',user.id).select('user_id').maybeSingle();
+    if(error)throw error;
+    if(!data)throw new Error('No athlete profile was updated. Please contact your coach.');
+    setAthleteProfile({
+      ftp:updatedProfile.ftp_w,
+      runThreshold:updatedProfile.run_threshold_sec_per_km,
+      swimThreshold:updatedProfile.swim_threshold_sec_per_100m,
+      weight:updatedProfile.weight_kg,
+      targetWeight:updatedProfile.target_weight_kg,
+    });
+    setProfileEditing(false);
+    setProfileSaveMessage('Performance profile saved.');
+  } catch(error:any) {
+    setProfileSaveMessage(error?.message||'Unable to save profile. Please try again.');
+  } finally {setProfileSaving(false);}
 }
   async function handleManualCompletion() {
     if(!selected?.id || manualSaving)return;
@@ -10373,7 +10370,7 @@ style={
     </section>
   )
 }
-{activeNav === 'Profile' && <ProfileView />}
+{activeNav === 'Profile' && ProfileView()}
 {activeNav === 'Weekly Review' && <WeeklyReviewView />}
         {activeNav === 'Data Sources' && <DataSourcesView />}
         {activeNav === 'Strava Feed' && <StravaFeedView />}
