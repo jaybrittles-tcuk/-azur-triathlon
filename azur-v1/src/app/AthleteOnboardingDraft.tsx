@@ -20,6 +20,8 @@ export default function AthleteOnboardingDraft(){
  const [hours,setHours]=useState('8');
  const [trainingDays,setTrainingDays]=useState<string[]>([]);
  const [recentHours,setRecentHours]=useState('');
+ const [schedulePattern,setSchedulePattern]=useState<'fixed'|'variable'|'rotating'>('fixed');
+ const [schedulePreference,setSchedulePreference]=useState<'weekly'|'rotating'|'flexible'>('weekly');
  const [ftp,setFtp]=useState('');
  const [css,setCss]=useState('');
  const [runThreshold,setRunThreshold]=useState('');
@@ -166,6 +168,21 @@ export default function AthleteOnboardingDraft(){
    <label>Typical hours available per week<input type="number" min={2} max={25} value={hours} onFocus={e=>e.currentTarget.select()} onChange={e=>setHours(e.target.value)}/></label>
    <p>Choose the days you can realistically train.</p>
    <div className="azur-onboarding-options">{weekdays.map(day=><label key={day} className={trainingDays.includes(day)?'selected':''}><input type="checkbox" checked={trainingDays.includes(day)} onChange={e=>setTrainingDays(previous=>e.target.checked?[...previous,day]:previous.filter(d=>d!==day))}/>{day}</label>)}</div>
+   <div className="azur-schedule-pattern" style={{margin:'22px 0',padding:16,border:'1px solid #35506d',borderRadius:16,background:'#12283e'}}>
+    <h4 style={{margin:'0 0 6px'}}>Does your weekly availability change?</h4>
+    <p style={{margin:'0 0 12px'}}>This helps us understand your routine. Your selected training days above remain the days used for your opening plan.</p>
+    <label>Weekly routine<select value={schedulePattern} onChange={e=>setSchedulePattern(e.target.value as typeof schedulePattern)}>
+      <option value="fixed">My routine is fairly consistent</option>
+      <option value="variable">I work shifts or have changing commitments</option>
+      <option value="rotating">I follow a rotating shift pattern</option>
+    </select></label>
+    {schedulePattern!=='fixed'&&<label>Preferred planning approach<select value={schedulePreference} onChange={e=>setSchedulePreference(e.target.value as typeof schedulePreference)}>
+      <option value="weekly">Update my availability each week</option>
+      <option value="rotating">Use my repeating shift pattern</option>
+      <option value="flexible">Build a flexible plan I can adjust</option>
+    </select></label>}
+    {schedulePattern!=='fixed'&&<small role="note">Weekly shift-aware scheduling is being developed. For now, choose the days you can train in the opening week above. These preferences are not yet saved or used by the plan generator.</small>}
+   </div>
    <label>Hours actually trained per week recently (optional)<input type="number" min={0} max={25} step="0.5" value={recentHours} onChange={e=>setRecentHours(e.target.value)} placeholder="Unknown"/></label>
    {recentHours!==''&&Number(recentHours)<hours&&<p role="note">You currently train {recentHours} hours per week and have {hours} hours available. AZUR will build gradually rather than immediately filling your available time.</p>}
    <p>Your event experience and recent training history are separate. An experienced racer returning after a break may still need a conservative first two weeks.</p>
