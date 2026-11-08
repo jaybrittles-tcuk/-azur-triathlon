@@ -28,7 +28,8 @@ export function createActivityPreviewHandler(fetcher: typeof fetch = globalThis.
  const entries=await upstream.json();
  if(!Array.isArray(entries))return res.status(502).json({error:'Unexpected upstream response'});
  const historyMode=req.query.mode==='history';
- const rides=entries.filter((a:any)=>historyMode ? ['ride','virtualride','indoorride','virtualcycling','run','virtualrun','treadmill','swim','poolswim','openwaterswim'].includes(String(a.type??'').toLowerCase().replace(/[^a-z]/g,'')) : ['ride','virtualride','indoorride','virtualcycling'].includes(String(a.type??'').toLowerCase().replace(/[^a-z]/g,'')));
+ const upstreamTypes=historyMode ? Object.entries(entries.reduce((counts:Record<string,number>,activity:any)=>{const type=String(activity.type??'unknown');counts[type]=(counts[type]??0)+1;return counts;},{})).map(([type,count])=>({type,count})) : [];
+ const rides=entries.filter((a:any)=>historyMode ? ['ride','virtualride','indoorride','virtualcycling','run','virtualrun','treadmill','trailrun','trackrun','swim','poolswim','openwaterswim','openwaterswimming','swimming','lap swimming'.replace(/[^a-z]/g,'')].includes(String(a.type??'').toLowerCase().replace(/[^a-z]/g,'')) : ['ride','virtualride','indoorride','virtualcycling'].includes(String(a.type??'').toLowerCase().replace(/[^a-z]/g,'')));
  // Read-only review of existing activities; never change completion status here.
  const existingResponse=await fetcher(url+'/rest/v1/completed_activity?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&start_time=gte.'+encodeURIComponent(oldest+'T00:00:00Z')+'&select=source,source_activity_id,sport,start_time,duration_sec,distance_m&limit=500',{headers});
  if(!existingResponse.ok)return res.status(502).json({error:'Could not perform duplicate review'});
@@ -38,7 +39,7 @@ export function createActivityPreviewHandler(fetcher: typeof fetch = globalThis.
  const plans=await plannedResponse.json();
  const assess=(a:any)=>reviewIntervalsActivity(a,existing,plans);
  res.setHeader('Cache-Control','private, no-store');
- return res.status(200).json({mode:historyMode?'history_preview_only':'preview_only',stagingEnabled:process.env.INTERVALS_STAGING_ENABLED==='true',acceptanceEnabled:process.env.INTERVALS_ACCEPTANCE_ENABLED==='true',loadValidationEnabled:process.env.INTERVALS_LOAD_VALIDATION_ENABLED==='true',dateRange:{oldest,newest},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,sport:/swim/i.test(String(a.type))?'swim':/run|treadmill/i.test(String(a.type))?'run':'bike',name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
+ return res.status(200).json({mode:historyMode?'history_preview_only':'preview_only',stagingEnabled:process.env.INTERVALS_STAGING_ENABLED==='true',acceptanceEnabled:process.env.INTERVALS_ACCEPTANCE_ENABLED==='true',loadValidationEnabled:process.env.INTERVALS_LOAD_VALIDATION_ENABLED==='true',dateRange:{oldest,newest},upstreamCount:historyMode?entries.length:undefined,upstreamTypes,activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,sport:/swim/i.test(String(a.type))?'swim':/run|treadmill/i.test(String(a.type))?'run':'bike',name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
 }
 }
 export default async function handler(req:any,res:any) {
