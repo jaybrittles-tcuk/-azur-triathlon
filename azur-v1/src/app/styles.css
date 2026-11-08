@@ -6612,3 +6612,78 @@ strong {
   height:32px!important;max-height:32px!important
  }
 }
+
+/* AZUR V3 plan-screen pass: compact week-first hierarchy inspired by athlete
+   reference, without changing stored workouts or inventing training metrics. */
+.calendar-layout.athlete-agenda{
+ background:#0a1521!important;color:#eef5fa!important;
+ --azur-v2-card:#142434;--azur-v2-ink:#eef5fa;
+ --azur-v2-outline:#2c4559;--azur-v2-elevated:#1c3449;
+ --azur-v2-subtle:#a4b8c9;
+ padding:10px!important;border-radius:16px!important
+}
+.calendar-layout.athlete-agenda .calendar-week-strip{
+ background:#10283a!important;border:1px solid #29465a!important;
+ border-radius:17px!important;box-shadow:none!important
+}
+.calendar-layout.athlete-agenda .calendar-strip-top h3,
+.calendar-layout.athlete-agenda .azur-calendar-quickbar strong,
+.calendar-layout.athlete-agenda .calendar-focus-toolbar strong{
+ color:#eef5fa!important
+}
+.calendar-layout.athlete-agenda .calendar-strip-footer small,
+.calendar-layout.athlete-agenda .calendar-focus-toolbar small{
+ color:#b6c7d5!important
+}
+.calendar-layout.athlete-agenda .calendar-day-head{
+ display:flex!important;align-items:center!important;
+ justify-content:space-between!important
+}
+.calendar-layout.athlete-agenda .calendar-day-head span{
+ color:#c9d8e3!important;font-weight:700!important
+}
+.calendar-layout.athlete-agenda .calendar-day .day-stack:empty{
+ display:none!important
+}
+.calendar-layout.athlete-agenda .calendar-day:has(.calendar-empty-state),
+.calendar-layout.athlete-agenda .calendar-day:has(.empty-day){
+ background:#0e2231!important
+}
+.calendar-layout.athlete-agenda .calendar-day:has(.calendar-empty-state) .calendar-day-head,
+.calendar-layout.athlete-agenda .calendar-day:has(.empty-day) .calendar-day-head{
+ padding:6px 10px!important
+}
+.calendar-layout.athlete-agenda .calendar-day:has(.calendar-empty-state) .day-stack,
+.calendar-layout.athlete-agenda .calendar-day:has(.empty-day) .day-stack{
+ padding:2px 8px 6px!important
+}
+.calendar-layout.athlete-agenda .calendar-session{
+ background:#151a22!important;border-color:#2d3b4a!important;
+ box-shadow:none!important
+}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-bars{
+ height:28px!important;max-height:28px!important;
+ min-height:0!important;background:#0b121a!important
+}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-profile{
+ margin:4px 0!important
+}
+.calendar-layout.athlete-agenda .calendar-session>strong{
+ color:#f2f6fb!important;line-height:1.3!important
+}
+.calendar-layout.athlete-agenda .calendar-week-overview{
+ background:#13283a!important;border:1px solid #2e4b5e!important;
+ border-radius:16px!important
+}
+.calendar-layout.athlete-agenda .calendar-week-overview-stats>div{
+ background:#1b3448!important;border-color:#345267!important
+}
+@media(max-width:600px){
+ .calendar-layout.athlete-agenda .calendar-day{margin-bottom:5px!important}
+ .calendar-layout.athlete-agenda .calendar-session{
+  padding:10px 12px!important;border-radius:12px!important
+ }
+ .calendar-layout.athlete-agenda .calendar-session .calendar-intensity-bars{
+  height:26px!important;max-height:26px!important
+ }
+}
