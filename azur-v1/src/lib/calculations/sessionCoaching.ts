@@ -17,7 +17,6 @@ type Input = {
 export function sessionCoaching(input: Input): { execution: string; context: string } {
   const intervals = normalizeWorkoutIntervals(input.steps);
   const work = intervals.filter(step => step.kind === 'work');
-  const recovery = intervals.filter(step => step.kind === 'recovery');
   const repeatCount = work.length;
   const explicitTargets = work.map(step => step.target).filter(target => target !== null);
   const sameTarget = explicitTargets.length === repeatCount && repeatCount > 0 &&
@@ -35,8 +34,6 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : target?.metric === 'swim_pace_sec_per_100m'
     ? `${target.low}–${target.high} seconds/100 m`
     : null;
-  // The structured interval count may omit narrative repeats. Never present it as the full prescription.
-  const structure = '';
   const execution = input.sport === 'bike'
     ? 'Keep power or effort steady; avoid chasing maximum numbers.'
     : input.sport === 'run'
@@ -60,7 +57,6 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : expectedRpe
     ? `You reported RPE ${rpe}/10 against prescribed RPE ${expectedRpe.low}–${expectedRpe.high}/10. Review the difference with your coach alongside the completed session.`
     : `You reported RPE ${rpe}/10. The workout has no uniform explicit RPE target for a direct comparison.`;
-  const explicitFocus = typeof input.focus === 'string' && input.focus.trim().length > 0 ? input.focus.trim() : null;
   const raceDate = typeof input.raceDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input.raceDate)
     ? Date.parse(input.raceDate + 'T12:00:00Z') : NaN;
   const plannedDate = typeof input.plannedDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input.plannedDate)
@@ -89,6 +85,6 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : 'Record whether the prescribed effort was sustainable and flag unexpected difficulty to your coach.';
   return {
     execution: [targetDescription ? `Target: ${targetDescription}.` : '', execution].filter(Boolean).join(' '),
-    context: [explicitFocus ? `Coach-prescribed focus: ${explicitFocus}.` : '', raceContext, power, missingFtp, missingTarget, response, feedbackPrompt, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
+    context: [raceContext, power, missingFtp, missingTarget, response, feedbackPrompt, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
   };
 }
