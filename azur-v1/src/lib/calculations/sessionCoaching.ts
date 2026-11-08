@@ -11,6 +11,7 @@ type Input = {
   raceName?: string | null;
   raceDate?: string | null;
   plannedDate?: string | null;
+  description?: string | null;
 };
 
 /** Describes only targets actually prescribed in the workout. No inferred readiness or threshold. */
@@ -18,6 +19,12 @@ export function sessionCoaching(input: Input): { execution: string; context: str
   const intervals = normalizeWorkoutIntervals(input.steps);
   const work = intervals.filter(step => step.kind === 'work');
   const repeatCount = work.length;
+  // Detect explicit repeat-count conflicts only; do not infer counts from general prose.
+  const narrative = [input.focus, input.description].filter((part): part is string => typeof part === 'string').join(' ');
+  const countWords: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+  const repeatMatch = narrative.match(/\\b(\\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten)\\s+(?:relaxed\\s+|easy\\s+|aerobic\\s+|hard\\s+|controlled\\s+)*(?:efforts|repeats|intervals)\\b/i);
+  const statedCount = repeatMatch ? (countWords[repeatMatch[1].toLowerCase()] ?? Number(repeatMatch[1])) : null;
+  const countMismatch = statedCount !== null && Number.isInteger(statedCount) && statedCount > 0 && work.length > 0 && statedCount !== work.length;
   const explicitTargets = work.map(step => step.target).filter(target => target !== null);
   const sameTarget = explicitTargets.length === repeatCount && repeatCount > 0 &&
     explicitTargets.every(target => target?.metric === explicitTargets[0]?.metric &&
@@ -73,6 +80,9 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : '';
   const missingFtp = target?.metric === 'ftp_percent' && !ftpValid
     ? 'Ask your coach to confirm your current FTP before using a wattage conversion.' : '';
+  const consistencyGuidance = countMismatch
+    ? 'The written session and workout interval structure show different repeat counts. Follow your coach-confirmed session instructions and ask for clarification before starting.'
+    : '';
   const feedbackPrompt = input.completed && rpe === null
     ? 'If you have not yet recorded session RPE, add it so your coach can compare the planned session with your experience.'
     : '';
@@ -85,6 +95,6 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : 'Record whether the prescribed effort was sustainable and flag unexpected difficulty to your coach.';
   return {
     execution: [targetDescription ? `Target: ${targetDescription}.` : '', execution].filter(Boolean).join(' '),
-    context: [raceContext, power, missingFtp, missingTarget, response, feedbackPrompt, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
+    context: [consistencyGuidance, raceContext, power, missingFtp, missingTarget, response, feedbackPrompt, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
   };
 }
