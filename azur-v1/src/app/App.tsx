@@ -7082,7 +7082,7 @@ onClick={() => {
 
   <span>{formatDuration(selected.durationMin)}</span>
 
-  <span>Priority {selected.priority}</span>
+  <span>{selected.sessionClass?.replace(/_/g, ' ') || 'Training session'}</span>
 </div>
             </div>
 
