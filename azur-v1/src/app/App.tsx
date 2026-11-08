@@ -7129,6 +7129,24 @@ onClick={() => {
               <p className="session-foundation-coaching">Why today matters: controlled aerobic work helps establish repeatable training habits and endurance without unnecessary fatigue. Keep effort conversational where prescribed; report how the session felt so future training can be adjusted.</p>
             </section>
           )}
+          {selected.sport === 'swim' && Array.isArray(selected.prescription?.poolSegments) && selected.prescription.poolSegments.length > 0 && (
+            <section className="session-foundation-timeline" aria-label="Swim intervals and technique">
+              <span className="eyebrow">AZUR SWIM INTELLIGENCE</span>
+              <h3>Your swim sets</h3>
+              <p>Distance-based intervals from your prescribed swim. Rest is taken between repetitions; adjust only with coach guidance.</p>
+              {selected.prescription.poolSegments.map((segment: any, index: number) => (
+                <div className="session-foundation-step" key={index}>
+                  <span className="session-foundation-step-index">{index + 1}</span>
+                  <div>
+                    <strong>{Number(segment.repeats)} × {Number(segment.distanceMeters)} m · {String(segment.purpose || 'Swim')}</strong>
+                    <p>{String(segment.target || 'Comfortable swimming')}</p>
+                  </div>
+                  <strong>{Number(segment.restSeconds) || 0}s rest</strong>
+                </div>
+              ))}
+              {selected.prescription.swim_duration_note && <p className="session-foundation-coaching">{String(selected.prescription.swim_duration_note)}</p>}
+            </section>
+          )}
           {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || selected.prescription?.focus || (Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) ? (
           <>
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} coachingContent={<><section className="azur-coaching-intelligence" aria-label="AZUR coaching intelligence">
