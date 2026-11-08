@@ -10,6 +10,24 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
  const [strategy,setStrategy]=useState<{weekly_hours:number|null;recent_weekly_hours:number|null;training_background:string|null;training_consistency:string|null;race_distance:string|null;race_date:string|null;swim_css_seconds_per_100m:number|null;ftp_watts:number|null;run_threshold_seconds_per_km:number|null}|null>(null);
  const [strategyLoading,setStrategyLoading]=useState(false);
  const [strategyError,setStrategyError]=useState(false);
+ const [returnHours,setReturnHours]=useState('10');
+ const [returnPreview,setReturnPreview]=useState<any>(null);
+ const [returnPreviewBusy,setReturnPreviewBusy]=useState(false);
+ const [returnPreviewError,setReturnPreviewError]=useState('');
+ const loadReturnPreview=async()=>{
+  const hours=Number(returnHours);
+  if(!Number.isFinite(hours)||hours<3||hours>25){setReturnPreviewError('Enter your actual average weekly training hours (3–25).');return;}
+  setReturnPreviewBusy(true);setReturnPreviewError('');setReturnPreview(null);
+  try{
+   const now=new Date(today+'T12:00:00');const next=new Date(now);
+   next.setDate(now.getDate()+((8-now.getDay())%7||7));
+   const week=next.getFullYear()+'-'+String(next.getMonth()+1).padStart(2,'0')+'-'+String(next.getDate()).padStart(2,'0');
+   const {data,error}=await supabase.rpc('preview_returning_athlete_week',{p_recent_actual_hours:hours,p_week_start:week});
+   if(error)throw error;
+   setReturnPreview(data);
+  }catch(e:any){setReturnPreviewError(e?.message||'Unable to load training preview.');}
+  finally{setReturnPreviewBusy(false);}
+ };
  useEffect(()=>{let active=true;setStrategyLoading(true);supabase.auth.getUser().then(async({data,error})=>{
   if(error||!data.user){if(active){setStrategyError(true);setStrategyLoading(false);}return;}
   const result=await supabase.from('athlete_onboarding').select('weekly_hours,recent_weekly_hours,training_background,training_consistency,race_distance,race_date,swim_css_seconds_per_100m,ftp_watts,run_threshold_seconds_per_km').eq('user_id',data.user.id).maybeSingle();
@@ -54,6 +72,22 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
       <p style={{color:'#f3e6ce',margin:'6px 0'}}>Confirm how many weeks you've sustained this volume and ask your coach to review the starting load before changing the plan.</p>
       <button type="button" onClick={()=>onNavigate('Profile')} style={{border:0,borderRadius:8,background:'#c9943b',color:'#142331',padding:'9px 12px',fontWeight:700}}>Review athlete profile →</button>
      </div>}
+     {strategy.training_consistency==='under4'&&strategy.recent_weekly_hours!=null&&strategy.recent_weekly_hours>=8&&<details style={{border:'1px solid #315c72',borderRadius:12,padding:12,marginTop:12,background:'#133348'}}>
+      <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>Returning athlete · coach-review week</summary>
+      <p style={{color:'#c7deea',fontSize:13,lineHeight:1.5}}>Enter the actual average completed hours from your last 2–3 weeks. Historical peak volume is not the starting load. Preview only; nothing will be published or changed.</p>
+      <label htmlFor="return-actual-hours" style={{display:'block',color:'#c7deea',fontSize:12,marginBottom:5}}>Recent actual hours per week</label>
+      <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+       <input id="return-actual-hours" type="number" min="3" max="25" step="0.5" value={returnHours} onChange={e=>{setReturnHours(e.target.value);setReturnPreview(null);}} style={{width:85,padding:9,borderRadius:8,border:'1px solid #57869b',background:'#0b2538',color:'#fff'}}/>
+       <button type="button" disabled={returnPreviewBusy} onClick={loadReturnPreview} style={{padding:'10px 13px',borderRadius:8,border:0,background:'#48bde9',color:'#082536',fontWeight:700}}>{returnPreviewBusy?'Preparing…':'Preview week'}</button>
+      </div>
+      {returnPreviewError&&<p role="alert" style={{color:'#ffd093'}}>{returnPreviewError}</p>}
+      {returnPreview&&<div style={{marginTop:12}}>
+       <strong style={{color:'#f6d278'}}>{returnPreview.status==='coach_review_required'?'Coach review required':'Review required'}</strong>
+       <p style={{color:'#c7deea',fontSize:13,lineHeight:1.5}}>{returnPreview.note||returnPreview.reason} No calendar changes have been made.</p>
+       {Array.isArray(returnPreview.sample_sessions)&&<div style={{display:'grid',gap:6}}>{returnPreview.sample_sessions.map((item:any,i:number)=><div key={i} style={{display:'flex',justifyContent:'space-between',gap:10,padding:'8px 0',borderBottom:'1px solid #31566a',color:'#e6f5fc',fontSize:13}}><span>{item.date} · {item.title}</span><strong style={{whiteSpace:'nowrap'}}>{item.duration_min}m</strong></div>)}</div>}
+       {returnPreview.sample_minutes!=null&&<p style={{color:'#e6f5fc'}}>Sample: {minutes(returnPreview.sample_minutes)} · target: {minutes(returnPreview.target_minutes)}</p>}
+      </div>}
+     </details>}
      <details style={{border:'1px solid #315c72',borderRadius:12,padding:12,marginTop:12,background:'#133348'}}>
       <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>This week's coaching signals <small style={{color:'#82cde8',fontWeight:500}}>· live calendar</small></summary>
       <div style={{display:'grid',gap:10,marginTop:12,lineHeight:1.5}}>
