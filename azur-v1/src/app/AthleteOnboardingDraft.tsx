@@ -146,8 +146,8 @@ export default function AthleteOnboardingDraft(){
   <button type="button" style={{width:'100%',padding:'16px',borderRadius:12,background:'#168bc5',color:'white',fontWeight:700,fontSize:17,border:0}} onClick={()=>window.location.assign('/')}>Explore my training calendar →</button>
  </section>;
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
-  <div className="azur-onboarding-progress"><strong>YOUR AZUR JOURNEY</strong><span>Step {step+1} of 5</span></div>
-  <div className="azur-onboarding-track"><span style={{width:`${(step+1)/5*100}%`}}/></div>
+  <div className="azur-onboarding-progress"><strong>YOUR AZUR JOURNEY</strong><span>Step {step+1} of 5 · {['Race goal','Training background','Benchmarks','Devices','Review'][step]}</span></div>
+  <div className="azur-onboarding-track" role="progressbar" aria-label="Athlete setup progress" aria-valuemin={0} aria-valuemax={5} aria-valuenow={step+1}><span style={{width:`${(step+1)/5*100}%`}}/></div>
   {step===0&&<div>
    <h3>What are you training towards?</h3><p>Your goal sets the direction. Your current fitness and availability determine where we begin.</p>
    <label>Your name<input type="text" maxLength={90} required value={displayName} onChange={e=>setDisplayName(e.target.value)}/></label>
