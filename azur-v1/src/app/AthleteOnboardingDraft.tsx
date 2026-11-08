@@ -73,7 +73,7 @@ export default function AthleteOnboardingDraft(){
  async function save(nextStep:number){
   if(!userId){setMessage('Sign in to save your setup.');return;}
   if(hours.trim()===''||!Number.isFinite(Number(hours))||Number(hours)<2||Number(hours)>25){setMessage('Weekly hours must be between 2 and 25.');return;}
-  if(nextStep>=2 && (!['novice','regular','established'].includes(background)||!['under4','4to7','8plus'].includes(consistency))){setMessage('Choose your training background and recent consistency to continue.');return;}
+  if(nextStep>=2 && (!['novice','regular','established'].includes(background)||!['under4','4to7','8plus'].includes(consistency))){setMessage('Please complete your training background and recent consistency before continuing.');setStep(1);return;}
   if(trainingDays.length===0 && nextStep>=2){setMessage('Choose at least one day you can train.');return;}
   if(recentHours!=='' && (!Number.isFinite(Number(recentHours))||Number(recentHours)<0||Number(recentHours)>25)){setMessage('Recent weekly training must be between 0 and 25 hours.');return;}
   if(ftp!==''&&(!Number.isFinite(Number(ftp))||Number(ftp)<60||Number(ftp)>650)){setMessage('FTP must be between 60 and 650 watts.');return;}
