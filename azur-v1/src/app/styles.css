@@ -6565,3 +6565,50 @@ strong {
  .athlete-agenda .session-detail-modal .section-heading{padding:13px!important}
  .athlete-agenda .session-detail-modal .session-foundation-timeline{padding:12px!important}
 }
+
+/* AZUR V3 mobile calendar contrast and density repair (2026-11-08).
+   Override legacy paper-day styling and legacy chart min-height. */
+.calendar-layout.athlete-agenda .calendar-day{
+ min-height:0!important;background:#102536!important;
+ border:1px solid #2d4659!important;border-radius:12px!important;
+ box-shadow:none!important;overflow:hidden!important
+}
+.calendar-layout.athlete-agenda .calendar-day-head{
+ background:#152b3d!important;color:#e9f4fc!important;
+ border:0!important;border-bottom:1px solid #29475a!important;
+ padding:9px 12px!important;min-height:0!important
+}
+.calendar-layout.athlete-agenda .calendar-day-head span,
+.calendar-layout.athlete-agenda .calendar-day-head strong{
+ color:#e9f4fc!important;font-size:12px!important;
+ letter-spacing:.045em!important;opacity:1!important
+}
+.calendar-layout.athlete-agenda .day-stack{
+ background:transparent!important;padding:7px!important;gap:6px!important
+}
+.calendar-layout.athlete-agenda .calendar-day .calendar-empty-state,
+.calendar-layout.athlete-agenda .calendar-day .empty-day{
+ background:transparent!important;color:#91a8ba!important;
+ border:0!important;padding:4px 6px!important;
+ min-height:0!important;font-size:12px!important
+}
+.calendar-layout.athlete-agenda .calendar-day .calendar-empty-state p{
+ color:#91a8ba!important;font-size:12px!important;margin:0!important
+}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-bars{
+ height:38px!important;min-height:0!important;max-height:38px!important;
+ padding:2px!important;align-items:flex-end!important;box-sizing:border-box!important
+}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-profile{
+ min-height:0!important;margin:6px 0!important;padding:0!important
+}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-bar{
+ max-height:100%!important
+}
+@media(max-width:600px){
+ .calendar-layout.athlete-agenda .calendar-day-head{padding:7px 10px!important}
+ .calendar-layout.athlete-agenda .day-stack{padding:5px!important}
+ .calendar-layout.athlete-agenda .calendar-session .calendar-intensity-bars{
+  height:32px!important;max-height:32px!important
+ }
+}
