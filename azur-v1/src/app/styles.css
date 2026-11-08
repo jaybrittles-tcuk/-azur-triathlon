@@ -6253,3 +6253,40 @@ strong {
 .athlete-agenda .calendar-strip-day.focused>strong,
 .athlete-agenda .calendar-strip-day.today>strong {color:#fff!important}
 .athlete-agenda .calendar-strip-days {gap:4px!important}
+
+/* Calendar contrast correction — selectors match the rendered calendar without relying on athlete-agenda ancestry. */
+.calendar-layout .calendar-strip-day,
+.calendar-layout button.calendar-strip-day {
+  background:#18374f!important;color:#eaf5ff!important;border:1px solid #365b73!important;
+  box-shadow:none!important;border-radius:10px!important
+}
+.calendar-layout .calendar-strip-day > strong {color:#f1f8ff!important}
+.calendar-layout .calendar-strip-day > span {color:#acc6d9!important}
+.calendar-layout .calendar-strip-day.today,
+.calendar-layout .calendar-strip-day.focused {background:#235b7e!important;border-color:#51b4ec!important}
+.calendar-layout .calendar-strip-day.today > strong,
+.calendar-layout .calendar-strip-day.focused > strong {color:#fff!important}
+.calendar-layout .calendar-strip-top h3,
+.calendar-layout .calendar-strip-footer,
+.calendar-layout .calendar-day-head,
+.calendar-layout .calendar-day-head strong {color:#e9f4fd!important}
+.calendar-layout .calendar-strip-footer {opacity:.85}
+.session-detail-overlay .session-detail-modal {
+  background:#0a1d2d!important;color:#eaf5fc!important;
+  border:1px solid #36556c!important
+}
+.session-detail-modal .session-block,
+.session-detail-modal .session-block-item,
+.session-detail-modal .session-purpose,
+.session-detail-modal .session-duration {
+  background:#142e44!important;color:#eaf5fc!important;border-color:#34546b!important
+}
+.session-detail-modal .session-block *,
+.session-detail-modal .session-block-item * {color:#eaf5fc!important}
+@media(max-width:600px){
+ .session-detail-overlay {padding:0!important;align-items:flex-end!important}
+ .session-detail-overlay .session-detail-modal {
+  width:100%!important;max-height:92dvh!important;border-radius:22px 22px 0 0!important;
+  padding:20px 16px max(30px,env(safe-area-inset-bottom))!important
+ }
+}
