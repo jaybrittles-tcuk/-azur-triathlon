@@ -55,6 +55,11 @@ export default function AthleteOnboardingDraft(){
    setInvitationVerified(true);
    const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
    if(!cancelled && profile?.display_name) setDisplayName(profile.display_name);
+   const {data:schedule}=await supabase.from('athlete_schedule_preference').select('schedule_pattern,planning_preference').eq('user_id',user.id).maybeSingle();
+   if(!cancelled&&schedule){
+    if(['fixed','variable','rotating'].includes(schedule.schedule_pattern))setSchedulePattern(schedule.schedule_pattern as 'fixed'|'variable'|'rotating');
+    if(['weekly','rotating','flexible'].includes(schedule.planning_preference))setSchedulePreference(schedule.planning_preference as 'weekly'|'rotating'|'flexible');
+   }
    const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,training_days,recent_weekly_hours,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,training_background,training_consistency,current_training_concern,can_swim_200m,device,onboarding_step').eq('user_id',user.id).maybeSingle();
    if(cancelled)return;
    if(error)setMessage('Could not load your saved setup: '+error.message);
@@ -85,6 +90,11 @@ export default function AthleteOnboardingDraft(){
   if(nextStep===5 && !betaAcknowledged){setMessage('Please acknowledge the beta limitations before creating your plan.');return;}
   if(nextStep===5 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
+  const {error:scheduleError}=await supabase.from('athlete_schedule_preference').upsert({
+   user_id:userId,schedule_pattern:schedulePattern,planning_preference:schedulePattern==='fixed'?'weekly':schedulePreference,
+   updated_at:new Date().toISOString()
+  },{onConflict:'user_id'});
+  if(scheduleError){setSaving(false);setMessage('Unable to save your weekly scheduling preference. Please retry: '+scheduleError.message);return;}
   if(nextStep===5){
    const {data,error}=await supabase.rpc('complete_athlete_onboarding_and_plan',{
     p_inputs:{
@@ -181,7 +191,7 @@ export default function AthleteOnboardingDraft(){
       <option value="rotating">Use my repeating shift pattern</option>
       <option value="flexible">Build a flexible plan I can adjust</option>
     </select></label>}
-    {schedulePattern!=='fixed'&&<small role="note">Weekly shift-aware scheduling is being developed. For now, choose the days you can train in the opening week above. These preferences are not yet saved or used by the plan generator.</small>}
+    {schedulePattern!=='fixed'&&<small role="note">Your preference is saved with your athlete account. The opening plan still uses the training days selected above; automatic weekly shift-aware replanning is not active yet.</small>}
    </div>
    <label>Hours actually trained per week recently (optional)<input type="number" min={0} max={25} step="0.5" value={recentHours} onChange={e=>setRecentHours(e.target.value)} placeholder="Unknown"/></label>
    {recentHours!==''&&Number(recentHours)<hours&&<p role="note">You currently train {recentHours} hours per week and have {hours} hours available. AZUR will build gradually rather than immediately filling your available time.</p>}
