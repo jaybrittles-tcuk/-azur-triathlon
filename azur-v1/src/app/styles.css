@@ -6925,3 +6925,44 @@ strong {
     animation-duration: .01ms !important;
   }
 }
+
+/* Compact premium disclosures for workout coaching and feedback */
+.athlete-agenda .session-detail-modal .azur-premium-disclosure {
+  background:#15181e!important;
+  border:1px solid #292f39!important;
+  border-radius:13px!important;
+  padding:0!important;
+  overflow:hidden;
+}
+.athlete-agenda .session-detail-modal .azur-premium-disclosure > summary {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  position:relative;
+  padding:15px 42px 15px 16px;
+  cursor:pointer;
+  list-style:none;
+}
+.athlete-agenda .session-detail-modal .azur-premium-disclosure > summary::-webkit-details-marker {display:none}
+.athlete-agenda .session-detail-modal .azur-premium-disclosure > summary::after {
+  content:'⌄';
+  position:absolute;
+  right:16px;
+  top:14px;
+  color:#a0aebd;
+  font-size:20px;
+  transition:transform .2s ease;
+}
+.athlete-agenda .session-detail-modal .azur-premium-disclosure[open] > summary::after {transform:rotate(180deg)}
+.athlete-agenda .session-detail-modal .azur-premium-disclosure > summary strong {font-size:15px;color:#f5f7fa}
+.athlete-agenda .session-detail-modal .azur-premium-disclosure > summary span {
+  font-size:12px;
+  line-height:1.35;
+  color:#a0aebd;
+}
+.athlete-agenda .session-detail-modal .azur-premium-disclosure[open] > :not(summary) {margin-left:16px;margin-right:16px}
+.athlete-agenda .session-detail-modal .azur-premium-disclosure[open] > :last-child {margin-bottom:16px}
+.athlete-agenda .session-detail-modal .azur-premium-disclosure > summary:focus-visible {
+  outline:2px solid #38a7e8;
+  outline-offset:-3px;
+}
