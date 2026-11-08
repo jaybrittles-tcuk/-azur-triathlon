@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
 import CalendarIntensityProfile from './CalendarIntensityProfile';
-type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null};
-export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource}:Props){
+type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null;coachingContent?:ReactNode};
+export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource,coachingContent}:Props){
  const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('intervals');
  const source=prescription?.azurWorkout as {steps?:unknown}|undefined;
  const intervals=normalizeWorkoutIntervals(source?.steps);
@@ -51,12 +52,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
   {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <h4>Coaching insights</h4>
-   <p>Open AZUR Intelligence below for your training-history signal, session-specific guidance and supporting evidence.</p>
-   {ftpWatts!=null && Number.isFinite(ftpWatts) && ftpWatts>=75 && ftpWatts<=600
-    ? <p><strong>Recorded FTP:</strong> {ftpWatts} W. Apply only where this workout explicitly prescribes FTP-based power targets.</p>
-    : <p><strong>Power targets:</strong> No validated FTP available. Use the session's prescribed effort guidance until a threshold is confirmed.</p>}
-   <small>Your feedback and recorded activity are considered separately. Significant training changes remain subject to coach approval.</small>
+   {coachingContent ?? <p>Coaching insights are not available for this workout yet.</p>}
   </div>}
  </section>;
 }
