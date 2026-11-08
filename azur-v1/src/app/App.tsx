@@ -7796,33 +7796,46 @@ const sessionVerdict =
 )}
 
 <details className="wide session-block session-intent-v2 azur-premium-disclosure" aria-label="AZUR coaching intelligence">
-  <summary><strong>AZUR Intelligence</strong><span>Session purpose · athlete context · coaching guidance</span></summary>
-  <p><strong>Why this workout:</strong> {String(selected.rationale || selected.prescription?.focus || 'Your coach has not yet supplied a session-specific rationale.').replace(/^Why today matters:\s*/i, '')}</p>
-  <p><strong>How it should feel:</strong> {selected.sport === 'bike'
-    ? 'Keep the easy portions genuinely easy and the work intervals repeatable. Watch for rising perceived effort or deteriorating cadence at the same prescribed target.'
-    : selected.sport === 'run'
-    ? 'Keep the effort aligned with the prescribed pace or RPE. Look for controlled breathing and consistent form rather than forcing a faster split.'
-    : selected.sport === 'swim'
-    ? 'Aim for consistent stroke quality and controlled breathing across repeats. If technique deteriorates, report it rather than forcing the pace.'
-    : 'Follow the prescribed targets and note any unusual change in effort or technique.'}</p>
-  <p><strong>What we know:</strong> {(() => {
+  <summary><strong>AZUR Intelligence</strong><span>Purpose · training signal · coach guidance</span></summary>
+  <p><strong>Why today matters</strong></p>
+  <p>{String(selected.rationale || selected.prescription?.focus || 'Follow the prescribed session and note how your effort responds.').replace(/^Why today matters:\s*/i, '')}</p>
+  <p><strong>Your training intelligence</strong></p>
+  <p>{(() => {
     const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
-    const prior = weekSessions.filter(session => {
+    const completed = weekSessions.filter(session => {
       const time = new Date(session.plannedDate + 'T12:00:00').getTime();
-      return Number.isFinite(time) && time < anchor && time >= anchor - 14 * 86400000;
+      return Number.isFinite(time) && time < anchor && time >= anchor - 14 * 86400000
+        && session.status === 'completed' && session.completedDurationSec != null
+        && Number.isFinite(session.completedDurationSec) && session.completedDurationSec > 0;
     });
-    const completed = prior.filter(session => session.status === 'completed');
-    const recorded = completed.filter(session => session.completedDurationSec != null && Number.isFinite(session.completedDurationSec) && session.completedDurationSec > 0);
-    return recorded.length
-      ? `In the preceding 14 days, ${recorded.length} calendar-linked sessions have recorded durations totalling ${(recorded.reduce((sum, session) => sum + (session.completedDurationSec || 0), 0) / 3600).toFixed(1)} hours. This is observed activity, not a recovery or readiness score.`
-      : 'There are no calendar-linked completed sessions with valid duration in the preceding 14 days. Training readiness cannot be established from this record.';
+    if (completed.length < 4) return 'Training history is still building. Follow today’s prescribed effort and log how it felt so AZUR can give more individual guidance.';
+    const recent = completed.filter(session => new Date(session.plannedDate + 'T12:00:00').getTime() >= anchor - 7 * 86400000);
+    const previous = completed.filter(session => new Date(session.plannedDate + 'T12:00:00').getTime() < anchor - 7 * 86400000);
+    if (recent.length < 2 || previous.length < 2) return 'Recent completed training is available, but there is not yet enough coverage in both weeks for a reliable trend.';
+    const hours = (sessions: typeof recent) => sessions.reduce((sum, session) => sum + (session.completedDurationSec || 0), 0) / 3600;
+    const current = hours(recent);
+    const prior = hours(previous);
+    if (prior <= 0) return 'A usable previous-week baseline is not available.';
+    const change = (current / prior - 1) * 100;
+    return Math.abs(change) > 25
+      ? `Recorded training duration is ${Math.round(Math.abs(change))}% ${change > 0 ? 'higher' : 'lower'} than the previous seven days. Discuss unexpected changes with your coach; duration does not measure recovery.`
+      : 'Recorded training duration is broadly similar across the last two seven-day windows. Session effort and recovery still need separate consideration.';
   })()}</p>
-  {selected.sport === 'bike' && (
-    <p><strong>Power guidance:</strong> {Number.isFinite(Number(athleteProfile.ftp)) && Number(athleteProfile.ftp) >= 75 && Number(athleteProfile.ftp) <= 600
-      ? `A recorded FTP of ${athleteProfile.ftp} W is available. Use it only where this workout explicitly prescribes an FTP-based target.`
-      : 'A usable FTP is not available. Any placeholder or implausible FTP is excluded from coaching guidance; use the explicitly prescribed RPE targets until your threshold is confirmed.'}</p>
-  )}
-  <p><strong>Training history signal:</strong> {(() => {
+  <p><strong>Coach guidance</strong></p>
+  <p>{selected.status === 'completed' && Number(sessionFeedback.rpe) >= 8 && Number(sessionFeedback.rpe) <= 10
+    ? `You rated this session ${sessionFeedback.rpe}/10. If that was harder than prescribed, flag it to your coach before the next demanding workout.`
+    : selected.status === 'completed' && Number(sessionFeedback.rpe) >= 1 && Number(sessionFeedback.rpe) <= 7
+    ? `You reported RPE ${sessionFeedback.rpe}/10. Your coach can compare this with the intended effort and recorded session.`
+    : selected.sport === 'bike'
+    ? 'Keep the prescribed efforts repeatable. Use RPE when a validated power threshold is unavailable, and report unexpected fatigue.'
+    : selected.sport === 'run'
+    ? 'Prioritise controlled pacing and consistent form; report any unexpected increase in effort.'
+    : selected.sport === 'swim'
+    ? 'Prioritise repeatable pace and stroke quality; report when technique deteriorates.'
+    : 'Follow the session targets and report any unexpected changes in effort.'}</p>
+  <details className="azur-intelligence-evidence">
+    <summary>Training evidence and coaching safeguards</summary>
+      <p><strong>Training history signal:</strong> {(() => {
     const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
     const window = (days: number) => weekSessions.filter(session => {
       const time = new Date(session.plannedDate + 'T12:00:00').getTime();
@@ -7842,23 +7855,12 @@ const sessionVerdict =
     if (change < -25) return `Recorded duration is ${Math.round(Math.abs(change))}% lower than the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). This may reflect scheduling, missing imports or reduced training; it is not automatically a recovery improvement.`;
     return `Recorded duration is within 25% of the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). Similar duration does not confirm stable intensity or recovery.`;
   })()}</p>
-  <p><strong>Athlete response:</strong> {selected.status !== 'completed'
-    ? 'After this session, your own effort rating and notes can add context to the device record. No recovery conclusion is available before that feedback.'
-    : Number(sessionFeedback.rpe) >= 8 && Number(sessionFeedback.rpe) <= 10
-    ? 'You reported a demanding session (RPE ' + sessionFeedback.rpe + '/10). Compare that effort with the prescribed target and recent training history. If the effort was unexpectedly high, ask your coach to review the next demanding session; this is not an automatic recovery diagnosis.'
-    : Number(sessionFeedback.rpe) >= 1 && Number(sessionFeedback.rpe) <= 7
-    ? 'You reported session effort of ' + sessionFeedback.rpe + '/10. This adds subjective context to recorded training duration, but a single effort rating cannot establish recovery readiness.'
-    : 'No valid athlete-reported session effort is available yet. Recorded duration alone cannot tell AZUR how recovered you feel.'}</p>
-  <p><strong>Coach decision:</strong> AZUR can highlight training-volume changes and unusual reported effort for review. Your scheduled sessions stay unchanged unless an authorised coach approves an adjustment.</p>
-  <p><strong>What happens next:</strong> {selected.status === 'completed'
-    ? 'Review recorded duration alongside your own RPE and notes. Flag unexpectedly high effort, discomfort or incomplete intervals for coach review before changing future intensity.'
-    : 'After training, record session RPE and any unexpected fatigue or changes from the plan. Your coach can compare those observations with completed activity before approving significant changes.'}</p>
-  <details className="azur-intelligence-evidence">
-    <summary>View supporting training data</summary>
-    <p>{calendarWeekSessions.length} sessions scheduled in the selected calendar week, totalling {(calendarWeekSessions.reduce((sum, session) => sum + session.durationMin, 0) / 60).toFixed(1)} planned hours. {calendarWeekSessions.filter(session => session.status === 'completed').length} are marked complete. Scheduled time is not completed training load.</p>
-    {selected.status === 'completed' && selected.completedDurationSec != null && selected.durationMin > 0 && <p>Recorded {Math.round(selected.completedDurationSec / 60)} minutes versus {selected.durationMin} planned minutes.</p>}
-    {selected.status === 'completed' && Number(sessionFeedback.rpe) >= 1 && Number(sessionFeedback.rpe) <= 10 && <p>Athlete-reported RPE: {sessionFeedback.rpe}/10 (subjective, not device-measured).</p>}
+    <p><strong>Week planned:</strong> {calendarWeekSessions.length} sessions · {(calendarWeekSessions.reduce((sum, session) => sum + session.durationMin, 0) / 60).toFixed(1)} hours. Planned time is not completed training load.</p>
+    {selected.sport === 'bike' && <p><strong>FTP:</strong> {Number.isFinite(Number(athleteProfile.ftp)) && Number(athleteProfile.ftp) >= 75 && Number(athleteProfile.ftp) <= 600 ? `${athleteProfile.ftp} W recorded; apply only to explicitly FTP-based targets.` : 'Not validated; use prescribed RPE.'}</p>}
+    {selected.status === 'completed' && selected.completedDurationSec != null && <p><strong>Recorded duration:</strong> {Math.round(selected.completedDurationSec / 60)} minutes.</p>}
+    <p>Device-derived duration and athlete-reported effort are different evidence sources. Neither alone establishes recovery or readiness. Significant plan changes require coach approval.</p>
   </details>
+</details>
 </details>
 {(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2" open={Boolean(editableManualId)}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
 <details className="wide session-block session-analysis-v3-feedback azur-premium-disclosure" open={selected.status==='completed'}>
