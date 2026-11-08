@@ -153,26 +153,41 @@ export default function AthleteOnboardingDraft(){
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
  if(!invitationVerified&&!isCoach)return <section className="azur-onboarding-draft" role="status"><h3>Invitation required</h3><p>{message||'Please accept your coach invitation before onboarding.'}</p>{pendingInvitationId?<a style={{display:'inline-block',background:'#087ee9',color:'#fff',padding:'12px 18px',borderRadius:12,fontWeight:700}} href={'/accept-invitation?invitation='+encodeURIComponent(pendingInvitationId)}>Accept coach invitation</a>:<p>Ask your coach for an invitation to this email address.</p>}</section>;
  if(isCoach)return <section className="azur-onboarding-draft"><h3>Athlete onboarding</h3><p>This setup is for athlete accounts. Coach access and assignments are managed separately.</p></section>;
- if(ready && message.startsWith('Your training plan is ready'))return <section className="azur-onboarding-draft" aria-label="Your AZUR training briefing" style={{maxWidth:680,margin:'0 auto'}}>
-  <div style={{padding:'8px 0 18px'}}><span className="eyebrow">YOUR PERSONAL TRAINING BRIEFING</span><h1 style={{fontSize:'clamp(30px,7vw,44px)',lineHeight:1.1,margin:'14px 0'}}>Your journey starts here.</h1><p style={{opacity:.85}}>Welcome, {displayName}. Here's how AZUR is preparing you for your {race==='70.3'?'IRONMAN 70.3':race==='ironman'?'IRONMAN':race} goal.</p></div>
+ if(ready && message.startsWith('Your training plan is ready'))return <section className="azur-onboarding-draft" aria-label="Your AZUR training briefing" style={{maxWidth:720,margin:'0 auto',color:'#f4f8ff'}}>
+  <div style={{padding:'12px 0 20px'}}>
+   <span className="eyebrow" style={{color:'#69c5ed',letterSpacing:2}}>AZUR · ATHLETE BRIEFING</span>
+   <h1 style={{fontSize:'clamp(30px,7vw,46px)',lineHeight:1.08,margin:'12px 0'}}>Built around you.</h1>
+   <p style={{color:'#b9cbdc',lineHeight:1.6,margin:0}}>Welcome, {displayName}. Your starting plan is ready. Here's the thinking behind your first block.</p>
+  </div>
+  <div style={{background:'linear-gradient(135deg,#123e62,#10283f)',border:'1px solid #337ba1',borderRadius:22,padding:'20px',marginBottom:14}}>
+   <small style={{color:'#8bd8f4',letterSpacing:1.6}}>YOUR RACE GOAL</small>
+   <h2 style={{fontSize:'clamp(23px,6vw,34px)',margin:'8px 0 4px'}}>{race==='ironman'?'IRONMAN':race==='70.3'?'IRONMAN 70.3':race.toUpperCase()}</h2>
+   <p style={{margin:0,color:'#c8dce9'}}>{raceDate?new Date(raceDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Race date to be confirmed'}</p>
+  </div>
   <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10,marginBottom:18}}>
-   <div style={{background:'#12334b',border:'1px solid #28546a',borderRadius:16,padding:16}}><small>YOUR EVENT</small><strong style={{display:'block',fontSize:19,marginTop:6}}>{race==='ironman'?'IRONMAN':race==='70.3'?'IRONMAN 70.3':race.toUpperCase()}</strong><small>{raceDate||'Race date to be confirmed'}</small></div>
-   <div style={{background:'#12334b',border:'1px solid #28546a',borderRadius:16,padding:16}}><small>YOUR AVAILABILITY</small><strong style={{display:'block',fontSize:24,marginTop:6}}>{hours} hrs</strong><small>per week available</small></div>
-   <div style={{background:'#12334b',border:'1px solid #28546a',borderRadius:16,padding:16}}><small>OPENING BLOCK</small><strong style={{display:'block',fontSize:24,marginTop:6}}>{planSummary?.sessions??'—'} sessions</strong><small>{planSummary?.total_minutes?Math.round(planSummary.total_minutes/60*10)/10+' hours across the opening block (not per week)':'Opening training block'}</small></div>
-   <div style={{background:'#12334b',border:'1px solid #28546a',borderRadius:16,padding:16}}><small>KNOWN BENCHMARKS</small><strong style={{display:'block',fontSize:16,marginTop:6}}>{css?'CSS '+css:'/100m test pending'}</strong><small>{runThreshold?'Run '+runThreshold+'/km':'Run threshold pending'}{ftp?' · FTP '+ftp+'W':''}</small></div>
+   <div style={{background:'#102c43',border:'1px solid #28546a',borderRadius:16,padding:15}}><small style={{color:'#9db7ca'}}>WEEKLY AVAILABILITY</small><strong style={{display:'block',fontSize:27,marginTop:5}}>{hours} <span style={{fontSize:14}}>hrs</span></strong><small style={{color:'#a9c3d3'}}>Scheduling capacity</small></div>
+   <div style={{background:'#102c43',border:'1px solid #28546a',borderRadius:16,padding:15}}><small style={{color:'#9db7ca'}}>RECENT TRAINING</small><strong style={{display:'block',fontSize:27,marginTop:5}}>{recentHours||'—'} <span style={{fontSize:14}}>{recentHours?'hrs':'not set'}</span></strong><small style={{color:'#a9c3d3'}}>Reported weekly average</small></div>
+   <div style={{background:'#102c43',border:'1px solid #28546a',borderRadius:16,padding:15}}><small style={{color:'#9db7ca'}}>OPENING BLOCK</small><strong style={{display:'block',fontSize:27,marginTop:5}}>{planSummary?.sessions??'—'} <span style={{fontSize:14}}>sessions</span></strong><small style={{color:'#a9c3d3'}}>{planSummary?.total_minutes?Math.round(planSummary.total_minutes/60*10)/10+' hours total across the block':'First training block'} · not per week</small></div>
+   <div style={{background:'#102c43',border:'1px solid #28546a',borderRadius:16,padding:15}}><small style={{color:'#9db7ca'}}>BENCHMARKS</small><strong style={{display:'block',fontSize:17,marginTop:8}}>{[css?'CSS '+css:null,ftp?'FTP '+ftp+' W':null,runThreshold?'Run '+runThreshold:null].filter(Boolean).join(' · ')||'To establish'}</strong><small style={{color:'#a9c3d3'}}>Starting references</small></div>
   </div>
-  <div style={{background:'#103d43',border:'1px solid #267e83',borderRadius:18,padding:20,marginBottom:16}}>
-   <span className="eyebrow">AZUR INTELLIGENCE</span><h2 style={{margin:'10px 0'}}>Why we're starting here</h2>
-   <p>{race==='ironman'?'An IRONMAN requires sustained aerobic endurance across a 3.8 km swim, 180 km bike and marathon. Early training prioritises repeatable sessions, durability and controlled effort before longer race-specific work.':race==='70.3'?'An IRONMAN 70.3 combines a 1.9 km swim, 90 km bike and half marathon. Your first block establishes consistency and aerobic control before progressively building race-specific endurance.':'Your first block establishes a consistent aerobic foundation and manageable training rhythm before progressing toward your chosen race demands.'}</p>
-   <p>{recentHours!==''&&Number(recentHours)<Number(hours)?`You have ${hours} hours available, but reported ${recentHours} hours of recent training. AZUR will build from your recent capacity rather than immediately filling every available hour.`:'Your available hours guide scheduling, while recent training and consistency determine how quickly load should progress.'}</p>
-   <p>{css&&runThreshold?'Your known swim and run thresholds provide starting intensity references. We will refine them using completed sessions and feedback.':css||runThreshold?'We can use your known threshold as a starting reference while establishing the remaining benchmark safely.':'Where thresholds are unknown, the opening sessions use controlled effort until reliable benchmarks can be established.'}</p>
+  <div style={{background:'#10373e',border:'1px solid #267e83',borderRadius:20,padding:18,marginBottom:16}}>
+   <span className="eyebrow" style={{color:'#76e0d6'}}>AZUR INTELLIGENCE</span>
+   <h2 style={{margin:'9px 0 12px',fontSize:22}}>Why your plan starts here</h2>
+   <div style={{display:'grid',gap:12}}>
+    <div><strong>01 · Build consistency</strong><p style={{margin:'4px 0 0',color:'#c5e1df',lineHeight:1.5}}>Your first block establishes repeatable aerobic sessions before race-specific training becomes more demanding.</p></div>
+    <div><strong>02 · Respect your training history</strong><p style={{margin:'4px 0 0',color:'#c5e1df',lineHeight:1.5}}>{recentHours!==''?('You reported '+recentHours+' recent training hours per week against '+hours+' hours available. Availability is a ceiling, not an automatic training target.'):'Your available time sets scheduling boundaries; training feedback will help guide progression.'}</p></div>
+    <div><strong>03 · Learn from every session</strong><p style={{margin:'4px 0 0',color:'#c5e1df',lineHeight:1.5}}>{css||ftp||runThreshold?'Your entered benchmarks are starting references, refined as reliable completed-session data becomes available.':'Early sessions use controlled effort while we establish reliable training benchmarks.'}</p></div>
+   </div>
   </div>
-  <div style={{background:'#102b40',border:'1px solid #28546a',borderRadius:18,padding:18,marginBottom:18}}>
-   <h2 style={{margin:'0 0 8px'}}>Your first sessions</h2><p style={{opacity:.8}}>These are drawn from your actual generated calendar, not a sample training plan.</p>
-   {(planSummary?.calendar||[]).slice(0,5).map((session,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,padding:'12px 0',borderBottom:'1px solid #28546a'}}><div><strong style={{display:'block'}}>{session.title}</strong><small>{session.date} · {session.sport}</small></div><strong style={{whiteSpace:'nowrap'}}>{session.duration_min} min</strong></div>)}
+  <div style={{background:'#102b40',border:'1px solid #28546a',borderRadius:20,padding:18,marginBottom:18}}>
+   <h2 style={{margin:'0 0 4px',fontSize:22}}>Your first sessions</h2><p style={{color:'#a9c3d3',margin:'0 0 12px',fontSize:13}}>A preview of your actual generated calendar</p>
+   {(planSummary?.calendar||[]).slice(0,5).map((session,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,padding:'12px 0',borderBottom:'1px solid #28546a'}}>
+    <div style={{minWidth:0}}><small style={{color:'#7dd5f6',textTransform:'uppercase',letterSpacing:1}}>{session.sport} · {new Date(session.date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</small><strong style={{display:'block',fontSize:14,marginTop:4}}>{session.title}</strong></div>
+    <strong style={{whiteSpace:'nowrap',fontSize:14,color:'#e3f5ff'}}>{session.duration_min} min</strong>
+   </div>)}
    {!(planSummary?.calendar?.length)&&<p>Your sessions are ready to explore in your training calendar.</p>}
   </div>
-  <button type="button" style={{width:'100%',padding:'16px',borderRadius:12,background:'#168bc5',color:'white',fontWeight:700,fontSize:17,border:0}} onClick={()=>window.location.assign('/')}>Explore my training calendar →</button>
+  <button type="button" style={{width:'100%',padding:'17px',borderRadius:14,background:'#168bc5',color:'white',fontWeight:750,fontSize:16,border:0,position:'sticky',bottom:12,boxShadow:'0 8px 26px #071927aa'}} onClick={()=>window.location.assign('/')}>Open my training calendar →</button>
  </section>;
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
   <div className="azur-onboarding-progress"><strong>YOUR AZUR JOURNEY</strong><span>Step {step+1} of 5 · {['Race goal','Training background','Benchmarks','Devices','Review'][step]}</span></div>
