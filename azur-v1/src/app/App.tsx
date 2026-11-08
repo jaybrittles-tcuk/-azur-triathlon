@@ -1296,6 +1296,7 @@ const [primaryRace, setPrimaryRace] = useState({
   const [selectedId, setSelectedId] = useState('');
   const [sessionDetailOpen, setSessionDetailOpen] = useState(false);
   const [calendarWeekOffset, setCalendarWeekOffset] = useState(0);
+  const [calendarMonthExpanded, setCalendarMonthExpanded] = useState(false);
   const [calendarFocusedDate, setCalendarFocusedDate] = useState<string | null>(null);
   const [movingSessionId, setMovingSessionId] = useState<string | null>(null);
   const [moveTargetDate, setMoveTargetDate] = useState('');
@@ -6764,17 +6765,18 @@ color:
 )}
 {moveMessage && <p role="status" className="calendar-move-message">{moveMessage}</p>}
 <section className="panel calendar-toolbar calendar-week-strip"><div className="agenda-date-nav">
-    <button aria-label="Previous four weeks" onClick={() => {setCalendarWeekOffset(gridWeekOffset-4);setCalendarFocusedDate(null)}}>‹</button>
-    <strong>{gridStart.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – {dateGrid[27].date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</strong>
-    <button aria-label="Next four weeks" onClick={() => {setCalendarWeekOffset(gridWeekOffset+4);setCalendarFocusedDate(null)}}>›</button>
+    <button aria-label={calendarMonthExpanded ? 'Previous four weeks' : 'Previous week'} onClick={() => {setCalendarWeekOffset(calendarWeekOffset-(calendarMonthExpanded?4:1));setCalendarFocusedDate(null)}}>‹</button>
+    <strong>{calendarMonthExpanded ? `${gridStart.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – ${dateGrid[27].date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}` : `Week of ${calendarWeekDates[0].date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`}</strong>
+    <button aria-label={calendarMonthExpanded ? 'Next four weeks' : 'Next week'} onClick={() => {setCalendarWeekOffset(calendarWeekOffset+(calendarMonthExpanded?4:1));setCalendarFocusedDate(null)}}>›</button>
     <button onClick={() => {setCalendarWeekOffset(0);setCalendarFocusedDate(todayKey)}}>Today</button>
   </div>
-  <div className="agenda-dates" role="group" aria-label="Four-week calendar">
+  <button type="button" className="agenda-expand-button" aria-expanded={calendarMonthExpanded} onClick={() => setCalendarMonthExpanded(!calendarMonthExpanded)}>{calendarMonthExpanded ? 'Show week' : 'View 4 weeks'}</button>
+  <div className="agenda-dates" role="group" aria-label={calendarMonthExpanded ? 'Four-week calendar' : 'Weekly calendar'}>
     {days.map(day => <small key={day} aria-hidden="true">{day[0]}</small>)}
-    {dateGrid.map(({date,key,sports},index) => <button key={key} type="button"
+    {(calendarMonthExpanded ? dateGrid : dateGrid.slice((calendarWeekOffset-gridWeekOffset)*7,(calendarWeekOffset-gridWeekOffset+1)*7)).map(({date,key,sports},index) => <button key={key} type="button"
       aria-label={date.toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long',year:'numeric'}) + (sports.size ? ', '+[...sports].join(', ') : '')}
       aria-current={key===todayKey?'date':undefined} aria-pressed={focusedDay?.dateKey===key}
-      onClick={()=>{setCalendarWeekOffset(gridWeekOffset+Math.floor(index/7));setCalendarFocusedDate(key)}}>
+      onClick={()=>{if(calendarMonthExpanded)setCalendarWeekOffset(gridWeekOffset+Math.floor(index/7));setCalendarFocusedDate(key)}}>
       {date.getDate()}<span aria-hidden="true">{[...sports].map(sport=><i className={sport} key={sport}/>)}</span>
     </button>)}
   </div>
