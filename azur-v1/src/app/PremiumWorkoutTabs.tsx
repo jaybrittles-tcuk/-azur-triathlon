@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
+import CalendarIntensityProfile from './CalendarIntensityProfile';
 type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null};
 export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource}:Props){
  const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('intervals');
@@ -29,9 +30,10 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
     <div><small>Workout structure</small><strong>{intervals.length?intervals.length+' timed blocks':'Coach-prescribed'}</strong></div>
    </div>
    {completedMinutes!=null&&<p>Recorded duration difference: {completedMinutes-plannedMinutes>=0?'+':''}{completedMinutes-plannedMinutes} min{completedSource?' · '+completedSource:''}. Duration alone does not establish intensity compliance.</p>}
-   {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Intervals for prescribed targets.</p>}
+   {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Workout for prescribed targets.</p>}
   </div>}
   {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
+   {intervals.length > 0 && <CalendarIntensityProfile steps={source?.steps} />}
    {intervals.length ? <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/> : <p>Review the coach-prescribed warm-up, main set and cool-down in the detailed instructions below.</p>}
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
