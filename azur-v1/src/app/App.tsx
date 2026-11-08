@@ -7810,9 +7810,21 @@ const sessionVerdict =
       ? ` You also have ${calendarWeekSessions.filter(session => session.plannedDate === selected.plannedDate && session.id !== selected.id).length} other session(s) scheduled that day; consider overall fatigue when recording feedback.`
       : ''}
   </p>
+  <p><strong>Recent training (14 days):</strong> {(() => {
+    const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
+    const prior = weekSessions.filter(session => {
+      const date = new Date(session.plannedDate + 'T12:00:00').getTime();
+      return Number.isFinite(date) && date <= anchor && date > anchor - 14 * 86400000;
+    });
+    const completed = prior.filter(session => session.status === 'completed');
+    const withDuration = completed.filter(session => session.completedDurationSec != null && Number.isFinite(session.completedDurationSec) && session.completedDurationSec > 0);
+    return completed.length === 0
+      ? 'No completed calendar sessions are available in this 14-day window. AZUR cannot infer recent training consistency or recovery from missing records.'
+      : `${completed.length} of ${prior.length} calendar sessions recorded complete; ${withDuration.length} have recorded duration${withDuration.length ? `, totalling ${(withDuration.reduce((sum, session) => sum + (session.completedDurationSec || 0), 0) / 3600).toFixed(1)} hours` : ''}. This is calendar-linked history only, not a complete measure of load or recovery.`;
+  })()}</p>
   <p><strong>How to execute:</strong> Follow the prescribed work and recovery targets. Monitor whether effort and technique remain controlled throughout, and avoid pushing above the planned intensity.</p>
   {selected.status === 'completed' && selected.completedDurationSec != null && selected.durationMin > 0 && (
-    <p><strong>Observed completion:</strong> ${''}{Math.round(selected.completedDurationSec / 60)} minutes recorded against {selected.durationMin} minutes planned ({Math.round((selected.completedDurationSec / 60) / selected.durationMin * 100)}% of planned duration). This is a duration comparison, not a measure of workout quality or readiness.</p>
+    <p><strong>Observed completion:</strong> {Math.round(selected.completedDurationSec / 60)} minutes recorded against {selected.durationMin} minutes planned ({Math.round((selected.completedDurationSec / 60) / selected.durationMin * 100)}% of planned duration). This is a duration comparison, not a measure of workout quality or readiness.</p>
   )}
   {selected.status === 'completed' && sessionFeedback.rpe !== '' && Number.isFinite(Number(sessionFeedback.rpe)) && Number(sessionFeedback.rpe) >= 1 && Number(sessionFeedback.rpe) <= 10 && (
     <p><strong>Athlete-reported effort:</strong> {sessionFeedback.rpe}/10 RPE. This is your subjective report, separate from device-recorded measurements.</p>
