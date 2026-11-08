@@ -6438,3 +6438,67 @@ strong {
 .athlete-agenda .calendar-session .calendar-session-meta {
  margin-top:5px!important;font-size:12px!important
 }
+
+/* AZUR V3 visual foundation — dark, compact, data-first athlete calendar.
+   Sport colours identify disciplines; workout intensity colours remain metric-specific. */
+.athlete-agenda{
+ --azur-v3-surface:#14191f;
+ --azur-v3-surface-raised:#1b232d;
+ --azur-v3-line:#303c48;
+ --azur-v3-copy:#f3f7fb;
+ --azur-v3-muted:#a9b9c7;
+ --azur-v3-swim:#65c9ee;
+ --azur-v3-bike:#ed88b6;
+ --azur-v3-run:#f6a364
+}
+.athlete-agenda .calendar-session-wrapper{
+ margin:0 0 7px!important;padding:0!important;border:0!important
+}
+.athlete-agenda .calendar-session,
+.athlete-agenda .calendar-session.planned,
+.athlete-agenda .calendar-session.selected{
+ background:var(--azur-v3-surface)!important;
+ border:1px solid var(--azur-v3-line)!important;
+ border-radius:14px!important;
+ padding:11px 13px!important;
+ box-shadow:none!important;
+ min-height:0!important;
+}
+.athlete-agenda .calendar-session-top{margin:0 0 4px!important;min-height:0!important}
+.athlete-agenda .calendar-session-top>span{
+ font-size:10px!important;letter-spacing:.12em!important;text-transform:uppercase!important
+}
+.athlete-agenda .calendar-session>strong{
+ font-size:15px!important;line-height:1.26!important;
+ font-weight:700!important;letter-spacing:-.012em!important;
+ margin:3px 0 7px!important
+}
+.athlete-agenda .calendar-session .calendar-intensity-profile{
+ padding:0!important;margin:3px 0 6px!important
+}
+.athlete-agenda .calendar-session .calendar-intensity-profile-head{display:none!important}
+.athlete-agenda .calendar-session .calendar-intensity-bars{
+ height:34px!important;padding:2px!important;
+ background:#0d141d!important;border-radius:6px!important;gap:2px!important
+}
+.athlete-agenda .calendar-session .calendar-intensity-bar{border-radius:2px!important}
+.athlete-agenda .calendar-session .calendar-session-purpose{
+ margin:4px 0!important;padding:0!important
+}
+.athlete-agenda .calendar-session .calendar-session-meta{
+ margin:5px 0 0!important;font-size:12px!important
+}
+.athlete-agenda .calendar-session-status{
+ font-size:10px!important;letter-spacing:.05em!important
+}
+.athlete-agenda .calendar-reschedule-button{
+ font-size:11px!important;padding:5px 9px!important;border-radius:8px!important
+}
+.athlete-agenda .calendar-session:focus-visible{
+ outline:2px solid #55baf0!important;outline-offset:2px!important
+}
+@media(max-width:600px){
+ .athlete-agenda .calendar-day{padding:6px 0!important}
+ .athlete-agenda .calendar-session>strong{font-size:14px!important}
+ .athlete-agenda .calendar-session .calendar-intensity-bars{height:30px!important}
+}
