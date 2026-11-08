@@ -105,7 +105,6 @@ export default function AthleteOnboardingDraft(){
    }
    setMessage(`Your training plan is ready: ${data.sessions} sessions.`);
    setReady(true);
-   if(window.location.pathname==='/onboarding')window.location.assign('/');
    return;
   }
   const {error}=await supabase.from('athlete_onboarding').upsert({
@@ -122,6 +121,7 @@ export default function AthleteOnboardingDraft(){
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
  if(!invitationVerified&&!isCoach)return <section className="azur-onboarding-draft" role="status"><h3>Invitation required</h3><p>{message||'Please accept your coach invitation before onboarding.'}</p><p>Open the invitation email sent by your coach, sign in with that address, and accept the invitation.</p></section>;
  if(isCoach)return <section className="azur-onboarding-draft"><h3>Athlete onboarding</h3><p>This setup is for athlete accounts. Coach access and assignments are managed separately.</p></section>;
+ if(ready && message.startsWith('Your training plan is ready'))return <section className="azur-onboarding-draft" aria-label="Your AZUR welcome"><span className="eyebrow">WELCOME TO AZUR</span><h2>Your journey starts here.</h2><p><strong>{displayName}</strong>, your {race==='70.3'?'IRONMAN 70.3':race==='ironman'?'IRONMAN':race} journey starts with a plan built around your {hours} available hours and your current training background.</p><div className="azur-onboarding-recap"><h3>Why your plan starts this way</h3><p>Your opening two weeks establish a sustainable rhythm and help AZUR understand how you respond to training. Where reliable thresholds are missing, sessions start conservatively before benchmarks guide more specific intensity.</p><p>Training days: {trainingDays.join(', ')}.</p><p>{message}</p></div><button type="button" onClick={()=>window.location.assign('/')}>Explore my training calendar</button></section>;
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
   <div className="azur-onboarding-progress"><strong>YOUR AZUR JOURNEY</strong><span>Step {step+1} of 5</span></div>
   <div className="azur-onboarding-track"><span style={{width:`${(step+1)/5*100}%`}}/></div>
