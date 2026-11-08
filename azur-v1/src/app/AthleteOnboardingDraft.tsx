@@ -70,6 +70,7 @@ export default function AthleteOnboardingDraft(){
   void load();
   return ()=>{cancelled=true};
  },[]);
+ useEffect(()=>{if(!loading){window.scrollTo({top:0,behavior:'smooth'});}},[step,loading]);
  async function save(nextStep:number){
   if(!userId){setMessage('Sign in to save your setup.');return;}
   if(hours.trim()===''||!Number.isFinite(Number(hours))||Number(hours)<2||Number(hours)>25){setMessage('Weekly hours must be between 2 and 25.');return;}
@@ -169,9 +170,9 @@ export default function AthleteOnboardingDraft(){
   </div>}
   {step===4&&<div className="azur-beta-disclosure" role="group" aria-label="AZUR beta participation"><h3>Before you begin: AZUR beta</h3><p><strong>What AZUR offers:</strong> race-goal and availability-based setup, structured training plans, workout explanations, feedback and supported activity connections.</p><p><strong>What is still being tested:</strong> training adaptations, device imports, calendar syncing and some coaching insights may be incomplete or inaccurate. Training sessions may require coach review. Do not follow a workout that feels unsafe; report problems to your coach. AZUR is not medical advice.</p><label><input type="checkbox" checked={betaAcknowledged} onChange={e=>setBetaAcknowledged(e.target.checked)}/> I understand that AZUR is a beta product and will review any unsuitable sessions or missing data with my coach.</label><small>This acknowledgement is required to finish setup. It is not yet stored as a permanent consent record.</small></div>}
   {step===4&&<div className="azur-onboarding-recap"><h3>Your AZUR starting point</h3><p><strong>{displayName}</strong> · {race.toUpperCase()} {raceDate?'· '+raceDate:''}</p><p>{hours} hours available each week · {trainingDays.join(', ')}</p><p>{css?'Swim CSS '+css+'/100m':'Swim benchmark to be established'} · {runThreshold?'Run threshold '+runThreshold+'/km':'Run benchmark to be established'}</p><p><strong>Why your plan starts this way</strong></p><p>AZUR uses your recent training, availability and race goal to establish a sustainable starting point. Where benchmarks are missing, your first two weeks focus on manageable endurance and learning how your body responds before targeted intensity is introduced.</p></div>}
-  <div className="azur-onboarding-actions">
-   {step>0&&<button type="button" onClick={()=>{setStep(s=>s-1);setReady(false)}}>Back</button>}
-   {step<4?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>Continue</button>
+  <div className="azur-onboarding-actions" style={{position:"sticky",bottom:0,zIndex:5,display:"flex",gap:12,justifyContent:"flex-end",padding:"14px 8px max(14px, env(safe-area-inset-bottom))",background:"linear-gradient(180deg, rgba(9,28,46,0.96), #091c2e)",borderTop:"1px solid rgba(110,178,216,0.25)",borderRadius:12}}>
+   {step>0&&<button type="button" onClick={()=>{setMessage("");setStep(s=>s-1);setReady(false)}}>Back</button>}
+   {step<4?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>{saving?"Saving…":"Continue"}</button>
    :<button type="button" disabled={saving} onClick={()=>void save(5)}>{saving?'Creating plan…':'Finish setup & create plan'}</button>}
   </div>
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
