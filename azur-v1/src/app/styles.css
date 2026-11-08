@@ -6290,3 +6290,11 @@ strong {
   padding:20px 16px max(30px,env(safe-area-inset-bottom))!important
  }
 }
+
+.session-foundation-timeline{background:#112e43;color:#edf7ff;border:1px solid #31586f;border-radius:18px;padding:20px;margin:16px 0}
+.session-foundation-timeline h3{color:#fff;font-size:21px;margin:8px 0 14px}
+.session-foundation-step{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:start;gap:12px;padding:14px 0;border-bottom:1px solid #34546b}
+.session-foundation-step>div strong,.session-foundation-step>strong{color:#f2f9ff;font-size:15px}
+.session-foundation-step p{color:#bfd5e3;line-height:1.5;margin:5px 0 0}
+.session-foundation-step-index{background:#1d729e;color:white;border-radius:50%;width:27px;height:27px;display:grid;place-items:center;font-weight:700;font-size:13px}
+.session-foundation-coaching{margin:16px 0 0;padding:14px;border-radius:12px;background:#173d4c;color:#d4ecf4;line-height:1.55;border-left:3px solid #f0c23d}
