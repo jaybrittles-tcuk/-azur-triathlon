@@ -9955,7 +9955,8 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
 
   if (!isAuthenticated || passwordRecoverySession) {
     return (
-      <div className="login-screen">
+      <div className="login-screen azur-login-premium">
+        <style>{`\n          .azur-login-premium { min-height: 100dvh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; background: radial-gradient(ellipse at 50% 0%, #123659 0%, #071525 55%, #050d19 100%); }\n          .azur-login-premium .login-card { width: min(100%, 430px); padding: 28px 24px; border-radius: 24px; background: #101d30; border: 1px solid #28415d; box-shadow: 0 22px 70px #0006; color: #eef6ff; }\n          .azur-login-premium .login-logo { width: 88px; height: 88px; object-fit: contain; border-radius: 18px; display: block; margin: 0 0 20px; }\n          .azur-login-premium .login-card h2 { color: #f4f8ff; font-size: clamp(27px, 6vw, 34px); line-height: 1.12; margin: 8px 0 12px; }\n          .azur-login-premium .login-card p { color: #a9bbd1; line-height: 1.5; margin: 0 0 22px; }\n          .azur-login-premium .login-card label { color: #dce9f7; display: block; margin: 0 0 16px; }\n          .azur-login-premium .login-card label span { display: block; margin-bottom: 7px; font-weight: 650; }\n          .azur-login-premium .login-card input { width: 100%; box-sizing: border-box; min-height: 48px; border-radius: 12px; border: 1px solid #35506d; background: #0a1728; color: #fff; padding: 12px 14px; }\n          .azur-login-premium .login-card input:focus { outline: 2px solid #238df2; outline-offset: 2px; }\n          .azur-login-premium .login-card .primary-button { width: 100%; min-height: 50px; border-radius: 12px; background: #087ee9; color: white; font-weight: 750; margin: 8px 0 12px; }\n          .azur-login-premium .azur-auth-switch { background: transparent; border: 0; color: #a8d5ff; padding: 9px 4px; font-weight: 600; }\n          .azur-login-premium .azur-password-field { position: relative; }\n          .azur-login-premium .azur-password-field input { padding-right: 76px; }\n          .azur-login-premium .azur-password-field .azur-password-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 7px; font-size: 13px; color: #b7d9fa; }\n          @media(max-width: 420px) { .azur-login-premium { padding: 16px 12px; } .azur-login-premium .login-card { padding: 24px 20px; } }\n        `}</style>
         <form className="login-card" onSubmit={passwordRecoverySession?handleRecoveryUpdate:recoveryMode?handleRecoveryRequest:registrationMode && betaRegistrationEnabled ? handleRegister : handleLogin}>
           <img
             src="/brand/azur-logo.png"
@@ -9985,14 +9986,16 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
           {!recoveryMode && <label>
             <span>Password</span>
 
-            <input
-              type={showAuthPassword?"text":"password"}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
+            <div className="azur-password-field">
+              <input
+                type={showAuthPassword?"text":"password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+              <button type="button" className="azur-auth-switch azur-password-toggle" aria-label={showAuthPassword?"Hide password":"Show password"} aria-pressed={showAuthPassword} onClick={()=>setShowAuthPassword(v=>!v)}>{showAuthPassword?"Hide":"Show"}</button>
+            </div>
           </label>}
-          {!recoveryMode&&<button type="button" className="azur-auth-switch" onClick={()=>setShowAuthPassword(v=>!v)}>{showAuthPassword?"Hide password":"Show password"}</button>}
 
           {authError && (
             <div className="login-error">{authError}</div>
