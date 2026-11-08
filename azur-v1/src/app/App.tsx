@@ -7848,7 +7848,7 @@ const sessionVerdict =
 <button
   type="button"
   className="primary-button"
-  onClick={()=>void handleSessionFeedbackSave()
+  onClick={()=>void handleSessionFeedbackSave()}
   disabled={sessionFeedbackSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed}
 >
   <Save size={17} />
