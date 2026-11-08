@@ -7095,6 +7095,13 @@ onClick={() => {
 
           {(() => {
             const check = auditAthleteInstructions(selected.prescription);
+            // Legacy onboarding foundation workouts store a fully specified RPE timeline in prescription.steps.
+            // Validate the actual steps; do not show a false missing-interval warning for these sessions.
+            const simpleSteps = selected.prescription?.steps;
+            if (Array.isArray(simpleSteps) && simpleSteps.length > 0 &&
+                simpleSteps.every((step: any) => Number.isFinite(Number(step.durationMin)) && Number(step.durationMin) > 0 &&
+                  typeof step.target === 'string' && step.target.trim().length > 0) &&
+                simpleSteps.reduce((total: number, step: any) => total + Number(step.durationMin), 0) === selected.durationMin) return null;
             if (check.complete) return null;
             return <div className="session-prescription-warning" role="note">
               <strong>Prescription needs coach clarification</strong>
@@ -7102,6 +7109,20 @@ onClick={() => {
               <small>Do not infer missing targets or rest periods. Ask your coach before completing an unclear session.</small>
             </div>;
           })()}
+          {Array.isArray(selected.prescription?.steps) && selected.prescription.steps.length > 0 && (
+            <section className="session-foundation-timeline" aria-label="Your prescribed workout">
+              <span className="eyebrow">YOUR WORKOUT</span>
+              <h3>Follow your session, step by step</h3>
+              {selected.prescription.steps.map((step: any, index: number) => (
+                <div className="session-foundation-step" key={index}>
+                  <span className="session-foundation-step-index">{index + 1}</span>
+                  <div><strong>{index === 0 ? 'Warm-up' : index === selected.prescription.steps.length - 1 ? 'Cool-down' : 'Main set'}</strong><p>{String(step.target || 'Effort not supplied — check with your coach')}</p></div>
+                  <strong>{step.durationMin} min</strong>
+                </div>
+              ))}
+              <p className="session-foundation-coaching">Why today matters: controlled aerobic work helps establish repeatable training habits and endurance without unnecessary fatigue. Keep effort conversational where prescribed; report how the session felt so future training can be adjusted.</p>
+            </section>
+          )}
           {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || selected.prescription?.focus || (Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) ? (
           <>
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
