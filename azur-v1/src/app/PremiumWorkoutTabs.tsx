@@ -18,6 +18,13 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
   if(rec.type==='repeat'){addCadence(rec.work);addCadence(rec.recovery);}
  };
  if(Array.isArray(source?.steps))source.steps.forEach(addCadence);
+ const describeTarget=(target:(typeof intervals)[number]['target'])=>target?(`${target.low===target.high?target.low:target.low+'–'+target.high}${target.unit===' /10'?' /10':target.unit==='/%'?'%':target.unit}`):'target not supplied';
+ const describeBlock=(block:(typeof intervals)[number])=>`${block.durationSec!==null?Math.round(block.durationSec/60)+' min':block.distanceM!==null?block.distanceM+' m':'duration not supplied'} · ${describeTarget(block.target)}`;
+ const warmups=intervals.filter(x=>x.kind==='warmup');
+ const cooldowns=intervals.filter(x=>x.kind==='cooldown');
+ const middle=intervals.filter(x=>x.kind==='work'||x.kind==='recovery');
+ const grouped:{count:number;label:string}[]=[];
+ middle.forEach(x=>{const label=`${x.kind==='work'?'Work':'Recovery'}: ${describeBlock(x)}`;const prev=grouped[grouped.length-1];if(prev?.label===label)prev.count++;else grouped.push({count:1,label});});
  return <section className="azur-premium-workout-tabs">
   <div className="azur-workout-tab-nav" role="tablist" aria-label="Workout information">
    {(['overview','intervals','notes'] as const).map(t=><button type="button" key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t==='intervals'?'Workout':t==='notes'?'Coaching':'Overview'}</button>)}
@@ -34,7 +41,13 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
   </div>}
   {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
    {intervals.length > 0 && <CalendarIntensityProfile steps={source?.steps} />}
-   {intervals.length ? <WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/> : <p>Review the coach-prescribed warm-up, main set and cool-down in the detailed instructions below.</p>}
+   {intervals.length ? <div className="azur-workout-compact-prescription" style={{padding:'12px 2px',lineHeight:1.55}}>
+    <h4 style={{margin:'0 0 10px'}}>Your workout</h4>
+    {warmups.length>0&&<p style={{margin:'8px 0'}}><strong>Warm-up:</strong> {warmups.map(describeBlock).join(' · ')}</p>}
+    {middle.length>0&&<p style={{margin:'8px 0'}}><strong>Main set:</strong> {grouped.map(x=>(x.count>1?x.count+' × ':'')+x.label).join(' · ')}</p>}
+    {cooldowns.length>0&&<p style={{margin:'8px 0'}}><strong>Cool-down:</strong> {cooldowns.map(describeBlock).join(' · ')}</p>}
+    <details style={{marginTop:14}}><summary style={{cursor:'pointer',fontWeight:600}}>View all {intervals.length} interval blocks and targets</summary><WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/></details>
+   </div> : <p>Review the coach-prescribed warm-up, main set and cool-down in the detailed instructions below.</p>}
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
   {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content">
