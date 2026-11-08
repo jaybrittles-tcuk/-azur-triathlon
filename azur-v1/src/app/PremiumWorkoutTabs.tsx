@@ -51,9 +51,12 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
   {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <h4>Coach guidance</h4><p>{rationale||'No additional coaching rationale recorded.'}</p>
-   <p>{typeof prescription?.focus==='string'?prescription.focus:'No additional focus notes supplied.'}</p>
-   <small>Additional workout notes and editable athlete feedback remain in the detailed sections below.</small>
+   <h4>Coaching insights</h4>
+   <p>Open AZUR Intelligence below for your training-history signal, session-specific guidance and supporting evidence.</p>
+   {ftpWatts!=null && Number.isFinite(ftpWatts) && ftpWatts>=75 && ftpWatts<=600
+    ? <p><strong>Recorded FTP:</strong> {ftpWatts} W. Apply only where this workout explicitly prescribes FTP-based power targets.</p>
+    : <p><strong>Power targets:</strong> No validated FTP available. Use the session's prescribed effort guidance until a threshold is confirmed.</p>}
+   <small>Your feedback and recorded activity are considered separately. Significant training changes remain subject to coach approval.</small>
   </div>}
  </section>;
 }
