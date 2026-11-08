@@ -190,7 +190,7 @@ export default function AthleteOnboardingDraft(){
   <button type="button" style={{width:'100%',padding:'17px',borderRadius:14,background:'#168bc5',color:'white',fontWeight:750,fontSize:16,border:0,position:'sticky',bottom:12,boxShadow:'0 8px 26px #071927aa'}} onClick={()=>window.location.assign('/')}>Open my training calendar →</button>
  </section>;
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
-  <div className="azur-onboarding-progress"><strong>YOUR AZUR JOURNEY</strong><span>Step {step+1} of 5 · {['Race goal','Training background','Benchmarks','Devices','Review'][step]}</span></div>
+  <div className="azur-onboarding-progress" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"10px 0 14px"}}><strong style={{letterSpacing:1.6,color:"#76d4f7",fontSize:12}}>YOUR AZUR JOURNEY</strong><span style={{fontSize:12,color:"#b5c9da"}}>{step+1} / 5 · {['Race goal','Training background','Benchmarks','Devices','Review'][step]}</span></div>
   <div className="azur-onboarding-track" role="progressbar" aria-label="Athlete setup progress" aria-valuemin={0} aria-valuemax={5} aria-valuenow={step+1}><span style={{width:`${(step+1)/5*100}%`}}/></div>
   {step===0&&<div>
    <h3>What are you training towards?</h3><p>Your goal sets the direction. Your current fitness and availability determine where we begin.</p>
