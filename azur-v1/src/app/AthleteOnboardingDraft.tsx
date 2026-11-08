@@ -89,6 +89,12 @@ export default function AthleteOnboardingDraft(){
   if(hours.trim()===''||!Number.isFinite(Number(hours))||Number(hours)<2||Number(hours)>25){setMessage('Weekly hours must be between 2 and 25.');return;}
   if(nextStep>=2 && (!['novice','regular','established'].includes(background)||!['under4','4to7','8plus'].includes(consistency))){setMessage('Please complete your training background and recent consistency before continuing.');setStep(1);return;}
   if(trainingDays.length===0 && nextStep>=2){setMessage('Choose at least one day you can train.');return;}
+  const outsideAvailability=(['swim','bike','run'] as const).flatMap(sport=>sportDays[sport].filter(day=>!trainingDays.includes(day)).map(day=>sport+' on '+day));
+  if(outsideAvailability.length){setMessage('Sport-specific availability must fall on days you can train. Review: '+outsideAvailability.join(', '));setStep(1);return;}
+  if(longBikeDay&&!trainingDays.includes(longBikeDay)){setMessage('Your preferred long bike day must be one of your available training days.');setStep(1);return;}
+  if(longRunDay&&!trainingDays.includes(longRunDay)){setMessage('Your preferred long run day must be one of your available training days.');setStep(1);return;}
+  if(longBikeDay&&sportDays.bike.length&&!sportDays.bike.includes(longBikeDay)){setMessage('Your long bike day must also be available for cycling.');setStep(1);return;}
+  if(longRunDay&&sportDays.run.length&&!sportDays.run.includes(longRunDay)){setMessage('Your long run day must also be available for running.');setStep(1);return;}
   if(recentHours!=='' && (!Number.isFinite(Number(recentHours))||Number(recentHours)<0||Number(recentHours)>25)){setMessage('Recent weekly training must be between 0 and 25 hours.');return;}
   if(ftp!==''&&(!Number.isFinite(Number(ftp))||Number(ftp)<60||Number(ftp)>650)){setMessage('FTP must be between 60 and 650 watts.');return;}
   for(const [label,value,min,max] of [['Swim CSS',css,50,300],['Run threshold',runThreshold,150,900]] as const){const seconds=parsePace(value);if(value!==''&&(seconds===null||!Number.isFinite(seconds)||seconds<min||seconds>max)){setMessage(`${label}: enter a pace as minutes:seconds (e.g. ${label==='Swim CSS'?'1:45':'5:00'}). Leave blank if unknown.`);return;}}
