@@ -12,9 +12,11 @@ export default function AthleteSessionMoveRequest(){
  useEffect(()=>{let cancelled=false;void(async()=>{
   const {data:{user}}=await supabase.auth.getUser();
   if(!user)return;
+  const {data:profile}=await supabase.from('athlete_profile').select('id').eq('user_id',user.id).maybeSingle();
+  if(!profile?.id){if(!cancelled)setMessage('Athlete profile not available.');return;}
   const today=new Date().toISOString().slice(0,10);
   const end=new Date(Date.now()+28*86400000).toISOString().slice(0,10);
-  const {data,error}=await supabase.from('planned_session').select('id,planned_date,sport,title,duration_min,session_class,locked').eq('athlete_id',user.id).eq('is_active_version',true).gte('planned_date',today).lte('planned_date',end).order('planned_date',{ascending:true}).limit(50);
+  const {data,error}=await supabase.from('planned_session').select('id,planned_date,sport,title,duration_min,session_class,locked').eq('athlete_id',profile.id).eq('is_active_version',true).gte('planned_date',today).lte('planned_date',end).order('planned_date',{ascending:true}).limit(50);
   if(cancelled)return;
   if(error)setMessage('Could not load planned sessions: '+error.message);
   else setSessions((data||[]) as Session[]);
