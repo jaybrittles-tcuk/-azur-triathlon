@@ -7797,11 +7797,18 @@ const sessionVerdict =
 
 <details className="wide session-block session-intent-v2 azur-premium-disclosure" aria-label="Why this session matters">
   <summary><strong>AZUR Intelligence</strong><span>Purpose · execution · adaptation</span></summary>
-  <p><strong>Why this session:</strong> {String(selected.rationale || selected.prescription?.focus || 'The training objective has not yet been supplied by your coach.').replace(/^Why today matters:\\s*/i, '').replace(/^Why today matters:\s*/i, '')}</p>
+  <p><strong>Why this session:</strong> {String(selected.rationale || selected.prescription?.focus || 'The training objective has not yet been supplied by your coach.').replace(/^Why today matters:\s*/i, '')}</p>
   <p><strong>Your training context:</strong> {calendarWeekSessions.length > 0
     ? `This calendar week includes ${calendarWeekSessions.length} planned sessions totalling ${(calendarWeekSessions.reduce((sum, session) => sum + session.durationMin, 0) / 60).toFixed(1)} hours; ${calendarWeekSessions.filter(session => session.status === 'completed').length} are recorded complete.`
     : 'No scheduled sessions are available for the selected week, so weekly workload cannot be assessed here.'}
     {selected.sport === 'bike' && athleteProfile.ftp && Number.isFinite(athleteProfile.ftp) ? ` Your recorded cycling FTP is ${athleteProfile.ftp} W; use percentage-based power targets only when they are explicitly prescribed.` : ''}
+  </p>
+  <p><strong>Where it fits:</strong> {calendarWeekSessions.some(session => session.id === selected.id)
+    ? `This is one of ${calendarWeekSessions.filter(session => session.sport === selected.sport).length} ${sportName(selected.sport).toLowerCase()} sessions scheduled in the selected week.`
+    : 'This session is outside the currently selected calendar week, so the week totals above may not describe its training context.'}
+    {calendarWeekSessions.some(session => session.id === selected.id) && calendarWeekSessions.filter(session => session.plannedDate === selected.plannedDate && session.id !== selected.id).length > 0
+      ? ` You also have ${calendarWeekSessions.filter(session => session.plannedDate === selected.plannedDate && session.id !== selected.id).length} other session(s) scheduled that day; consider overall fatigue when recording feedback.`
+      : ''}
   </p>
   <p><strong>How to execute:</strong> Follow the prescribed work and recovery targets. Monitor whether effort and technique remain controlled throughout, and avoid pushing above the planned intensity.</p>
   <p><strong>What AZUR learns:</strong> Record session RPE, fatigue and any changes from the plan. These observations support coach review and future adjustments; a single session does not prove an adaptation.</p>
