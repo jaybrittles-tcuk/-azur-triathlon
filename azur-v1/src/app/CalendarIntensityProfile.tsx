@@ -19,12 +19,12 @@ export default function CalendarIntensityProfile({ steps }: { steps: unknown }) 
   const max = Math.max(...performance);
   const span = max - min;
   return (
-    <div className="calendar-intensity-profile" style={{position:"relative",display:"block",width:"100%",minWidth:0,overflow:"hidden",padding:"5px 0",boxSizing:"border-box",clear:"both"}}>
-      <div className="calendar-intensity-profile-head" style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}>
+    <div className="calendar-intensity-profile" style={{position:"relative",display:"block",width:"100%",minWidth:0,overflow:"hidden",padding:"2px 0",boxSizing:"border-box",clear:"both"}}>
+      <div className="calendar-intensity-profile-head" style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
         <strong>Prescribed intensity</strong>
         <span>{targets[0].unit} · relative scale</span>
       </div>
-      <div className="calendar-intensity-bars" style={{display:"flex",alignItems:"flex-end",height:54,width:"100%",minWidth:0,overflow:"hidden",background:"#142b3b",borderRadius:10,padding:"6px",boxSizing:"border-box"}} role="img"
+      <div className="calendar-intensity-bars" style={{display:"flex",alignItems:"flex-end",height:36,width:"100%",minWidth:0,overflow:"hidden",background:"#0d1016",borderRadius:7,padding:"4px",boxSizing:"border-box"}} role="img"
         aria-label={`Workout intensity profile: ${intervals.length} timed segments; relative bar heights compare ${targets[0].unit} within this workout`}>
         {intervals.map((part, index) => {
           const height = span === 0 ? 58 : 25 + 75 * (performance[index] - min) / span;
@@ -37,7 +37,7 @@ export default function CalendarIntensityProfile({ steps }: { steps: unknown }) 
           );
         })}
       </div>
-      <small style={{display:"block",marginTop:5,lineHeight:1.4}}>Widths = duration · Heights = relative prescribed target{metric==="ftp_percent"?" · Colours = cycling FTP zones":metric==="rpe"?" · Colours = perceived effort (not FTP zones)":" · No inferred power zones"}</small>
+      <small style={{display:"block",marginTop:4,lineHeight:1.3,fontSize:"0.7rem",color:"#98a6b5"}}>Bar width = time · Height = relative effort{metric==="ftp_percent"?" · Colours = cycling FTP zones":metric==="rpe"?" · Colours = perceived effort (not FTP zones)":" · No inferred power zones"}</small>
     </div>
   );
 }
