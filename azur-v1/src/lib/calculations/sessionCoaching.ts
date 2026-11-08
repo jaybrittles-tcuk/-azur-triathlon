@@ -8,6 +8,9 @@ type Input = {
   sessionRpe?: number | null;
   completed?: boolean;
   focus?: string | null;
+  raceName?: string | null;
+  raceDate?: string | null;
+  plannedDate?: string | null;
 };
 
 /** Describes only targets actually prescribed in the workout. No inferred readiness or threshold. */
@@ -59,6 +62,15 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     ? `You reported RPE ${rpe}/10 against prescribed RPE ${expectedRpe.low}–${expectedRpe.high}/10. Review the difference with your coach alongside the completed session.`
     : `You reported RPE ${rpe}/10. The workout has no uniform explicit RPE target for a direct comparison.`;
   const explicitFocus = typeof input.focus === 'string' && input.focus.trim().length > 0 ? input.focus.trim() : null;
+  const raceDate = typeof input.raceDate === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(input.raceDate)
+    ? Date.parse(input.raceDate + 'T12:00:00Z') : NaN;
+  const plannedDate = typeof input.plannedDate === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(input.plannedDate)
+    ? Date.parse(input.plannedDate + 'T12:00:00Z') : NaN;
+  const daysToRace = Number.isFinite(raceDate) && Number.isFinite(plannedDate)
+    ? Math.round((raceDate - plannedDate) / 86400000) : null;
+  const raceContext = daysToRace !== null && daysToRace >= 0 && daysToRace <= 730
+    ? `Your recorded priority race${input.raceName?.trim() ? ` (\u0024{input.raceName.trim()})` : ''} is ${daysToRace === 0 ? 'today' : `in ${daysToRace} days`}. This workout contributes to your training programme, but its specific race-phase purpose requires a confirmed phase and athlete assessment.`
+    : '';
   const missingTarget = work.length > 0 && explicitTargets.length === 0
     ? 'Follow the written effort guidance in your workout. If a target is unclear, check with your coach.'
     : work.length > 0 && explicitTargets.length < work.length
@@ -78,6 +90,6 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : 'Record whether the prescribed effort was sustainable and flag unexpected difficulty to your coach.';
   return {
     execution: [targetDescription ? `Target: ${targetDescription}.` : '', execution, repeatCount > 1 ? structure : ''].filter(Boolean).join(' '),
-    context: [explicitFocus ? `Coach-prescribed focus: ${explicitFocus}.` : '', power, missingFtp, missingTarget, response, feedbackPrompt, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
+    context: [explicitFocus ? `Coach-prescribed focus: ${explicitFocus}.` : '', raceContext, power, missingFtp, missingTarget, response, feedbackPrompt, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
   };
 }
