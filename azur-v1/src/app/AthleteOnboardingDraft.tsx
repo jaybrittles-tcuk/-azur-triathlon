@@ -3,6 +3,8 @@ import { supabase } from '../lib/supabase';
 
 type Device = 'garmin'|'coros'|'polar'|'apple'|'other'|'none';
 type Race = 'sprint'|'olympic'|'70.3'|'ironman'|'other';
+const formatPace=(raw:string)=>{if(!raw)return '';if(raw.includes(':'))return raw;const n=Number(raw);return Number.isFinite(n)?`${Math.floor(n/60)}:${String(n%60).padStart(2,'0')}`:raw};
+const parsePace=(raw:string)=>{const v=raw.trim();if(!v)return null;if(/^\d{1,2}:\d{2}$/.test(v)){const [m,sec]=v.split(':').map(Number);return sec<60?m*60+sec:NaN;}return NaN;};
 const weekdays=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const devices: {id:Device;label:string}[]=[
  {id:'garmin',label:'Garmin'}, {id:'coros',label:'COROS'},
@@ -59,7 +61,7 @@ export default function AthleteOnboardingDraft(){
     setDevice(data.device as Device);
     setBackground(data.training_background||'regular');setBackgroundTouched(true);setConsistency(data.training_consistency||'4to7');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);
     setTrainingDays((data.training_days||[]).map((day:number)=>weekdays[day]).filter(Boolean));setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
-    setFtp(data.ftp_watts==null?'':String(data.ftp_watts));setCss(data.swim_css_seconds_per_100m==null?'':String(data.swim_css_seconds_per_100m));setRunThreshold(data.run_threshold_seconds_per_km==null?'':String(data.run_threshold_seconds_per_km));setStep(Math.min(2,Math.max(0,data.onboarding_step)));
+    setFtp(data.ftp_watts==null?'':String(data.ftp_watts));setCss(data.swim_css_seconds_per_100m==null?'':formatPace(String(data.swim_css_seconds_per_100m)));setRunThreshold(data.run_threshold_seconds_per_km==null?'':formatPace(String(data.run_threshold_seconds_per_km)));setStep(Math.min(4,Math.max(0,data.onboarding_step)));
     // Existing athlete data is always preserved; no automatic plan changes.
    }
    setLoading(false);
@@ -72,11 +74,12 @@ export default function AthleteOnboardingDraft(){
   if(!Number.isFinite(hours)||hours<2||hours>25){setMessage('Weekly hours must be between 2 and 25.');return;}
   if(trainingDays.length===0 && nextStep>=2){setMessage('Choose at least one day you can train.');return;}
   if(recentHours!=='' && (!Number.isFinite(Number(recentHours))||Number(recentHours)<0||Number(recentHours)>25)){setMessage('Recent weekly training must be between 0 and 25 hours.');return;}
-  for(const [label,value,min,max] of [['FTP',ftp,60,650],['Swim CSS',css,50,300],['Run threshold',runThreshold,150,900]] as const){if(value!==''&&(!Number.isFinite(Number(value))||Number(value)<min||Number(value)>max)){setMessage(`${label} is outside the expected range. Leave blank if unknown.`);return;}}
-  if(nextStep===3 && !betaAcknowledged){setMessage('Please acknowledge the beta limitations before creating your plan.');return;}
-  if(nextStep===3 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
+  if(ftp!==''&&(!Number.isFinite(Number(ftp))||Number(ftp)<60||Number(ftp)>650)){setMessage('FTP must be between 60 and 650 watts.');return;}
+  for(const [label,value,min,max] of [['Swim CSS',css,50,300],['Run threshold',runThreshold,150,900]] as const){const seconds=parsePace(value);if(value!==''&&(seconds===null||!Number.isFinite(seconds)||seconds<min||seconds>max)){setMessage(`${label}: enter a pace as minutes:seconds (e.g. ${label==='Swim CSS'?'1:45':'5:00'}). Leave blank if unknown.`);return;}}
+  if(nextStep===5 && !betaAcknowledged){setMessage('Please acknowledge the beta limitations before creating your plan.');return;}
+  if(nextStep===5 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
-  if(nextStep===3){
+  if(nextStep===5){
    const {data,error}=await supabase.rpc('complete_athlete_onboarding_and_plan',{
     p_inputs:{
      display_name:displayName.trim(),race_distance:race,race_date:raceDate||null,
@@ -85,8 +88,8 @@ export default function AthleteOnboardingDraft(){
      training_background:background,training_consistency:consistency,
      current_training_concern:concern,can_swim_200m:canSwim,
      ftp_watts:ftp===''?null:Number(ftp),
-     swim_css_seconds_per_100m:css===''?null:Number(css),
-     run_threshold_seconds_per_km:runThreshold===''?null:Number(runThreshold),device
+     swim_css_seconds_per_100m:parsePace(css),
+     run_threshold_seconds_per_km:parsePace(runThreshold),device
     }
    });
    setSaving(false);
@@ -106,22 +109,22 @@ export default function AthleteOnboardingDraft(){
   const {error}=await supabase.from('athlete_onboarding').upsert({
    user_id:userId,race_distance:race,race_date:raceDate||null,
    experience,weekly_hours:hours,training_days:trainingDays.map(day=>weekdays.indexOf(day)),training_background:background,training_consistency:consistency,current_training_concern:concern,can_swim_200m:canSwim,recent_weekly_hours:recentHours===''?null:Number(recentHours),
-   ftp_watts:ftp===''?null:Number(ftp),swim_css_seconds_per_100m:css===''?null:Number(css),run_threshold_seconds_per_km:runThreshold===''?null:Number(runThreshold),device,onboarding_step:nextStep,
+   ftp_watts:ftp===''?null:Number(ftp),swim_css_seconds_per_100m:parsePace(css),run_threshold_seconds_per_km:parsePace(runThreshold),device,onboarding_step:nextStep,
    updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
   setSaving(false);
   if(error){setMessage('Unable to save setup: '+error.message);return;}
-  setStep(Math.min(2,nextStep));
+  setStep(Math.min(4,nextStep));
   setMessage('Progress saved.');
  }
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
  if(!invitationVerified&&!isCoach)return <section className="azur-onboarding-draft" role="status"><h3>Invitation required</h3><p>{message||'Please accept your coach invitation before onboarding.'}</p><p>Open the invitation email sent by your coach, sign in with that address, and accept the invitation.</p></section>;
  if(isCoach)return <section className="azur-onboarding-draft"><h3>Athlete onboarding</h3><p>This setup is for athlete accounts. Coach access and assignments are managed separately.</p></section>;
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
-  <div className="azur-onboarding-progress"><strong>Getting started</strong><span>Step {step+1} of 3</span></div>
-  <div className="azur-onboarding-track"><span style={{width:`${(step+1)/3*100}%`}}/></div>
+  <div className="azur-onboarding-progress"><strong>YOUR AZUR JOURNEY</strong><span>Step {step+1} of 5</span></div>
+  <div className="azur-onboarding-track"><span style={{width:`${(step+1)/5*100}%`}}/></div>
   {step===0&&<div>
-   <h3>Your training goal</h3>
+   <h3>What are you training towards?</h3><p>Your goal sets the direction. Your current fitness and availability determine where we begin.</p>
    <label>Your name<input type="text" maxLength={90} required value={displayName} onChange={e=>setDisplayName(e.target.value)}/></label>
    <label>Race distance<select value={race} onChange={e=>setRace(e.target.value as Race)}>
     <option value="sprint">Sprint</option><option value="olympic">Olympic</option>
@@ -134,7 +137,7 @@ export default function AthleteOnboardingDraft(){
    </select></label>
   </div>}
   {step===1&&<div>
-   <h3>Your training availability</h3>
+   <h3>Training that fits your life</h3><p>Choose the time you can consistently protect. AZUR will adapt training to your real week, not the other way around.</p>
    <label>Typical hours available per week<input type="number" min={2} max={25} value={hours} onChange={e=>setHours(Number(e.target.value))}/></label>
    <p>Choose the days you can realistically train.</p>
    <div className="azur-onboarding-options">{weekdays.map(day=><label key={day} className={trainingDays.includes(day)?'selected':''}><input type="checkbox" checked={trainingDays.includes(day)} onChange={e=>setTrainingDays(previous=>e.target.checked?[...previous,day]:previous.filter(d=>d!==day))}/>{day}</label>)}</div>
@@ -146,26 +149,29 @@ export default function AthleteOnboardingDraft(){
    <label>Recent training consistency<select value={consistency} onChange={e=>setConsistency(e.target.value)}><option value="under4">Under 4 weeks consistent</option><option value="4to7">4–7 weeks consistent</option><option value="8plus">8+ weeks consistent</option></select></label>
    <label>Any current injury or training concern?<select value={concern} onChange={e=>setConcern(e.target.value)}><option value="none">No</option><option value="yes">Yes — coach review needed</option><option value="unsure">Unsure — coach review needed</option></select></label>
    <label>Can you comfortably swim 200m continuously?<select value={canSwim?'yes':'no'} onChange={e=>setCanSwim(e.target.value==='yes')}><option value="yes">Yes</option><option value="no">Not yet</option></select></label>
-   <h3>Known training thresholds (optional)</h3>
-   <p>Use your most recent reliable test results. These values help personalise training intensity.</p>
+
+  </div>}
+  {step===2&&<div>   <h3>Your current fitness</h3>
+   <p>Enter recent reliable benchmarks to personalise training intensity. Unknown? Leave blank — AZUR will introduce appropriate testing when you're ready.</p>
    <label>Bike FTP (watts)<input type="number" min={60} max={650} value={ftp} onChange={e=>setFtp(e.target.value)} placeholder="Unknown"/></label>
-   <label>Swim CSS (seconds per 100m) <small>For example, 105 = 1:45/100m.</small><input type="number" min={50} max={300} value={css} onChange={e=>setCss(e.target.value)} placeholder="Unknown"/></label>
-   <label>Run threshold (seconds per km) <small>For example, 260 = 4:20/km.</small><input type="number" min={150} max={900} value={runThreshold} onChange={e=>setRunThreshold(e.target.value)} placeholder="Unknown"/></label>
+   <label>Swim CSS (min:sec per 100m) <small>Example: 1:45</small><input type="text" inputMode="numeric" value={css} onChange={e=>setCss(e.target.value)} placeholder="Unknown"/></label>
+   <label>Run threshold (min:sec per km) <small>Example: 4:20</small><input type="text" inputMode="numeric" value={runThreshold} onChange={e=>setRunThreshold(e.target.value)} placeholder="Unknown"/></label>
    <small>Leave unknown values blank — don't guess. AZUR will begin with appropriate endurance sessions and schedule benchmarks when you are ready.</small>
   </div>}
-  {step===2&&<div>
-   <h3>How do you track training?</h3>
+  {step===3&&<div>
+   <h3>Connect your training</h3><p>Choose how you record sessions. You can connect supported services later.</p>
    <p>Choose your main training device. You can connect supported services after setup.</p>
    <div className="azur-onboarding-options">{devices.map(d=><label key={d.id} className={device===d.id?'selected':''}>
     <input type="radio" name="azur-device" checked={device===d.id} onChange={()=>setDevice(d.id)}/>{d.label}
    </label>)}</div>
    <p>{device==='garmin'?'Garmin connection will be offered after setup where available.':device==='none'?'You can record workouts, RPE and benchmarks manually.':'You can start with manual workout logging. Direct syncing for this device is not yet available.'}</p>
   </div>}
-  {step===2&&<div className="azur-beta-disclosure" role="group" aria-label="AZUR beta participation"><h3>Before you begin: AZUR beta</h3><p><strong>What AZUR offers:</strong> race-goal and availability-based setup, structured training plans, workout explanations, feedback and supported activity connections.</p><p><strong>What is still being tested:</strong> training adaptations, device imports, calendar syncing and some coaching insights may be incomplete or inaccurate. Training sessions may require coach review. Do not follow a workout that feels unsafe; report problems to your coach. AZUR is not medical advice.</p><label><input type="checkbox" checked={betaAcknowledged} onChange={e=>setBetaAcknowledged(e.target.checked)}/> I understand that AZUR is a beta product and will review any unsuitable sessions or missing data with my coach.</label><small>This acknowledgement is required to finish setup. It is not yet stored as a permanent consent record.</small></div>}
+  {step===4&&<div className="azur-beta-disclosure" role="group" aria-label="AZUR beta participation"><h3>Before you begin: AZUR beta</h3><p><strong>What AZUR offers:</strong> race-goal and availability-based setup, structured training plans, workout explanations, feedback and supported activity connections.</p><p><strong>What is still being tested:</strong> training adaptations, device imports, calendar syncing and some coaching insights may be incomplete or inaccurate. Training sessions may require coach review. Do not follow a workout that feels unsafe; report problems to your coach. AZUR is not medical advice.</p><label><input type="checkbox" checked={betaAcknowledged} onChange={e=>setBetaAcknowledged(e.target.checked)}/> I understand that AZUR is a beta product and will review any unsuitable sessions or missing data with my coach.</label><small>This acknowledgement is required to finish setup. It is not yet stored as a permanent consent record.</small></div>}
+  {step===4&&<div className="azur-onboarding-recap"><h3>Your AZUR starting point</h3><p><strong>{displayName}</strong> · {race.toUpperCase()} {raceDate?'· '+raceDate:''}</p><p>{hours} hours available each week · {trainingDays.join(', ')}</p><p>{css?'Swim CSS '+css+'/100m':'Swim benchmark to be established'} · {runThreshold?'Run threshold '+runThreshold+'/km':'Run benchmark to be established'}</p><p><strong>Why your plan starts this way</strong></p><p>AZUR uses your recent training, availability and race goal to establish a sustainable starting point. Where benchmarks are missing, your first two weeks focus on manageable endurance and learning how your body responds before targeted intensity is introduced.</p></div>}
   <div className="azur-onboarding-actions">
    {step>0&&<button type="button" onClick={()=>{setStep(s=>s-1);setReady(false)}}>Back</button>}
-   {step<2?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>Continue</button>
-   :<button type="button" disabled={saving} onClick={()=>void save(3)}>{saving?'Creating plan…':'Finish setup & create plan'}</button>}
+   {step<4?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>Continue</button>
+   :<button type="button" disabled={saving} onClick={()=>void save(5)}>{saving?'Creating plan…':'Finish setup & create plan'}</button>}
   </div>
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
   {ready&&<div role="status" className="azur-onboarding-recap"><strong>Draft setup</strong>
