@@ -6363,3 +6363,18 @@ strong {
  .session-detail-modal .session-foundation-timeline {padding:15px!important}
  .session-detail-modal .session-foundation-step {gap:9px!important}
 }
+
+/* Week-first calendar controls */
+.calendar-week-strip .agenda-expand-button {
+ display:block;margin:0 0 12px auto;padding:7px 12px;border-radius:999px;
+ background:#1d4966;color:#eaf7ff;border:1px solid #3a7697;
+ font-size:12px;font-weight:700;cursor:pointer
+}
+.calendar-week-strip .agenda-date-nav {gap:8px}
+.calendar-week-strip .agenda-date-nav strong {min-width:0;flex:1}
+.calendar-week-strip .agenda-dates {row-gap:5px}
+.calendar-week-strip .agenda-dates>button {min-height:48px}
+@media(max-width:600px){
+ .calendar-week-strip .agenda-date-nav strong {font-size:15px!important}
+ .calendar-week-strip .agenda-dates>button {min-height:47px;padding:6px 1px!important}
+}
