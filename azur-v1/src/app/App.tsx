@@ -7822,6 +7822,26 @@ const sessionVerdict =
       ? `A recorded FTP of ${athleteProfile.ftp} W is available. Use it only where this workout explicitly prescribes an FTP-based target.`
       : 'A usable FTP is not available. Any placeholder or implausible FTP is excluded from coaching guidance; use the explicitly prescribed RPE targets until your threshold is confirmed.'}</p>
   )}
+  <p><strong>Training history signal:</strong> {(() => {
+    const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
+    const window = (days: number) => weekSessions.filter(session => {
+      const time = new Date(session.plannedDate + 'T12:00:00').getTime();
+      return Number.isFinite(time) && time < anchor && time >= anchor - days * 86400000
+        && session.status === 'completed' && session.completedDurationSec != null
+        && Number.isFinite(session.completedDurationSec) && session.completedDurationSec > 0;
+    });
+    const recent = window(7);
+    const previous = window(14).filter(session => new Date(session.plannedDate + 'T12:00:00').getTime() < anchor - 7 * 86400000);
+    const hours = (sessions: typeof recent) => sessions.reduce((sum, session) => sum + (session.completedDurationSec || 0), 0) / 3600;
+    if (recent.length < 2 || previous.length < 2) return 'Not enough recorded sessions in both 7-day windows to compare training volume reliably. Keep the plan under coach review and report how sessions feel.';
+    const currentHours = hours(recent);
+    const previousHours = hours(previous);
+    if (previousHours <= 0) return 'The earlier week has no usable duration baseline. A volume comparison is unavailable.';
+    const change = (currentHours / previousHours - 1) * 100;
+    if (change > 25) return `Recorded duration is ${Math.round(change)}% higher than the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). Check fatigue and session quality with your coach; duration alone cannot determine safe progression.`;
+    if (change < -25) return `Recorded duration is ${Math.round(Math.abs(change))}% lower than the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). This may reflect scheduling, missing imports or reduced training; it is not automatically a recovery improvement.`;
+    return `Recorded duration is within 25% of the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). Similar duration does not confirm stable intensity or recovery.`;
+  })()}</p>
   <p><strong>What happens next:</strong> {selected.status === 'completed'
     ? 'Review recorded duration alongside your own RPE and notes. Flag unexpectedly high effort, discomfort or incomplete intervals for coach review before changing future intensity.'
     : 'After training, record session RPE and any unexpected fatigue or changes from the plan. Your coach can compare those observations with completed activity before approving significant changes.'}</p>
