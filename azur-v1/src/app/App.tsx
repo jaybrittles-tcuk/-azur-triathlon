@@ -1285,7 +1285,7 @@ const [primaryRace, setPrimaryRace] = useState({
   const [raceEditing,setRaceEditing]=useState(false);
   const [raceSaving,setRaceSaving]=useState(false);
   const [raceSaveMessage,setRaceSaveMessage]=useState('');
-  const [raceDraft,setRaceDraft]=useState({distance:'',date:''});
+  const [raceDraft,setRaceDraft]=useState({name:'',distance:'',date:'',location:'',priority:'A',targetTime:'',swim:'',bike:'',run:''});
   const [activeNav, setActiveNav] = useState('Home');
   const [isCoachAccount, setIsCoachAccount] = useState(false);
   const [homeMode, setHomeMode] = useState<'athlete' | 'coach'>('athlete');
@@ -1646,26 +1646,29 @@ if (data?.avatar_url) {
 }
 
 async function loadPrimaryRace(userId: string) {
-  // Staging stores the onboarding race goal here; the legacy race table is not available.
-  const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date').eq('user_id',userId).maybeSingle();
-  if(error){console.error('Unable to load onboarding race goal:',error);return;}
-  if(!data)return;
-  setPrimaryRace(current=>({...current,name:data.race_distance?String(data.race_distance):'',raceDate:data.race_date||'',priority:data.race_date?'A':''}));
+ const {data,error}=await supabase.from('athlete_onboarding').select('race_name,race_distance,race_date,race_location,race_priority,race_target_time,race_target_swim,race_target_bike,race_target_run').eq('user_id',userId).maybeSingle();
+ if(error){console.error('Unable to load race goal:',error);return;}
+ if(!data)return;
+ setPrimaryRace(current=>({...current,name:data.race_name||data.race_distance||'',raceDate:data.race_date||'',priority:data.race_priority||'A',location:data.race_location||'',targetSplits:{swim:data.race_target_swim||'',bike:data.race_target_bike||'',run:data.race_target_run||'',target_total:data.race_target_time||''}}));
+ setRaceDraft({name:data.race_name||'',distance:data.race_distance||'',date:data.race_date||'',location:data.race_location||'',priority:data.race_priority||'A',targetTime:data.race_target_time||'',swim:data.race_target_swim||'',bike:data.race_target_bike||'',run:data.race_target_run||''});
 }
 async function handleRaceSave(){
-  if(raceSaving)return;
-  if(!raceDraft.distance.trim()||!raceDraft.date){setRaceSaveMessage('Select a race distance and date.');return;}
-  setRaceSaving(true);setRaceSaveMessage('');
-  try{
-   const {data:{user},error:authError}=await supabase.auth.getUser();
-   if(authError||!user)throw new Error('Please sign in again.');
-   const {data,error}=await supabase.from('athlete_onboarding').update({race_distance:raceDraft.distance,race_date:raceDraft.date}).eq('user_id',user.id).select('user_id').maybeSingle();
-   if(error)throw error;
-   if(!data)throw new Error('Race goal was not saved. Check your onboarding profile.');
-   setPrimaryRace(current=>({...current,name:raceDraft.distance,raceDate:raceDraft.date,priority:'A'}));
-   setRaceEditing(false);setRaceSaveMessage('Primary race goal saved.');
-  }catch(e:any){setRaceSaveMessage(e?.message||'Unable to save race goal.');}
-  finally{setRaceSaving(false);}
+ if(raceSaving)return;
+ if(!raceDraft.name.trim()||!raceDraft.distance.trim()||!raceDraft.date){setRaceSaveMessage('Enter a race name, distance and date.');return;}
+ const validTime=(v:string)=>!v.trim()||/^(?:\d{1,2}:)?\d{1,2}:[0-5]\d$/.test(v.trim());
+ if(![raceDraft.targetTime,raceDraft.swim,raceDraft.bike,raceDraft.run].every(validTime)){setRaceSaveMessage('Use hh:mm:ss or mm:ss for target times.');return;}
+ setRaceSaving(true);setRaceSaveMessage('');
+ try{
+  const {data:{user},error:authError}=await supabase.auth.getUser();
+  if(authError||!user)throw new Error('Please sign in again.');
+  const payload={race_name:raceDraft.name.trim(),race_distance:raceDraft.distance,race_date:raceDraft.date,race_location:raceDraft.location.trim(),race_priority:raceDraft.priority,race_target_time:raceDraft.targetTime.trim(),race_target_swim:raceDraft.swim.trim(),race_target_bike:raceDraft.bike.trim(),race_target_run:raceDraft.run.trim()};
+  const {data,error}=await supabase.from('athlete_onboarding').update(payload).eq('user_id',user.id).select('user_id').maybeSingle();
+  if(error)throw error;
+  if(!data)throw new Error('Race goal was not saved. Check your onboarding profile.');
+  setPrimaryRace(current=>({...current,name:payload.race_name,raceDate:payload.race_date,priority:payload.race_priority,location:payload.race_location,targetSplits:{swim:payload.race_target_swim,bike:payload.race_target_bike,run:payload.race_target_run,target_total:payload.race_target_time}}));
+  setRaceEditing(false);setRaceSaveMessage('Race goal saved.');
+ }catch(e:any){setRaceSaveMessage(e?.message||'Unable to save race goal.');}
+ finally{setRaceSaving(false);}
 }
 async function loadPlannedSessions(userId: string) {
   const { data: athlete, error: athleteError } = await supabase
@@ -8693,19 +8696,17 @@ swimThreshold:
           <span className="eyebrow">PRIMARY TARGET</span>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
            <h3>{primaryRace.name || 'No race selected'}</h3>
-           <button type="button" className="profile-edit-button" onClick={()=>{if(!raceEditing){setRaceDraft({distance:primaryRace.name||'',date:primaryRace.raceDate||''});setRaceSaveMessage('');}setRaceEditing(v=>!v);}}>{raceEditing?'Cancel':'Edit race goal'}</button>
+           <button type="button" className="profile-edit-button" onClick={()=>{if(!raceEditing){setRaceDraft(v=>({...v,name:primaryRace.name||v.name,date:primaryRace.raceDate||v.date}));setRaceSaveMessage('');}setRaceEditing(v=>!v);}}>{raceEditing?'Cancel':'Edit race goal'}</button>
           </div>
           {raceEditing&&<div style={{display:'grid',gap:10,margin:'14px 0'}}>
-           <label>Race distance
-            <select value={raceDraft.distance} onChange={e=>setRaceDraft(v=>({...v,distance:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}>
-             <option value="">Select distance</option>
-             <option value="Ironman">Ironman</option>
-             <option value="70.3">Ironman 70.3</option>
-             <option value="Olympic">Olympic</option>
-             <option value="Sprint">Sprint</option>
-            </select>
-           </label>
-           <label>Race date <input type="date" value={raceDraft.date} onChange={e=>setRaceDraft(v=>({...v,date:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}/></label>
+           <label>Race name<input type="text" placeholder="e.g. Challenge Roth" value={raceDraft.name} onChange={e=>setRaceDraft(v=>({...v,name:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}/></label>
+           <label>Race distance<select value={raceDraft.distance} onChange={e=>setRaceDraft(v=>({...v,distance:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}>
+            <option value="">Select distance</option><option value="ironman">Full distance / Ironman</option><option value="70.3">Middle distance / 70.3</option><option value="Olympic">Olympic</option><option value="Sprint">Sprint</option><option value="Other">Other</option>
+           </select></label>
+           <label>Race date<input type="date" value={raceDraft.date} onChange={e=>setRaceDraft(v=>({...v,date:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}/></label>
+           <label>Location<input type="text" placeholder="e.g. Roth, Germany" value={raceDraft.location} onChange={e=>setRaceDraft(v=>({...v,location:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}/></label>
+           <label>Priority<select value={raceDraft.priority} onChange={e=>setRaceDraft(v=>({...v,priority:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}><option value="A">A race</option><option value="B">B race</option><option value="C">C race</option></select></label>
+           {([['targetTime','Overall target time'],['swim','Swim target'],['bike','Bike target'],['run','Run target']] as const).map(([key,label])=><label key={key}>{label} <span style={{fontSize:12,color:'#64748b'}}>(optional)</span><input type="text" inputMode="numeric" placeholder="hh:mm:ss" value={raceDraft[key]} onChange={e=>setRaceDraft(v=>({...v,[key]:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}/></label>)}
            <button type="button" className="primary-button" disabled={raceSaving} onClick={handleRaceSave}>{raceSaving?'Saving…':'Save race goal'}</button>
           </div>}
           {raceSaveMessage&&<p role="status" className="panel-note">{raceSaveMessage}</p>}
