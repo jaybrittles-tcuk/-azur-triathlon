@@ -6324,3 +6324,42 @@ strong {
 .calendar-layout .calendar-focus-toolbar,.calendar-layout .calendar-focus-toolbar strong {
  color:#f4f9ff!important;opacity:1!important
 }
+
+/* AZUR premium workout detail: restrained, readable, mobile-first */
+.session-detail-overlay .session-detail-modal {
+ background:#081827!important;color:#edf6fc!important;
+ border:1px solid #2c4a60!important;box-shadow:0 24px 90px rgba(0,0,0,.45)!important
+}
+.session-detail-modal .session-foundation-timeline {
+ background:#122c41!important;border:1px solid #31546c!important;
+ border-radius:18px!important;padding:18px!important;margin:14px 0!important
+}
+.session-detail-modal .session-foundation-timeline h3 {
+ font-size:clamp(19px,4.8vw,24px)!important;line-height:1.2!important;
+ letter-spacing:-.025em!important;margin:6px 0 10px!important
+}
+.session-detail-modal .session-foundation-step {
+ padding:12px 0!important;gap:11px!important;grid-template-columns:26px minmax(0,1fr) auto!important
+}
+.session-detail-modal .session-foundation-step-index {
+ width:25px!important;height:25px!important;background:#246d98!important
+}
+.session-detail-modal .session-foundation-step p {
+ font-size:14px!important;line-height:1.45!important;color:#b9d0de!important
+}
+.session-detail-modal .session-foundation-step>strong {font-size:14px!important;white-space:nowrap}
+.session-detail-modal .session-foundation-coaching {
+ font-size:14px!important;line-height:1.55!important;margin-top:12px!important;
+ padding:13px!important;border-left:3px solid #f1c344!important;
+ background:#1a3c4b!important
+}
+.session-detail-modal .session-intent-v2 {
+ background:#112c42!important;border:1px solid #31536b!important;
+ border-radius:15px!important;padding:16px!important
+}
+.session-detail-modal .session-intent-v2>strong {display:block;font-size:17px!important;line-height:1.35!important}
+.session-detail-modal .session-intent-v2 p {font-size:14px!important;line-height:1.5!important;color:#bfd4e3!important}
+@media(max-width:600px){
+ .session-detail-modal .session-foundation-timeline {padding:15px!important}
+ .session-detail-modal .session-foundation-step {gap:9px!important}
+}
