@@ -10020,7 +10020,28 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
   if (window.location.pathname === '/accept-invitation') return <AcceptCoachInvitation />;
 
   if (window.location.pathname === '/onboarding') {
-    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer"><p>Already linked to your coach? Your training plan will be prepared after setup.</p><a href="/" className="azur-onboarding-exit">Return to dashboard</a></div></main>
+    return <main className="azur-onboarding-page azur-onboarding-premium">
+      <style>{`
+        .azur-onboarding-premium { min-height:100dvh; padding:24px 16px 90px; box-sizing:border-box; background:radial-gradient(ellipse at 50% 0%,#123659 0%,#071525 58%,#050d19 100%); color:#eef6ff; }
+        .azur-onboarding-premium .azur-onboarding-page-header { max-width:760px; margin:0 auto 20px; display:flex; align-items:center; gap:18px; }
+        .azur-onboarding-premium .azur-onboarding-page-header img { width:72px; height:72px; object-fit:contain; border-radius:16px; }
+        .azur-onboarding-premium h1,.azur-onboarding-premium h2,.azur-onboarding-premium h3,.azur-onboarding-premium strong { color:#f4f8ff; }
+        .azur-onboarding-premium p,.azur-onboarding-premium small { color:#b1c3d8; line-height:1.5; }
+        .azur-onboarding-premium .azur-onboarding-draft { max-width:760px; margin:0 auto; padding:26px; background:#101d30; border:1px solid #28415d; border-radius:24px; box-shadow:0 22px 70px #0005; }
+        .azur-onboarding-premium .azur-onboarding-progress { display:flex; justify-content:space-between; align-items:center; gap:12px; color:#b6dfff; font-size:13px; letter-spacing:.04em; }
+        .azur-onboarding-premium .azur-onboarding-track { height:6px; border-radius:99px; overflow:hidden; background:#29415c; margin:12px 0 24px; }
+        .azur-onboarding-premium .azur-onboarding-track span { display:block; height:100%; background:linear-gradient(90deg,#087ee9,#54b8ff); border-radius:99px; }
+        .azur-onboarding-premium .azur-onboarding-draft label { color:#dce9f7; }
+        .azur-onboarding-premium .azur-onboarding-draft input:not([type=checkbox]):not([type=radio]),.azur-onboarding-premium .azur-onboarding-draft select { box-sizing:border-box; width:100%; min-height:46px; background:#0a1728; color:#fff; border:1px solid #35506d; border-radius:12px; padding:10px 12px; }
+        .azur-onboarding-premium .azur-onboarding-draft input:focus-visible,.azur-onboarding-premium .azur-onboarding-draft select:focus-visible { outline:2px solid #238df2; outline-offset:2px; }
+        .azur-onboarding-premium .azur-onboarding-options label { background:#13263d; border:1px solid #35506d; border-radius:12px; padding:12px; }
+        .azur-onboarding-premium .azur-onboarding-options label.selected { border-color:#2999ff; background:#123758; }
+        .azur-onboarding-premium .azur-onboarding-actions button { border-radius:12px; min-height:46px; padding:10px 18px; font-weight:700; }
+        .azur-onboarding-premium .azur-onboarding-actions button:last-child { background:#087ee9; color:white; border:1px solid #2397ff; }
+        .azur-onboarding-premium .azur-onboarding-page-footer { max-width:760px; margin:18px auto 0; }
+        @media(max-width:480px){ .azur-onboarding-premium{padding:18px 12px 90px} .azur-onboarding-premium .azur-onboarding-draft{padding:20px 16px} .azur-onboarding-premium .azur-onboarding-page-header img{width:56px;height:56px} }
+      `}</style>
+      <header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer"><p>Already linked to your coach? Your training plan will be prepared after setup.</p><a href="/" className="azur-onboarding-exit">Return to dashboard</a></div></main>
   }
 
   return (
