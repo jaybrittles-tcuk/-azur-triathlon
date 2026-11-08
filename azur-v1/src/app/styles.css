@@ -6794,3 +6794,63 @@ strong {
   border-radius:16px!important;
  }
 }
+
+/* AZUR V4.1 — compact performance presentation, staging visual-only pass */
+.calendar-layout.athlete-agenda{
+  background:#0b0c10!important;
+}
+.calendar-layout.athlete-agenda .calendar-day{
+  border-color:#24272d!important;
+  box-shadow:none!important;
+}
+.calendar-layout.athlete-agenda .calendar-day-head{
+  background:transparent!important;
+  border:0!important;
+  padding:5px 2px!important;
+}
+.calendar-layout.athlete-agenda .calendar-session{
+  background:#17191e!important;
+  border:1px solid #30333b!important;
+  border-radius:12px!important;
+  padding:10px 12px!important;
+  box-shadow:none!important;
+}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-profile{
+  margin:7px 0 3px!important;
+}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-bars{
+  height:21px!important;max-height:21px!important;
+}
+.athlete-agenda .session-detail-overlay .session-detail-modal{
+  background:#0b0c10!important;
+}
+.athlete-agenda .session-detail-modal .azur-premium-workout-tabs{
+  padding:8px!important;
+  background:#111318!important;
+  border-color:#24272f!important;
+}
+.athlete-agenda .session-detail-modal .azur-workout-tab-content{
+  padding:12px 5px!important;
+}
+.athlete-agenda .session-detail-modal .azur-workout-tab-nav button{
+  min-height:39px!important;
+  padding:8px 10px!important;
+  font-size:13px!important;
+}
+.athlete-agenda .session-detail-modal .azur-workout-tab-nav button[aria-selected="true"]{
+  background:#243d50!important;
+}
+.athlete-agenda .session-detail-modal .calendar-intensity-bars{
+  max-height:105px!important;
+}
+@media(max-width:600px){
+ .calendar-layout.athlete-agenda .calendar-session{
+  padding:9px 11px!important;
+ }
+ .calendar-layout.athlete-agenda .calendar-session .calendar-intensity-bars{
+  height:19px!important;max-height:19px!important;
+ }
+ .athlete-agenda .session-detail-modal .azur-premium-workout-tabs{
+  padding:7px!important;
+ }
+}
