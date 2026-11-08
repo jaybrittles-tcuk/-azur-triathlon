@@ -5,6 +5,7 @@ import CoachInvitations from './CoachInvitations';
 import AcceptCoachInvitation from './AcceptCoachInvitation';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
+import { sessionCoaching } from '../lib/calculations/sessionCoaching';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
 import CoachAttentionInbox from './CoachAttentionInbox';
@@ -7153,18 +7154,22 @@ onClick={() => {
       ? `Recorded training duration is ${Math.round(Math.abs(change))}% ${change > 0 ? 'higher' : 'lower'} than the previous seven days. Discuss unexpected changes with your coach; duration does not measure recovery.`
       : 'Recorded training duration is broadly similar across the last two seven-day windows. Session effort and recovery still need separate consideration.';
   })()}</p>
+  <p><strong>How to execute this session</strong></p>
+  <p>{sessionCoaching({
+    sport: selected.sport,
+    steps: selected.prescription?.azurWorkout?.steps,
+    ftpWatts: Number(athleteProfile.ftp),
+    completed: selected.status === 'completed',
+    sessionRpe: Number(sessionFeedback.rpe) || null,
+  }).execution}</p>
   <p><strong>Coach guidance</strong></p>
-  <p>{selected.status === 'completed' && Number(sessionFeedback.rpe) >= 8 && Number(sessionFeedback.rpe) <= 10
-    ? `You rated this session ${sessionFeedback.rpe}/10. If that was harder than prescribed, flag it to your coach before the next demanding workout.`
-    : selected.status === 'completed' && Number(sessionFeedback.rpe) >= 1 && Number(sessionFeedback.rpe) <= 7
-    ? `You reported RPE ${sessionFeedback.rpe}/10. Your coach can compare this with the intended effort and recorded session.`
-    : selected.sport === 'bike'
-    ? 'Keep the prescribed efforts repeatable. Use RPE when a validated power threshold is unavailable, and report unexpected fatigue.'
-    : selected.sport === 'run'
-    ? 'Prioritise controlled pacing and consistent form; report any unexpected increase in effort.'
-    : selected.sport === 'swim'
-    ? 'Prioritise repeatable pace and stroke quality; report when technique deteriorates.'
-    : 'Follow the session targets and report any unexpected changes in effort.'}</p>
+  <p>{sessionCoaching({
+    sport: selected.sport,
+    steps: selected.prescription?.azurWorkout?.steps,
+    ftpWatts: Number(athleteProfile.ftp),
+    completed: selected.status === 'completed',
+    sessionRpe: Number(sessionFeedback.rpe) || null,
+  }).context}</p>
   <details className="azur-intelligence-evidence">
     <summary>Training evidence and coaching safeguards</summary>
       <p><strong>Training history signal:</strong> {(() => {
