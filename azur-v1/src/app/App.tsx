@@ -7842,6 +7842,14 @@ const sessionVerdict =
     if (change < -25) return `Recorded duration is ${Math.round(Math.abs(change))}% lower than the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). This may reflect scheduling, missing imports or reduced training; it is not automatically a recovery improvement.`;
     return `Recorded duration is within 25% of the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). Similar duration does not confirm stable intensity or recovery.`;
   })()}</p>
+  <p><strong>Athlete response:</strong> {selected.status !== 'completed'
+    ? 'After this session, your own effort rating and notes can add context to the device record. No recovery conclusion is available before that feedback.'
+    : Number(sessionFeedback.rpe) >= 8 && Number(sessionFeedback.rpe) <= 10
+    ? 'You reported a demanding session (RPE ' + sessionFeedback.rpe + '/10). Compare that effort with the prescribed target and recent training history. If the effort was unexpectedly high, ask your coach to review the next demanding session; this is not an automatic recovery diagnosis.'
+    : Number(sessionFeedback.rpe) >= 1 && Number(sessionFeedback.rpe) <= 7
+    ? 'You reported session effort of ' + sessionFeedback.rpe + '/10. This adds subjective context to recorded training duration, but a single effort rating cannot establish recovery readiness.'
+    : 'No valid athlete-reported session effort is available yet. Recorded duration alone cannot tell AZUR how recovered you feel.'}</p>
+  <p><strong>Coach decision:</strong> AZUR can highlight training-volume changes and unusual reported effort for review. Your scheduled sessions stay unchanged unless an authorised coach approves an adjustment.</p>
   <p><strong>What happens next:</strong> {selected.status === 'completed'
     ? 'Review recorded duration alongside your own RPE and notes. Flag unexpectedly high effort, discomfort or incomplete intervals for coach review before changing future intensity.'
     : 'After training, record session RPE and any unexpected fatigue or changes from the plan. Your coach can compare those observations with completed activity before approving significant changes.'}</p>
