@@ -6240,3 +6240,46 @@ strong {
  .athlete-agenda .calendar-session {padding:12px!important}
  .athlete-agenda .calendar-intensity-profile-head {font-size:12px!important}
 }
+
+/* AZUR V2: workout hierarchy, legible coaching notes, premium mobile rhythm */
+.athlete-agenda .calendar-session-top {
+  display:flex!important;justify-content:space-between!important;align-items:center!important;
+  gap:10px!important;margin-bottom:9px!important
+}
+.athlete-agenda .calendar-session-top>span:first-child {
+  font-size:11px!important;font-weight:800!important;letter-spacing:.12em!important;
+  text-transform:uppercase!important;color:#b9d8e9!important
+}
+.athlete-agenda .calendar-session>strong {
+  display:block!important;font-size:clamp(16px,4vw,20px)!important;
+  line-height:1.32!important;letter-spacing:-.02em!important;margin:7px 0 10px!important
+}
+.athlete-agenda .calendar-session-status {
+  display:inline-flex!important;align-items:center!important;gap:5px!important;
+  border-radius:999px!important;padding:5px 9px!important;
+  font-size:10px!important;font-weight:750!important;letter-spacing:.08em!important;
+  background:#244c65!important;border:1px solid #3c6b86!important
+}
+.athlete-agenda .calendar-session-meta {
+  display:flex!important;flex-wrap:wrap!important;align-items:center!important;
+  gap:8px 14px!important;padding-top:10px!important;
+  border-top:1px solid rgba(130,178,204,.2)!important
+}
+.athlete-agenda .calendar-week-overview {
+  padding:20px!important;margin-top:16px!important
+}
+.athlete-agenda .calendar-week-overview-heading h3 {
+  font-size:clamp(21px,5vw,27px)!important;letter-spacing:-.025em!important
+}
+.athlete-agenda .calendar-week-overview-stats {
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important
+}
+.athlete-agenda .calendar-week-overview-stats>div {
+  min-width:0!important;border-radius:13px!important;padding:12px 10px!important
+}
+.athlete-agenda .calendar-week-overview-stats strong {
+  font-size:clamp(16px,4vw,22px)!important;line-height:1.2!important
+}
+@media(max-width:390px) {
+ .athlete-agenda .calendar-week-overview-stats {grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
