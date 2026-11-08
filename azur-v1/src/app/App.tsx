@@ -7158,6 +7158,7 @@ onClick={() => {
   <p>{sessionCoaching({
     sport: selected.sport,
     steps: selected.prescription?.azurWorkout?.steps,
+    focus: typeof selected.prescription?.focus === 'string' ? selected.prescription.focus : null,
     ftpWatts: Number(athleteProfile.ftp),
     completed: selected.status === 'completed',
     sessionRpe: Number(sessionFeedback.rpe) || null,
@@ -7166,6 +7167,7 @@ onClick={() => {
   <p>{sessionCoaching({
     sport: selected.sport,
     steps: selected.prescription?.azurWorkout?.steps,
+    focus: typeof selected.prescription?.focus === 'string' ? selected.prescription.focus : null,
     ftpWatts: Number(athleteProfile.ftp),
     completed: selected.status === 'completed',
     sessionRpe: Number(sessionFeedback.rpe) || null,
