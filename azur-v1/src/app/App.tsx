@@ -4,6 +4,7 @@ import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
 import AcceptCoachInvitation from './AcceptCoachInvitation';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
+import AthleteSessionMoveRequest from './AthleteSessionMoveRequest';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
 import { sessionCoaching } from '../lib/calculations/sessionCoaching';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
@@ -5564,6 +5565,7 @@ color:
 }
 function HomeView() {
  return <><AthleteDashboard name={athleteName} avatar={avatarUrl} race={primaryRace} phase={currentMacrocycleWeek?.phase} today={todayKey} sessions={weekSessions} readiness={recoveryReadiness} weeklyStress={trainingLoad.weeklyStress} onSession={id=>{setSelectedId(id);setSessionDetailOpen(true);setActiveNav('Calendar');}} onNavigate={page=>setActiveNav(page as any)} />
+ <AthleteSessionMoveRequest />
  <details className="awd-advanced"><summary>Training settings & plan tools</summary><div className="azur-home-tools"
   style={{
     display: 'grid',
