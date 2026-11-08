@@ -5,6 +5,7 @@ import CoachInvitations from './CoachInvitations';
 import AcceptCoachInvitation from './AcceptCoachInvitation';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import AthleteSessionMoveRequest from './AthleteSessionMoveRequest';
+import CoachSessionMoveReview from './CoachSessionMoveReview';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
 import { sessionCoaching } from '../lib/calculations/sessionCoaching';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
@@ -10333,7 +10334,8 @@ style={
     </div>
   </>}
   {coachWorkspace==='monitoring'&&<>{import.meta.env.VITE_ENABLE_WEEKLY_REVIEW === 'true' && <CoachWeeklyReview/>}{import.meta.env.VITE_ENABLE_SWIM_ASSESSMENTS === 'true' && <CoachSwimFocusReview/>}<CoachAttentionInbox onSelect={(a)=>{setCoachSelectedAthlete(a);setCoachWorkspace('overview')}}/></>}
-  {coachWorkspace==='invitations'&&<CoachInvitations mode="coach"/>}
+  {coachWorkspace==='invitations'&&<CoachSessionMoveReview />
+ <CoachInvitations mode="coach"/>}
   {coachWorkspace==='library'&&<CoachCyclingLibraryReview ftpWatts={coachSelectedAthlete?.ftp_w ?? null} athleteName={coachSelectedAthlete?.display_name ?? null} athleteWeeklyHours={coachSelectedAthlete?.normal_weekly_hours ?? null} athleteId={coachSelectedAthlete?.id ?? null}/>}
 </div>}
 {activeNav === 'Home' && (!isCoachAccount || homeMode === 'athlete') && HomeView()}
