@@ -59,6 +59,16 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     ? `You reported RPE ${rpe}/10 against prescribed RPE ${expectedRpe.low}–${expectedRpe.high}/10. Review the difference with your coach alongside the completed session.`
     : `You reported RPE ${rpe}/10. The workout has no uniform explicit RPE target for a direct comparison.`;
   const explicitFocus = typeof input.focus === 'string' && input.focus.trim().length > 0 ? input.focus.trim() : null;
+  const missingTarget = work.length > 0 && explicitTargets.length === 0
+    ? 'No machine-readable intensity target is attached to the work intervals. Follow the coach-written prescription; do not infer a pace, wattage or heart-rate zone.'
+    : work.length > 0 && explicitTargets.length < work.length
+    ? 'Only some work intervals contain structured targets. Check the full workout instructions rather than applying one target to every repeat.'
+    : '';
+  const missingFtp = target?.metric === 'ftp_percent' && !ftpValid
+    ? 'Ask your coach to confirm your current FTP before using a wattage conversion.' : '';
+  const feedbackPrompt = input.completed && rpe === null
+    ? 'If you have not yet recorded session RPE, add it so your coach can compare the planned session with your experience.'
+    : '';
   const sportGuidance = input.sport === 'bike'
     ? 'After riding, note whether power or perceived effort stayed consistent across repeats. If the same target becomes unexpectedly harder, flag it before the next quality ride.'
     : input.sport === 'run'
@@ -68,6 +78,6 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : 'Record whether the prescribed effort was sustainable and flag unexpected difficulty to your coach.';
   return {
     execution: [structure, targetDescription ? `Work target: ${targetDescription}.` : '', execution].filter(Boolean).join(' '),
-    context: [explicitFocus ? `Coach-prescribed focus: ${explicitFocus}.` : '', power, response, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
+    context: [explicitFocus ? `Coach-prescribed focus: ${explicitFocus}.` : '', power, missingFtp, missingTarget, response, feedbackPrompt, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
   };
 }
