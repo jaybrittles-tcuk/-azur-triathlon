@@ -7,6 +7,7 @@ type Input = {
   ftpWatts?: number | null;
   sessionRpe?: number | null;
   completed?: boolean;
+  focus?: string | null;
 };
 
 /** Describes only targets actually prescribed in the workout. No inferred readiness or threshold. */
@@ -57,6 +58,7 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : expectedRpe
     ? `You reported RPE ${rpe}/10 against prescribed RPE ${expectedRpe.low}–${expectedRpe.high}/10. Review the difference with your coach alongside the completed session.`
     : `You reported RPE ${rpe}/10. The workout has no uniform explicit RPE target for a direct comparison.`;
+  const explicitFocus = typeof input.focus === 'string' && input.focus.trim().length > 0 ? input.focus.trim() : null;
   const sportGuidance = input.sport === 'bike'
     ? 'After riding, note whether power or perceived effort stayed consistent across repeats. If the same target becomes unexpectedly harder, flag it before the next quality ride.'
     : input.sport === 'run'
@@ -66,6 +68,6 @@ export function sessionCoaching(input: Input): { execution: string; context: str
     : 'Record whether the prescribed effort was sustainable and flag unexpected difficulty to your coach.';
   return {
     execution: [structure, targetDescription ? `Work target: ${targetDescription}.` : '', execution].filter(Boolean).join(' '),
-    context: [power, response, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
+    context: [explicitFocus ? `Coach-prescribed focus: ${explicitFocus}.` : '', power, response, sportGuidance].filter(Boolean).join(' ') + ' Significant plan changes require coach approval.',
   };
 }
