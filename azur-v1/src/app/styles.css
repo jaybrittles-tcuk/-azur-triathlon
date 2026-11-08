@@ -6182,3 +6182,61 @@ strong {
 .azur-onboarding-page .azur-onboarding-track{border-radius:30px;overflow:hidden}
 .azur-onboarding-page .azur-onboarding-track span{background:linear-gradient(90deg,#219ad4,#f0c34d)}
 @media(max-width:600px){.azur-onboarding-page{padding:18px 14px 48px}.azur-onboarding-page-header{gap:14px}.azur-onboarding-page-header img{width:62px;height:62px;border-radius:13px;padding:6px}.azur-onboarding-page .azur-onboarding-draft{border-radius:21px;padding:22px 18px}.azur-onboarding-page .azur-onboarding-draft h3{font-size:22px}}
+
+/* AZUR staging: premium dark athlete calendar visual pass */
+.calendar-layout.athlete-agenda {
+  --azur-v2-card:#102c43;--azur-v2-ink:#f4f9fd;--azur-v2-outline:#31536b;
+  --azur-v2-elevated:#183b54;--azur-v2-subtle:#b0c7d7;
+  background:#071727!important;color:#eaf4fb!important;border:1px solid #25445d;
+  border-radius:22px!important;padding:clamp(10px,3vw,20px)!important;
+}
+.athlete-agenda .calendar-week-strip,.athlete-agenda .calendar-grid,
+.athlete-agenda .calendar-day,.athlete-agenda .calendar-week-overview {
+  background:#102c43!important;border:1px solid #31536b!important;
+  color:#f4f9fd!important;border-radius:16px!important;
+}
+.athlete-agenda .calendar-strip-top h3,.athlete-agenda .azur-calendar-quickbar strong,
+.athlete-agenda .calendar-focus-toolbar strong,.athlete-agenda .calendar-day-head strong,
+.athlete-agenda .calendar-empty-state h3,.athlete-agenda .calendar-week-overview h3,
+.athlete-agenda .calendar-week-overview strong {color:#f4f9fd!important}
+.athlete-agenda .calendar-strip-footer,.athlete-agenda .calendar-day-head,
+.athlete-agenda .calendar-week-overview p,.athlete-agenda .calendar-week-overview small {
+  color:#b0c7d7!important
+}
+.athlete-agenda .calendar-session-wrapper {min-width:0!important;overflow:hidden}
+.athlete-agenda .calendar-session {
+  position:relative;background:#17374f!important;color:#f3f9fe!important;
+  border:1px solid #365b74!important;border-radius:14px!important;
+  box-shadow:0 6px 18px rgba(0,0,0,.15)!important;
+  padding:14px!important;overflow:hidden!important;min-width:0!important;
+}
+.athlete-agenda .calendar-session>strong,.athlete-agenda .calendar-session-top,
+.athlete-agenda .calendar-session-status {color:#f4f9fd!important}
+.athlete-agenda .calendar-session-meta,.athlete-agenda .calendar-session-meta>span {
+  color:#bcd3e3!important
+}
+.athlete-agenda .calendar-intensity-profile {
+  display:block!important;max-height:none!important;overflow:hidden!important;
+  width:100%!important;position:relative!important;clear:both!important;
+  margin:12px 0 8px!important;box-sizing:border-box!important;
+}
+.athlete-agenda .calendar-intensity-profile-head {color:#e8f4fc!important}
+.athlete-agenda .calendar-intensity-profile-head span {color:#a9c6d8!important}
+.athlete-agenda .calendar-intensity-bars {
+  position:relative!important;display:flex!important;width:100%!important;
+  max-width:100%!important;min-height:84px!important;overflow:hidden!important;
+  box-sizing:border-box!important
+}
+.athlete-agenda .calendar-intensity-bar {opacity:1!important}
+.athlete-agenda .calendar-reschedule-button {
+  background:#214a65!important;color:#e5f5ff!important;
+  border-color:#42708c!important;border-radius:9px!important
+}
+.athlete-agenda .calendar-week-overview-stats>div {
+  background:#193d56!important;border-color:#315b73!important;color:#f4f9fd!important
+}
+@media(max-width:600px){
+ .calendar-layout.athlete-agenda {padding:10px!important;border-radius:16px!important}
+ .athlete-agenda .calendar-session {padding:12px!important}
+ .athlete-agenda .calendar-intensity-profile-head {font-size:12px!important}
+}
