@@ -3,8 +3,10 @@ import {supabase} from '../lib/supabase';
 
 type Session={id:string;planned_date:string;sport:string;title:string;duration_min:number;session_class:string;locked:boolean};
 type MoveResult={status:string;reason:string;request_id:string};
+type MoveRequest={id:string;original_date:string;requested_date:string;status:string;reason:string;coach_decision:string|null};
 export default function AthleteSessionMoveRequest(){
  const [sessions,setSessions]=useState<Session[]>([]);
+ const [requests,setRequests]=useState<MoveRequest[]>([]);
  const [selected,setSelected]=useState('');
  const [date,setDate]=useState('');
  const [busy,setBusy]=useState(false);
@@ -18,6 +20,8 @@ export default function AthleteSessionMoveRequest(){
   const end=new Date(Date.now()+28*86400000).toISOString().slice(0,10);
   const {data,error}=await supabase.from('planned_session').select('id,planned_date,sport,title,duration_min,session_class,locked').eq('athlete_id',profile.id).eq('is_active_version',true).gte('planned_date',today).lte('planned_date',end).order('planned_date',{ascending:true}).limit(50);
   if(cancelled)return;
+  const {data:existing}=await supabase.from('athlete_session_move_request').select('id,original_date,requested_date,status,reason,coach_decision').eq('athlete_user_id',user.id).order('created_at',{ascending:false}).limit(12);
+  if(!cancelled)setRequests((existing||[]) as MoveRequest[]);
   if(error)setMessage('Could not load planned sessions: '+error.message);
   else setSessions((data||[]) as Session[]);
  })();return()=>{cancelled=true};},[]);
@@ -29,6 +33,7 @@ export default function AthleteSessionMoveRequest(){
   setBusy(false);
   if(error){setMessage(error.message);return;}
   const result=data as MoveResult;
+  setRequests(previous=>[{id:result.request_id,original_date:session?.planned_date||'',requested_date:date,status:result.status,reason:result.reason,coach_decision:null},...previous]);
   setMessage(result.status==='coach_review'?'Coach review requested. Your existing session remains unchanged. '+result.reason:'Move proposal recorded. Your calendar is unchanged until the scheduling workflow applies it. '+result.reason);
  }
  return <details style={{border:'1px solid #345574',borderRadius:16,padding:14,margin:'12px 0',background:'#0e253a',color:'#f1f8ff'}}>
@@ -45,6 +50,7 @@ export default function AthleteSessionMoveRequest(){
   </label>
   {session&&<p style={{fontSize:12,color:'#b4ccdc'}}>Original: {session.planned_date} · {session.duration_min} min. Key or long sessions require coach review.</p>}
   <button type="button" disabled={!selected||!date||busy} onClick={()=>void requestMove()} style={{padding:'11px 16px',borderRadius:10,background:'#1696d2',color:'#fff',fontWeight:700}}>{busy?'Checking…':'Check & request move'}</button>
+  {requests.length>0&&<div style={{marginTop:16}}><strong>Recent requests</strong>{requests.map(request=><div key={request.id} style={{borderTop:'1px solid #345574',padding:'9px 0',fontSize:13}}><div>{request.original_date} → {request.requested_date}</div><div style={{color:'#b4ccdc'}}>{request.coach_decision==='approved'?'Coach approved · awaiting calendar update':request.coach_decision==='rejected'?'Coach declined':request.status==='coach_review'?'Awaiting coach review':'Lower-risk proposal · not yet applied'}</div></div>)}</div>}
   {message&&<p role="status" style={{marginTop:12,fontSize:13}}>{message}</p>}
  </details>;
 }
