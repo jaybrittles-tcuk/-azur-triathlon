@@ -6949,7 +6949,7 @@ onClick={() => {
       ? `${Math.round(
           session.completedMatchConfidence,
         )}% match`
-      : `Priority ${session.priority}`}
+      : `${session.sessionClass.replace(/_/g, ' ')} · planned`}
   </span>
 </div>
 
