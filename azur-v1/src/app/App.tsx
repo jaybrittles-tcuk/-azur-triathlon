@@ -1282,6 +1282,10 @@ const [primaryRace, setPrimaryRace] = useState({
     target_total?: string;
   },
 });
+  const [raceEditing,setRaceEditing]=useState(false);
+  const [raceSaving,setRaceSaving]=useState(false);
+  const [raceSaveMessage,setRaceSaveMessage]=useState('');
+  const [raceDraft,setRaceDraft]=useState({distance:'',date:''});
   const [activeNav, setActiveNav] = useState('Home');
   const [isCoachAccount, setIsCoachAccount] = useState(false);
   const [homeMode, setHomeMode] = useState<'athlete' | 'coach'>('athlete');
@@ -1642,55 +1646,27 @@ if (data?.avatar_url) {
 }
 
 async function loadPrimaryRace(userId: string) {
-  const { data: athlete, error: athleteError } = await supabase
-    .from('athlete_profile')
-    .select('id')
-    .eq('user_id', userId)
-    .single();
-
-  if (athleteError || !athlete) {
-    console.error('Unable to load athlete id:', athleteError);
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from('race')
-    .select(
-  'id, name, race_date, priority, location, swim_distance_m, bike_distance_km, run_distance_km, target_splits',
-)
-    .eq('athlete_id', athlete.id)
-    .eq('priority', 'A')
-    .order('race_date', { ascending: true })
-    .limit(1)
-    .single();
-
-  if (error) {
-    console.error('Unable to load primary race:', error);
-    return;
-  }
-
-setPrimaryRace({
-  id: data.id,
-  name: data.name,
-  raceDate: data.race_date,
-  priority: data.priority,
-  location: data.location ?? '',
-  swimDistanceM:
-    data.swim_distance_m != null
-      ? Number(data.swim_distance_m)
-      : null,
-  bikeDistanceKm:
-    data.bike_distance_km != null
-      ? Number(data.bike_distance_km)
-      : null,
-  runDistanceKm:
-    data.run_distance_km != null
-      ? Number(data.run_distance_km)
-      : null,
-  targetSplits: data.target_splits,
-});
+  // Staging stores the onboarding race goal here; the legacy race table is not available.
+  const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date').eq('user_id',userId).maybeSingle();
+  if(error){console.error('Unable to load onboarding race goal:',error);return;}
+  if(!data)return;
+  setPrimaryRace(current=>({...current,name:data.race_distance?String(data.race_distance):'',raceDate:data.race_date||'',priority:data.race_date?'A':''}));
 }
-
+async function handleRaceSave(){
+  if(raceSaving)return;
+  if(!raceDraft.distance.trim()||!raceDraft.date){setRaceSaveMessage('Select a race distance and date.');return;}
+  setRaceSaving(true);setRaceSaveMessage('');
+  try{
+   const {data:{user},error:authError}=await supabase.auth.getUser();
+   if(authError||!user)throw new Error('Please sign in again.');
+   const {data,error}=await supabase.from('athlete_onboarding').update({race_distance:raceDraft.distance,race_date:raceDraft.date}).eq('user_id',user.id).select('user_id').maybeSingle();
+   if(error)throw error;
+   if(!data)throw new Error('Race goal was not saved. Check your onboarding profile.');
+   setPrimaryRace(current=>({...current,name:raceDraft.distance,raceDate:raceDraft.date,priority:'A'}));
+   setRaceEditing(false);setRaceSaveMessage('Primary race goal saved.');
+  }catch(e:any){setRaceSaveMessage(e?.message||'Unable to save race goal.');}
+  finally{setRaceSaving(false);}
+}
 async function loadPlannedSessions(userId: string) {
   const { data: athlete, error: athleteError } = await supabase
     .from('athlete_profile')
@@ -8715,7 +8691,24 @@ swimThreshold:
 
         <section className="panel">
           <span className="eyebrow">PRIMARY TARGET</span>
-          <h3>{primaryRace.name || 'No race selected'}</h3>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
+           <h3>{primaryRace.name || 'No race selected'}</h3>
+           <button type="button" className="profile-edit-button" onClick={()=>{if(!raceEditing){setRaceDraft({distance:primaryRace.name||'',date:primaryRace.raceDate||''});setRaceSaveMessage('');}setRaceEditing(v=>!v);}}>{raceEditing?'Cancel':'Edit race goal'}</button>
+          </div>
+          {raceEditing&&<div style={{display:'grid',gap:10,margin:'14px 0'}}>
+           <label>Race distance
+            <select value={raceDraft.distance} onChange={e=>setRaceDraft(v=>({...v,distance:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}>
+             <option value="">Select distance</option>
+             <option value="Ironman">Ironman</option>
+             <option value="70.3">Ironman 70.3</option>
+             <option value="Olympic">Olympic</option>
+             <option value="Sprint">Sprint</option>
+            </select>
+           </label>
+           <label>Race date <input type="date" value={raceDraft.date} onChange={e=>setRaceDraft(v=>({...v,date:e.target.value}))} style={{display:'block',width:'100%',padding:12,marginTop:5}}/></label>
+           <button type="button" className="primary-button" disabled={raceSaving} onClick={handleRaceSave}>{raceSaving?'Saving…':'Save race goal'}</button>
+          </div>}
+          {raceSaveMessage&&<p role="status" className="panel-note">{raceSaveMessage}</p>}
 
           <div className="profile-settings-list">
             <div>
