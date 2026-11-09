@@ -27,6 +27,10 @@ export function createActivityPreviewHandler(fetcher: typeof fetch = globalThis.
  if(!upstream.ok)return res.status(502).json({error:'Intervals.icu activity read failed',upstreamStatus:upstream.status});
  const entries=await upstream.json();
  if(!Array.isArray(entries))return res.status(502).json({error:'Unexpected upstream response'});
+ const exclusionResponse=await fetcher(url+'/rest/v1/athlete_history_activity_exclusion?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&source=eq.intervals.icu&select=source_activity_id,reason&limit=1000',{headers});
+ if(!exclusionResponse.ok)return res.status(502).json({error:'Cannot verify historical activity exclusions'});
+ const exclusions=await exclusionResponse.json();
+ const excludedIds=new Set(exclusions.map((x:any)=>String(x.source_activity_id)));
  const historyMode=req.query.mode==='history';
  const upstreamTypes=historyMode ? Object.entries(entries.reduce((counts:Record<string,number>,activity:any)=>{const type=String(activity.type??'unknown');counts[type]=(counts[type]??0)+1;return counts;},{})).map(([type,count])=>({type,count})) : [];
  const rides=entries.filter((a:any)=>historyMode ? ['ride','virtualride','indoorride','virtualcycling','run','virtualrun','treadmill','trailrun','trackrun','swim','poolswim','openwaterswim','openwaterswimming','swimming','lap swimming'.replace(/[^a-z]/g,'')].includes(String(a.type??'').toLowerCase().replace(/[^a-z]/g,'')) : ['ride','virtualride','indoorride','virtualcycling'].includes(String(a.type??'').toLowerCase().replace(/[^a-z]/g,'')));
@@ -39,7 +43,7 @@ export function createActivityPreviewHandler(fetcher: typeof fetch = globalThis.
  const plans=await plannedResponse.json();
  const sportFor=(a:any)=>/swim/i.test(String(a.type))?'swim':/run|treadmill/i.test(String(a.type))?'run':'bike';
  const historySummary=historyMode?(()=>{
-  const accepted=rides.filter((a:any)=>Number.isFinite(Number(a.moving_time??a.elapsed_time))&&Number(a.moving_time??a.elapsed_time)>0&&Number.isFinite(Date.parse(a.start_date??a.start_date_local??'')));
+  const accepted=rides.filter((a:any)=>!excludedIds.has(String(a.id))&&Number.isFinite(Number(a.moving_time??a.elapsed_time))&&Number(a.moving_time??a.elapsed_time)>0&&Number.isFinite(Date.parse(a.start_date??a.start_date_local??'')));
   const weeks:Record<string,{week:string;swim:number;bike:number;run:number;total:number}>={};
   const sports={swim:{count:0,minutes:0,distanceKm:0,longestMinutes:0},bike:{count:0,minutes:0,distanceKm:0,longestMinutes:0},run:{count:0,minutes:0,distanceKm:0,longestMinutes:0}};
   let recentMinutes=0,previousMinutes=0;
@@ -61,11 +65,11 @@ export function createActivityPreviewHandler(fetcher: typeof fetch = globalThis.
    if(age>=0&&age<28*86400000)recentMinutes+=minutes;
    else if(age>=28*86400000&&age<56*86400000)previousMinutes+=minutes;
   }
-  return {activityCount:accepted.length,excludedCount:rides.length-accepted.length,sports,weekly:Object.values(weeks).sort((a,b)=>a.week.localeCompare(b.week)),recentFourWeekHours:Math.round(recentMinutes/60*10)/10,previousFourWeekHours:Math.round(previousMinutes/60*10)/10,source:'intervals.icu',readOnly:true};
+  return {activityCount:accepted.length,excludedCount:rides.length-accepted.length,sports,weekly:Object.values(weeks).sort((a,b)=>a.week.localeCompare(b.week)),recentFourWeekHours:Math.round(recentMinutes/60*10)/10,previousFourWeekHours:Math.round(previousMinutes/60*10)/10,source:'intervals.icu',readOnly:true,confirmedExclusionCount:rides.filter((a:any)=>excludedIds.has(String(a.id))).length};
  })():undefined;
  const assess=(a:any)=>reviewIntervalsActivity(a,existing,plans);
  res.setHeader('Cache-Control','private, no-store');
- return res.status(200).json({mode:historyMode?'history_preview_only':'preview_only',stagingEnabled:process.env.INTERVALS_STAGING_ENABLED==='true',acceptanceEnabled:process.env.INTERVALS_ACCEPTANCE_ENABLED==='true',loadValidationEnabled:process.env.INTERVALS_LOAD_VALIDATION_ENABLED==='true',dateRange:{oldest,newest},upstreamCount:historyMode?entries.length:undefined,upstreamTypes,historySummary,activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,sport:/swim/i.test(String(a.type))?'swim':/run|treadmill/i.test(String(a.type))?'run':'bike',name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
+ return res.status(200).json({mode:historyMode?'history_preview_only':'preview_only',stagingEnabled:process.env.INTERVALS_STAGING_ENABLED==='true',acceptanceEnabled:process.env.INTERVALS_ACCEPTANCE_ENABLED==='true',loadValidationEnabled:process.env.INTERVALS_LOAD_VALIDATION_ENABLED==='true',dateRange:{oldest,newest},upstreamCount:historyMode?entries.length:undefined,upstreamTypes,historySummary,activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,sport:/swim/i.test(String(a.type))?'swim':/run|treadmill/i.test(String(a.type))?'run':'bike',name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,confirmedExclusion:excludedIds.has(String(a.id)),...assess(a)})),count:rides.length});
 }
 }
 export default async function handler(req:any,res:any) {
