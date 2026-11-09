@@ -9,6 +9,7 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
  const todayHeading=useId();
  const [strategy,setStrategy]=useState<{weekly_hours:number|null;recent_weekly_hours:number|null;training_background:string|null;training_consistency:string|null;race_distance:string|null;race_date:string|null;swim_css_seconds_per_100m:number|null;ftp_watts:number|null;run_threshold_seconds_per_km:number|null}|null>(null);
  const [strategyLoading,setStrategyLoading]=useState(false);
+ const [verifiedHistory,setVerifiedHistory]=useState<{count:number;recent:number;previous:number;swim:number;bike:number;run:number;excluded:number;weeklyCount:number}|null>(null);
  const [strategyError,setStrategyError]=useState(false);
  const [returnHours,setReturnHours]=useState('10');
  const [returnPreview,setReturnPreview]=useState<any>(null);
