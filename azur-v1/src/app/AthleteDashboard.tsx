@@ -53,28 +53,22 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
    </section>
    <button type="button" className="awd-card awd-readiness" onClick={()=>onNavigate('Recovery')}><span className={`awd-readiness-mark ${readiness?.color??'unknown'}`} aria-hidden="true">{readiness?'•':'—'}</span><span><span className="awd-eyebrow">Daily readiness</span><strong>{readyLabel}</strong><small>{readiness?'View the signals behind this guidance':'Add your recovery check-in'}</small></span><ChevronRight size={18}/></button>
    <section className="awd-card awd-week"><div className="awd-heading"><h2>This week</h2><button type="button" aria-label="Open weekly calendar" onClick={()=>onNavigate('Calendar')}><ArrowUpRight size={18}/></button></div><p className="awd-week-total"><strong>{done}<span> / {total} sessions</span></strong><span>{minutes(plannedMinutes)} planned</span></p><div className="awd-week-sports">{(['swim','bike','run'] as const).map(sport=>{const list=week.filter(s=>s.sport===sport),complete=list.filter(s=>s.status==='completed').length,Icon=icons[sport];return <div key={sport} className={`awd-sport-row ${sport}`}><span className="awd-sport-icon"><Icon size={17}/></span><span>{sport[0].toUpperCase()+sport.slice(1)}</span><div role="progressbar" aria-label={`${sport} recorded session completion`} aria-valuemin={0} aria-valuemax={list.length||1} aria-valuenow={complete}><i style={{width:list.length?`${complete/list.length*100}%`:'0%'}}/></div><small>{complete}/{list.length}</small></div>})}</div><small className="awd-note">Recorded completion · not a training-quality score</small><button type="button" className="awd-load-link" onClick={()=>onNavigate('Weekly Review')}>Weekly Review <span>{Math.round(weeklyStress||0)} stress points <ChevronRight size={14}/></span></button></section>
-   <section className="awd-card" aria-label="My training strategy" style={{background:'#102b40',color:'#eff8ff',border:'1px solid #28546a',borderRadius:18,padding:16}}>
+   <section className="awd-card" aria-label="My training strategy" style={{background:'#102b40',color:'#eff8ff',border:'1px solid #28546a',borderRadius:18,padding:14}}>
     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:10}}>
-     <div><small style={{color:'#73c7eb',letterSpacing:1.2,fontWeight:700}}>AZUR INTELLIGENCE</small><h2 style={{fontSize:20,margin:'5px 0'}}>My Training Strategy</h2><small style={{color:'#adc8d9'}}>Your goal, capacity and coaching decisions</small></div>
+     <div><small style={{color:'#73c7eb',letterSpacing:1.2,fontWeight:700}}>AZUR INTELLIGENCE</small><h2 style={{fontSize:20,margin:'5px 0'}}>Training strategy</h2><small style={{color:'#adc8d9'}}>Your race and training capacity</small></div>
     </div>
     {strategyLoading?<p>Loading your training strategy…</p>:strategyError?<p>Your strategy is temporarily unavailable.</p>:strategy?<div style={{marginTop:14}}>
      <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:9}}>
       {[
        ['Race goal',strategy.race_distance?.toUpperCase()||race.name||'Not set'],
        ['Available / week',strategy.weekly_hours!=null?strategy.weekly_hours+' hrs':'Not set'],
-       ['Recent / week',strategy.recent_weekly_hours!=null?strategy.recent_weekly_hours+' hrs':'Not reported'],
+       ['Reported recent / week',strategy.recent_weekly_hours!=null?strategy.recent_weekly_hours+' hrs':'Not reported'],
        ['Race date',strategy.race_date?new Date(strategy.race_date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set']
       ].map(([label,value])=><div key={label} style={{background:'#16394f',borderRadius:12,padding:11,minWidth:0}}><small style={{display:'block',color:'#9cbcd0'}}>{label}</small><strong style={{display:'block',marginTop:5,overflowWrap:'anywhere'}}>{value}</strong></div>)}
      </div>
-     {strategy.recent_weekly_hours!=null&&strategy.recent_weekly_hours>=8&&strategy.training_consistency==='under4'&&<div role="status" style={{background:'#3c3320',border:'1px solid #b68b40',borderRadius:12,padding:12,marginTop:12}}>
-      <strong style={{color:'#ffda91'}}>Training baseline needs review</strong>
-      <p style={{color:'#f3e6ce',lineHeight:1.5,margin:'6px 0'}}>You reported {strategy.recent_weekly_hours} hours of recent training but fewer than four consistent weeks. AZUR currently treats this as limited training history and may prescribe a much smaller foundation week. That does not mean your established fitness has been assessed.</p>
-      <p style={{color:'#f3e6ce',margin:'6px 0'}}>Confirm how many weeks you've sustained this volume and ask your coach to review the starting load before changing the plan.</p>
-      <button type="button" onClick={()=>onNavigate('Profile')} style={{border:0,borderRadius:8,background:'#c9943b',color:'#142331',padding:'9px 12px',fontWeight:700}}>Review athlete profile →</button>
-     </div>}
      {strategy.training_consistency==='under4'&&strategy.recent_weekly_hours!=null&&strategy.recent_weekly_hours>=8&&<details style={{border:'1px solid #315c72',borderRadius:12,padding:12,marginTop:12,background:'#133348'}}>
-      <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>Returning athlete · coach-review week</summary>
-      <p style={{color:'#c7deea',fontSize:13,lineHeight:1.5}}>Enter the actual average completed hours from your last 2–3 weeks. Historical peak volume is not the starting load. Preview only; nothing will be published or changed.</p>
+      <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>Training baseline · review recent hours</summary>
+      <p style={{color:'#c7deea',fontSize:13,lineHeight:1.5}}>Your reported volume has not yet been verified against imported training history. Enter the average you actually completed over the last 2–3 weeks. Historical peak volume is not your starting load. A coach must approve changes; this preview does not publish a plan.</p>
       <label htmlFor="return-actual-hours" style={{display:'block',color:'#c7deea',fontSize:12,marginBottom:5}}>Recent actual hours per week</label>
       <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
        <input id="return-actual-hours" type="number" min="3" max="25" step="0.5" value={returnHours} onChange={e=>{setReturnHours(e.target.value);setReturnPreview(null);}} style={{width:85,padding:9,borderRadius:8,border:'1px solid #57869b',background:'#0b2538',color:'#fff'}}/>
