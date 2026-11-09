@@ -95,6 +95,21 @@ export default function CoachWeeklyReview(){
   finally{setBusy('')}
  }
  async function prepareIntro(save:boolean){setBusy('intro');setError('');setIntroMessage('');try{if(!introAthlete)throw new Error('Choose an athlete');const {data,error}=await supabase.rpc('coach_prepare_no_history_week',{p_athlete_id:introAthlete,p_save:save});if(error)throw error;if(!data||(!save&&data.status!=='preview_only')||(save&&!['draft_created','already_drafted'].includes(data.status)))throw new Error('Unable to prepare an introductory week');if(save){setIntroMessage('Draft saved for coach review. Calendar unchanged.');setIntroPreview(null);setReload(x=>x+1);}else{setIntroPreview(data);setIntroMessage('Read-only preview: no calendar changes.');}}catch(e){setError(e instanceof Error?e.message:'Introductory draft failed');}finally{setBusy('');}}
+ async function approveAndPublishIntro(){
+  setBusy('intro-publish');setError('');setIntroMessage('');
+  try{
+    if(!introAthlete)throw new Error('Choose an athlete');
+    const {data,error}=await supabase.rpc('coach_approve_publish_no_history_week',{p_athlete_id:introAthlete,p_confirm:true});
+    if(error)throw error;
+    if(data?.status!=='published'||!data?.single_action)throw new Error('Calendar publication was not confirmed');
+    const {data:readback,error:readError}=await supabase.from('planned_session').select('id,duration_min').eq('athlete_id',introAthlete).gte('planned_date',data.week_start).lte('planned_date',new Date(Date.parse(data.week_start+'T12:00:00Z')+6*86400000).toISOString().slice(0,10)).eq('is_active_version',true);
+    if(readError)throw readError;
+    if((readback||[]).length!==Number(data.sessions)||readback!.reduce((n,x)=>n+Number(x.duration_min),0)!==Number(data.total_minutes))throw new Error('Publication completed but calendar readback does not match. Refresh calendar or contact support.');
+    setIntroMessage('Published: '+data.sessions+' workouts ('+data.total_minutes+' min) are now on the athlete calendar.');
+    setIntroPreview(null);setReload(x=>x+1);
+  }catch(e){setError(e instanceof Error?e.message:'Approval and publication failed');}
+  finally{setBusy('');}
+ }
  const activeRow=rows.find(row=>row.athlete_id===introAthlete && row.phase==='foundation_no_history');
  const otherRows=rows.filter(row=>row.id!==activeRow?.id);
  const selectedName=introAthletes.find(a=>a.id===introAthlete)?.name||'Athlete';
@@ -108,7 +123,7 @@ export default function CoachWeeklyReview(){
   </details>;
  });
  return <section className="coach-attention-v2" aria-label="Weekly plan reviews">
-  <header className="coach-attention-heading"><div><h3>Prepare training week</h3><p>Select an athlete, review their first week, then approve and publish.</p></div>
+  <header className="coach-attention-heading"><div><h3>Prepare training week</h3><p>Select an athlete and approve their proposed week in one action.</p></div>
    <button type="button" disabled={loading||Boolean(busy)} onClick={()=>setReload(x=>x+1)}>Refresh</button></header>
   {error&&<p role="alert" style={{color:'#ffc7a6'}}>{error}</p>}
   <div style={{padding:16,borderRadius:18,background:'#102b42',border:'1px solid #31566e',display:'grid',gap:12,color:'#ecf6ff'}}>
@@ -117,11 +132,12 @@ export default function CoachWeeklyReview(){
      <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
     </select></label>
    {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · Introductory week · No verified history</div>}
-   {!activeRow&&<button type="button" disabled={!introAthlete||Boolean(busy)} onClick={()=>void prepareIntro(false)}>{busy==='intro'?'Preparing…':'Preview first week'}</button>}
+   {!activeRow&&<button type="button" disabled={!introAthlete||Boolean(busy)} onClick={()=>void prepareIntro(false)}>Preview workouts (optional)</button>}
+   {introAthlete&&<button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700}} disabled={Boolean(busy)} onClick={()=>void approveAndPublishIntro()}>{busy==='intro-publish'?'Approving and publishing…':'Approve & Publish first week'}</button>}
    {introPreview&&!activeRow&&<>
     <div><strong>{introPreview.session_count} sessions · {introPreview.total_minutes} min</strong><p style={{fontSize:12,color:'#b6ccdc'}}>Easy RPE training, no assumed FTP or historical fitness. Not yet on the athlete calendar.</p></div>
     <details><summary>View proposed workouts</summary>{sessionList(introPreview.sessions||[])}</details>
-    <button type="button" disabled={Boolean(busy)} onClick={()=>void prepareIntro(true)}>Save week for approval</button>
+
    </>}
    {activeRow&&<>
     <div style={{display:'flex',justifyContent:'space-between',gap:8,alignItems:'center'}}>
@@ -129,12 +145,7 @@ export default function CoachWeeklyReview(){
       <span style={{fontSize:12,color:activeRow.decision==='approved'?'#79dcbf':'#f8d27a'}}>{activeRow.decision==='approved'?'Approved':activeRow.decision==='rejected'?'Rejected':'Awaiting approval'}</span>
     </div>
     <details><summary>View workout details</summary>{sessionList(Array.isArray(activeRow.sessions)?activeRow.sessions:[])}</details>
-    {activeRow.decision!=='approved'&&<label style={{fontSize:13}}>Coach notes
-      <textarea rows={2} style={{width:'100%',boxSizing:'border-box',marginTop:6,padding:10,borderRadius:10,background:'#173c55',color:'white'}} value={note} onChange={e=>setNote(e.target.value)} placeholder="Why is this starting volume appropriate?"/>
-    </label>}
-    {activeRow.decision!=='approved'&&<button type="button" disabled={Boolean(busy)||note.trim().length<15||activeRow.decision==='rejected'} onClick={()=>void decide(activeRow,'approved')}>Approve training week</button>}
-    {activeRow.decision==='approved'&&<button type="button" disabled={Boolean(busy)||readiness(activeRow).length>0} onClick={()=>void publish(activeRow,'full')}>Publish to athlete calendar</button>}
-    <details><summary>Other decisions</summary><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(activeRow,activeRow.decision==='approved'?'rejected':'rejected')}>{activeRow.decision==='approved'?'Revoke approval':'Reject week'}</button></details>
+    <p style={{fontSize:12,color:'#b6ccdc'}}>Coach approval and calendar publication happen together with one action. Nothing is scheduled until you approve.</p>
    </>}
    {introMessage&&<p role="status" style={{fontSize:13,color:'#b8e9d8'}}>{introMessage}</p>}
   </div>
