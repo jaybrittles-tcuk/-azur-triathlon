@@ -7167,18 +7167,32 @@ onClick={() => {
           {Array.isArray(selected.prescription?.steps) && selected.prescription.steps.length > 0 && !(Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) && (
             <section className="session-foundation-timeline" aria-label="Your prescribed workout">
               <span className="eyebrow">YOUR WORKOUT</span>
-              <h3>Follow your session, step by step</h3>
-              {selected.prescription.steps.map((step: any, index: number) => (
-                <div className="session-foundation-step" key={index}>
-                  <span className="session-foundation-step-index">{index + 1}</span>
-                  <div><strong>{index === 0 ? 'Warm-up' : index === selected.prescription.steps.length - 1 ? 'Cool-down' : 'Main set'}</strong><p>{String(step.target || 'Effort not supplied — check with your coach')}</p></div>
-                  <strong>{step.durationMin} min</strong>
-                </div>
-              ))}
-              <p className="session-foundation-coaching">Why today matters: controlled aerobic work helps establish repeatable training habits and endurance without unnecessary fatigue. Keep effort conversational where prescribed; report how the session felt so future training can be adjusted.</p>
+              <h3>{selected.sport === 'swim' ? 'Your swim sets' : 'Your structured session'}</h3>
+              <details open={selected.prescription.steps.length <= 3}>
+                <summary style={{cursor:'pointer',fontWeight:700,padding:'10px 0'}}>Workout structure · {selected.prescription.steps.length} steps</summary>
+                {selected.prescription.steps.map((step: any, index: number) => (
+                  <div className="session-foundation-step" key={index}>
+                    <span className="session-foundation-step-index">{index + 1}</span>
+                    <div><strong>{index === 0 ? 'Warm-up' : index === selected.prescription.steps.length - 1 ? 'Cool-down' : 'Main set'}</strong><p>{String(step.target || 'Effort not supplied — check with your coach')}</p></div>
+                    <strong>{step.durationMin} min</strong>
+                  </div>
+                ))}
+              </details>
+              {Array.isArray(selected.prescription.poolSegments) && selected.prescription.poolSegments.length > 0 && (
+                <details style={{marginTop:12}}>
+                  <summary style={{cursor:'pointer',fontWeight:700,padding:'10px 0'}}>Pool intervals · {selected.prescription.totalDistanceMeters || 'distance to be confirmed'} m</summary>
+                  {selected.prescription.poolSegments.map((set:any,i:number)=>(
+                    <div key={i} className="session-foundation-step">
+                      <span className="session-foundation-step-index">{i+1}</span>
+                      <div><strong>{set.repeats} × {set.distanceMeters} m</strong><p>{String(set.target||'Comfortable effort')} · {set.restSeconds ? set.restSeconds+' sec rest' : 'Cool-down'}</p></div>
+                    </div>
+                  ))}
+                </details>
+              )}
+              <p className="session-foundation-coaching"><strong>Why today matters:</strong> {String(selected.rationale || selected.prescription.focus || 'This controlled session builds consistency while helping your coach learn how you respond.').replace(/^Why today matters:\s*/i,'')}</p>
             </section>
           )}
-          {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || selected.prescription?.focus || (Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) ? (
+          {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || (selected.prescription?.focus && !Array.isArray(selected.prescription?.steps)) || (Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) ? (
           <>
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} coachingContent={<><section className="azur-coaching-intelligence" aria-label="AZUR coaching intelligence">
   <h4>AZUR Intelligence</h4>
