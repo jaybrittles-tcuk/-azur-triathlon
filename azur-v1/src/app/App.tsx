@@ -9520,6 +9520,17 @@ function DataSourcesView() {
       if (intervalsReviewOwner.current !== session.user.id) return;
       if (!response.ok) throw new Error(data?.error ?? 'Unable to retrieve activities');
       setIntervalsPreview({activities: data.activities ?? [],dateRange:data.dateRange,upstreamCount:data.upstreamCount,upstreamTypes:data.upstreamTypes,historySummary:data.historySummary,stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true,loadValidationEnabled:data.loadValidationEnabled===true});
+      if(historyMode&&data.historySummary&&data.dateRange?.oldest&&data.dateRange?.newest){
+        setHistorySaveBusy(true);
+        setHistorySaveMessage('Automatically saving training history for coach review…');
+        try{
+          const summary={...data.historySummary,source:'intervals.icu',readOnly:true};
+          const {data:saved,error:saveError}=await supabase.rpc('save_history_baseline_preview',{p_summary:summary,p_window_start:data.dateRange.oldest,p_window_end:data.dateRange.newest});
+          if(saveError)throw saveError;
+          setHistorySaveMessage(saved?.saved?'Training history automatically saved for coach review. No workouts or training load changed.':'Automatic history save could not be confirmed.');
+        }catch(saveError){setHistorySaveMessage('Automatic save needs attention: '+(saveError instanceof Error?saveError.message:'Unknown error'));}
+        finally{setHistorySaveBusy(false);}
+      }
       if (data.acceptanceEnabled===true) await refreshRideInbox();
       if (data.loadValidationEnabled===true) await refreshLoadReview();
     } catch (error) {
@@ -9616,7 +9627,7 @@ function DataSourcesView() {
                     {(['swim','bike','run'] as const).map(sport => {const item=intervalsPreview.historySummary!.sports[sport];return <p key={sport}><strong>{sport.toUpperCase()}</strong> · {item.count} sessions · {(item.minutes/60).toFixed(1)} h · {item.distanceKm.toFixed(1)} km · longest {Math.round(item.longestMinutes)} min</p>;})}
                     <details><summary>Weekly training volume</summary>{intervalsPreview.historySummary.weekly.map(week=><p key={week.week}>{week.week}: {(week.total/60).toFixed(1)} h (swim {(week.swim/60).toFixed(1)}, bike {(week.bike/60).toFixed(1)}, run {(week.run/60).toFixed(1)})</p>)}</details>
                     <small>Historical evidence only. No activity imported, calendar workout completed, or training load updated.</small>
-                    <button type="button" className="primary-button" disabled={historySaveBusy} onClick={()=>void saveHistorySnapshot()}>{historySaveBusy?'Saving…':'Save baseline for coach review'}</button>
+                    <button type="button" className="primary-button" disabled={historySaveBusy} onClick={()=>void saveHistorySnapshot()}>{historySaveBusy?'Saving…':'Retry saving baseline'}</button>
                     {historySaveMessage&&<p role="status">{historySaveMessage}</p>}
                   </section>
                 )}
