@@ -9868,7 +9868,7 @@ async function handleRegister(event: React.FormEvent) {
   const invitationReturn=invitationId?window.location.origin+'/accept-invitation?invitation='+encodeURIComponent(invitationId):window.location.origin+'/onboarding';
   const {data,error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{emailRedirectTo:invitationReturn}});
   if(error) setAuthError(error.message);
-  else { setPassword(''); if(data.session){window.location.assign(invitationReturn);return;} setRegistrationNotice('Check your email to confirm your account. After confirmation, return to your invitation link to accept and begin athlete setup.'); }
+  else { setPassword(''); if(data.session){window.location.assign(invitationReturn);return;} setRegistrationNotice('Check your email to verify your account. Your confirmation link will take you directly to athlete setup after AZUR verifies your invitation.'); }
   setAuthLoading(false);
 }
 async function handleSignOut() {
