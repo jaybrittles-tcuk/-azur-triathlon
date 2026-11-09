@@ -7168,27 +7168,55 @@ onClick={() => {
             <section className="session-foundation-timeline" aria-label="Your prescribed workout">
               <span className="eyebrow">YOUR WORKOUT</span>
               <h3>{selected.sport === 'swim' ? 'Your swim sets' : 'Your structured session'}</h3>
-              <details open={selected.prescription.steps.length <= 3}>
-                <summary style={{cursor:'pointer',fontWeight:700,padding:'10px 0'}}>Workout structure · {selected.prescription.steps.length} steps</summary>
-                {selected.prescription.steps.map((step: any, index: number) => (
-                  <div className="session-foundation-step" key={index}>
-                    <span className="session-foundation-step-index">{index + 1}</span>
-                    <div><strong>{index === 0 ? 'Warm-up' : index === selected.prescription.steps.length - 1 ? 'Cool-down' : 'Main set'}</strong><p>{String(step.target || 'Effort not supplied — check with your coach')}</p></div>
-                    <strong>{step.durationMin} min</strong>
-                  </div>
-                ))}
-              </details>
-              {Array.isArray(selected.prescription.poolSegments) && selected.prescription.poolSegments.length > 0 && (
-                <details style={{marginTop:12}}>
-                  <summary style={{cursor:'pointer',fontWeight:700,padding:'10px 0'}}>Pool intervals · {selected.prescription.totalDistanceMeters || 'distance to be confirmed'} m</summary>
+              {Array.isArray(selected.prescription.poolSegments) && selected.prescription.poolSegments.length > 0 ? (
+                <>
+                  <div style={{padding:'6px 0 10px',fontWeight:700,color:'#a9d7ee'}}>{selected.prescription.totalDistanceMeters || 'Distance not supplied'} m · prescribed pool sets</div>
                   {selected.prescription.poolSegments.map((set:any,i:number)=>(
                     <div key={i} className="session-foundation-step">
                       <span className="session-foundation-step-index">{i+1}</span>
-                      <div><strong>{set.repeats} × {set.distanceMeters} m</strong><p>{String(set.target||'Comfortable effort')} · {set.restSeconds ? set.restSeconds+' sec rest' : 'Cool-down'}</p></div>
+                      <div><strong>{set.repeats} × {set.distanceMeters} m</strong><p>{String(set.target||'Comfortable effort')}{Number(set.restSeconds)>0?' · '+set.restSeconds+' sec rest':''}</p></div>
                     </div>
                   ))}
-                </details>
-              )}
+                  <details style={{marginTop:12}}>
+                    <summary style={{cursor:'pointer',padding:'10px 0'}}>Estimated time guide · {selected.prescription.steps.length} steps</summary>
+                    <p style={{fontSize:12,color:'#a8c6d8'}}>Timing is approximate until your swim pace is established. Prioritise distances, recoveries and comfortable technique.</p>
+                    {selected.prescription.steps.map((step:any,i:number)=>(
+                      <p key={i} style={{fontSize:13,margin:'7px 0'}}>{step.durationMin} min · {step.target}</p>
+                    ))}
+                  </details>
+                </>
+              ) : (() => {
+                const steps=selected.prescription.steps as Array<{durationMin:number;target?:string}>;
+                const work=steps.slice(1,-1).filter((_:any,i:number)=>i%2===0);
+                const rest=steps.slice(2,-1).filter((_:any,i:number)=>i%2===0);
+                const compact=steps.length>=7 && work.length>=3 && rest.length===work.length-1
+                  && work.every((step:any)=>Number(step.durationMin)===Number(work[0].durationMin) && /interval|block/i.test(String(step.target||'')))
+                  && rest.every((step:any)=>Number(step.durationMin)===Number(rest[0].durationMin));
+                return compact ? (
+                  <>
+                    <div className="session-foundation-step"><span className="session-foundation-step-index">1</span><div><strong>Warm-up</strong><p>{steps[0].target}</p></div><strong>{steps[0].durationMin} min</strong></div>
+                    <div className="session-foundation-step"><span className="session-foundation-step-index">2</span>
+                      <div><strong>{work.length} × {work[0].durationMin} min aerobic</strong><p>{String(work[0].target||'').replace(/\s*(?:interval|block)\s*1\/\d+\s*·?\s*/i,'').trim() || 'Controlled aerobic effort'} · {rest[0].durationMin} min easy spin between repetitions</p></div>
+                      <strong>{work.reduce((n:number,s:any)=>n+Number(s.durationMin),0)+rest.reduce((n:number,s:any)=>n+Number(s.durationMin),0)} min</strong>
+                    </div>
+                    <div className="session-foundation-step"><span className="session-foundation-step-index">3</span><div><strong>Cool-down</strong><p>{steps[steps.length-1].target}</p></div><strong>{steps[steps.length-1].durationMin} min</strong></div>
+                    <details style={{marginTop:12}}><summary style={{cursor:'pointer',padding:'10px 0'}}>Show all {steps.length} steps</summary>
+                      {steps.map((step:any,i:number)=><p key={i} style={{fontSize:13,margin:'7px 0'}}>{i+1}. {step.durationMin} min · {step.target}</p>)}
+                    </details>
+                  </>
+                ) : (
+                  <details open={steps.length<=3}>
+                    <summary style={{cursor:'pointer',fontWeight:700,padding:'10px 0'}}>Workout structure · {steps.length} steps</summary>
+                    {steps.map((step:any,index:number)=>(
+                      <div className="session-foundation-step" key={index}>
+                        <span className="session-foundation-step-index">{index+1}</span>
+                        <div><strong>{index===0?'Warm-up':index===steps.length-1?'Cool-down':/easy spin|easy jog|walk/i.test(String(step.target||''))?'Recovery':'Main set'}</strong><p>{String(step.target||'Effort not supplied — check with your coach')}</p></div>
+                        <strong>{step.durationMin} min</strong>
+                      </div>
+                    ))}
+                  </details>
+                );
+              })()}
               <p className="session-foundation-coaching"><strong>Why today matters:</strong> {String(selected.rationale || selected.prescription.focus || 'This controlled session builds consistency while helping your coach learn how you respond.').replace(/^Why today matters:\s*/i,'')}</p>
             </section>
           )}
