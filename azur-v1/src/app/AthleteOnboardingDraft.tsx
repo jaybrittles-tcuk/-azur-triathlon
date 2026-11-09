@@ -245,7 +245,7 @@ export default function AthleteOnboardingDraft(){
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
   {ready&&<div role="status" className="azur-onboarding-recap"><strong>Draft setup</strong>
    <p>{race.toUpperCase()} {raceDate?'· '+raceDate:''} · {hours} h/week · {device==='none'?'Manual logging':device.toUpperCase()}</p>
-   <small>{message.startsWith('Your training plan is ready')?'Your setup is saved for coach review.':'Your setup has been saved; your coach will review it before training is allocated.'}</small>
+   <small>Your setup is saved for coach review. No workouts have been published.</small>
   </div>}
  </section>;
 }
