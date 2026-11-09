@@ -12,6 +12,7 @@ export async function proxyStagingImport(req:any,res:any,action:string) {
  try {
   const target=new URL(backend+'/'+action);
   if(req.query?.days!=null)target.searchParams.set('days',String(req.query.days));
+  if(action==='activity-preview' && req.query?.mode==='history')target.searchParams.set('mode','history');
   const response=await fetch(target,{method:req.method,headers:{Authorization:String(req.headers.authorization??''),'Content-Type':'application/json'},...(req.method==='POST'?{body:JSON.stringify(req.body??{})}:{})});
   const data=await response.json();
   res.status(response.status).json(data);
