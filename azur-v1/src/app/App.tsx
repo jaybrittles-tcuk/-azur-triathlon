@@ -1185,6 +1185,7 @@ export function App() {
   const onboardingRedirectStarted = useRef(false);
   // Keep review state stable while background profile/session loads rerender App.
   const [intervalsPreview, setIntervalsPreview] = useState<{
+    dateRange?:{oldest:string;newest:string};
     upstreamCount?:number; upstreamTypes?:Array<{type:string;count:number}>;
     historySummary?:{activityCount:number;excludedCount:number;recentFourWeekHours:number;previousFourWeekHours:number;sports:Record<'swim'|'bike'|'run',{count:number;minutes:number;distanceKm:number;longestMinutes:number}>;weekly:Array<{week:string;swim:number;bike:number;run:number;total:number}>};
     activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;loadStatus?:string;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
@@ -1195,6 +1196,8 @@ export function App() {
   } | null>(null);
   const [intervalsLoading, setIntervalsLoading] = useState(false);
   const [intervalsHistoryMode, setIntervalsHistoryMode] = useState(false);
+  const [historySaveBusy,setHistorySaveBusy]=useState(false);
+  const [historySaveMessage,setHistorySaveMessage]=useState('');
   const [rideAction, setRideAction] = useState<string | null>(null);
   const [rideMessage, setRideMessage] = useState('');
   const [rideInbox, setRideInbox] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;status:string}>>([]);
@@ -9503,6 +9506,7 @@ function DataSourcesView() {
   }
   async function previewIntervals(historyMode = false) {
     setIntervalsHistoryMode(historyMode);
+    setHistorySaveMessage('');
     setIntervalsLoading(true);
     setIntervalsPreview(null);
     try {
@@ -9514,7 +9518,7 @@ function DataSourcesView() {
       const data = await response.json();
       if (intervalsReviewOwner.current !== session.user.id) return;
       if (!response.ok) throw new Error(data?.error ?? 'Unable to retrieve activities');
-      setIntervalsPreview({activities: data.activities ?? [],upstreamCount:data.upstreamCount,upstreamTypes:data.upstreamTypes,historySummary:data.historySummary,stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true,loadValidationEnabled:data.loadValidationEnabled===true});
+      setIntervalsPreview({activities: data.activities ?? [],dateRange:data.dateRange,upstreamCount:data.upstreamCount,upstreamTypes:data.upstreamTypes,historySummary:data.historySummary,stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true,loadValidationEnabled:data.loadValidationEnabled===true});
       if (data.acceptanceEnabled===true) await refreshRideInbox();
       if (data.loadValidationEnabled===true) await refreshLoadReview();
     } catch (error) {
@@ -9522,6 +9526,17 @@ function DataSourcesView() {
     } finally {
       setIntervalsLoading(false);
     }
+  }
+  async function saveHistorySnapshot(){
+    if(!intervalsHistoryMode||!intervalsPreview?.historySummary||!intervalsPreview.dateRange)return;
+    setHistorySaveBusy(true);setHistorySaveMessage('');
+    try{
+      const summary={...intervalsPreview.historySummary,source:'intervals.icu',readOnly:true};
+      const {data,error}=await supabase.rpc('save_history_baseline_preview',{p_summary:summary,p_window_start:intervalsPreview.dateRange.oldest,p_window_end:intervalsPreview.dateRange.newest});
+      if(error)throw error;
+      setHistorySaveMessage(data?.saved?'History summary saved for review. No activities imported or training load changed.':'Unable to confirm saved summary.');
+    }catch(error){setHistorySaveMessage(error instanceof Error?error.message:'Unable to save history summary');}
+    finally{setHistorySaveBusy(false);}
   }
   return (
     <>
@@ -9600,6 +9615,8 @@ function DataSourcesView() {
                     {(['swim','bike','run'] as const).map(sport => {const item=intervalsPreview.historySummary!.sports[sport];return <p key={sport}><strong>{sport.toUpperCase()}</strong> · {item.count} sessions · {(item.minutes/60).toFixed(1)} h · {item.distanceKm.toFixed(1)} km · longest {Math.round(item.longestMinutes)} min</p>;})}
                     <details><summary>Weekly training volume</summary>{intervalsPreview.historySummary.weekly.map(week=><p key={week.week}>{week.week}: {(week.total/60).toFixed(1)} h (swim {(week.swim/60).toFixed(1)}, bike {(week.bike/60).toFixed(1)}, run {(week.run/60).toFixed(1)})</p>)}</details>
                     <small>Historical evidence only. No activity imported, calendar workout completed, or training load updated.</small>
+                    <button type="button" className="primary-button" disabled={historySaveBusy} onClick={()=>void saveHistorySnapshot()}>{historySaveBusy?'Saving…':'Save baseline for coach review'}</button>
+                    {historySaveMessage&&<p role="status">{historySaveMessage}</p>}
                   </section>
                 )}
                 {intervalsHistoryMode && intervalsPreview.upstreamTypes && <p role="status">Intervals.icu returned {intervalsPreview.upstreamCount ?? 0} activities. Types: {intervalsPreview.upstreamTypes.map(item => `${item.type} (${item.count})`).join(', ') || 'none'}.</p>}
