@@ -10188,13 +10188,6 @@ async function handleProfileSave() {
     }
   }
 `}</style>
-      {autoHistoryStatus !== 'idle' && (
-        <section role="status" aria-live="polite" style={{padding:'15px 18px',background:'#102a43',color:'#eaf5ff',borderBottom:'1px solid #295276'}}>
-          <strong>{autoHistoryStatus === 'running' ? 'Connecting your training history' : autoHistoryStatus === 'saved' ? 'Training history ready' : 'Training history needs attention'}</strong>
-          <p style={{margin:'6px 0 0',color:'#c3d9ed'}}>{autoHistoryDetail}</p>
-          {autoHistoryStatus === 'error' && <button type="button" onClick={() => setAutoHistoryRetry(value => value + 1)} style={{marginTop:10,padding:'9px 14px',borderRadius:10,background:'#168DCE',color:'#fff',border:0}}>Retry history analysis</button>}
-        </section>
-      )}
       <aside className="sidebar">
         <div className="brand-block">
           <img
@@ -10266,6 +10259,14 @@ async function handleProfileSave() {
       : undefined
   }
 >
+      {autoHistoryStatus !== 'idle' && (
+        <section role="status" aria-live="polite" style={{padding:'15px 18px',background:'#102a43',color:'#eaf5ff',borderBottom:'1px solid #295276'}}>
+          <strong>{autoHistoryStatus === 'running' ? 'Connecting your training history' : autoHistoryStatus === 'saved' ? 'Training history ready' : 'Training history needs attention'}</strong>
+          <p style={{margin:'6px 0 0',color:'#c3d9ed'}}>{autoHistoryDetail}</p>
+          {autoHistoryStatus === 'error' && <button type="button" onClick={() => setAutoHistoryRetry(value => value + 1)} style={{marginTop:10,padding:'9px 14px',borderRadius:10,background:'#168DCE',color:'#fff',border:0}}>Retry history analysis</button>}
+        </section>
+      )}
+
         <header
   className="topbar"
 style={
