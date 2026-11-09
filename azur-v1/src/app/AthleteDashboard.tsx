@@ -9,7 +9,7 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
  const todayHeading=useId();
  const [strategy,setStrategy]=useState<{weekly_hours:number|null;recent_weekly_hours:number|null;training_background:string|null;training_consistency:string|null;race_distance:string|null;race_date:string|null;swim_css_seconds_per_100m:number|null;ftp_watts:number|null;run_threshold_seconds_per_km:number|null}|null>(null);
  const [strategyLoading,setStrategyLoading]=useState(false);
- const [reviewEvidence,setReviewEvidence]=useState<{recent:number;previous:number;status:string;max:number}|null>(null);
+ const [reviewEvidence,setReviewEvidence]=useState<{recent:number;previous:number;status:string;max:number;median:number;spikeReason:string}|null>(null);
  const [verifiedHistory,setVerifiedHistory]=useState<{count:number;recent:number;previous:number;swim:number;bike:number;run:number;excluded:number;weeklyCount:number}|null>(null);
  const [strategyError,setStrategyError]=useState(false);
  const [returnHours,setReturnHours]=useState('10');
@@ -43,7 +43,7 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
   const data=await response.json(),summary=data.historySummary;
   if(active&&summary?.readOnly===true&&Number.isFinite(summary.activityCount))setVerifiedHistory({count:summary.activityCount,recent:summary.recentFourWeekHours,previous:summary.previousFourWeekHours,swim:summary.sports?.swim?.count??0,bike:summary.sports?.bike?.count??0,run:summary.sports?.run?.count??0,excluded:summary.excludedCount??0,weeklyCount:summary.weekly?.length??0});
  }catch{/* Keep self-reported values clearly labelled when history is unavailable. */}})();return()=>{active=false;};},[]);
- useEffect(()=>{let active=true;(async()=>{try{const {data:{user}}=await supabase.auth.getUser();if(!user)return;const {data,error}=await supabase.from('athlete_history_intelligence').select('last_four_completed_week_avg_hours,prior_four_completed_week_avg_hours,evidence_status,historical_max_week_hours').eq('owner_user_id',user.id).maybeSingle();if(error||!data)return;if(active)setReviewEvidence({recent:Number(data.last_four_completed_week_avg_hours),previous:Number(data.prior_four_completed_week_avg_hours),status:String(data.evidence_status),max:Number(data.historical_max_week_hours)});}catch{/* Show normal dashboard when review evidence is unavailable. */}})();return()=>{active=false;};},[]);
+ useEffect(()=>{let active=true;(async()=>{try{const {data:{user}}=await supabase.auth.getUser();if(!user)return;const {data,error}=await supabase.from('athlete_history_intelligence').select('last_four_completed_week_avg_hours,prior_four_completed_week_avg_hours,evidence_status,historical_max_week_hours').eq('owner_user_id',user.id).maybeSingle();if(error||!data)return;const {data:robust}=await supabase.from('athlete_history_robust_review').select('recent_median_hours,review_reason').eq('owner_user_id',user.id).maybeSingle();if(active)setReviewEvidence({recent:Number(data.last_four_completed_week_avg_hours),previous:Number(data.prior_four_completed_week_avg_hours),status:String(data.evidence_status),max:Number(data.historical_max_week_hours),median:Number(robust?.recent_median_hours??data.last_four_completed_week_avg_hours),spikeReason:String(robust?.review_reason??'coach_review')});}catch{/* Show normal dashboard when review evidence is unavailable. */}})();return()=>{active=false;};},[]);
  const pace=(seconds:number|null|undefined)=>seconds&&seconds>0?Math.floor(seconds/60)+':'+String(Math.round(seconds%60)).padStart(2,'0'):null;
  const day=new Date(today+'T12:00:00');const monday=new Date(day);monday.setDate(day.getDate()-(day.getDay()+6)%7);
  const dateKey=(d:Date)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -80,6 +80,7 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
      {reviewEvidence&&<div style={{marginTop:12,border:'1px solid #3b6980',borderRadius:12,padding:12,background:'#15354b'}}>
       <small style={{color:'#89d5ed',fontWeight:700,letterSpacing:'.05em'}}>SAVED BASELINE · COACH REVIEW</small>
       <p style={{margin:'7px 0',fontSize:13,color:'#e1f1f8'}}>Completed-week average: <strong>{reviewEvidence.recent.toFixed(1)} h/week</strong> recently vs <strong>{reviewEvidence.previous.toFixed(1)} h/week</strong> previously.</p>
+      <p style={{margin:'6px 0',fontSize:13,color:'#d6eaf3'}}>Typical recent week (median): <strong>{reviewEvidence.median.toFixed(1)} h</strong>. This is descriptive, not a prescribed target.</p>
       <p style={{margin:'6px 0',fontSize:13,color:'#e5c68e'}}>{reviewEvidence.status==='outlier_review_required'?'An unusually high-volume week ('+reviewEvidence.max.toFixed(1)+' h) needs review before setting your starting load.':'History requires coach review before it informs your training load.'}</p>
       <small style={{color:'#b7d1df'}}>Evidence only · training plan unchanged</small>
      </div>}
