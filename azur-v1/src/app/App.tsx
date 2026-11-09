@@ -9631,7 +9631,7 @@ function DataSourcesView() {
                     ))}
                   </section>
                 )}
-                {intervalsPreview.activities?.map(activity => (
+                {intervalsHistoryMode ? <details className="azur-intervals-history-details"><summary>Review individual activities ({intervalsPreview.activities?.length ?? 0})</summary>{intervalsPreview.activities?.map(activity => (
                   <article className="azur-intervals-preview-ride" key={String(activity.sourceId)}>
                     <strong>{activity.name || 'Cycling activity'}</strong>
                     <span>{activity.start || 'Unknown start'} · {activity.type || 'Ride'}</span>
@@ -9649,6 +9649,13 @@ function DataSourcesView() {
                       </button>
                     )}
                     <span className="azur-intervals-review-note">Stage: {activity.alreadyImported ? 'Already recorded' : activity.possibleCrossPlatformDuplicate ? 'Duplicate review required' : activity.status === 'candidate_match' ? 'Potential workout match' : activity.status === 'ambiguous_session' ? 'Session matching requires review' : 'Not imported'} · {activity.loadStatus === 'validated' ? 'Training load approved' : activity.alreadyImported ? 'Training-load approval pending' : 'Training load unchanged'}</span>
+                  </article>
+                ))}</details> : intervalsPreview.activities?.map(activity => (
+                  <article className="azur-intervals-preview-ride" key={String(activity.sourceId)}>
+                    <strong>{activity.name || 'Cycling activity'}</strong>
+                    <span>{activity.start || 'Unknown start'} · {activity.type || 'Ride'}</span>
+                    <span>{activity.durationSec != null ? `${Math.round(activity.durationSec / 60)} min` : 'Duration unavailable'} · {activity.distanceMeters != null ? `${(activity.distanceMeters / 1000).toFixed(2)} km` : 'Distance unavailable'}</span>
+                    <small>{activity.reason || activity.status || 'Review required'}</small>
                   </article>
                 ))}
               </div>
