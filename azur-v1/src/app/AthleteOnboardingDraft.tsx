@@ -102,8 +102,8 @@ export default function AthleteOnboardingDraft(){
   if(recentHours!=='' && (!Number.isFinite(Number(recentHours))||Number(recentHours)<0||Number(recentHours)>25)){setMessage('Recent weekly training must be between 0 and 25 hours.');return;}
   if(ftp!==''&&(!Number.isFinite(Number(ftp))||Number(ftp)<60||Number(ftp)>650)){setMessage('FTP must be between 60 and 650 watts.');return;}
   for(const [label,value,min,max] of [['Swim CSS',css,50,300],['Run threshold',runThreshold,150,900]] as const){const seconds=parsePace(value);if(value!==''&&(seconds===null||!Number.isFinite(seconds)||seconds<min||seconds>max)){setMessage(`${label}: enter a pace as minutes:seconds (e.g. ${label==='Swim CSS'?'1:45':'5:00'}). Leave blank if unknown.`);return;}}
-  if(nextStep===5 && (!['novice','regular','established'].includes(background)||!['under4','4to7','8plus'].includes(consistency))){setMessage('Please confirm your training background and recent consistency in Step 2 before creating your plan.');setStep(1);return;}
-  if(nextStep===5 && !betaAcknowledged){setMessage('Please acknowledge the beta limitations before creating your plan.');return;}
+  if(nextStep===5 && (!['novice','regular','established'].includes(background)||!['under4','4to7','8plus'].includes(consistency))){setMessage('Please confirm your training background and recent consistency in Step 2 before completing setup.');setStep(1);return;}
+  if(nextStep===5 && !betaAcknowledged){setMessage('Please acknowledge the beta limitations before completing setup.');return;}
   if(nextStep===5 && !displayName.trim()){setMessage('Please enter your name before finishing setup.');return;}
   setSaving(true);setMessage('');
   const {error:scheduleError}=await supabase.from('athlete_schedule_preference').upsert({
@@ -113,29 +113,29 @@ export default function AthleteOnboardingDraft(){
   },{onConflict:'user_id'});
   if(scheduleError){setSaving(false);setMessage('Unable to save your weekly scheduling preference. Please retry: '+scheduleError.message);return;}
   if(nextStep===5){
-   const {data,error}=await supabase.rpc('complete_athlete_onboarding_and_plan',{
-    p_inputs:{
-     display_name:displayName.trim(),race_distance:race,race_date:raceDate||null,
-     experience,weekly_hours:Number(hours),training_days:trainingDays.map(day=>weekdays.indexOf(day)),
-     recent_weekly_hours:recentHours===''?null:Number(recentHours),
+   // Beta onboarding saves the athlete's inputs ONLY. Historical baseline and
+   // coach approval must be validated before any training plan is generated.
+   const {data:profiles,error:profileReadError}=await supabase.from('athlete_profile')
+     .select('id').eq('user_id',userId).limit(2);
+   if(profileReadError){setSaving(false);setMessage('Unable to verify athlete profile: '+profileReadError.message);return;}
+   if((profiles||[]).length>1){setSaving(false);setMessage('Duplicate athlete profiles require coach support before continuing.');return;}
+   const profileWrite=(profiles||[]).length
+     ? await supabase.from('athlete_profile').update({display_name:displayName.trim()}).eq('id',profiles![0].id)
+     : await supabase.from('athlete_profile').insert({user_id:userId,display_name:displayName.trim()});
+   if(profileWrite.error){setSaving(false);setMessage('Unable to save athlete profile: '+profileWrite.error.message);return;}
+   const {error:setupError}=await supabase.from('athlete_onboarding').upsert({
+     user_id:userId,race_distance:race,race_date:raceDate||null,experience,
+     weekly_hours:Number(hours),training_days:trainingDays.map(day=>weekdays.indexOf(day)),
      training_background:background,training_consistency:consistency,
      current_training_concern:concern,can_swim_200m:canSwim,
-     ftp_watts:ftp===''?null:Number(ftp),
-     swim_css_seconds_per_100m:parsePace(css),
-     run_threshold_seconds_per_km:parsePace(runThreshold),device
-    }
-   });
+     recent_weekly_hours:recentHours===''?null:Number(recentHours),
+     ftp_watts:ftp===''?null:Number(ftp),swim_css_seconds_per_100m:parsePace(css),
+     run_threshold_seconds_per_km:parsePace(runThreshold),device,
+     onboarding_step:4,updated_at:new Date().toISOString()
+   },{onConflict:'user_id'});
    setSaving(false);
-   if(error){setMessage('Unable to finish setup and create your training plan: '+error.message);return;}
-   if(data?.status==='review_required'){
-    setMessage('Your setup is saved. Coach review is required before training can be allocated: '+(data.reason||'safety review'));
-    setReady(true);return;
-   }
-   if(data?.status!=='ready'||!Number.isInteger(data.sessions)||data.sessions<1){
-    setMessage('Training setup could not be verified. Please contact your coach.');return;
-   }
-   setPlanSummary({sessions:data.sessions,total_minutes:data.total_minutes,calendar:Array.isArray(data.calendar)?data.calendar:[]});
-   setMessage(`Your training plan is ready: ${data.sessions} sessions.`);
+   if(setupError){setMessage('Unable to finish athlete setup: '+setupError.message);return;}
+   setMessage('Your athlete profile is saved for coach review.');
    setReady(true);
    return;
   }
@@ -153,41 +153,15 @@ export default function AthleteOnboardingDraft(){
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
  if(!invitationVerified&&!isCoach)return <section className="azur-onboarding-draft" role="status"><h3>Invitation required</h3><p>{message||'Please accept your coach invitation before onboarding.'}</p>{pendingInvitationId?<a style={{display:'inline-block',background:'#087ee9',color:'#fff',padding:'12px 18px',borderRadius:12,fontWeight:700}} href={'/accept-invitation?invitation='+encodeURIComponent(pendingInvitationId)}>Accept coach invitation</a>:<p>Ask your coach for an invitation to this email address.</p>}</section>;
  if(isCoach)return <section className="azur-onboarding-draft"><h3>Athlete onboarding</h3><p>This setup is for athlete accounts. Coach access and assignments are managed separately.</p></section>;
- if(ready && message.startsWith('Your training plan is ready'))return <section className="azur-onboarding-draft" aria-label="Your AZUR training briefing" style={{maxWidth:720,margin:'0 auto',color:'#f4f8ff'}}>
-  <div style={{padding:'12px 0 20px'}}>
-   <span className="eyebrow" style={{color:'#69c5ed',letterSpacing:2}}>AZUR · ATHLETE BRIEFING</span>
-   <h1 style={{fontSize:'clamp(30px,7vw,46px)',lineHeight:1.08,margin:'12px 0'}}>Built around you.</h1>
-   <p style={{color:'#b9cbdc',lineHeight:1.6,margin:0}}>Welcome, {displayName}. Your starting plan is ready. Here's the thinking behind your first block.</p>
+ if(ready)return <section className="azur-onboarding-draft" aria-label="AZUR setup complete" style={{maxWidth:720,margin:'0 auto',color:'#f4f8ff'}}>
+  <span className="eyebrow" style={{color:'#69c5ed'}}>AZUR · ATHLETE ONBOARDING</span>
+  <h1 style={{fontSize:'clamp(30px,7vw,44px)',margin:'12px 0'}}>You're all set, {displayName}.</h1>
+  <p role="status" style={{color:'#b9cbdc',lineHeight:1.6}}>Your training preferences are saved. AZUR will review your connected training history and your coach will approve a safe starting volume before your first training plan is released.</p>
+  <div style={{background:'#102c43',border:'1px solid #28546a',borderRadius:16,padding:18,margin:'18px 0'}}>
+    <strong>{hours} hours available each week</strong>
+    <p style={{color:'#b1c7da'}}>This is your scheduling availability, not an automatically approved training prescription. No workouts have been generated or published by onboarding.</p>
   </div>
-  <div style={{background:'linear-gradient(135deg,#123e62,#10283f)',border:'1px solid #337ba1',borderRadius:22,padding:'20px',marginBottom:14}}>
-   <small style={{color:'#8bd8f4',letterSpacing:1.6}}>YOUR RACE GOAL</small>
-   <h2 style={{fontSize:'clamp(23px,6vw,34px)',margin:'8px 0 4px'}}>{race==='ironman'?'IRONMAN':race==='70.3'?'IRONMAN 70.3':race.toUpperCase()}</h2>
-   <p style={{margin:0,color:'#c8dce9'}}>{raceDate?new Date(raceDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'Race date to be confirmed'}</p>
-  </div>
-  <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:10,marginBottom:18}}>
-   <div style={{background:'#102c43',border:'1px solid #28546a',borderRadius:16,padding:15}}><small style={{color:'#9db7ca'}}>WEEKLY AVAILABILITY</small><strong style={{display:'block',fontSize:27,marginTop:5}}>{hours} <span style={{fontSize:14}}>hrs</span></strong><small style={{color:'#a9c3d3'}}>Scheduling capacity</small></div>
-   <div style={{background:'#102c43',border:'1px solid #28546a',borderRadius:16,padding:15}}><small style={{color:'#9db7ca'}}>RECENT TRAINING</small><strong style={{display:'block',fontSize:27,marginTop:5}}>{recentHours||'—'} <span style={{fontSize:14}}>{recentHours?'hrs':'not set'}</span></strong><small style={{color:'#a9c3d3'}}>Reported weekly average</small></div>
-   <div style={{background:'#102c43',border:'1px solid #28546a',borderRadius:16,padding:15}}><small style={{color:'#9db7ca'}}>OPENING BLOCK</small><strong style={{display:'block',fontSize:27,marginTop:5}}>{planSummary?.sessions??'—'} <span style={{fontSize:14}}>sessions</span></strong><small style={{color:'#a9c3d3'}}>{planSummary?.total_minutes?Math.round(planSummary.total_minutes/60*10)/10+' hours total across the block':'First training block'} · not per week</small></div>
-   <div style={{background:'#102c43',border:'1px solid #28546a',borderRadius:16,padding:15}}><small style={{color:'#9db7ca'}}>BENCHMARKS</small><strong style={{display:'block',fontSize:17,marginTop:8}}>{[css?'CSS '+css:null,ftp?'FTP '+ftp+' W':null,runThreshold?'Run '+runThreshold:null].filter(Boolean).join(' · ')||'To establish'}</strong><small style={{color:'#a9c3d3'}}>Starting references</small></div>
-  </div>
-  <div style={{background:'#10373e',border:'1px solid #267e83',borderRadius:20,padding:18,marginBottom:16}}>
-   <span className="eyebrow" style={{color:'#76e0d6'}}>AZUR INTELLIGENCE</span>
-   <h2 style={{margin:'9px 0 12px',fontSize:22}}>Why your plan starts here</h2>
-   <div style={{display:'grid',gap:12}}>
-    <div><strong>01 · Build consistency</strong><p style={{margin:'4px 0 0',color:'#c5e1df',lineHeight:1.5}}>Your first block establishes repeatable aerobic sessions before race-specific training becomes more demanding.</p></div>
-    <div><strong>02 · Respect your training history</strong><p style={{margin:'4px 0 0',color:'#c5e1df',lineHeight:1.5}}>{recentHours!==''?('You reported '+recentHours+' recent training hours per week against '+hours+' hours available. Availability is a ceiling, not an automatic training target.'):'Your available time sets scheduling boundaries; training feedback will help guide progression.'}</p></div>
-    <div><strong>03 · Learn from every session</strong><p style={{margin:'4px 0 0',color:'#c5e1df',lineHeight:1.5}}>{css||ftp||runThreshold?'Your entered benchmarks are starting references, refined as reliable completed-session data becomes available.':'Early sessions use controlled effort while we establish reliable training benchmarks.'}</p></div>
-   </div>
-  </div>
-  <div style={{background:'#102b40',border:'1px solid #28546a',borderRadius:20,padding:18,marginBottom:18}}>
-   <h2 style={{margin:'0 0 4px',fontSize:22}}>Your first sessions</h2><p style={{color:'#a9c3d3',margin:'0 0 12px',fontSize:13}}>A preview of your actual generated calendar</p>
-   {(planSummary?.calendar||[]).slice(0,5).map((session,i)=><div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,padding:'12px 0',borderBottom:'1px solid #28546a'}}>
-    <div style={{minWidth:0}}><small style={{color:'#7dd5f6',textTransform:'uppercase',letterSpacing:1}}>{session.sport} · {new Date(session.date+'T12:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}</small><strong style={{display:'block',fontSize:14,marginTop:4}}>{session.title}</strong></div>
-    <strong style={{whiteSpace:'nowrap',fontSize:14,color:'#e3f5ff'}}>{session.duration_min} min</strong>
-   </div>)}
-   {!(planSummary?.calendar?.length)&&<p>Your sessions are ready to explore in your training calendar.</p>}
-  </div>
-  <button type="button" style={{width:'100%',padding:'17px',borderRadius:14,background:'#168bc5',color:'white',fontWeight:750,fontSize:16,border:0,position:'sticky',bottom:12,boxShadow:'0 8px 26px #071927aa'}} onClick={()=>window.location.assign('/')}>Open my training calendar →</button>
+  <button type="button" style={{width:'100%',padding:'15px',borderRadius:14,background:'#168bc5',color:'white',fontWeight:750,border:0}} onClick={()=>window.location.assign('/')}>Go to my AZUR dashboard →</button>
  </section>;
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
   <div className="azur-onboarding-progress" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"10px 0 14px"}}><strong style={{letterSpacing:1.6,color:"#76d4f7",fontSize:12}}>YOUR AZUR JOURNEY</strong><span style={{fontSize:12,color:"#b5c9da"}}>{step+1} / 5 · {['Race goal','Training background','Benchmarks','Devices','Review'][step]}</span></div>
@@ -266,12 +240,12 @@ export default function AthleteOnboardingDraft(){
   <div className="azur-onboarding-actions" style={{position:"sticky",bottom:0,zIndex:5,display:"flex",gap:12,justifyContent:"flex-end",padding:"14px 8px max(14px, env(safe-area-inset-bottom))",background:"linear-gradient(180deg, rgba(9,28,46,0.96), #091c2e)",borderTop:"1px solid rgba(110,178,216,0.25)",borderRadius:12}}>
    {step>0&&<button type="button" onClick={()=>{setMessage("");setStep(s=>s-1);setReady(false)}}>Back</button>}
    {step<4?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>{saving?"Saving…":"Continue"}</button>
-   :<button type="button" disabled={saving} onClick={()=>void save(5)}>{saving?'Creating plan…':'Finish setup & create plan'}</button>}
+   :<button type="button" disabled={saving} onClick={()=>void save(5)}>{saving?'Saving athlete setup…':'Finish setup for coach review'}</button>}
   </div>
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
   {ready&&<div role="status" className="azur-onboarding-recap"><strong>Draft setup</strong>
    <p>{race.toUpperCase()} {raceDate?'· '+raceDate:''} · {hours} h/week · {device==='none'?'Manual logging':device.toUpperCase()}</p>
-   <small>{message.startsWith('Your training plan is ready')?'Your plan has been created and verified.':'Your setup has been saved; your coach will review it before training is allocated.'}</small>
+   <small>{message.startsWith('Your training plan is ready')?'Your setup is saved for coach review.':'Your setup has been saved; your coach will review it before training is allocated.'}</small>
   </div>}
  </section>;
 }
