@@ -29,6 +29,9 @@ export default function CoachWeeklyReview(){
  const [introPreview,setIntroPreview]=useState<any>(null);
  const [introMessage,setIntroMessage]=useState('');
  const [publishedAthletes,setPublishedAthletes]=useState<string[]>([]);
+ const [nextWeekPublished,setNextWeekPublished]=useState<string[]>([]);
+ const [nextWeekPreview,setNextWeekPreview]=useState<any>(null);
+ const nextMonday=(()=>{const d=new Date();d.setUTCHours(12,0,0,0);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)+7);return d.toISOString().slice(0,10)})();
  useEffect(()=>{let live=true;(async()=>{
   setLoading(true);setError('');
   try{
@@ -40,15 +43,19 @@ export default function CoachWeeklyReview(){
    if(!ids.length){if(live)setRows([]);return;}
    const weekStart=(()=>{const d=new Date();const day=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-day);return d.toISOString().slice(0,10)})();
    const weekEnd=(()=>{const d=new Date(weekStart+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+6);return d.toISOString().slice(0,10)})();
+   const nextEnd=(()=>{const d=new Date(weekStart+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+13);return d.toISOString().slice(0,10)})();
    const [drafts,profiles,baselines,history,planned]=await Promise.all([
      supabase.from('weekly_plan_draft').select('id,athlete_id,week_start,revision,phase,sessions,proposal_fingerprint,created_at').in('athlete_id',ids).order('created_at',{ascending:false}).limit(150),
      supabase.from('athlete_profile').select('id,display_name').in('id',ids),
      supabase.from('coach_history_baseline_review').select('athlete_id,decision,approved_weekly_hours').in('athlete_id',ids),
      supabase.from('athlete_history_baseline').select('athlete_id,validation_status').in('athlete_id',ids),
-     supabase.from('planned_session').select('athlete_id').in('athlete_id',ids).gte('planned_date',weekStart).lte('planned_date',weekEnd).eq('is_active_version',true)
+     supabase.from('planned_session').select('athlete_id,planned_date').in('athlete_id',ids).gte('planned_date',weekStart).lte('planned_date',nextEnd).eq('is_active_version',true)
    ]);
    if(drafts.error||profiles.error||baselines.error||history.error||planned.error)throw new Error(drafts.error?.message||profiles.error?.message||baselines.error?.message||history.error?.message||planned.error?.message||'Unable to load weekly drafts');
-   if(live)setPublishedAthletes([...new Set((planned.data??[]).map(s=>s.athlete_id))]);
+   if(live){
+    setPublishedAthletes([...new Set((planned.data??[]).filter(s=>s.planned_date<=weekEnd).map(s=>s.athlete_id))]);
+    setNextWeekPublished([...new Set((planned.data??[]).filter(s=>s.planned_date>weekEnd).map(s=>s.athlete_id))]);
+   }
    const all=drafts.data??[];
    const decisions=all.length?await supabase.from('weekly_plan_decision').select('draft_id,decision,decided_at').in('draft_id',all.map(d=>d.id)).order('decided_at',{ascending:false}):{data:[] as Decision[],error:null};
    if(decisions.error)throw decisions.error;
@@ -115,6 +122,35 @@ export default function CoachWeeklyReview(){
   }catch(e){setError(e instanceof Error?e.message:'Approval and publication failed');}
   finally{setBusy('');}
  }
+ async function previewNextWeek(){
+  setBusy('next-preview');setError('');setIntroMessage('');
+  try{
+    if(!introAthlete)throw new Error('Choose an athlete');
+    const {data,error}=await supabase.rpc('coach_preview_intro_v2',{p_athlete_id:introAthlete,p_week_start:nextMonday});
+    if(error)throw error;
+    if(data?.planner_version!=='intro_v2'||data?.status!=='preview_only')throw new Error('Next-week proposal unavailable');
+    setNextWeekPreview(data);
+    setIntroMessage('Improved week ready to review · no calendar changes.');
+  }catch(e){setError(e instanceof Error?e.message:'Unable to preview next week');}
+  finally{setBusy('');}
+ }
+ async function approveNextWeek(){
+  setBusy('next-publish');setError('');setIntroMessage('');
+  try{
+    if(!introAthlete)throw new Error('Choose an athlete');
+    if(!nextWeekPreview||nextWeekPreview.week_start!==nextMonday)throw new Error('Review the proposed week first');
+    const {data,error}=await supabase.rpc('coach_approve_publish_intro_v2_next_week',{p_athlete_id:introAthlete,p_confirm:true});
+    if(error)throw error;
+    if(data?.status!=='published'||data?.calendar_verified!==true||data?.week_start!==nextMonday)throw new Error('Next-week calendar publication not verified');
+    const endDate=(()=>{const d=new Date(nextMonday+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+6);return d.toISOString().slice(0,10)})();
+    const {data:saved,error:readError}=await supabase.from('planned_session').select('id,duration_min').eq('athlete_id',introAthlete).gte('planned_date',nextMonday).lte('planned_date',endDate).eq('is_active_version',true);
+    if(readError)throw readError;
+    if((saved??[]).length!==Number(data.sessions)||(saved??[]).reduce((n,x)=>n+Number(x.duration_min),0)!==Number(data.total_minutes))throw new Error('Publication succeeded but calendar readback did not match');
+    setIntroMessage('Published improved week: '+data.sessions+' sessions, '+data.total_minutes+' minutes. Recovery day included.');
+    setNextWeekPreview(null);setReload(x=>x+1);
+  }catch(e){setError(e instanceof Error?e.message:'Next-week publication failed');}
+  finally{setBusy('');}
+ }
  const activeRow=rows.find(row=>row.athlete_id===introAthlete && row.phase==='foundation_no_history');
  const otherRows=rows.filter(row=>row.id!==activeRow?.id);
  const selectedName=introAthletes.find(a=>a.id===introAthlete)?.name||'Athlete';
@@ -133,7 +169,7 @@ export default function CoachWeeklyReview(){
   {error&&<p role="alert" style={{color:'#ffc7a6'}}>{error}</p>}
   <div style={{padding:16,borderRadius:18,background:'#102b42',border:'1px solid #31566e',display:'grid',gap:12,color:'#ecf6ff'}}>
    <label style={{fontSize:13,fontWeight:700}}>Athlete
-    <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setIntroMessage('');}}>
+    <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setNextWeekPreview(null);setIntroMessage('');}}>
      <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
     </select></label>
    {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · Introductory week · No verified history</div>}
@@ -152,6 +188,18 @@ export default function CoachWeeklyReview(){
     <details><summary>View workout details</summary>{sessionList(Array.isArray(activeRow.sessions)?activeRow.sessions:[])}</details>
     <p style={{fontSize:12,color:'#b6ccdc'}}>Coach approval and calendar publication happen together with one action. Nothing is scheduled until you approve.</p>
    </>}
+   {introAthlete&&publishedAthletes.includes(introAthlete)&&<div style={{marginTop:10,paddingTop:14,borderTop:'1px solid #34556c',display:'grid',gap:9}}>
+     <strong style={{fontSize:16}}>Improved training · Week of {nextMonday}</strong>
+     {nextWeekPublished.includes(introAthlete)?<p role="status" style={{color:'#a5e6cc'}}>Next week is published to the athlete calendar.</p>:<>
+       <p style={{fontSize:13,color:'#c2d9e8'}}>Sport-specific intervals, distance-based swims and a recovery day. Current week stays unchanged.</p>
+       <button type="button" disabled={Boolean(busy)} onClick={()=>void previewNextWeek()}>Review improved week</button>
+       {nextWeekPreview&&<>
+         <p><strong>{nextWeekPreview.session_count} workouts · {nextWeekPreview.total_minutes} minutes</strong> · {Array.isArray(nextWeekPreview.recovery_days)?nextWeekPreview.recovery_days.length:0} recovery day</p>
+         <details><summary>Review workouts and intervals</summary>{sessionList(nextWeekPreview.sessions||[])}</details>
+         <button type="button" style={{background:'#1592ef',color:'white',minHeight:48,borderRadius:12,fontWeight:700}} disabled={Boolean(busy)} onClick={()=>void approveNextWeek()}>{busy==='next-publish'?'Publishing…':'Approve & Publish improved week'}</button>
+       </>}
+     </>}
+   </div>}
    {introMessage&&<p role="status" style={{fontSize:13,color:'#b8e9d8'}}>{introMessage}</p>}
   </div>
   <details style={{marginTop:16,padding:12,border:'1px solid #304d63',borderRadius:12}}>
