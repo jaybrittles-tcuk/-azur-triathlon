@@ -28,6 +28,7 @@ export default function CoachWeeklyReview(){
  const [introAthlete,setIntroAthlete]=useState('');
  const [introPreview,setIntroPreview]=useState<any>(null);
  const [introMessage,setIntroMessage]=useState('');
+ const [publishedAthletes,setPublishedAthletes]=useState<string[]>([]);
  useEffect(()=>{let live=true;(async()=>{
   setLoading(true);setError('');
   try{
@@ -37,13 +38,17 @@ export default function CoachWeeklyReview(){
    if(ae)throw ae;
    const ids=(assign??[]).map(a=>a.athlete_id);
    if(!ids.length){if(live)setRows([]);return;}
-   const [drafts,profiles,baselines,history]=await Promise.all([
+   const weekStart=(()=>{const d=new Date();const day=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-day);return d.toISOString().slice(0,10)})();
+   const weekEnd=(()=>{const d=new Date(weekStart+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+6);return d.toISOString().slice(0,10)})();
+   const [drafts,profiles,baselines,history,planned]=await Promise.all([
      supabase.from('weekly_plan_draft').select('id,athlete_id,week_start,revision,phase,sessions,proposal_fingerprint,created_at').in('athlete_id',ids).order('created_at',{ascending:false}).limit(150),
      supabase.from('athlete_profile').select('id,display_name').in('id',ids),
      supabase.from('coach_history_baseline_review').select('athlete_id,decision,approved_weekly_hours').in('athlete_id',ids),
-     supabase.from('athlete_history_baseline').select('athlete_id,validation_status').in('athlete_id',ids)
+     supabase.from('athlete_history_baseline').select('athlete_id,validation_status').in('athlete_id',ids),
+     supabase.from('planned_session').select('athlete_id').in('athlete_id',ids).gte('planned_date',weekStart).lte('planned_date',weekEnd).eq('is_active_version',true)
    ]);
-   if(drafts.error||profiles.error||baselines.error||history.error)throw new Error(drafts.error?.message||profiles.error?.message||baselines.error?.message||history.error?.message||'Unable to load weekly drafts');
+   if(drafts.error||profiles.error||baselines.error||history.error||planned.error)throw new Error(drafts.error?.message||profiles.error?.message||baselines.error?.message||history.error?.message||planned.error?.message||'Unable to load weekly drafts');
+   if(live)setPublishedAthletes([...new Set((planned.data??[]).map(s=>s.athlete_id))]);
    const all=drafts.data??[];
    const decisions=all.length?await supabase.from('weekly_plan_decision').select('draft_id,decision,decided_at').in('draft_id',all.map(d=>d.id)).order('decided_at',{ascending:false}):{data:[] as Decision[],error:null};
    if(decisions.error)throw decisions.error;
@@ -133,7 +138,7 @@ export default function CoachWeeklyReview(){
     </select></label>
    {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · Introductory week · No verified history</div>}
    {!activeRow&&<button type="button" disabled={!introAthlete||Boolean(busy)} onClick={()=>void prepareIntro(false)}>Preview workouts (optional)</button>}
-   {introAthlete&&<button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700}} disabled={Boolean(busy)} onClick={()=>void approveAndPublishIntro()}>{busy==='intro-publish'?'Approving and publishing…':'Approve & Publish first week'}</button>}
+   {introAthlete&&(publishedAthletes.includes(introAthlete)?<p role="status" style={{color:'#a5e6cc',fontWeight:700}}>Week published · Training is on the athlete calendar</p>:<button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700}} disabled={Boolean(busy)} onClick={()=>void approveAndPublishIntro()}>{busy==='intro-publish'?'Approving and publishing…':'Approve & Publish first week'}</button>)}
    {introPreview&&!activeRow&&<>
     <div><strong>{introPreview.session_count} sessions · {introPreview.total_minutes} min</strong><p style={{fontSize:12,color:'#b6ccdc'}}>Easy RPE training, no assumed FTP or historical fitness. Not yet on the athlete calendar.</p></div>
     <details><summary>View proposed workouts</summary>{sessionList(introPreview.sessions||[])}</details>
