@@ -95,28 +95,61 @@ export default function CoachWeeklyReview(){
   finally{setBusy('')}
  }
  async function prepareIntro(save:boolean){setBusy('intro');setError('');setIntroMessage('');try{if(!introAthlete)throw new Error('Choose an athlete');const {data,error}=await supabase.rpc('coach_prepare_no_history_week',{p_athlete_id:introAthlete,p_save:save});if(error)throw error;if(!data||(!save&&data.status!=='preview_only')||(save&&!['draft_created','already_drafted'].includes(data.status)))throw new Error('Unable to prepare an introductory week');if(save){setIntroMessage('Draft saved for coach review. Calendar unchanged.');setIntroPreview(null);setReload(x=>x+1);}else{setIntroPreview(data);setIntroMessage('Read-only preview: no calendar changes.');}}catch(e){setError(e instanceof Error?e.message:'Introductory draft failed');}finally{setBusy('');}}
+ const activeRow=rows.find(row=>row.athlete_id===introAthlete && row.phase==='foundation_no_history');
+ const otherRows=rows.filter(row=>row.id!==activeRow?.id);
+ const selectedName=introAthletes.find(a=>a.id===introAthlete)?.name||'Athlete';
+ const total=(row:Row)=>Array.isArray(row.sessions)?row.sessions.reduce((n:number,x:any)=>n+(Number(x?.session?.durationMin)||0),0):0;
+ const sessionList=(sessions:any[])=>sessions.map((item:any,i:number)=>{
+  const x=item.session||item;
+  return <details key={i} style={{padding:'10px 0',borderBottom:'1px solid #284b62'}}>
+    <summary style={{cursor:'pointer',fontSize:14}}><strong>{String(x.title||'Workout')}</strong> <span style={{color:'#9bbbd0'}}>{Number(x.durationMin||0)} min · {String(x.sport||'').toUpperCase()}</span></summary>
+    <p style={{fontSize:13,color:'#c8dce9',lineHeight:1.5}}>{String(x.rationale||'Controlled introductory session')}</p>
+    <div style={{fontSize:12,color:'#b7d0df'}}>{Array.isArray(x.prescription?.steps)?x.prescription.steps.map((s:any,j:number)=><p key={j} style={{margin:'5px 0'}}>{s.durationMin} min · {s.target}</p>):null}</div>
+  </details>;
+ });
  return <section className="coach-attention-v2" aria-label="Weekly plan reviews">
-  <CoachWorkoutLibrary/>
-  <CoachWeekReconciliationPreview/>
-  <header className="coach-attention-heading"><div><h3>Weekly plan review</h3><p>Review saved drafts before publication. Decisions do not automatically schedule training.</p></div><button type="button" disabled={loading||Boolean(busy)} onClick={()=>setReload(x=>x+1)}>↻ Refresh</button></header>
-  <div className="coach-attention-row" style={{display:'grid',gap:10,padding:16}}>
-   <strong>Introductory week · No recorded history</strong>
-   <p>Prepare a conservative RPE-based week from athlete onboarding. A device is not required. Coach approval is mandatory before calendar publication.</p>
-   <label>Assigned athlete <select value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);}}><option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
-   <div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type="button" disabled={!introAthlete||Boolean(busy)} onClick={()=>void prepareIntro(false)}>Preview introductory week</button>
-   {introPreview&&<button type="button" disabled={Boolean(busy)} onClick={()=>void prepareIntro(true)}>Save draft for review</button>}</div>
-   {introMessage&&<p role="status">{introMessage}</p>}
-   {introPreview&&<details open><summary>{introPreview.session_count} proposed sessions · {introPreview.total_minutes} minutes</summary>{(introPreview.sessions||[]).map((x:any,i:number)=><p key={i}><strong>{x.date} · {x.session.title} ({x.session.durationMin} min)</strong><span style={{display:'block'}}>{x.session.rationale}</span></p>)}</details>}
+  <header className="coach-attention-heading"><div><h3>Prepare training week</h3><p>Select an athlete, review their first week, then approve and publish.</p></div>
+   <button type="button" disabled={loading||Boolean(busy)} onClick={()=>setReload(x=>x+1)}>Refresh</button></header>
+  {error&&<p role="alert" style={{color:'#ffc7a6'}}>{error}</p>}
+  <div style={{padding:16,borderRadius:18,background:'#102b42',border:'1px solid #31566e',display:'grid',gap:12,color:'#ecf6ff'}}>
+   <label style={{fontSize:13,fontWeight:700}}>Athlete
+    <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setIntroMessage('');}}>
+     <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
+    </select></label>
+   {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · Introductory week · No verified history</div>}
+   {!activeRow&&<button type="button" disabled={!introAthlete||Boolean(busy)} onClick={()=>void prepareIntro(false)}>{busy==='intro'?'Preparing…':'Preview first week'}</button>}
+   {introPreview&&!activeRow&&<>
+    <div><strong>{introPreview.session_count} sessions · {introPreview.total_minutes} min</strong><p style={{fontSize:12,color:'#b6ccdc'}}>Easy RPE training, no assumed FTP or historical fitness. Not yet on the athlete calendar.</p></div>
+    <details><summary>View proposed workouts</summary>{sessionList(introPreview.sessions||[])}</details>
+    <button type="button" disabled={Boolean(busy)} onClick={()=>void prepareIntro(true)}>Save week for approval</button>
+   </>}
+   {activeRow&&<>
+    <div style={{display:'flex',justifyContent:'space-between',gap:8,alignItems:'center'}}>
+      <strong>{Array.isArray(activeRow.sessions)?activeRow.sessions.length:0} sessions · {total(activeRow)} min</strong>
+      <span style={{fontSize:12,color:activeRow.decision==='approved'?'#79dcbf':'#f8d27a'}}>{activeRow.decision==='approved'?'Approved':activeRow.decision==='rejected'?'Rejected':'Awaiting approval'}</span>
+    </div>
+    <details><summary>View workout details</summary>{sessionList(Array.isArray(activeRow.sessions)?activeRow.sessions:[])}</details>
+    {activeRow.decision!=='approved'&&<label style={{fontSize:13}}>Coach notes
+      <textarea rows={2} style={{width:'100%',boxSizing:'border-box',marginTop:6,padding:10,borderRadius:10,background:'#173c55',color:'white'}} value={note} onChange={e=>setNote(e.target.value)} placeholder="Why is this starting volume appropriate?"/>
+    </label>}
+    {activeRow.decision!=='approved'&&<button type="button" disabled={Boolean(busy)||note.trim().length<15||activeRow.decision==='rejected'} onClick={()=>void decide(activeRow,'approved')}>Approve training week</button>}
+    {activeRow.decision==='approved'&&<button type="button" disabled={Boolean(busy)||readiness(activeRow).length>0} onClick={()=>void publish(activeRow,'full')}>Publish to athlete calendar</button>}
+    <details><summary>Other decisions</summary><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(activeRow,activeRow.decision==='approved'?'rejected':'rejected')}>{activeRow.decision==='approved'?'Revoke approval':'Reject week'}</button></details>
+   </>}
+   {introMessage&&<p role="status" style={{fontSize:13,color:'#b8e9d8'}}>{introMessage}</p>}
   </div>
-  {error&&<p role="alert">{error}</p>}
-  {loading?<p>Loading approved-coach draft records…</p>:rows.length===0?<p>No saved weekly proposals are ready for coach review. The automatic proposal service is not connected yet.</p>:<>
-   <label className="coach-attention-heading">Coach review rationale (at least 15 characters for introductory weeks)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Reason or coach observations" maxLength={500}/></label>
-   {rows.map(row=><article key={row.id} className="coach-attention-row"><div><strong>{row.athleteName} · Week of {row.week_start}</strong><p>Revision {row.revision} · {row.phase} · {row.decision}</p><p>{row.phase==='foundation_no_history'?'No recorded history · proposed introductory week':row.baselineValidated?`Approved baseline: ${row.approvedWeeklyHours} h/week`:'Historical baseline approval required'}</p><p>{readiness(row).length?`Publication blocked: ${readiness(row).join('; ')}`:'Coach-approved draft · publication requires protected server workflow and calendar readback'}</p>
-    <details><summary>Inspect proposed sessions</summary>
-    {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item?.session?.prescription??item?.prescription??{},null,2)}</pre></div>):<p>Draft contains no sessions.</p>}
-    </details></div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
-    {row.decision==='approved'&&<><button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'full')}>Publish complete week</button><button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'additive')}>Publish approved additions</button></>}
-    {row.decision==='approved'&&<button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Revoke approval</button>}</div></article>)}
-  </>}
+  <details style={{marginTop:16,padding:12,border:'1px solid #304d63',borderRadius:12}}>
+   <summary>Advanced coaching tools and other reviews</summary>
+   <div style={{marginTop:12,display:'grid',gap:12}}>
+    <CoachWorkoutLibrary/>
+    <CoachWeekReconciliationPreview/>
+    {otherRows.map(row=><div key={row.id} style={{padding:12,border:'1px solid #304d63',borderRadius:10}}>
+      <strong>{row.athleteName} · {row.week_start}</strong><p style={{fontSize:12}}>{row.phase} · {row.decision}</p>
+      <details><summary>Workouts and checks</summary>{sessionList(Array.isArray(row.sessions)?row.sessions:[])}<p>{readiness(row).join('; ')||'Ready for publication'}</p></details>
+      {row.decision==='pending'&&<button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve after review</button>}
+      {row.decision==='approved'&&<button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'full')}>Publish approved week</button>}
+    </div>)}
+   </div>
+  </details>
  </section>;
 }
