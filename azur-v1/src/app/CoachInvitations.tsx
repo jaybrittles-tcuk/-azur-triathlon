@@ -44,7 +44,7 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
  }
  async function copyInstructions(inv:Invitation){
   const link=window.location.origin+'/?join=1&invitation='+encodeURIComponent(inv.id);
-  const msg = `You're invited to AZUR Triathlon Coaching!\n\nYour coach has invited ${inv.invitee_email} to test AZUR beta. Register or sign in with this email, verify it, and accept your invitation before onboarding.\n\nOpen your invitation: ${link}\n\nIn beta, AZUR can help you set race goals, enter training availability and thresholds, view a structured swim/bike/run plan, and give feedback. Training recommendations and integrations are still being tested; some imports, adaptive adjustments and calendar connections may not work reliably. Review sessions with your coach and report anything unexpected.\n\nPlease do not rely on AZUR alone for medical or safety decisions.`;
+  const msg = `You're invited to AZUR Triathlon Coaching!\n\nYour coach has invited ${inv.invitee_email} to test AZUR beta. Register or sign in with this email, verify it, and AZUR will securely connect you to your coach before onboarding.\n\nOpen your invitation: ${link}\n\nIn beta, AZUR can help you set race goals, enter training availability and thresholds, view a structured swim/bike/run plan, and give feedback. Training recommendations and integrations are still being tested; some imports, adaptive adjustments and calendar connections may not work reliably. Review sessions with your coach and report anything unexpected.\n\nPlease do not rely on AZUR alone for medical or safety decisions.`;
   try{await navigator.clipboard.writeText(msg);setMessage('Invitation instructions copied. Sharing them does not create an account or activate public registration.');}
   catch{setMessage('Copy unavailable. Share the onboarding URL and invited email address manually.');}
  }
@@ -70,6 +70,6 @@ export default function CoachInvitations({mode}:{mode:'coach'|'athlete'}){
    {mode==='coach'&&!inv.accepted_at&&<button type="button" onClick={()=>void copyInstructions(inv)}>Copy instructions</button>}
    {mode==='athlete'&&!inv.accepted_at&&new Date(inv.expires_at).getTime()>Date.now()&&<button disabled={busy} onClick={()=>void accept(inv)}>Accept</button>}
   </div>)}</div>}
-  {mode==='coach'&&<p className="azur-invite-note">Enter an athlete email to create and send the invitation in one step. If sending fails, retry Send email on the existing invitation. Athlete acceptance is required before onboarding.</p>}
+  {mode==='coach'&&<p className="azur-invite-note">Enter an athlete email to create and send the invitation in one step. If email delivery is not configured, use Copy instructions on the existing invitation. Athletes only need the invitation link and verified email; no separate acceptance button is required.</p>}
  </section>;
 }
