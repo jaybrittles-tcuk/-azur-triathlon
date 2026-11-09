@@ -33,6 +33,14 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
   const result=await supabase.from('athlete_onboarding').select('weekly_hours,recent_weekly_hours,training_background,training_consistency,race_distance,race_date,swim_css_seconds_per_100m,ftp_watts,run_threshold_seconds_per_km').eq('user_id',data.user.id).maybeSingle();
   if(active){setStrategy(result.data);setStrategyError(!!result.error);setStrategyLoading(false);}
  }).catch(()=>{if(active){setStrategyError(true);setStrategyLoading(false);}});return()=>{active=false;};},[]);
+ useEffect(()=>{let active=true;(async()=>{try{
+  const {data:{session}}=await supabase.auth.getSession();
+  if(!session?.access_token)return;
+  const response=await fetch('/api/intervals/activity-preview?days=90&mode=history',{headers:{Authorization:'Bearer '+session.access_token}});
+  if(!response.ok)return;
+  const data=await response.json(),summary=data.historySummary;
+  if(active&&summary?.readOnly===true&&Number.isFinite(summary.activityCount))setVerifiedHistory({count:summary.activityCount,recent:summary.recentFourWeekHours,previous:summary.previousFourWeekHours,swim:summary.sports?.swim?.count??0,bike:summary.sports?.bike?.count??0,run:summary.sports?.run?.count??0});
+ }catch{/* Keep self-reported values clearly labelled when history is unavailable. */}})();return()=>{active=false;};},[]);
  const pace=(seconds:number|null|undefined)=>seconds&&seconds>0?Math.floor(seconds/60)+':'+String(Math.round(seconds%60)).padStart(2,'0'):null;
  const day=new Date(today+'T12:00:00');const monday=new Date(day);monday.setDate(day.getDate()-(day.getDay()+6)%7);
  const dateKey=(d:Date)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -66,6 +74,12 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
        ['Race date',strategy.race_date?new Date(strategy.race_date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set']
       ].map(([label,value])=><div key={label} style={{background:'#16394f',borderRadius:12,padding:11,minWidth:0}}><small style={{display:'block',color:'#9cbcd0'}}>{label}</small><strong style={{display:'block',marginTop:5,overflowWrap:'anywhere'}}>{value}</strong></div>)}
      </div>
+     {verifiedHistory&&<div style={{marginTop:12,padding:'12px 13px',border:'1px solid #2d6074',borderRadius:12,background:'#14384b'}}>
+      <small style={{display:'block',color:'#85d6ec',fontWeight:700,letterSpacing:'.04em'}}>CONNECTED TRAINING HISTORY · 90 DAYS</small>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:8,marginTop:6}}><strong style={{fontSize:20}}>{verifiedHistory.recent.toFixed(1)} h / 4 weeks</strong><small style={{color:'#bdd7e4'}}>Last 28 days</small></div>
+      <small style={{display:'block',marginTop:5,color:'#b8d0df'}}>{verifiedHistory.count} activities · {verifiedHistory.swim} swims · {verifiedHistory.bike} rides · {verifiedHistory.run} runs</small>
+      <small style={{display:'block',marginTop:6,color:'#b8d0df'}}>Previous 28 days: {verifiedHistory.previous.toFixed(1)} h. Imported baseline pending validation; coaching changes require approval.</small>
+     </div>}
      {strategy.training_consistency==='under4'&&strategy.recent_weekly_hours!=null&&strategy.recent_weekly_hours>=8&&<details style={{border:'1px solid #315c72',borderRadius:12,padding:12,marginTop:12,background:'#133348'}}>
       <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>Training baseline · review recent hours</summary>
       <p style={{color:'#c7deea',fontSize:13,lineHeight:1.5}}>Your reported volume has not yet been verified against imported training history. Enter the average you actually completed over the last 2–3 weeks. Historical peak volume is not your starting load. A coach must approve changes; this preview does not publish a plan.</p>
