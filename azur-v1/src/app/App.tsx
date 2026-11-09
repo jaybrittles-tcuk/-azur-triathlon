@@ -1199,6 +1199,10 @@ export function App() {
   const [intervalsHistoryMode, setIntervalsHistoryMode] = useState(false);
   const [historySaveBusy,setHistorySaveBusy]=useState(false);
   const [historySaveMessage,setHistorySaveMessage]=useState('');
+  const [autoHistoryStatus, setAutoHistoryStatus] = useState<'idle'|'running'|'saved'|'error'>('idle');
+  const [autoHistoryDetail, setAutoHistoryDetail] = useState('');
+  const [autoHistoryRetry, setAutoHistoryRetry] = useState(0);
+  const autoHistoryInFlight = useRef(false);
   const [rideAction, setRideAction] = useState<string | null>(null);
   const [rideMessage, setRideMessage] = useState('');
   const [rideInbox, setRideInbox] = useState<Array<{id:string;source_activity_id:string;start_time:string;duration_sec:number;status:string}>>([]);
@@ -1929,6 +1933,55 @@ if (session?.user) {
     subscription.unsubscribe();
   };
 }, []);
+  // Intervals OAuth returns to /?intervals=connected. Finish the historical
+  // assessment automatically rather than requiring an athlete to find a button.
+  // This does NOT create completed activities, training load or workouts.
+  useEffect(() => {
+    if (!authReady || !isAuthenticated || autoHistoryInFlight.current) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('intervals') !== 'connected') return;
+    autoHistoryInFlight.current = true;
+    let active = true;
+    const run = async () => {
+      setAutoHistoryStatus('running');
+      setAutoHistoryDetail('Analysing up to 90 days of connected training history…');
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) throw new Error('Please sign in to finish training-history setup.');
+        const response = await fetch('/api/intervals/activity-preview?days=90&mode=history', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          cache: 'no-store',
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result?.error ?? 'Training-history analysis failed.');
+        if (!result?.historySummary || !result?.dateRange?.oldest || !result?.dateRange?.newest)
+          throw new Error('Intervals did not return a complete training-history summary.');
+        const summary = { ...result.historySummary, source: 'intervals.icu', readOnly: true };
+        const { data: saved, error } = await supabase.rpc('save_history_baseline_preview', {
+          p_summary: summary,
+          p_window_start: result.dateRange.oldest,
+          p_window_end: result.dateRange.newest,
+        });
+        if (error) throw error;
+        if (saved?.saved !== true) throw new Error('AZUR could not confirm the baseline was saved.');
+        if (!active) return;
+        setAutoHistoryStatus('saved');
+        setAutoHistoryDetail(`${summary.activityCount} valid sessions analysed. Your training baseline is ready for coach review; no training load or calendar workouts were changed.`);
+        url.searchParams.delete('intervals');
+        window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+      } catch (error) {
+        if (active) {
+          setAutoHistoryStatus('error');
+          setAutoHistoryDetail(error instanceof Error ? error.message : 'Automatic history import needs attention.');
+        }
+      } finally {
+        autoHistoryInFlight.current = false;
+      }
+    };
+    void run();
+    return () => { active = false; };
+  }, [authReady, isAuthenticated, autoHistoryRetry]);
+
   const selected =
     weekSessions.find((session) => session.id === selectedId) ||
     weekSessions[0];
@@ -10135,6 +10188,13 @@ async function handleProfileSave() {
     }
   }
 `}</style>
+      {autoHistoryStatus !== 'idle' && (
+        <section role="status" aria-live="polite" style={{padding:'15px 18px',background:'#102a43',color:'#eaf5ff',borderBottom:'1px solid #295276'}}>
+          <strong>{autoHistoryStatus === 'running' ? 'Connecting your training history' : autoHistoryStatus === 'saved' ? 'Training history ready' : 'Training history needs attention'}</strong>
+          <p style={{margin:'6px 0 0',color:'#c3d9ed'}}>{autoHistoryDetail}</p>
+          {autoHistoryStatus === 'error' && <button type="button" onClick={() => setAutoHistoryRetry(value => value + 1)} style={{marginTop:10,padding:'9px 14px',borderRadius:10,background:'#168DCE',color:'#fff',border:0}}>Retry history analysis</button>}
+        </section>
+      )}
       <aside className="sidebar">
         <div className="brand-block">
           <img
