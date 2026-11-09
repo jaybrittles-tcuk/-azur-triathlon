@@ -37,9 +37,35 @@ export function createActivityPreviewHandler(fetcher: typeof fetch = globalThis.
  const plannedResponse=await fetcher(url+'/rest/v1/planned_session?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&planned_date=gte.'+oldest+'&planned_date=lte.'+newest+'&select=id,sport,title,planned_date,duration_min,status,is_active_version&limit=500',{headers});
  if(!plannedResponse.ok)return res.status(502).json({error:'Could not review planned sessions'});
  const plans=await plannedResponse.json();
+ const sportFor=(a:any)=>/swim/i.test(String(a.type))?'swim':/run|treadmill/i.test(String(a.type))?'run':'bike';
+ const historySummary=historyMode?(()=>{
+  const accepted=rides.filter((a:any)=>Number.isFinite(Number(a.moving_time??a.elapsed_time))&&Number(a.moving_time??a.elapsed_time)>0&&Number.isFinite(Date.parse(a.start_date??a.start_date_local??'')));
+  const weeks:Record<string,{week:string;swim:number;bike:number;run:number;total:number}>={};
+  const sports={swim:{count:0,minutes:0,distanceKm:0,longestMinutes:0},bike:{count:0,minutes:0,distanceKm:0,longestMinutes:0},run:{count:0,minutes:0,distanceKm:0,longestMinutes:0}};
+  let recentMinutes=0,previousMinutes=0;
+  const now=Date.now();
+  for(const a of accepted){
+   const sport=sportFor(a) as 'swim'|'bike'|'run';
+   const minutes=Number(a.moving_time??a.elapsed_time)/60;
+   const distance=Number(a.distance);
+   const date=new Date(a.start_date??a.start_date_local);
+   const monday=new Date(Date.UTC(date.getUTCFullYear(),date.getUTCMonth(),date.getUTCDate()));
+   monday.setUTCDate(monday.getUTCDate()-(monday.getUTCDay()+6)%7);
+   const week=monday.toISOString().slice(0,10);
+   const row=weeks[week]??={week,swim:0,bike:0,run:0,total:0};
+   row[sport]+=minutes;row.total+=minutes;
+   sports[sport].count++;sports[sport].minutes+=minutes;
+   if(Number.isFinite(distance)&&distance>=0)sports[sport].distanceKm+=distance/1000;
+   sports[sport].longestMinutes=Math.max(sports[sport].longestMinutes,minutes);
+   const age=now-date.getTime();
+   if(age>=0&&age<28*86400000)recentMinutes+=minutes;
+   else if(age>=28*86400000&&age<56*86400000)previousMinutes+=minutes;
+  }
+  return {activityCount:accepted.length,excludedCount:rides.length-accepted.length,sports,weekly:Object.values(weeks).sort((a,b)=>a.week.localeCompare(b.week)),recentFourWeekHours:Math.round(recentMinutes/60*10)/10,previousFourWeekHours:Math.round(previousMinutes/60*10)/10,source:'intervals.icu',readOnly:true};
+ })():undefined;
  const assess=(a:any)=>reviewIntervalsActivity(a,existing,plans);
  res.setHeader('Cache-Control','private, no-store');
- return res.status(200).json({mode:historyMode?'history_preview_only':'preview_only',stagingEnabled:process.env.INTERVALS_STAGING_ENABLED==='true',acceptanceEnabled:process.env.INTERVALS_ACCEPTANCE_ENABLED==='true',loadValidationEnabled:process.env.INTERVALS_LOAD_VALIDATION_ENABLED==='true',dateRange:{oldest,newest},upstreamCount:historyMode?entries.length:undefined,upstreamTypes,activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,sport:/swim/i.test(String(a.type))?'swim':/run|treadmill/i.test(String(a.type))?'run':'bike',name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
+ return res.status(200).json({mode:historyMode?'history_preview_only':'preview_only',stagingEnabled:process.env.INTERVALS_STAGING_ENABLED==='true',acceptanceEnabled:process.env.INTERVALS_ACCEPTANCE_ENABLED==='true',loadValidationEnabled:process.env.INTERVALS_LOAD_VALIDATION_ENABLED==='true',dateRange:{oldest,newest},upstreamCount:historyMode?entries.length:undefined,upstreamTypes,historySummary,activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,sport:/swim/i.test(String(a.type))?'swim':/run|treadmill/i.test(String(a.type))?'run':'bike',name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
 }
 }
 export default async function handler(req:any,res:any) {
