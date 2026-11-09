@@ -74,12 +74,16 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
        ['Race date',strategy.race_date?new Date(strategy.race_date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set']
       ].map(([label,value])=><div key={label} style={{background:'#16394f',borderRadius:12,padding:11,minWidth:0}}><small style={{display:'block',color:'#9cbcd0'}}>{label}</small><strong style={{display:'block',marginTop:5,overflowWrap:'anywhere'}}>{value}</strong></div>)}
      </div>
-     {verifiedHistory&&<div style={{marginTop:12,padding:'12px 13px',border:'1px solid #2d6074',borderRadius:12,background:'#14384b'}}>
-      <small style={{display:'block',color:'#85d6ec',fontWeight:700,letterSpacing:'.04em'}}>CONNECTED TRAINING HISTORY · 90 DAYS</small>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:8,marginTop:6}}><strong style={{fontSize:20}}>{verifiedHistory.recent.toFixed(1)} h / 4 weeks</strong><small style={{color:'#bdd7e4'}}>Last 28 days</small></div>
-      <small style={{display:'block',marginTop:5,color:'#b8d0df'}}>{verifiedHistory.count} activities · {verifiedHistory.swim} swims · {verifiedHistory.bike} rides · {verifiedHistory.run} runs</small>
-      <small style={{display:'block',marginTop:6,color:'#b8d0df'}}>Previous 28 days: {verifiedHistory.previous.toFixed(1)} h. Imported baseline pending validation; coaching changes require approval.</small>
-     </div>}
+     {verifiedHistory&&<section aria-label="Connected training evidence" style={{marginTop:12,padding:'12px 13px',border:'1px solid #2d6074',borderRadius:12,background:'#14384b'}}>
+      <small style={{display:'block',color:'#85d6ec',fontWeight:700,letterSpacing:'.04em'}}>CONNECTED TRAINING EVIDENCE · 90 DAYS</small>
+      <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',gap:10,marginTop:8}}>
+       <div><strong style={{fontSize:22}}>{(verifiedHistory.recent/4).toFixed(1)} h/week</strong><small style={{display:'block',color:'#b8d0df'}}>Average · last 28 days</small></div>
+       <div style={{textAlign:'right'}}><strong style={{fontSize:16}}>{(verifiedHistory.previous/4).toFixed(1)} h/week</strong><small style={{display:'block',color:'#b8d0df'}}>Prior 28 days</small></div>
+      </div>
+      <p style={{fontSize:13,lineHeight:1.5,color:'#d3e8f0',margin:'10px 0 5px'}}>{verifiedHistory.recent>verifiedHistory.previous*1.15?'Recorded volume is higher than the preceding four weeks. Review recovery and session distribution before progressing.':verifiedHistory.previous>0&&verifiedHistory.recent<verifiedHistory.previous*.85?'Recorded volume is below the preceding four weeks. Use recent consistency, not historical peak volume, when reviewing the next training block.':'Recorded volume is broadly similar to the preceding four weeks, subject to activity coverage.'}</p>
+      <small style={{display:'block',color:'#b8d0df'}}>{verifiedHistory.count} activities in preview · {verifiedHistory.swim} swims · {verifiedHistory.bike} rides · {verifiedHistory.run} runs</small>
+      <details style={{marginTop:9,color:'#d4e9f2'}}><summary style={{cursor:'pointer',fontSize:13,fontWeight:600}}>How AZUR interprets this</summary><p style={{fontSize:13,lineHeight:1.5}}>This is an observed activity average, not an approved starting training load. Missing sessions, duplicate uploads and activity quality still need validation. Coach approval is required before changing the plan.</p></details>
+     </section>}
      {strategy.training_consistency==='under4'&&strategy.recent_weekly_hours!=null&&strategy.recent_weekly_hours>=8&&<details style={{border:'1px solid #315c72',borderRadius:12,padding:12,marginTop:12,background:'#133348'}}>
       <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>Training baseline · review recent hours</summary>
       <p style={{color:'#c7deea',fontSize:13,lineHeight:1.5}}>Your reported volume has not yet been verified against imported training history. Enter the average you actually completed over the last 2–3 weeks. Historical peak volume is not your starting load. A coach must approve changes; this preview does not publish a plan.</p>
