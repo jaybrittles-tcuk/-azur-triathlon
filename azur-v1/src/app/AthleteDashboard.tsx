@@ -73,7 +73,6 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
       {[
        ['Race goal',strategy.race_distance?.toUpperCase()||race.name||'Not set'],
        ['Available / week',strategy.weekly_hours!=null?strategy.weekly_hours+' hrs':'Not set'],
-       ['Reported recent / week',strategy.recent_weekly_hours!=null?strategy.recent_weekly_hours+' hrs':'Not reported'],
        ['Race date',strategy.race_date?new Date(strategy.race_date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'Not set']
       ].map(([label,value])=><div key={label} style={{background:'#16394f',borderRadius:12,padding:11,minWidth:0}}><small style={{display:'block',color:'#9cbcd0'}}>{label}</small><strong style={{display:'block',marginTop:5,overflowWrap:'anywhere'}}>{value}</strong></div>)}
      </div>
@@ -90,10 +89,9 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
        {verifiedHistory&&<p style={{fontSize:13,color:'#bfd6e3'}}>90-day preview: {verifiedHistory.count} activities · {verifiedHistory.swim} swims · {verifiedHistory.bike} rides · {verifiedHistory.run} runs · {verifiedHistory.excluded} excluded</p>}
        <p style={{fontSize:13,lineHeight:1.5,color:'#bfd6e3'}}>These values are descriptive evidence, not training targets. Source coverage and duplicates still require review. Coach approval is required before changing the plan.</p>
       </details>
-     </section>}
-     {strategy.training_consistency==='under4'&&strategy.recent_weekly_hours!=null&&strategy.recent_weekly_hours>=8&&<details style={{border:'1px solid #315c72',borderRadius:12,padding:12,marginTop:12,background:'#133348'}}>
-      <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>Training baseline · review recent hours</summary>
-      <p style={{color:'#c7deea',fontSize:13,lineHeight:1.5}}>Your reported volume has not yet been verified against imported training history. Enter the average you actually completed over the last 2–3 weeks. Historical peak volume is not your starting load. A coach must approve changes; this preview does not publish a plan.</p>
+      {strategy.training_consistency==='under4'&&strategy.recent_weekly_hours!=null&&strategy.recent_weekly_hours>=8&&<details style={{border:'1px solid #315c72',borderRadius:12,padding:12,marginTop:12,background:'#133348'}}>
+      <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>Review onboarding estimate & preview week</summary>
+      <p style={{color:'#c7deea',fontSize:13,lineHeight:1.5}}>Onboarding estimate: {strategy.recent_weekly_hours} h/week. This is self-reported, not a validated starting load. Enter the actual average from the last 2–3 weeks to preview a coach-reviewed week; nothing will be published.</p>
       <label htmlFor="return-actual-hours" style={{display:'block',color:'#c7deea',fontSize:12,marginBottom:5}}>Recent actual hours per week</label>
       <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
        <input id="return-actual-hours" type="number" min="3" max="25" step="0.5" value={returnHours} onChange={e=>{setReturnHours(e.target.value);setReturnPreview(null);}} style={{width:85,padding:9,borderRadius:8,border:'1px solid #57869b',background:'#0b2538',color:'#fff'}}/>
@@ -107,6 +105,7 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
        {returnPreview.sample_minutes!=null&&<p style={{color:'#e6f5fc'}}>Sample: {minutes(returnPreview.sample_minutes)} · target: {minutes(returnPreview.target_minutes)}</p>}
       </div>}
      </details>}
+     </section>}
      <details style={{border:'1px solid #315c72',borderRadius:12,padding:12,marginTop:12,background:'#133348'}}>
       <summary style={{cursor:'pointer',fontWeight:700,color:'#e9f7ff'}}>This week's coaching signals <small style={{color:'#82cde8',fontWeight:500}}>· live calendar</small></summary>
       <div style={{display:'grid',gap:10,marginTop:12,lineHeight:1.5}}>
