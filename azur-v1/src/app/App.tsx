@@ -1,6 +1,7 @@
 import BenchmarkHistory from './BenchmarkHistory';
 import BenchmarkTrainingZones from './BenchmarkTrainingZones';
 import AthleteDashboard from './AthleteDashboard';
+import CoachHistoryReview from './CoachHistoryReview';
 import CoachInvitations from './CoachInvitations';
 import AcceptCoachInvitation from './AcceptCoachInvitation';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
@@ -10368,6 +10369,7 @@ style={
     <div className="azur-coach-kpis"><div><small>COACH WORKSPACE</small><strong>Squad overview</strong><span>Connected athletes and training priorities</span></div><button type="button" onClick={()=>setCoachWorkspace('invitations')}>+ Invite athlete</button></div>
     <CoachAthleteRoster onSelect={setCoachSelectedAthlete} selectedAthleteId={coachSelectedAthlete?.id ?? null}/>
     {coachSelectedAthlete&&<CoachAthletePerformance athlete={coachSelectedAthlete}/>}
+    {coachSelectedAthlete&&<CoachHistoryReview athleteId={coachSelectedAthlete.id}/>}
     <div className="azur-coach-shortcuts">
       <button type="button" onClick={()=>setCoachWorkspace('monitoring')}>Training monitoring <span>View signals →</span></button>
       <button type="button" onClick={()=>setCoachWorkspace('library')}>Cycling session review <span>Open library →</span></button>
