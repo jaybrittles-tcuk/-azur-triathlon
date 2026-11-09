@@ -160,7 +160,11 @@ export default function CoachWeeklyReview(){
   return <details key={i} style={{padding:'10px 0',borderBottom:'1px solid #284b62'}}>
     <summary style={{cursor:'pointer',fontSize:14}}><strong>{String(x.title||'Workout')}</strong> <span style={{color:'#9bbbd0'}}>{Number(x.durationMin||0)} min · {String(x.sport||'').toUpperCase()}</span></summary>
     <p style={{fontSize:13,color:'#c8dce9',lineHeight:1.5}}>{String(x.rationale||'Controlled introductory session')}</p>
-    <div style={{fontSize:12,color:'#b7d0df'}}>{Array.isArray(x.prescription?.steps)?x.prescription.steps.map((s:any,j:number)=><p key={j} style={{margin:'5px 0'}}>{s.durationMin} min · {s.target}</p>):null}</div>
+    <div style={{fontSize:12,color:'#b7d0df'}}>{Array.isArray(x.prescription?.steps)?x.prescription.steps.map((s:any,j:number)=><p key={j} style={{margin:'5px 0'}}>{s.durationMin} min · {s.target}</p>):null}
+      {Array.isArray(x.prescription?.poolSegments)&&x.prescription.poolSegments.length>0&&<details><summary>Swim sets · {x.prescription.totalDistanceMeters} m</summary>
+       {x.prescription.poolSegments.map((s:any,j:number)=><p key={j}>{s.repeats} × {s.distanceMeters}m · {s.target} · {s.restSeconds}s rest</p>)}
+      </details>}
+    </div>
   </details>;
  });
  return <section className="coach-attention-v2" aria-label="Weekly plan reviews">
@@ -180,7 +184,7 @@ export default function CoachWeeklyReview(){
     <details><summary>View proposed workouts</summary>{sessionList(introPreview.sessions||[])}</details>
 
    </>}
-   {activeRow&&<>
+   {activeRow&&!publishedAthletes.includes(introAthlete)&&<>
     <div style={{display:'flex',justifyContent:'space-between',gap:8,alignItems:'center'}}>
       <strong>{Array.isArray(activeRow.sessions)?activeRow.sessions.length:0} sessions · {total(activeRow)} min</strong>
       <span style={{fontSize:12,color:activeRow.decision==='approved'?'#79dcbf':'#f8d27a'}}>{activeRow.decision==='approved'?'Approved':activeRow.decision==='rejected'?'Rejected':'Awaiting approval'}</span>
