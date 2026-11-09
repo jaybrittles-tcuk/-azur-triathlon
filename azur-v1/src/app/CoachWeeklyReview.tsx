@@ -9,7 +9,8 @@ function readiness(row:Row){
  const sessions=Array.isArray(row.sessions)?row.sessions:[];
  const problems:string[]=[];
  if(row.decision!=='approved')problems.push('Latest coach approval required');
- if(!row.baselineValidated||!row.approvedWeeklyHours)problems.push('Validated coach-approved historical baseline required');
+ if(row.phase!=='foundation_no_history'&&(!row.baselineValidated||!row.approvedWeeklyHours))problems.push('Validated coach-approved historical baseline required');
+ if(row.phase==='foundation_no_history'&&sessions.reduce((n:number,x:any)=>n+(Number(x?.session?.durationMin)||0),0)>240)problems.push('Introductory limit exceeded');
  const totalMinutes=sessions.reduce((sum:number,item:any)=>sum+(Number(item?.session?.durationMin)||0),0);
  if(row.approvedWeeklyHours&&totalMinutes>row.approvedWeeklyHours*60+5)problems.push('Draft exceeds coach-approved weekly hours');
  if(!sessions.length)problems.push('No proposed sessions');
@@ -23,6 +24,10 @@ export default function CoachWeeklyReview(){
  const [busy,setBusy]=useState('');
  const [note,setNote]=useState('');
  const [reload,setReload]=useState(0);
+ const [introAthletes,setIntroAthletes]=useState<{id:string;name:string}[]>([]);
+ const [introAthlete,setIntroAthlete]=useState('');
+ const [introPreview,setIntroPreview]=useState<any>(null);
+ const [introMessage,setIntroMessage]=useState('');
  useEffect(()=>{let live=true;(async()=>{
   setLoading(true);setError('');
   try{
@@ -47,6 +52,7 @@ export default function CoachWeeklyReview(){
    const names=new Map((profiles.data??[]).map(p=>[p.id,p.display_name||'Assigned athlete']));
    const approved=new Map((baselines.data??[]).map(x=>[x.athlete_id,x]));
    const statuses=new Map((history.data??[]).map(x=>[x.athlete_id,x.validation_status]));
+   if(live){const candidates=(profiles.data??[]).filter(p=>!statuses.has(p.id)).map(p=>({id:p.id,name:p.display_name||'Assigned athlete'}));setIntroAthletes(candidates);setIntroAthlete(old=>candidates.some(a=>a.id===old)?old:(candidates[0]?.id||''));}
    const latest=new Map<string,Draft>();
    for(const d of all){const key=d.athlete_id+':'+d.week_start;const previous=latest.get(key);if(!previous||d.revision>previous.revision)latest.set(key,d);}
    if(live)setRows([...latest.values()].map(d=>({...d,athleteName:names.get(d.athlete_id)||'Assigned athlete',decision:last.get(d.id)?.decision||'pending',approvedWeeklyHours:approved.get(d.athlete_id)?.decision==='validated'?Number(approved.get(d.athlete_id)?.approved_weekly_hours):null,baselineValidated:statuses.get(d.athlete_id)==='validated'&&approved.get(d.athlete_id)?.decision==='validated'})).sort((a,b)=>b.week_start.localeCompare(a.week_start)));
@@ -58,6 +64,7 @@ export default function CoachWeeklyReview(){
   try{
    const {data:{session}}=await supabase.auth.getSession();
    if(!session?.access_token)throw new Error('Coach sign-in required');
+   if(row.phase==='foundation_no_history'){if(readiness(row).length)throw new Error(readiness(row).join('; '));const {data,error}=await supabase.rpc('coach_publish_no_history_week',{p_draft_id:row.id,p_confirm:true});if(error)throw error;if(data?.status!=='published')throw new Error('Publication not verified');setIntroMessage('Approved sessions published to athlete calendar.');setReload(x=>x+1);return;}
    if(readiness(row).length)throw new Error(readiness(row).join('; '));
    const response=await fetch('/api/publish-week',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token},body:JSON.stringify({draftId:row.id,mode})});
    const payload=await response.json();
@@ -72,6 +79,7 @@ export default function CoachWeeklyReview(){
    const {data:{user}}=await supabase.auth.getUser();
    if(!user||user.app_metadata?.role!=='coach')throw new Error('Verified coach required');
    if(!Array.isArray(row.sessions)||!row.sessions.length)throw new Error('Cannot approve an empty weekly draft');
+   if(row.phase==='foundation_no_history'){const {data,error}=await supabase.rpc('coach_decide_no_history_week',{p_draft_id:row.id,p_decision:decision,p_reason:note.trim()});if(error)throw error;if(data?.status!=='decision_recorded')throw new Error('Decision not verified');setNote('');setReload(k=>k+1);return;}
    if(decision==='approved'&&(!row.baselineValidated||!row.approvedWeeklyHours))throw new Error('Coach-approved historical baseline required before draft approval');
    if(decision==='approved'&&row.sessions.reduce((sum:number,item:any)=>sum+(Number(item?.session?.durationMin)||0),0)>row.approvedWeeklyHours!*60+5)throw new Error('Draft exceeds coach-approved weekly volume');
    const {data:latest,error:le}=await supabase.from('weekly_plan_draft').select('id,revision').eq('athlete_id',row.athlete_id).eq('week_start',row.week_start).order('revision',{ascending:false}).limit(1);
@@ -86,14 +94,24 @@ export default function CoachWeeklyReview(){
   }catch(e){setError(e instanceof Error?e.message:'Unable to record coach decision')}
   finally{setBusy('')}
  }
+ async function prepareIntro(save:boolean){setBusy('intro');setError('');setIntroMessage('');try{if(!introAthlete)throw new Error('Choose an athlete');const {data,error}=await supabase.rpc('coach_prepare_no_history_week',{p_athlete_id:introAthlete,p_save:save});if(error)throw error;if(!data||(!save&&data.status!=='preview_only')||(save&&!['draft_created','already_drafted'].includes(data.status)))throw new Error('Unable to prepare an introductory week');if(save){setIntroMessage('Draft saved for coach review. Calendar unchanged.');setIntroPreview(null);setReload(x=>x+1);}else{setIntroPreview(data);setIntroMessage('Read-only preview: no calendar changes.');}}catch(e){setError(e instanceof Error?e.message:'Introductory draft failed');}finally{setBusy('');}}
  return <section className="coach-attention-v2" aria-label="Weekly plan reviews">
   <CoachWorkoutLibrary/>
   <CoachWeekReconciliationPreview/>
   <header className="coach-attention-heading"><div><h3>Weekly plan review</h3><p>Review saved drafts before publication. Decisions do not automatically schedule training.</p></div><button type="button" disabled={loading||Boolean(busy)} onClick={()=>setReload(x=>x+1)}>↻ Refresh</button></header>
+  <div className="coach-attention-row" style={{display:'grid',gap:10,padding:16}}>
+   <strong>Introductory week · No recorded history</strong>
+   <p>Prepare a conservative RPE-based week from athlete onboarding. A device is not required. Coach approval is mandatory before calendar publication.</p>
+   <label>Assigned athlete <select value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);}}><option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
+   <div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button type="button" disabled={!introAthlete||Boolean(busy)} onClick={()=>void prepareIntro(false)}>Preview introductory week</button>
+   {introPreview&&<button type="button" disabled={Boolean(busy)} onClick={()=>void prepareIntro(true)}>Save draft for review</button>}</div>
+   {introMessage&&<p role="status">{introMessage}</p>}
+   {introPreview&&<details open><summary>{introPreview.session_count} proposed sessions · {introPreview.total_minutes} minutes</summary>{(introPreview.sessions||[]).map((x:any,i:number)=><p key={i}><strong>{x.date} · {x.session.title} ({x.session.durationMin} min)</strong><span style={{display:'block'}}>{x.session.rationale}</span></p>)}</details>}
+  </div>
   {error&&<p role="alert">{error}</p>}
   {loading?<p>Loading approved-coach draft records…</p>:rows.length===0?<p>No saved weekly proposals are ready for coach review. The automatic proposal service is not connected yet.</p>:<>
-   <label className="coach-attention-heading">Decision notes (optional)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Reason or coach observations" maxLength={500}/></label>
-   {rows.map(row=><article key={row.id} className="coach-attention-row"><div><strong>{row.athleteName} · Week of {row.week_start}</strong><p>Revision {row.revision} · {row.phase} · {row.decision}</p><p>{row.baselineValidated?`Approved baseline: ${row.approvedWeeklyHours} h/week`:'Historical baseline approval required'}</p><p>{readiness(row).length?`Publication blocked: ${readiness(row).join('; ')}`:'Coach-approved draft · publication requires protected server workflow and calendar readback'}</p>
+   <label className="coach-attention-heading">Coach review rationale (at least 15 characters for introductory weeks)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Reason or coach observations" maxLength={500}/></label>
+   {rows.map(row=><article key={row.id} className="coach-attention-row"><div><strong>{row.athleteName} · Week of {row.week_start}</strong><p>Revision {row.revision} · {row.phase} · {row.decision}</p><p>{row.phase==='foundation_no_history'?'No recorded history · proposed introductory week':row.baselineValidated?`Approved baseline: ${row.approvedWeeklyHours} h/week`:'Historical baseline approval required'}</p><p>{readiness(row).length?`Publication blocked: ${readiness(row).join('; ')}`:'Coach-approved draft · publication requires protected server workflow and calendar readback'}</p>
     <details><summary>Inspect proposed sessions</summary>
     {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item?.session?.prescription??item?.prescription??{},null,2)}</pre></div>):<p>Draft contains no sessions.</p>}
     </details></div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
