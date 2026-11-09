@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 type Draft={id:string;athlete_id:string;week_start:string;revision:number;phase:string;sessions:unknown;proposal_fingerprint:string;created_at:string};
 type Decision={draft_id:string;decision:string;decided_at:string};
-type Row=Draft&{athleteName:string;decision:string};
+type Row=Draft&{athleteName:string;decision:string;approvedWeeklyHours:number|null;baselineValidated:boolean};
 function readiness(row:Row){
  const sessions=Array.isArray(row.sessions)?row.sessions:[];
  const problems:string[]=[];
  if(row.decision!=='approved')problems.push('Latest coach approval required');
+ if(!row.baselineValidated||!row.approvedWeeklyHours)problems.push('Validated coach-approved historical baseline required');
+ const totalMinutes=sessions.reduce((sum:number,item:any)=>sum+(Number(item?.session?.durationMin)||0),0);
+ if(row.approvedWeeklyHours&&totalMinutes>row.approvedWeeklyHours*60+5)problems.push('Draft exceeds coach-approved weekly hours');
  if(!sessions.length)problems.push('No proposed sessions');
  for(const item of sessions){const x=item as {date?:string;session?:{title?:string;durationMin?:number;sport?:string;prescription?:unknown;sessionClass?:string;priority?:number;targets?:unknown}};if(!x.session?.title||!x.date||!Number.isFinite(x.session.durationMin)||!x.session.sport||!x.session.prescription||!x.session.sessionClass||!x.session.priority||!x.session.targets)problems.push('Draft has incomplete workout fields');}
  return [...new Set(problems)];
@@ -29,20 +32,24 @@ export default function CoachWeeklyReview(){
    if(ae)throw ae;
    const ids=(assign??[]).map(a=>a.athlete_id);
    if(!ids.length){if(live)setRows([]);return;}
-   const [drafts,profiles]=await Promise.all([
+   const [drafts,profiles,baselines,history]=await Promise.all([
      supabase.from('weekly_plan_draft').select('id,athlete_id,week_start,revision,phase,sessions,proposal_fingerprint,created_at').in('athlete_id',ids).order('created_at',{ascending:false}).limit(150),
-     supabase.from('athlete_profile').select('id,display_name').in('id',ids)
+     supabase.from('athlete_profile').select('id,display_name').in('id',ids),
+     supabase.from('coach_history_baseline_review').select('athlete_id,decision,approved_weekly_hours').in('athlete_id',ids),
+     supabase.from('athlete_history_baseline').select('athlete_id,validation_status').in('athlete_id',ids)
    ]);
-   if(drafts.error||profiles.error)throw new Error(drafts.error?.message||profiles.error?.message||'Unable to load weekly drafts');
+   if(drafts.error||profiles.error||baselines.error||history.error)throw new Error(drafts.error?.message||profiles.error?.message||baselines.error?.message||history.error?.message||'Unable to load weekly drafts');
    const all=drafts.data??[];
    const decisions=all.length?await supabase.from('weekly_plan_decision').select('draft_id,decision,decided_at').in('draft_id',all.map(d=>d.id)).order('decided_at',{ascending:false}):{data:[] as Decision[],error:null};
    if(decisions.error)throw decisions.error;
    const last=new Map<string,Decision>();
    for(const d of decisions.data??[])if(!last.has(d.draft_id))last.set(d.draft_id,d);
    const names=new Map((profiles.data??[]).map(p=>[p.id,p.display_name||'Assigned athlete']));
+   const approved=new Map((baselines.data??[]).map(x=>[x.athlete_id,x]));
+   const statuses=new Map((history.data??[]).map(x=>[x.athlete_id,x.validation_status]));
    const latest=new Map<string,Draft>();
    for(const d of all){const key=d.athlete_id+':'+d.week_start;const previous=latest.get(key);if(!previous||d.revision>previous.revision)latest.set(key,d);}
-   if(live)setRows([...latest.values()].map(d=>({...d,athleteName:names.get(d.athlete_id)||'Assigned athlete',decision:last.get(d.id)?.decision||'pending'})).sort((a,b)=>b.week_start.localeCompare(a.week_start)));
+   if(live)setRows([...latest.values()].map(d=>({...d,athleteName:names.get(d.athlete_id)||'Assigned athlete',decision:last.get(d.id)?.decision||'pending',approvedWeeklyHours:approved.get(d.athlete_id)?.decision==='validated'?Number(approved.get(d.athlete_id)?.approved_weekly_hours):null,baselineValidated:statuses.get(d.athlete_id)==='validated'&&approved.get(d.athlete_id)?.decision==='validated'})).sort((a,b)=>b.week_start.localeCompare(a.week_start)));
   }catch(e){if(live)setError(e instanceof Error?e.message:'Could not load weekly reviews');}
   finally{if(live)setLoading(false);}
  })();return()=>{live=false};},[reload]);
@@ -65,6 +72,8 @@ export default function CoachWeeklyReview(){
    const {data:{user}}=await supabase.auth.getUser();
    if(!user||user.app_metadata?.role!=='coach')throw new Error('Verified coach required');
    if(!Array.isArray(row.sessions)||!row.sessions.length)throw new Error('Cannot approve an empty weekly draft');
+   if(decision==='approved'&&(!row.baselineValidated||!row.approvedWeeklyHours))throw new Error('Coach-approved historical baseline required before draft approval');
+   if(decision==='approved'&&row.sessions.reduce((sum:number,item:any)=>sum+(Number(item?.session?.durationMin)||0),0)>row.approvedWeeklyHours!*60+5)throw new Error('Draft exceeds coach-approved weekly volume');
    const {data:latest,error:le}=await supabase.from('weekly_plan_draft').select('id,revision').eq('athlete_id',row.athlete_id).eq('week_start',row.week_start).order('revision',{ascending:false}).limit(1);
    if(le)throw le;
    if(latest?.[0]?.id!==row.id)throw new Error('This draft has been revised. Refresh before reviewing.');
@@ -84,7 +93,7 @@ export default function CoachWeeklyReview(){
   {error&&<p role="alert">{error}</p>}
   {loading?<p>Loading approved-coach draft records…</p>:rows.length===0?<p>No saved weekly proposals are ready for coach review. The automatic proposal service is not connected yet.</p>:<>
    <label className="coach-attention-heading">Decision notes (optional)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Reason or coach observations" maxLength={500}/></label>
-   {rows.map(row=><article key={row.id} className="coach-attention-row"><div><strong>{row.athleteName} · Week of {row.week_start}</strong><p>Revision {row.revision} · {row.phase} · {row.decision}</p><p>{readiness(row).length?`Publication blocked: ${readiness(row).join('; ')}`:'Coach-approved draft · publication requires protected server workflow and calendar readback'}</p>
+   {rows.map(row=><article key={row.id} className="coach-attention-row"><div><strong>{row.athleteName} · Week of {row.week_start}</strong><p>Revision {row.revision} · {row.phase} · {row.decision}</p><p>{row.baselineValidated?`Approved baseline: ${row.approvedWeeklyHours} h/week`:'Historical baseline approval required'}</p><p>{readiness(row).length?`Publication blocked: ${readiness(row).join('; ')}`:'Coach-approved draft · publication requires protected server workflow and calendar readback'}</p>
     <details><summary>Inspect proposed sessions</summary>
     {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item?.session?.prescription??item?.prescription??{},null,2)}</pre></div>):<p>Draft contains no sessions.</p>}
     </details></div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
