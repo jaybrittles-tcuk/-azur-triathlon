@@ -31,6 +31,8 @@ export default function CoachWeeklyReview(){
  const [publishedAthletes,setPublishedAthletes]=useState<string[]>([]);
  const [nextWeekPublished,setNextWeekPublished]=useState<string[]>([]);
  const [nextWeekPreview,setNextWeekPreview]=useState<any>(null);
+ const [setupStatus,setSetupStatus]=useState<{status:string;label:string;safe_to_use_no_history_path:boolean}|null>(null);
+ const [autoPreviewLoading,setAutoPreviewLoading]=useState(false);
  const nextMonday=(()=>{const d=new Date();d.setUTCHours(12,0,0,0);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)+7);return d.toISOString().slice(0,10)})();
  useEffect(()=>{let live=true;(async()=>{
   setLoading(true);setError('');
@@ -71,6 +73,29 @@ export default function CoachWeeklyReview(){
   }catch(e){if(live)setError(e instanceof Error?e.message:'Could not load weekly reviews');}
   finally{if(live)setLoading(false);}
  })();return()=>{live=false};},[reload]);
+ useEffect(()=>{
+  let live=true;
+  setSetupStatus(null);setNextWeekPreview(null);
+  if(!introAthlete||loading)return()=>{live=false};
+  (async()=>{
+   const {data,error}=await supabase.rpc('coach_athlete_setup_status',{p_athlete_id:introAthlete});
+   if(!live)return;
+   if(error){setError('Unable to check athlete history status: '+error.message);return;}
+   const status=data as {status:string;label:string;safe_to_use_no_history_path:boolean};
+   setSetupStatus(status);
+   // The coach may review the proposed week immediately. No workouts or drafts are written here.
+   if(status.safe_to_use_no_history_path&&publishedAthletes.includes(introAthlete)&&!nextWeekPublished.includes(introAthlete)){
+    setAutoPreviewLoading(true);
+    const preview=await supabase.rpc('coach_preview_intro_v2',{p_athlete_id:introAthlete,p_week_start:nextMonday});
+    if(live){
+      if(preview.error)setError('Next-week proposal needs attention: '+preview.error.message);
+      else if(preview.data?.planner_version==='intro_v2'&&preview.data.status==='preview_only')setNextWeekPreview(preview.data);
+      setAutoPreviewLoading(false);
+    }
+   }
+  })();
+  return()=>{live=false};
+ },[introAthlete,loading,reload]);
  async function publish(row:Row,mode:'full'|'additive'){
   setBusy(row.id);setError('');
   try{
@@ -176,10 +201,10 @@ export default function CoachWeeklyReview(){
     <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setNextWeekPreview(null);setIntroMessage('');}}>
      <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
     </select></label>
-   {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · Introductory week · No verified history</div>}
-   {!activeRow&&<button type="button" disabled={!introAthlete||Boolean(busy)} onClick={()=>void prepareIntro(false)}>Preview workouts (optional)</button>}
-   {introAthlete&&(publishedAthletes.includes(introAthlete)?<p role="status" style={{color:'#a5e6cc',fontWeight:700}}>Week published · Training is on the athlete calendar</p>:<button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700}} disabled={Boolean(busy)} onClick={()=>void approveAndPublishIntro()}>{busy==='intro-publish'?'Approving and publishing…':'Approve & Publish first week'}</button>)}
-   {introPreview&&!activeRow&&<>
+   {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>}
+   {!activeRow&&!publishedAthletes.includes(introAthlete)&&setupStatus?.safe_to_use_no_history_path&&<button type="button" disabled={!introAthlete||Boolean(busy)} onClick={()=>void prepareIntro(false)}>Preview workouts (optional)</button>}
+   {introAthlete&&(publishedAthletes.includes(introAthlete)?<p role="status" style={{color:'#a5e6cc',fontWeight:700}}>Week published · Training is on the athlete calendar</p>:setupStatus?.safe_to_use_no_history_path?<button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700}} disabled={Boolean(busy)} onClick={()=>void approveAndPublishIntro()}>{busy==='intro-publish'?'Approving and publishing…':'Approve & Publish first week'}</button>:<p style={{fontSize:13,color:'#f8d27a'}}>Training assessment required before coach publication. Device import is optional, but unresolved import states must not be mistaken for zero history.</p>)}
+   {introPreview&&!activeRow&&setupStatus?.safe_to_use_no_history_path&&<>
     <div><strong>{introPreview.session_count} sessions · {introPreview.total_minutes} min</strong><p style={{fontSize:12,color:'#b6ccdc'}}>Easy RPE training, no assumed FTP or historical fitness. Not yet on the athlete calendar.</p></div>
     <details><summary>View proposed workouts</summary>{sessionList(introPreview.sessions||[])}</details>
 
@@ -192,11 +217,11 @@ export default function CoachWeeklyReview(){
     <details><summary>View workout details</summary>{sessionList(Array.isArray(activeRow.sessions)?activeRow.sessions:[])}</details>
     <p style={{fontSize:12,color:'#b6ccdc'}}>Coach approval and calendar publication happen together with one action. Nothing is scheduled until you approve.</p>
    </>}
-   {introAthlete&&publishedAthletes.includes(introAthlete)&&<div style={{marginTop:10,paddingTop:14,borderTop:'1px solid #34556c',display:'grid',gap:9}}>
+   {introAthlete&&setupStatus?.safe_to_use_no_history_path&&publishedAthletes.includes(introAthlete)&&<div style={{marginTop:10,paddingTop:14,borderTop:'1px solid #34556c',display:'grid',gap:9}}>
      <strong style={{fontSize:16}}>Improved training · Week of {nextMonday}</strong>
      {nextWeekPublished.includes(introAthlete)?<p role="status" style={{color:'#a5e6cc'}}>Next week is published to the athlete calendar.</p>:<>
        <p style={{fontSize:13,color:'#c2d9e8'}}>Sport-specific intervals, distance-based swims and a recovery day. Current week stays unchanged.</p>
-       <button type="button" disabled={Boolean(busy)} onClick={()=>void previewNextWeek()}>Review improved week</button>
+       {autoPreviewLoading?<p role="status">Preparing next week's draft for review…</p>:!nextWeekPreview?<button type="button" disabled={Boolean(busy)} onClick={()=>void previewNextWeek()}>Retry training preview</button>:null}
        {nextWeekPreview&&<>
          <p><strong>{nextWeekPreview.session_count} workouts · {nextWeekPreview.total_minutes} minutes</strong> · {Array.isArray(nextWeekPreview.recovery_days)?nextWeekPreview.recovery_days.length:0} recovery day</p>
          <details><summary>Review workouts and intervals</summary>{sessionList(nextWeekPreview.sessions||[])}</details>
