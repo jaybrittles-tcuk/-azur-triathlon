@@ -206,7 +206,7 @@ export default function CoachWeeklyReview(){
     <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setNextWeekPreview(null);setIntroMessage('');}}>
      <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
     </select></label>
-   {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>
+   {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>}
    {swimAssessment&&<details style={{padding:'10px 12px',border:'1px solid #35627d',borderRadius:12,background:'#153751'}}>
      <summary style={{cursor:'pointer',fontWeight:700}}>AZUR Swim Intelligence · {swimAssessment.recommended_focus}</summary>
      <p style={{fontSize:13,margin:'10px 0'}}><strong>Recommended practice:</strong> {swimAssessment.recommended_practice}</p>
