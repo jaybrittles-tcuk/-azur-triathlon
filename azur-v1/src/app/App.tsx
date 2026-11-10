@@ -1199,7 +1199,7 @@ export function App() {
   const [intervalsHistoryMode, setIntervalsHistoryMode] = useState(false);
   const [historySaveBusy,setHistorySaveBusy]=useState(false);
   const [historySaveMessage,setHistorySaveMessage]=useState('');
-  const [autoHistoryStatus, setAutoHistoryStatus] = useState<'idle'|'running'|'saved'|'error'>('idle');
+  const [autoHistoryStatus, setAutoHistoryStatus] = useState<'idle'|'running'|'saved'|'empty'|'error'>('idle');
   const [autoHistoryDetail, setAutoHistoryDetail] = useState('');
   const [autoHistoryRetry, setAutoHistoryRetry] = useState(0);
   const autoHistoryInFlight = useRef(false);
@@ -1956,6 +1956,8 @@ if (session?.user) {
         if (!response.ok) throw new Error(result?.error ?? 'Training-history analysis failed.');
         if (!result?.historySummary || !result?.dateRange?.oldest || !result?.dateRange?.newest)
           throw new Error('Intervals did not return a complete training-history summary.');
+        if (!Number.isInteger(result.historySummary.activityCount) || result.historySummary.activityCount < 0)
+          throw new Error('Intervals returned an invalid activity count; nothing was saved.');
         const summary = { ...result.historySummary, source: 'intervals.icu', readOnly: true };
         const { data: saved, error } = await supabase.rpc('save_history_baseline_preview', {
           p_summary: summary,
@@ -1965,8 +1967,13 @@ if (session?.user) {
         if (error) throw error;
         if (saved?.saved !== true) throw new Error('AZUR could not confirm the baseline was saved.');
         if (!active) return;
-        setAutoHistoryStatus('saved');
-        setAutoHistoryDetail(`${summary.activityCount} valid sessions analysed. Your training baseline is ready for coach review; no training load or calendar workouts were changed.`);
+        if (summary.activityCount === 0) {
+          setAutoHistoryStatus('empty');
+          setAutoHistoryDetail('Connection successful, but no recorded swim, bike or run sessions were found in the last 90 days. This does not mean you have no fitness or experience. Your coach can assess your starting programme using onboarding answers. No training sessions were created or changed.');
+        } else {
+          setAutoHistoryStatus('saved');
+          setAutoHistoryDetail(`${summary.activityCount} recorded sessions found in the last 90 days. Your training baseline is ready for coach review; no training load or calendar workouts were changed.`);
+        }
         url.searchParams.delete('intervals');
         window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
       } catch (error) {
@@ -10303,7 +10310,7 @@ async function handleProfileSave() {
 >
       {autoHistoryStatus !== 'idle' && (
         <section role="status" aria-live="polite" style={{padding:'15px 18px',background:'#102a43',color:'#eaf5ff',borderBottom:'1px solid #295276'}}>
-          <strong>{autoHistoryStatus === 'running' ? 'Connecting your training history' : autoHistoryStatus === 'saved' ? 'Training history ready' : 'Training history needs attention'}</strong>
+          <strong>{autoHistoryStatus === 'running' ? 'Connecting your training history' : autoHistoryStatus === 'saved' ? 'Training history ready for review' : autoHistoryStatus === 'empty' ? 'No recorded activities found' : 'Training history needs attention'}</strong>
           <p style={{margin:'6px 0 0',color:'#c3d9ed'}}>{autoHistoryDetail}</p>
           {autoHistoryStatus === 'error' && <button type="button" onClick={() => setAutoHistoryRetry(value => value + 1)} style={{marginTop:10,padding:'9px 14px',borderRadius:10,background:'#168DCE',color:'#fff',border:0}}>Retry history analysis</button>}
         </section>
