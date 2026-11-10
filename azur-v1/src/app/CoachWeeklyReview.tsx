@@ -35,6 +35,7 @@ export default function CoachWeeklyReview(){
  const [swimAssessment,setSwimAssessment]=useState<{recommended_focus:string;recommended_practice:string;execution_cue:string;why_today_matters:string;focus_source:string;css_status:string;next_evidence:string}|null>(null);
  const [coachingModel,setCoachingModel]=useState<any>(null);
  const [trainingResponse,setTrainingResponse]=useState<any>(null);
+ const [adaptiveSelection,setAdaptiveSelection]=useState<any>(null);
  const [merseyBeta,setMerseyBeta]=useState(false);
  const [merseyLoading,setMerseyLoading]=useState(false);
  const [purposePreview,setPurposePreview]=useState<any>(null);
@@ -88,19 +89,21 @@ export default function CoachWeeklyReview(){
  })();return()=>{live=false};},[reload]);
  useEffect(()=>{
   let live=true;
-  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setTrainingResponse(null);setNextWeekPreview(null);setPurposePreview(null);
+  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setTrainingResponse(null);setAdaptiveSelection(null);setNextWeekPreview(null);setPurposePreview(null);
   if(!introAthlete||loading)return()=>{live=false};
   (async()=>{
-   const [{data,error},{data:swimData,error:swimError},{data:modelData,error:modelError},{data:responseData,error:responseError}]=await Promise.all([
+   const [{data,error},{data:swimData,error:swimError},{data:modelData,error:modelError},{data:responseData,error:responseError},{data:adaptiveData,error:adaptiveError}]=await Promise.all([
      supabase.rpc('coach_athlete_setup_status',{p_athlete_id:introAthlete}),
      supabase.rpc('coach_swim_intelligence_preview',{p_athlete_id:introAthlete}),
      supabase.rpc('coach_training_intelligence_preview',{p_athlete_id:introAthlete}),
-     supabase.rpc('coach_training_response_preview',{p_athlete_id:introAthlete})
+     supabase.rpc('coach_training_response_preview',{p_athlete_id:introAthlete}),
+     supabase.rpc('coach_adaptive_session_selection_v1',{p_athlete_id:introAthlete,p_primary_focus:'aerobic_development'})
    ]);
    if(!live)return;
    if(!swimError&&swimData?.status==='review_only')setSwimAssessment(swimData);
    if(!modelError&&modelData?.model_version==='coach_intelligence_v2')setCoachingModel(modelData);
    if(!responseError&&responseData?.status==='review_only')setTrainingResponse(responseData);
+   if(!adaptiveError&&adaptiveData?.model_version==='adaptive_selection_v1')setAdaptiveSelection(adaptiveData);
    if(error){setError('Unable to check athlete history status: '+error.message);return;}
    const status=data as {status:string;label:string;safe_to_use_no_history_path:boolean};
    setSetupStatus(status);
@@ -337,6 +340,20 @@ export default function CoachWeeklyReview(){
        <p>{trainingResponse.coach_recommendation}</p>
        <small style={{color:'#b9d5e5'}}>Missing training records are not evidence of poor fitness. Coach approval required for major programme changes.</small>
       </div>
+   </details>}
+   {adaptiveSelection&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
+     <summary style={{cursor:'pointer',fontWeight:800}}>Adaptive Session Selection · {String(adaptiveSelection.decision).replaceAll('_',' ')}</summary>
+     <div style={{fontSize:13,lineHeight:1.5,paddingTop:9}}>
+       <p><strong>Decision:</strong> {adaptiveSelection.decision_reason}</p>
+       <p><strong>Primary focus:</strong> {String(adaptiveSelection.primary_block_focus).replaceAll('_',' ')}</p>
+       <p><strong>Hard-session candidates:</strong> {adaptiveSelection.suggested_substantial_hard_sessions} · based on current available evidence, not a quota</p>
+       {Array.isArray(adaptiveSelection.sport_options)&&adaptiveSelection.sport_options.map((item:any)=><details key={item.sport} style={{padding:'9px 0',borderTop:'1px solid #355d75'}}>
+         <summary style={{cursor:'pointer',textTransform:'capitalize'}}><strong>{item.sport}:</strong> {item.secondary}</summary>
+         <p>{item.intervalTemplate}</p><p><strong>Why:</strong> {item.adaptationRationale}</p>
+         <p><strong>Needs:</strong> {item.progressionEvidence}</p>
+       </details>)}
+       <small style={{color:'#acd4e9'}}>Read-only coach suggestions. Never automatically published or escalated.</small>
+     </div>
    </details>}
    {coachingModel&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
      <summary style={{cursor:'pointer',fontWeight:800}}>AZUR Coaching Intelligence · {coachingModel.primary_priority}</summary>
