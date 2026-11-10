@@ -351,6 +351,7 @@ export default function CoachWeeklyReview(){
       <div style={{fontSize:13,paddingTop:10,display:'grid',gap:8}}>
        <p><strong>Evidence quality:</strong> {String(trainingResponse.evidence_quality||'under review').replaceAll('_',' ')} · {trainingResponse.sessions_due ?? trainingResponse.scheduled_sessions} sessions due · {trainingResponse.calendar_completed_sessions} calendar completions</p>
        <p><strong>Confirmed records:</strong> {trainingResponse.confirmed_activities ?? trainingResponse.recorded_activities_not_rejected} activities · {trainingResponse.rpe_feedback_count} effort ratings{trainingResponse.average_reported_rpe!=null?' · average RPE '+trainingResponse.average_reported_rpe:''}</p>
+       {Number(trainingResponse.rpe_from_validated_activities)>0&&<p style={{color:'#b9d5e5',margin:'3px 0'}}>Includes {trainingResponse.rpe_from_validated_activities} effort ratings from validated activity imports, excluding any duplicate session feedback.</p>}
        {trainingResponse.model_version==='training_response_v2'&&<details style={{borderTop:'1px solid #376a86',paddingTop:8}}>
          <summary style={{cursor:'pointer',color:'#b9e0f4'}}>Import quality · See unverified and excluded records</summary>
          <p>{trainingResponse.unverified_activities} unverified · {trainingResponse.pending_validation_activities} pending validation · {trainingResponse.rejected_activities} rejected · {trainingResponse.excluded_test_or_duplicate_activities} excluded test/duplicate activities</p>
