@@ -211,16 +211,68 @@ export default function CoachWeeklyReview(){
  async function previewPurposeSessions(){
   setBusy('purpose-preview');setError('');setPurposePreview(null);
   try{
-   if(!introAthlete||!setupStatus?.safe_to_use_no_history_path)throw new Error('A verified introductory pathway is required');
-   // Do not propose changes to an already-published upcoming week.
-   const startDate=new Date(nextMonday+'T12:00:00Z');
-   if(nextWeekPublished.includes(introAthlete))startDate.setUTCDate(startDate.getUTCDate()+7);
-   const previewWeek=startDate.toISOString().slice(0,10);
+   if(!introAthlete||!setupStatus?.safe_to_use_no_history_path)throw new Error('Verified introductory pathway required');
+   // Skip all previously published / drafted weeks, not just next week.
+   const beginning=new Date(nextMonday+'T12:00:00Z');
+   const end=new Date(beginning);end.setUTCDate(end.getUTCDate()+27);
+   const maxDate=end.toISOString().slice(0,10);
+   const [{data:planned,error:plannedError},{data:drafts,error:draftsError}]=await Promise.all([
+    supabase.from('planned_session').select('planned_date').eq('athlete_id',introAthlete)
+      .gte('planned_date',nextMonday).lte('planned_date',maxDate),
+    supabase.from('weekly_plan_draft').select('week_start').eq('athlete_id',introAthlete)
+      .gte('week_start',nextMonday).lte('week_start',maxDate),
+   ]);
+   if(plannedError||draftsError)throw new Error(plannedError?.message||draftsError?.message||'Could not check existing weeks');
+   const occupied=new Set<string>();
+   for(const item of planned??[]){
+     const d=new Date(item.planned_date+'T12:00:00Z');
+     d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7));
+     occupied.add(d.toISOString().slice(0,10));
+   }
+   for(const item of drafts??[])occupied.add(item.week_start);
+   let previewWeek='';
+   for(let week=0;week<4;week++){
+     const d=new Date(beginning);d.setUTCDate(d.getUTCDate()+7*week);
+     const candidate=d.toISOString().slice(0,10);
+     if(!occupied.has(candidate)){previewWeek=candidate;break}
+   }
+   if(!previewWeek)throw new Error('Upcoming four weeks already contain drafts or planned workouts');
    const {data,error}=await supabase.rpc('coach_preview_session_purpose_v3',{p_athlete_id:introAthlete,p_week_start:previewWeek});
    if(error)throw error;
-   if(data?.planner_version!=='purpose_v3_preview'||data?.calendar_changed!==false||data?.requires_coach_approval!==true)throw new Error('Purpose-model safety verification failed');
+   if(data?.planner_version!=='purpose_v3_preview'||data?.calendar_changed!==false||
+      data?.requires_coach_approval!==true||data?.week_start!==previewWeek)
+      throw new Error('Purpose-model safety verification failed');
    setPurposePreview(data);
   }catch(e){setError(e instanceof Error?e.message:'Purpose preview unavailable');}
+  finally{setBusy('');}
+ }
+ async function approvePurposeWeek(){
+  setBusy('purpose-publish');setError('');
+  try{
+   if(!introAthlete||!setupStatus?.safe_to_use_no_history_path||!purposePreview?.sessions)
+      throw new Error('Review the full purpose-based week first');
+   const {data,error}=await supabase.rpc('coach_publish_session_purpose_v3',{
+      p_athlete_id:introAthlete,
+      p_week_start:purposePreview.week_start,
+      p_expected_sessions:purposePreview.sessions,
+      p_confirm:true
+   });
+   if(error)throw error;
+   if(data?.status!=='published'||data?.planner_version!=='purpose_v3'||
+      data?.calendar_verified!==true||data?.coach_approved!==true)
+      throw new Error('Calendar publication was not verified');
+   const end=new Date(data.week_start+'T12:00:00Z');end.setUTCDate(end.getUTCDate()+6);
+   const {data:saved,error:readError}=await supabase.from('planned_session')
+     .select('id,duration_min,prescription').eq('athlete_id',introAthlete)
+     .gte('planned_date',data.week_start).lte('planned_date',end.toISOString().slice(0,10)).eq('is_active_version',true);
+   if(readError)throw readError;
+   if((saved??[]).length!==Number(data.sessions)||
+      (saved??[]).reduce((n,x)=>n+Number(x.duration_min),0)!==Number(data.total_minutes)||
+      !(saved??[]).every(x=>Boolean(x.prescription?.purpose?.primaryAdaptation)))
+     throw new Error('Published sessions need reconciliation; calendar readback does not match');
+   setIntroMessage('V3 purpose-based week published: '+data.sessions+' workouts, '+data.total_minutes+' minutes. Coach approval recorded.');
+   setPurposePreview(null);setReload(x=>x+1);
+  }catch(e){setError(e instanceof Error?e.message:'Purpose-based publication failed');}
   finally{setBusy('');}
  }
  const activeRow=rows.find(row=>row.athlete_id===introAthlete && row.phase==='foundation_no_history');
@@ -276,12 +328,14 @@ export default function CoachWeeklyReview(){
    </details>}
    {introAthlete&&setupStatus?.safe_to_use_no_history_path&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
      <summary style={{cursor:'pointer',fontWeight:700}}>Session Purpose Engine · V3 preview</summary>
-     <p style={{fontSize:13,color:'#bfdaec',marginTop:10}}>See how AZUR selects each workout's purpose from the athlete's priority, phase and available evidence. Read-only: does not replace published workouts.</p>
+     <p style={{fontSize:13,color:'#bfdaec',marginTop:10}}>See how AZUR selects each workout's purpose from the athlete's priority, phase and available evidence. Preview is read-only; publication requires your explicit approval and never overwrites existing workouts.</p>
      <button type="button" disabled={Boolean(busy)} onClick={()=>void previewPurposeSessions()}>{busy==='purpose-preview'?'Analysing purposes…':'Generate purpose-based preview'}</button>
      {purposePreview&&<div style={{marginTop:12}}>
         <strong>Week of {purposePreview.week_start} · {purposePreview.session_count} sessions · {purposePreview.total_minutes} minutes</strong>
-        <p style={{fontSize:12,color:'#b6ccdc'}}>Proposed for coach review only · No intensity increase · No calendar changes</p>
+        <p style={{fontSize:12,color:'#b6ccdc'}}>Preview only · No intensity increase · Existing calendar remains unchanged until approved</p>
         <div>{sessionList(purposePreview.sessions||[])}</div>
+        <button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700,marginTop:12}} disabled={Boolean(busy)}
+         onClick={()=>void approvePurposeWeek()}>{busy==='purpose-publish'?'Publishing approved V3 week…':'Approve & Publish V3 week'}</button>
      </div>}
    </details>}
    {swimAssessment&&<details style={{padding:'10px 12px',border:'1px solid #35627d',borderRadius:12,background:'#153751'}}>
