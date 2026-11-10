@@ -346,9 +346,15 @@ export default function CoachWeeklyReview(){
    {trainingResponse&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
       <summary style={{cursor:'pointer',fontWeight:800}}>Training Response · {trainingResponse.response_category==='insufficient_completed_evidence'?'Gather athlete feedback':'Coach evidence review'}</summary>
       <div style={{fontSize:13,paddingTop:10,display:'grid',gap:8}}>
-       <p><strong>Recent 28 days:</strong> {trainingResponse.calendar_completed_sessions} calendar completions · {trainingResponse.recorded_activities_not_rejected} recorded activities · {trainingResponse.rpe_feedback_count} effort ratings</p>
-       <p>{trainingResponse.coach_recommendation}</p>
-       <small style={{color:'#b9d5e5'}}>Missing training records are not evidence of poor fitness. Coach approval required for major programme changes.</small>
+       <p><strong>Evidence quality:</strong> {String(trainingResponse.evidence_quality||'under review').replaceAll('_',' ')} · {trainingResponse.sessions_due ?? trainingResponse.scheduled_sessions} sessions due · {trainingResponse.calendar_completed_sessions} calendar completions</p>
+       <p><strong>Confirmed records:</strong> {trainingResponse.confirmed_activities ?? trainingResponse.recorded_activities_not_rejected} activities · {trainingResponse.rpe_feedback_count} effort ratings{trainingResponse.average_reported_rpe!=null?' · average RPE '+trainingResponse.average_reported_rpe:''}</p>
+       {trainingResponse.model_version==='training_response_v2'&&<details style={{borderTop:'1px solid #376a86',paddingTop:8}}>
+         <summary style={{cursor:'pointer',color:'#b9e0f4'}}>Import quality · See unverified and excluded records</summary>
+         <p>{trainingResponse.unverified_activities} unverified · {trainingResponse.pending_validation_activities} pending validation · {trainingResponse.rejected_activities} rejected · {trainingResponse.excluded_test_or_duplicate_activities} excluded test/duplicate activities</p>
+         <p>{trainingResponse.recovery_checkin_note}</p>
+       </details>}
+       <p><strong>Coach guidance:</strong> {trainingResponse.coach_recommendation}</p>
+       <small style={{color:'#b9d5e5'}}>Missing records are not evidence of poor fitness or missed training. Do not increase intensity or volume automatically; significant changes require coach approval.</small>
       </div>
    </details>}
    {adaptiveSelection&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
