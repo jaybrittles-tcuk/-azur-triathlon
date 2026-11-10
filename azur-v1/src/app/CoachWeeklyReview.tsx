@@ -34,6 +34,8 @@ export default function CoachWeeklyReview(){
  const [setupStatus,setSetupStatus]=useState<{status:string;label:string;safe_to_use_no_history_path:boolean}|null>(null);
  const [swimAssessment,setSwimAssessment]=useState<{recommended_focus:string;recommended_practice:string;execution_cue:string;why_today_matters:string;focus_source:string;css_status:string;next_evidence:string}|null>(null);
  const [coachingModel,setCoachingModel]=useState<any>(null);
+ const [merseyBeta,setMerseyBeta]=useState(false);
+ const [merseyLoading,setMerseyLoading]=useState(false);
  const [purposePreview,setPurposePreview]=useState<any>(null);
  const [autoPreviewLoading,setAutoPreviewLoading]=useState(false);
  const nextMonday=(()=>{const d=new Date();d.setUTCHours(12,0,0,0);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)+7);return d.toISOString().slice(0,10)})();
@@ -69,7 +71,7 @@ export default function CoachWeeklyReview(){
    const names=new Map((profiles.data??[]).map(p=>[p.id,p.display_name||'Assigned athlete']));
    const approved=new Map((baselines.data??[]).map(x=>[x.athlete_id,x]));
    const statuses=new Map((history.data??[]).map(x=>[x.athlete_id,x.validation_status]));
-   if(live){const candidates=(profiles.data??[]).filter(p=>!statuses.has(p.id)).map(p=>({id:p.id,name:p.display_name||'Assigned athlete'}));setIntroAthletes(candidates);setIntroAthlete(old=>candidates.some(a=>a.id===old)?old:(candidates[0]?.id||''));}
+   if(live){const candidates=(profiles.data??[]).map(p=>({id:p.id,name:p.display_name||'Assigned athlete'}));setIntroAthletes(candidates);setIntroAthlete(old=>candidates.some(a=>a.id===old)?old:(candidates[0]?.id||''));}
    const latest=new Map<string,Draft>();
    for(const d of all){const key=d.athlete_id+':'+d.week_start;const previous=latest.get(key);if(!previous||d.revision>previous.revision)latest.set(key,d);}
    if(live)setRows([...latest.values()].map(d=>({...d,athleteName:names.get(d.athlete_id)||'Assigned athlete',decision:last.get(d.id)?.decision||'pending',approvedWeeklyHours:approved.get(d.athlete_id)?.decision==='validated'?Number(approved.get(d.athlete_id)?.approved_weekly_hours):null,baselineValidated:statuses.get(d.athlete_id)==='validated'&&approved.get(d.athlete_id)?.decision==='validated'})).sort((a,b)=>b.week_start.localeCompare(a.week_start)));
@@ -185,6 +187,27 @@ export default function CoachWeeklyReview(){
   }catch(e){setError(e instanceof Error?e.message:'Next-week publication failed');}
   finally{setBusy('');}
  }
+ useEffect(()=>{
+  let active=true;setMerseyLoading(false);setMerseyBeta(false);
+  if(!introAthlete)return()=>{active=false};
+  (async()=>{
+   const {data,error}=await supabase.from('athlete_beta_cohort').select('cohort_key').eq('athlete_id',introAthlete).maybeSingle();
+   if(active&&!error)setMerseyBeta(data?.cohort_key==='mersey_tri');
+  })().catch(()=>{});
+  return()=>{active=false};
+ },[introAthlete,reload]);
+ async function setMerseyCohort(){
+  if(!introAthlete)return;
+  setMerseyLoading(true);setError('');
+  try{
+   const {data,error}=await supabase.rpc('coach_set_beta_cohort',{p_athlete_id:introAthlete,p_cohort:merseyBeta?null:'mersey_tri'});
+   if(error)throw error;
+   if(data?.status!=='updated')throw new Error('Could not verify club assignment');
+   setMerseyBeta(!merseyBeta);
+   setIntroMessage(merseyBeta?'Mersey Tri beta branding removed for this athlete.':'Mersey Tri beta banner enabled for this athlete.');
+  }catch(e){setError(e instanceof Error?e.message:'Could not update beta club');}
+  finally{setMerseyLoading(false);}
+ }
  async function previewPurposeSessions(){
   setBusy('purpose-preview');setError('');setPurposePreview(null);
   try{
@@ -232,6 +255,10 @@ export default function CoachWeeklyReview(){
      <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
     </select></label>
    {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>}
+   {introAthlete&&<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,padding:'10px 12px',border:'1px solid #335973',borderRadius:12}}>
+     <span style={{fontSize:13}}><strong>Mersey Tri beta branding</strong><small style={{display:'block',color:'#b8d2e3',marginTop:3}}>{merseyBeta?'Enabled for athlete dashboard':'Default AZUR dashboard header'}</small></span>
+     <button type="button" disabled={merseyLoading||Boolean(busy)} onClick={()=>void setMerseyCohort()} style={{borderRadius:10,minWidth:78,background:merseyBeta?'#1779b0':'#203d51',color:'white',padding:'9px 12px'}}>{merseyLoading?'Saving…':merseyBeta?'Enabled':'Enable'}</button>
+   </div>}
    {coachingModel&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
      <summary style={{cursor:'pointer',fontWeight:800}}>AZUR Coaching Intelligence · {coachingModel.primary_priority}</summary>
      <div style={{display:'grid',gap:9,paddingTop:12,fontSize:13}}>
