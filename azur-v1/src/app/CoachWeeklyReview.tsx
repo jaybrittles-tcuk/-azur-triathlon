@@ -39,6 +39,7 @@ export default function CoachWeeklyReview(){
  const [merseyBeta,setMerseyBeta]=useState(false);
  const [merseyLoading,setMerseyLoading]=useState(false);
  const [purposePreview,setPurposePreview]=useState<any>(null);
+ const [vipaAudit,setVipaAudit]=useState<any>(null);
  const [autoPreviewLoading,setAutoPreviewLoading]=useState(false);
  const nextMonday=(()=>{const d=new Date();d.setUTCHours(12,0,0,0);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)+7);return d.toISOString().slice(0,10)})();
  useEffect(()=>{let live=true;(async()=>{
@@ -89,7 +90,7 @@ export default function CoachWeeklyReview(){
  })();return()=>{live=false};},[reload]);
  useEffect(()=>{
   let live=true;
-  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setTrainingResponse(null);setAdaptiveSelection(null);setNextWeekPreview(null);setPurposePreview(null);
+  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setTrainingResponse(null);setAdaptiveSelection(null);setNextWeekPreview(null);setPurposePreview(null);setVipaAudit(null);
   if(!introAthlete||loading)return()=>{live=false};
   (async()=>{
    const [{data,error},{data:swimData,error:swimError},{data:modelData,error:modelError},{data:responseData,error:responseError},{data:adaptiveData,error:adaptiveError}]=await Promise.all([
@@ -222,7 +223,7 @@ export default function CoachWeeklyReview(){
   finally{setMerseyLoading(false);}
  }
  async function previewPurposeSessions(){
-  setBusy('purpose-preview');setError('');setPurposePreview(null);
+  setBusy('purpose-preview');setError('');setPurposePreview(null);setVipaAudit(null);
   try{
    if(!introAthlete||!setupStatus?.safe_to_use_no_history_path)throw new Error('Verified introductory pathway required');
    // Skip all previously published / drafted weeks, not just next week.
@@ -255,14 +256,20 @@ export default function CoachWeeklyReview(){
    if(data?.planner_version!=='purpose_v3_preview'||data?.calendar_changed!==false||
       data?.requires_coach_approval!==true||data?.week_start!==previewWeek)
       throw new Error('Purpose-model safety verification failed');
-   setPurposePreview(data);
+   const audit=await supabase.rpc('coach_vipa_week_quality_audit',{
+     p_athlete_id:introAthlete,p_week_start:previewWeek,p_sessions:data.sessions
+   });
+   if(audit.error)throw audit.error;
+   if(audit.data?.model!=='vipa_week_quality_v1'||audit.data?.calendar_changed!==false)
+      throw new Error('VIPA quality audit could not be verified');
+   setPurposePreview(data);setVipaAudit(audit.data);
   }catch(e){setError(e instanceof Error?e.message:'Purpose preview unavailable');}
   finally{setBusy('');}
  }
  async function approvePurposeWeek(){
   setBusy('purpose-publish');setError('');
   try{
-   if(!introAthlete||!setupStatus?.safe_to_use_no_history_path||!purposePreview?.sessions)
+   if(!introAthlete||!setupStatus?.safe_to_use_no_history_path||!purposePreview?.sessions||vipaAudit?.status!=='review_ready')
       throw new Error('Review the full purpose-based week first');
    const {data,error}=await supabase.rpc('coach_publish_session_purpose_v3',{
       p_athlete_id:introAthlete,
@@ -324,7 +331,7 @@ export default function CoachWeeklyReview(){
   {error&&<p role="alert" style={{color:'#ffc7a6'}}>{error}</p>}
   <div style={{padding:16,borderRadius:18,background:'#102b42',border:'1px solid #31566e',display:'grid',gap:12,color:'#ecf6ff'}}>
    <label style={{fontSize:13,fontWeight:700}}>Athlete
-    <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setNextWeekPreview(null);setPurposePreview(null);setIntroMessage('');}}>
+    <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setNextWeekPreview(null);setPurposePreview(null);setVipaAudit(null);setIntroMessage('');}}>
      <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}{a.onboardingReady?' · Ready for review':' · Setup incomplete'}</option>)}
     </select></label>
    {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>}
@@ -377,6 +384,15 @@ export default function CoachWeeklyReview(){
      {purposePreview&&<div style={{marginTop:12}}>
         <strong>Week of {purposePreview.week_start} · {purposePreview.session_count} sessions · {purposePreview.total_minutes} minutes</strong>
         <p style={{fontSize:12,color:'#b6ccdc'}}>Preview only · No intensity increase · Existing calendar remains unchanged until approved</p>
+        {vipaAudit&&<details open style={{border:'1px solid #39718a',borderRadius:12,padding:12,margin:'12px 0',background:'#123951',fontSize:13}}>
+          <summary style={{cursor:'pointer',fontWeight:800}}>VIPA quality gate · {vipaAudit.status==='review_ready'?'Ready for coach review':'Publication blocked'}</summary>
+          <p style={{margin:'9px 0'}}><strong>V — Variety:</strong> {vipaAudit.pillars?.variety?.unique_session_structures} distinct structures · {vipaAudit.pillars?.variety?.repeated_recent_sessions} repeats from recent weeks</p>
+          <p style={{margin:'9px 0'}}><strong>I — Intentional Intensity:</strong> {vipaAudit.pillars?.intentional_intensity?.proposed_escalated_sessions} escalated sessions · history {vipaAudit.pillars?.intentional_intensity?.validated_history?'validated':'not validated'}</p>
+          <p style={{margin:'9px 0'}}><strong>P — Progression:</strong> {vipaAudit.pillars?.progression?.calendar_based_increase_authorised?'Coach-reviewed':'No automatic increase'}</p>
+          <p style={{margin:'9px 0'}}><strong>A — Adaptation:</strong> Requires recorded training response and coach review</p>
+          {(vipaAudit.issues||[]).map((issue:string,i:number)=><p key={'issue'+i} style={{color:'#ffb7a5'}}>Hold: {issue}</p>)}
+          {(vipaAudit.warnings||[]).map((warning:string,i:number)=><p key={'warn'+i} style={{color:'#f5d999'}}>Review: {warning}</p>)}
+        </details>}
         {purposePreview.purpose_engine?.under15hMixPolicy&&<details style={{border:'1px solid #3b637b',borderRadius:10,padding:'10px 12px',margin:'12px 0',fontSize:13}}>
           <summary style={{cursor:'pointer',fontWeight:700}}>Weekly intensity philosophy · Mixed zones under 15 hours</summary>
           <p style={{margin:'8px 0'}}>{purposePreview.purpose_engine.under15hMixPolicy.rationale}</p>
@@ -398,7 +414,7 @@ export default function CoachWeeklyReview(){
           <small style={{color:'#b9d4e3'}}>Coach guidance only · These examples are not extra scheduled workouts</small>
         </details>}
         <div>{sessionList(purposePreview.sessions||[])}</div>
-        <button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700,marginTop:12}} disabled={Boolean(busy)}
+        <button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700,marginTop:12}} disabled={Boolean(busy)||vipaAudit?.status!=='review_ready'}
          onClick={()=>void approvePurposeWeek()}>{busy==='purpose-publish'?'Publishing approved V3 week…':'Approve & Publish V3 week'}</button>
      </div>}
    </details>}
