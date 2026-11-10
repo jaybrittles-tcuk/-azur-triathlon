@@ -63,7 +63,13 @@ export default function AthleteOnboardingDraft(){
     setMessage(pending?.length?'Your email is confirmed. Accept your existing coach invitation to begin setup.':'No active coach invitation was found for this email. Please contact your coach.');setLoading(false);return;}
    setInvitationVerified(true);
    const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
-   if(!cancelled && profile?.display_name) setDisplayName(profile.display_name);
+   if(!cancelled && profile?.display_name) {
+    // Supabase can provision an email-derived placeholder. Do not mistake this for
+    // a person's name when asking for personalised coaching and dashboard greetings.
+    const emailLocal=(user.email||'').split('@')[0].toLowerCase();
+    const current=profile.display_name.trim();
+    setDisplayName(current.toLowerCase()===emailLocal?'':current);
+   }
    const {data:schedule}=await supabase.from('athlete_schedule_preference').select('schedule_pattern,planning_preference,swim_days,bike_days,run_days,long_bike_day,long_run_day').eq('user_id',user.id).maybeSingle();
    if(!cancelled&&schedule){
     if(['fixed','variable','rotating'].includes(schedule.schedule_pattern))setSchedulePattern(schedule.schedule_pattern as 'fixed'|'variable'|'rotating');
@@ -170,7 +176,7 @@ export default function AthleteOnboardingDraft(){
   <div className="azur-onboarding-track" role="progressbar" aria-label="Athlete setup progress" aria-valuemin={0} aria-valuemax={5} aria-valuenow={step+1}><span style={{width:`${(step+1)/5*100}%`}}/></div>
   {step===0&&<div>
    <h3>What are you training towards?</h3><p>Your goal sets the direction. Your current fitness and availability determine where we begin.</p>
-   <label>Your name<input type="text" maxLength={90} required value={displayName} onChange={e=>setDisplayName(e.target.value)}/></label>
+   <label>Your full name (not your email address)<input type="text" maxLength={90} required autoComplete="name" value={displayName} onChange={e=>setDisplayName(e.target.value)} placeholder="First and last name"/></label>
    <label>Race distance<select value={race} onChange={e=>setRace(e.target.value as Race)}>
     <option value="sprint">Sprint</option><option value="olympic">Olympic</option>
     <option value="70.3">IRONMAN 70.3</option><option value="ironman">IRONMAN</option>
