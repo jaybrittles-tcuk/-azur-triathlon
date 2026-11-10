@@ -7,6 +7,19 @@ const icons={bike:Bike,swim:Waves,run:Footprints};
 const minutes=(n:number)=>n>=60?`${Math.floor(n/60)}h ${Math.round(n%60)}m`:`${Math.round(n)} min`;
 export default function AthleteDashboard({name,avatar,race,phase,today,sessions,readiness,weeklyStress,onSession,onNavigate}:Props){
  const todayHeading=useId();
+ const [merseyTriBeta,setMerseyTriBeta]=useState(false);
+ useEffect(()=>{
+  let active=true;
+  (async()=>{
+   const {data:{user}}=await supabase.auth.getUser();
+   if(!user)return;
+   const {data:profile,error:profileError}=await supabase.from('athlete_profile').select('id').eq('user_id',user.id).maybeSingle();
+   if(profileError||!profile?.id)return;
+   const {data:cohort,error}=await supabase.from('athlete_beta_cohort').select('cohort_key').eq('athlete_id',profile.id).maybeSingle();
+   if(active&&!error)setMerseyTriBeta(cohort?.cohort_key==='mersey_tri');
+  })().catch(()=>{/* Keep default banner if cohort cannot be loaded. */});
+  return()=>{active=false};
+ },[]);
  const [strategy,setStrategy]=useState<{weekly_hours:number|null;recent_weekly_hours:number|null;training_background:string|null;training_consistency:string|null;race_distance:string|null;race_date:string|null;swim_css_seconds_per_100m:number|null;ftp_watts:number|null;run_threshold_seconds_per_km:number|null}|null>(null);
  const [strategyLoading,setStrategyLoading]=useState(false);
  const [coachingBrief,setCoachingBrief]=useState<{rationale:string;action:string}|null>(null);
@@ -59,7 +72,10 @@ export default function AthleteDashboard({name,avatar,race,phase,today,sessions,
  const readyLabel=!readiness?'Readiness unavailable':readiness.color==='green'?'Ready for planned training':readiness.color==='amber'?'Review your recovery':'Recovery needs attention';
  const shortRationale=current?.rationale?.trim();const insight=shortRationale?(shortRationale.length>150?shortRationale.slice(0,147)+'…':shortRationale):current?'Follow the prescribed targets. Open the session for its full structure.':'No session is scheduled today. Check your calendar for what is next.';
  return <div className="azur-white-dashboard" aria-label="Athlete dashboard">
-  <header className="awd-hero"><div className="awd-brand"><img src="/brand/azur-logo-250.png" alt="Azur Triathlon Coaching"/><button type="button" aria-label="Open athlete profile" onClick={()=>onNavigate('Profile')}>{avatar?<img src={avatar} alt=""/>:<UserRound size={21}/>}</button></div><p className="awd-greeting">Your day, {name?.split(' ')[0]||'athlete'}.</p><h1>{race.name||'Your next goal'}</h1><div className="awd-race-meta"><span>{phase||'Training plan'}</span><span>{raceDays===null?'Set your race date in Profile':raceDays<0?'Review your next race goal':raceDays===0?'Race day':`${raceDays} days to race day`}</span></div></header>
+  <header className={`awd-hero${merseyTriBeta?' awd-hero-mersey':''}`}><div className="awd-brand"><img src="/brand/azur-logo-250.png" alt="Azur Triathlon Coaching"/><button type="button" aria-label="Open athlete profile" onClick={()=>onNavigate('Profile')}>{avatar?<img src={avatar} alt=""/>:<UserRound size={21}/>}</button></div>{merseyTriBeta&&<div className="awd-mersey-partner">
+   <div className="awd-mersey-artwork"><img src="/brand/mersey-tri-banner.svg" alt="Mersey Tri"/></div>
+   <span className="awd-mersey-label">Mersey Tri Beta</span>
+  </div>}<p className="awd-greeting">Your day, {name?.split(' ')[0]||'athlete'}.</p><h1>{race.name||'Your next goal'}</h1><div className="awd-race-meta"><span>{phase||'Training plan'}</span><span>{raceDays===null?'Set your race date in Profile':raceDays<0?'Review your next race goal':raceDays===0?'Race day':`${raceDays} days to race day`}</span></div></header>
   <div className="awd-body">
    <section className="awd-card awd-session" aria-labelledby={todayHeading}><div className="awd-heading"><h2 id={todayHeading}>Today’s session{todays.length>1?'s':''}</h2><span className="awd-tag">{todays.length?`${todays.length} planned`:'Unscheduled'}</span></div>
     {todays.length?todays.map(s=>{const Icon=icons[s.sport as keyof typeof icons]??Bike;const blocks=['warmup','main_set','cooldown'].flatMap(key=>Array.isArray(s.prescription?.[key])?s.prescription[key].map((b:any)=>({...b,kind:key})):[]).filter(b=>Number(b.duration_min)>0);return <article key={s.id} className={`awd-workout ${s.sport}`}><div className="awd-workout-title"><span className="awd-sport-icon"><Icon size={22}/></span><div><h3>{s.title}</h3><p>{s.sport.toUpperCase()} · {minutes(Number(s.durationMin)||0)} · {s.status==='completed'?'Recorded complete':'Planned'}</p></div></div>{blocks.length>0&&<><div className="awd-prescription" aria-hidden="true">{blocks.map((b:any,i:number)=><span key={i} className={b.kind} style={{flex:Number(b.duration_min)}}/>)}</div><p className="awd-target">{blocks.find((b:any)=>b.kind==='main_set')?.target||'Structured session'}<span>Prescribed effort</span></p></>}<button type="button" className="awd-primary" onClick={()=>onSession(s.id)}>View session <ArrowUpRight size={17}/></button></article>}):<div className="awd-unscheduled"><h3>No workout scheduled</h3><p>Your calendar has no session for today.</p><button type="button" className="awd-primary" onClick={()=>onNavigate('Calendar')}>View calendar <ArrowUpRight size={17}/></button></div>}
