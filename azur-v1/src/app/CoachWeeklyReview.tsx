@@ -34,6 +34,7 @@ export default function CoachWeeklyReview(){
  const [setupStatus,setSetupStatus]=useState<{status:string;label:string;safe_to_use_no_history_path:boolean}|null>(null);
  const [swimAssessment,setSwimAssessment]=useState<{recommended_focus:string;recommended_practice:string;execution_cue:string;why_today_matters:string;focus_source:string;css_status:string;next_evidence:string}|null>(null);
  const [coachingModel,setCoachingModel]=useState<any>(null);
+ const [trainingResponse,setTrainingResponse]=useState<any>(null);
  const [merseyBeta,setMerseyBeta]=useState(false);
  const [merseyLoading,setMerseyLoading]=useState(false);
  const [purposePreview,setPurposePreview]=useState<any>(null);
@@ -80,17 +81,19 @@ export default function CoachWeeklyReview(){
  })();return()=>{live=false};},[reload]);
  useEffect(()=>{
   let live=true;
-  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setNextWeekPreview(null);setPurposePreview(null);
+  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setTrainingResponse(null);setNextWeekPreview(null);setPurposePreview(null);
   if(!introAthlete||loading)return()=>{live=false};
   (async()=>{
-   const [{data,error},{data:swimData,error:swimError},{data:modelData,error:modelError}]=await Promise.all([
+   const [{data,error},{data:swimData,error:swimError},{data:modelData,error:modelError},{data:responseData,error:responseError}]=await Promise.all([
      supabase.rpc('coach_athlete_setup_status',{p_athlete_id:introAthlete}),
      supabase.rpc('coach_swim_intelligence_preview',{p_athlete_id:introAthlete}),
-     supabase.rpc('coach_training_intelligence_preview',{p_athlete_id:introAthlete})
+     supabase.rpc('coach_training_intelligence_preview',{p_athlete_id:introAthlete}),
+     supabase.rpc('coach_training_response_preview',{p_athlete_id:introAthlete})
    ]);
    if(!live)return;
    if(!swimError&&swimData?.status==='review_only')setSwimAssessment(swimData);
    if(!modelError&&modelData?.model_version==='coach_intelligence_v2')setCoachingModel(modelData);
+   if(!responseError&&responseData?.status==='review_only')setTrainingResponse(responseData);
    if(error){setError('Unable to check athlete history status: '+error.message);return;}
    const status=data as {status:string;label:string;safe_to_use_no_history_path:boolean};
    setSetupStatus(status);
@@ -311,6 +314,14 @@ export default function CoachWeeklyReview(){
      <span style={{fontSize:13}}><strong>Mersey Tri beta branding</strong><small style={{display:'block',color:'#b8d2e3',marginTop:3}}>{merseyBeta?'Enabled for athlete dashboard':'Default AZUR dashboard header'}</small></span>
      <button type="button" disabled={merseyLoading||Boolean(busy)} onClick={()=>void setMerseyCohort()} style={{borderRadius:10,minWidth:78,background:merseyBeta?'#1779b0':'#203d51',color:'white',padding:'9px 12px'}}>{merseyLoading?'Saving…':merseyBeta?'Enabled':'Enable'}</button>
    </div>}
+   {trainingResponse&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
+      <summary style={{cursor:'pointer',fontWeight:800}}>Training Response · {trainingResponse.response_category==='insufficient_completed_evidence'?'Gather athlete feedback':'Coach evidence review'}</summary>
+      <div style={{fontSize:13,paddingTop:10,display:'grid',gap:8}}>
+       <p><strong>Recent 28 days:</strong> {trainingResponse.calendar_completed_sessions} calendar completions · {trainingResponse.recorded_activities_not_rejected} recorded activities · {trainingResponse.rpe_feedback_count} effort ratings</p>
+       <p>{trainingResponse.coach_recommendation}</p>
+       <small style={{color:'#b9d5e5'}}>Missing training records are not evidence of poor fitness. Coach approval required for major programme changes.</small>
+      </div>
+   </details>}
    {coachingModel&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
      <summary style={{cursor:'pointer',fontWeight:800}}>AZUR Coaching Intelligence · {coachingModel.primary_priority}</summary>
      <div style={{display:'grid',gap:9,paddingTop:12,fontSize:13}}>
