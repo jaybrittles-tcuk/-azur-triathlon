@@ -295,12 +295,14 @@ export default function CoachWeeklyReview(){
   return <details key={i} style={{padding:'10px 0',borderBottom:'1px solid #284b62'}}>
     <summary style={{cursor:'pointer',fontSize:14}}><strong>{String(x.title||'Workout')}</strong> <span style={{color:'#9bbbd0'}}>{Number(x.durationMin||0)} min · {String(x.sport||'').toUpperCase()}</span></summary>
     {x.prescription?.purpose?<div style={{fontSize:13,color:'#cbe7f5',lineHeight:1.5,padding:'10px 0'}}>
-      <p style={{margin:'0 0 6px'}}><strong>Why this workout:</strong> {x.prescription.purpose.primaryAdaptation}</p>
+      <p style={{margin:'0 0 6px'}}><strong>Main development:</strong> {x.prescription.purpose.primaryAdaptation}</p>
+      {x.prescription.purpose.secondaryFocus&&<p style={{margin:'0 0 6px'}}><strong>Secondary focus:</strong> {x.prescription.purpose.secondaryFocus}</p>}
       <p style={{margin:'0 0 6px'}}>{x.prescription.purpose.executionCue}</p>
       {x.prescription.workoutSummary&&<p style={{margin:'12px 0 6px',fontWeight:700,color:'#fff'}}>{x.prescription.workoutSummary}</p>}
       <details style={{marginTop:10}}><summary style={{cursor:'pointer',color:'#b4dff5'}}>Coaching evidence and what to monitor</summary>
         <p>{x.prescription.purpose.selectionReason}</p>
         <p><strong>Monitor:</strong> {x.prescription.purpose.responseToMonitor}</p>
+        {x.prescription.purpose.intensityDecision&&<p><strong>Intensity decision:</strong> {String(x.prescription.purpose.intensityDecision).replaceAll('_',' ')}</p>}
         <small>Evidence: {String(x.prescription.purpose.evidenceSource).replaceAll('_',' ')} · {x.prescription.purpose.evidenceConfidence} confidence</small>
       </details>
     </div>:<p style={{fontSize:13,color:'#c8dce9',lineHeight:1.5}}>{String(x.rationale||'Controlled introductory session')}</p>}
