@@ -294,18 +294,23 @@ export default function CoachWeeklyReview(){
   const x=item.session||item;
   return <details key={i} style={{padding:'10px 0',borderBottom:'1px solid #284b62'}}>
     <summary style={{cursor:'pointer',fontSize:14}}><strong>{String(x.title||'Workout')}</strong> <span style={{color:'#9bbbd0'}}>{Number(x.durationMin||0)} min · {String(x.sport||'').toUpperCase()}</span></summary>
-    <p style={{fontSize:13,color:'#c8dce9',lineHeight:1.5}}>{String(x.rationale||'Controlled introductory session')}</p>
-    {x.prescription?.purpose&&<div style={{fontSize:12,color:'#add9f4',padding:'8px 0'}}>
-      <strong>Primary adaptation:</strong> {x.prescription.purpose.primaryAdaptation}
-      <p style={{margin:'5px 0'}}>Coach execution cue: {x.prescription.purpose.executionCue}</p>
-      <p style={{margin:'5px 0'}}>Monitor next: {x.prescription.purpose.responseToMonitor}</p>
-      <small>Evidence: {String(x.prescription.purpose.evidenceSource).replaceAll('_',' ')} · {x.prescription.purpose.evidenceConfidence} confidence</small>
-    </div>}
-    <div style={{fontSize:12,color:'#b7d0df'}}>{Array.isArray(x.prescription?.steps)?x.prescription.steps.map((s:any,j:number)=><p key={j} style={{margin:'5px 0'}}>{s.durationMin} min · {s.target}</p>):null}
-      {Array.isArray(x.prescription?.poolSegments)&&x.prescription.poolSegments.length>0&&<details><summary>Swim sets · {x.prescription.totalDistanceMeters} m</summary>
+    {x.prescription?.purpose?<div style={{fontSize:13,color:'#cbe7f5',lineHeight:1.5,padding:'10px 0'}}>
+      <p style={{margin:'0 0 6px'}}><strong>Why this workout:</strong> {x.prescription.purpose.primaryAdaptation}</p>
+      <p style={{margin:'0 0 6px'}}>{x.prescription.purpose.executionCue}</p>
+      {x.prescription.workoutSummary&&<p style={{margin:'12px 0 6px',fontWeight:700,color:'#fff'}}>{x.prescription.workoutSummary}</p>}
+      <details style={{marginTop:10}}><summary style={{cursor:'pointer',color:'#b4dff5'}}>Coaching evidence and what to monitor</summary>
+        <p>{x.prescription.purpose.selectionReason}</p>
+        <p><strong>Monitor:</strong> {x.prescription.purpose.responseToMonitor}</p>
+        <small>Evidence: {String(x.prescription.purpose.evidenceSource).replaceAll('_',' ')} · {x.prescription.purpose.evidenceConfidence} confidence</small>
+      </details>
+    </div>:<p style={{fontSize:13,color:'#c8dce9',lineHeight:1.5}}>{String(x.rationale||'Controlled introductory session')}</p>}
+    {Array.isArray(x.prescription?.steps)&&<details style={{fontSize:12,color:'#b7d0df',marginTop:6}} open={!x.prescription?.workoutSummary&&x.prescription.steps.length<=3}>
+       <summary style={{cursor:'pointer'}}>Detailed workout steps · {x.prescription.steps.length}</summary>
+       {x.prescription.steps.map((s:any,j:number)=><p key={j} style={{margin:'7px 0'}}>{s.durationMin} min · {s.target}</p>)}
+    </details>}
+    {Array.isArray(x.prescription?.poolSegments)&&x.prescription.poolSegments.length>0&&<details style={{fontSize:12,color:'#b7d0df',marginTop:8}}><summary>Pool distance intervals · {x.prescription.totalDistanceMeters} m</summary>
        {x.prescription.poolSegments.map((s:any,j:number)=><p key={j}>{s.repeats} × {s.distanceMeters}m · {s.target} · {s.restSeconds}s rest</p>)}
-      </details>}
-    </div>
+    </details>}
   </details>;
  });
  return <section className="coach-attention-v2" aria-label="Weekly plan reviews">
