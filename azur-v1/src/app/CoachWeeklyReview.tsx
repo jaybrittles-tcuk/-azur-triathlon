@@ -360,6 +360,13 @@ export default function CoachWeeklyReview(){
      {purposePreview&&<div style={{marginTop:12}}>
         <strong>Week of {purposePreview.week_start} · {purposePreview.session_count} sessions · {purposePreview.total_minutes} minutes</strong>
         <p style={{fontSize:12,color:'#b6ccdc'}}>Preview only · No intensity increase · Existing calendar remains unchanged until approved</p>
+        {purposePreview.purpose_engine?.under15hMixPolicy&&<details style={{border:'1px solid #3b637b',borderRadius:10,padding:'10px 12px',margin:'12px 0',fontSize:13}}>
+          <summary style={{cursor:'pointer',fontWeight:700}}>Weekly intensity philosophy · Mixed zones under 15 hours</summary>
+          <p style={{margin:'8px 0'}}>{purposePreview.purpose_engine.under15hMixPolicy.rationale}</p>
+          <p style={{margin:'8px 0'}}><strong>Secondary stimulus:</strong> {String(purposePreview.purpose_engine.under15hMixPolicy.secondary_stimulus).replaceAll('_',' ')}</p>
+          <p style={{margin:'8px 0'}}><strong>Readiness:</strong> {String(purposePreview.purpose_engine.under15hMixPolicy.readiness_status).replaceAll('_',' ')}</p>
+          <p style={{fontSize:12,color:'#a5c5d8'}}>Suggested zone proportions are illustrative only, not a compulsory quota or a substitute for sport-specific thresholds and coach review.</p>
+        </details>}
         <div>{sessionList(purposePreview.sessions||[])}</div>
         <button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700,marginTop:12}} disabled={Boolean(busy)}
          onClick={()=>void approvePurposeWeek()}>{busy==='purpose-publish'?'Publishing approved V3 week…':'Approve & Publish V3 week'}</button>
