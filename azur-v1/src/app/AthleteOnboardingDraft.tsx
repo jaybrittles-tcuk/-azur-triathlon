@@ -36,6 +36,7 @@ export default function AthleteOnboardingDraft(){
  const [consistency,setConsistency]=useState('4to7');
  const [concern,setConcern]=useState('none');
  const [canSwim,setCanSwim]=useState(true);
+ const [swimFocus,setSwimFocus]=useState('unknown');
  const [ready,setReady]=useState(false);
  const [planSummary,setPlanSummary]=useState<{sessions:number;total_minutes?:number;calendar?:{date:string;sport:string;duration_min:number;title:string}[]}|null>(null);
  const [betaAcknowledged,setBetaAcknowledged]=useState(false);
@@ -78,14 +79,14 @@ export default function AthleteOnboardingDraft(){
     setLongBikeDay(schedule.long_bike_day==null?'':weekdays[schedule.long_bike_day]);
     setLongRunDay(schedule.long_run_day==null?'':weekdays[schedule.long_run_day]);
    }
-   const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,training_days,recent_weekly_hours,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,training_background,training_consistency,current_training_concern,can_swim_200m,device,onboarding_step').eq('user_id',user.id).maybeSingle();
+   const {data,error}=await supabase.from('athlete_onboarding').select('race_distance,race_date,experience,weekly_hours,training_days,recent_weekly_hours,ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,training_background,training_consistency,current_training_concern,can_swim_200m,swim_focus_self_report,device,onboarding_step').eq('user_id',user.id).maybeSingle();
    if(cancelled)return;
    if(error)setMessage('Could not load your saved setup: '+error.message);
    else if(data){
     setRace(data.race_distance as Race);setRaceDate(data.race_date||'');
     setExperience(data.experience);setHours(String(data.weekly_hours));
     setDevice(data.device as Device);
-    setBackground(['novice','regular','established'].includes(data.training_background)?data.training_background:'');setBackgroundTouched(true);setConsistency(['under4','4to7','8plus'].includes(data.training_consistency)?data.training_consistency:'');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);
+    setBackground(['novice','regular','established'].includes(data.training_background)?data.training_background:'');setBackgroundTouched(true);setConsistency(['under4','4to7','8plus'].includes(data.training_consistency)?data.training_consistency:'');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);setSwimFocus(data.swim_focus_self_report||'unknown');
     setTrainingDays((data.training_days||[]).map((day:number)=>weekdays[day]).filter(Boolean));setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
     setFtp(data.ftp_watts==null?'':String(data.ftp_watts));setCss(data.swim_css_seconds_per_100m==null?'':formatPace(String(data.swim_css_seconds_per_100m)));setRunThreshold(data.run_threshold_seconds_per_km==null?'':formatPace(String(data.run_threshold_seconds_per_km)));setStep(Math.min(4,Math.max(0,data.onboarding_step)));
     // Existing athlete data is always preserved; no automatic plan changes.
@@ -135,7 +136,7 @@ export default function AthleteOnboardingDraft(){
      user_id:userId,race_distance:race,race_date:raceDate||null,experience,
      weekly_hours:Number(hours),training_days:trainingDays.map(day=>weekdays.indexOf(day)),
      training_background:background,training_consistency:consistency,
-     current_training_concern:concern,can_swim_200m:canSwim,
+     current_training_concern:concern,can_swim_200m:canSwim,swim_focus_self_report:swimFocus,
      recent_weekly_hours:recentHours===''?null:Number(recentHours),
      ftp_watts:ftp===''?null:Number(ftp),swim_css_seconds_per_100m:parsePace(css),
      run_threshold_seconds_per_km:parsePace(runThreshold),device,
@@ -149,7 +150,7 @@ export default function AthleteOnboardingDraft(){
   }
   const {error}=await supabase.from('athlete_onboarding').upsert({
    user_id:userId,race_distance:race,race_date:raceDate||null,
-   experience,weekly_hours:Number(hours),training_days:trainingDays.map(day=>weekdays.indexOf(day)),training_background:background,training_consistency:consistency,current_training_concern:concern,can_swim_200m:canSwim,recent_weekly_hours:recentHours===''?null:Number(recentHours),
+   experience,weekly_hours:Number(hours),training_days:trainingDays.map(day=>weekdays.indexOf(day)),training_background:background,training_consistency:consistency,current_training_concern:concern,can_swim_200m:canSwim,swim_focus_self_report:swimFocus,recent_weekly_hours:recentHours===''?null:Number(recentHours),
    ftp_watts:ftp===''?null:Number(ftp),swim_css_seconds_per_100m:parsePace(css),run_threshold_seconds_per_km:parsePace(runThreshold),device,onboarding_step:nextStep,
    updated_at:new Date().toISOString()
   },{onConflict:'user_id'});
@@ -226,6 +227,16 @@ export default function AthleteOnboardingDraft(){
    <label>Recent training consistency<select value={consistency} onChange={e=>setConsistency(e.target.value)}><option value="" disabled>Choose your recent consistency</option><option value="under4">Under 4 weeks consistent</option><option value="4to7">4–7 weeks consistent</option><option value="8plus">8+ weeks consistent</option></select></label>
    <label>Any current injury or training concern?<select value={concern} onChange={e=>setConcern(e.target.value)}><option value="none">No</option><option value="yes">Yes — coach review needed</option><option value="unsure">Unsure — coach review needed</option></select></label>
    <label>Can you comfortably swim 200m continuously?<select value={canSwim?'yes':'no'} onChange={e=>setCanSwim(e.target.value==='yes')}><option value="yes">Yes</option><option value="no">Not yet</option></select></label>
+   <label>What would you most like to improve about your swimming? (optional)<select value={swimFocus} onChange={e=>setSwimFocus(e.target.value)}>
+     <option value="unknown">Not sure yet</option>
+     <option value="breathing">Breathing and staying relaxed</option>
+     <option value="body_position">Body position and balance</option>
+     <option value="catch">Feeling an effective catch</option>
+     <option value="rhythm">Stroke rhythm and timing</option>
+     <option value="open_water">Open-water confidence and sighting</option>
+     <option value="endurance">Swimming longer without tiring</option>
+   </select></label>
+   <small>This guides possible technique priorities. AZUR does not diagnose stroke faults from a self-report or CSS alone.</small>
 
   </div>}
   {step===2&&<div>   <h3>Your current fitness</h3>
