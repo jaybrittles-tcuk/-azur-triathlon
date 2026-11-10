@@ -6966,3 +6966,54 @@ strong {
   outline:2px solid #38a7e8;
   outline-offset:-3px;
 }
+
+/* Mersey Tri partner-specific athlete hero (opt-in beta cohort only). */
+.awd-hero.awd-hero-mersey{
+ background:linear-gradient(180deg,#0b2041 0%,#102a48 100%);
+ padding-bottom:34px;
+}
+.awd-mersey-partner{
+ display:flex;
+ flex-direction:column;
+ align-items:flex-start;
+ gap:4px;
+ margin:-14px 0 14px;
+}
+.awd-mersey-artwork{
+ width:min(100%,330px);
+ max-height:112px;
+ overflow:hidden;
+ border-radius:8px;
+ position:relative;
+ background:#0b2041;
+}
+.awd-mersey-artwork img{
+ display:block;
+ width:100%;
+ height:112px;
+ object-fit:cover;
+ object-position:center;
+}
+.awd-mersey-artwork:after{
+ content:'';
+ position:absolute;
+ inset:0;
+ background:linear-gradient(180deg,transparent 48%,rgba(4,23,44,.18));
+ pointer-events:none;
+}
+.awd-mersey-label{
+ display:inline-block;
+ padding:4px 9px;
+ border:1px solid rgba(53,187,235,.35);
+ border-radius:999px;
+ background:rgba(29,135,184,.16);
+ color:#bde9ff;
+ font-size:10px;
+ font-weight:800;
+ letter-spacing:.08em;
+ text-transform:uppercase;
+}
+@media(max-width:420px){
+ .awd-mersey-artwork{max-height:96px;width:min(100%,300px)}
+ .awd-mersey-artwork img{height:96px}
+}
