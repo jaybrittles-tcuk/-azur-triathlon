@@ -1,0 +1,27 @@
+name: AZUR coaching intelligence validation
+on:
+  push:
+    branches:
+      - feature/swim-intelligence-rules-20261109
+  pull_request:
+    paths:
+      - 'azur-v1/src/lib/**'
+      - '.github/workflows/azur-coaching-validation.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: azur-v1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run coaching intelligence tests
+        run: npm test
+      - name: TypeScript check
+        run: npx tsc --noEmit
