@@ -24,7 +24,7 @@ export default function CoachWeeklyReview(){
  const [busy,setBusy]=useState('');
  const [note,setNote]=useState('');
  const [reload,setReload]=useState(0);
- const [introAthletes,setIntroAthletes]=useState<{id:string;name:string}[]>([]);
+ const [introAthletes,setIntroAthletes]=useState<{id:string;name:string;onboardingReady:boolean}[]>([]);
  const [introAthlete,setIntroAthlete]=useState('');
  const [introPreview,setIntroPreview]=useState<any>(null);
  const [introMessage,setIntroMessage]=useState('');
@@ -52,14 +52,15 @@ export default function CoachWeeklyReview(){
    const weekStart=(()=>{const d=new Date();const day=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-day);return d.toISOString().slice(0,10)})();
    const weekEnd=(()=>{const d=new Date(weekStart+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+6);return d.toISOString().slice(0,10)})();
    const nextEnd=(()=>{const d=new Date(weekStart+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+13);return d.toISOString().slice(0,10)})();
-   const [drafts,profiles,baselines,history,planned]=await Promise.all([
+   const [drafts,profiles,baselines,history,planned,onboardings]=await Promise.all([
      supabase.from('weekly_plan_draft').select('id,athlete_id,week_start,revision,phase,sessions,proposal_fingerprint,created_at').in('athlete_id',ids).order('created_at',{ascending:false}).limit(150),
-     supabase.from('athlete_profile').select('id,display_name').in('id',ids),
+     supabase.from('athlete_profile').select('id,user_id,display_name').in('id',ids),
      supabase.from('coach_history_baseline_review').select('athlete_id,decision,approved_weekly_hours').in('athlete_id',ids),
      supabase.from('athlete_history_baseline').select('athlete_id,validation_status').in('athlete_id',ids),
-     supabase.from('planned_session').select('athlete_id,planned_date').in('athlete_id',ids).gte('planned_date',weekStart).lte('planned_date',nextEnd).eq('is_active_version',true)
+     supabase.from('planned_session').select('athlete_id,planned_date').in('athlete_id',ids).gte('planned_date',weekStart).lte('planned_date',nextEnd).eq('is_active_version',true),
+     supabase.from('athlete_onboarding').select('user_id,onboarding_step').eq('onboarding_step',4)
    ]);
-   if(drafts.error||profiles.error||baselines.error||history.error||planned.error)throw new Error(drafts.error?.message||profiles.error?.message||baselines.error?.message||history.error?.message||planned.error?.message||'Unable to load weekly drafts');
+   if(drafts.error||profiles.error||baselines.error||history.error||planned.error||onboardings.error)throw new Error(drafts.error?.message||profiles.error?.message||baselines.error?.message||history.error?.message||planned.error?.message||onboardings.error?.message||'Unable to load weekly drafts');
    if(live){
     setPublishedAthletes([...new Set((planned.data??[]).filter(s=>s.planned_date<=weekEnd).map(s=>s.athlete_id))]);
     setNextWeekPublished([...new Set((planned.data??[]).filter(s=>s.planned_date>weekEnd).map(s=>s.athlete_id))]);
@@ -72,7 +73,13 @@ export default function CoachWeeklyReview(){
    const names=new Map((profiles.data??[]).map(p=>[p.id,p.display_name||'Assigned athlete']));
    const approved=new Map((baselines.data??[]).map(x=>[x.athlete_id,x]));
    const statuses=new Map((history.data??[]).map(x=>[x.athlete_id,x.validation_status]));
-   if(live){const candidates=(profiles.data??[]).map(p=>({id:p.id,name:p.display_name||'Assigned athlete'}));setIntroAthletes(candidates);setIntroAthlete(old=>candidates.some(a=>a.id===old)?old:(candidates[0]?.id||''));}
+   if(live){
+    const readyUsers=new Set((onboardings.data??[]).map(o=>o.user_id));
+    const candidates=(profiles.data??[]).map(p=>({id:p.id,name:p.display_name||'Assigned athlete',onboardingReady:readyUsers.has(p.user_id)}))
+      .sort((a,b)=>Number(b.onboardingReady)-Number(a.onboardingReady)||a.name.localeCompare(b.name));
+    setIntroAthletes(candidates);
+    setIntroAthlete(old=>candidates.some(a=>a.id===old)?old:(candidates.find(a=>a.onboardingReady)?.id||candidates[0]?.id||''));
+   }
    const latest=new Map<string,Draft>();
    for(const d of all){const key=d.athlete_id+':'+d.week_start;const previous=latest.get(key);if(!previous||d.revision>previous.revision)latest.set(key,d);}
    if(live)setRows([...latest.values()].map(d=>({...d,athleteName:names.get(d.athlete_id)||'Assigned athlete',decision:last.get(d.id)?.decision||'pending',approvedWeeklyHours:approved.get(d.athlete_id)?.decision==='validated'?Number(approved.get(d.athlete_id)?.approved_weekly_hours):null,baselineValidated:statuses.get(d.athlete_id)==='validated'&&approved.get(d.athlete_id)?.decision==='validated'})).sort((a,b)=>b.week_start.localeCompare(a.week_start)));
@@ -281,6 +288,7 @@ export default function CoachWeeklyReview(){
  const activeRow=rows.find(row=>row.athlete_id===introAthlete && row.phase==='foundation_no_history');
  const otherRows=rows.filter(row=>row.id!==activeRow?.id);
  const selectedName=introAthletes.find(a=>a.id===introAthlete)?.name||'Athlete';
+ const selectedOnboardingReady=introAthletes.find(a=>a.id===introAthlete)?.onboardingReady===true;
  const total=(row:Row)=>Array.isArray(row.sessions)?row.sessions.reduce((n:number,x:any)=>n+(Number(x?.session?.durationMin)||0),0):0;
  const sessionList=(sessions:any[])=>sessions.map((item:any,i:number)=>{
   const x=item.session||item;
@@ -307,9 +315,10 @@ export default function CoachWeeklyReview(){
   <div style={{padding:16,borderRadius:18,background:'#102b42',border:'1px solid #31566e',display:'grid',gap:12,color:'#ecf6ff'}}>
    <label style={{fontSize:13,fontWeight:700}}>Athlete
     <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setNextWeekPreview(null);setPurposePreview(null);setIntroMessage('');}}>
-     <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
+     <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}{a.onboardingReady?' · Ready for review':' · Setup incomplete'}</option>)}
     </select></label>
    {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>}
+   {introAthlete&&!selectedOnboardingReady&&<p role="status" style={{fontSize:13,color:'#f3cf83',margin:0}}>This athlete has not completed onboarding. Select a ready athlete above to review V3 workouts and training intelligence.</p>}
    {introAthlete&&<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,padding:'10px 12px',border:'1px solid #335973',borderRadius:12}}>
      <span style={{fontSize:13}}><strong>Mersey Tri beta branding</strong><small style={{display:'block',color:'#b8d2e3',marginTop:3}}>{merseyBeta?'Enabled for athlete dashboard':'Default AZUR dashboard header'}</small></span>
      <button type="button" disabled={merseyLoading||Boolean(busy)} onClick={()=>void setMerseyCohort()} style={{borderRadius:10,minWidth:78,background:merseyBeta?'#1779b0':'#203d51',color:'white',padding:'9px 12px'}}>{merseyLoading?'Saving…':merseyBeta?'Enabled':'Enable'}</button>
