@@ -36,6 +36,7 @@ export default function CoachWeeklyReview(){
  const [coachingModel,setCoachingModel]=useState<any>(null);
  const [trainingResponse,setTrainingResponse]=useState<any>(null);
  const [adaptiveSelection,setAdaptiveSelection]=useState<any>(null);
+ const [adaptationReview,setAdaptationReview]=useState<any>(null);
  const [merseyBeta,setMerseyBeta]=useState(false);
  const [merseyLoading,setMerseyLoading]=useState(false);
  const [purposePreview,setPurposePreview]=useState<any>(null);
@@ -90,21 +91,23 @@ export default function CoachWeeklyReview(){
  })();return()=>{live=false};},[reload]);
  useEffect(()=>{
   let live=true;
-  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setTrainingResponse(null);setAdaptiveSelection(null);setNextWeekPreview(null);setPurposePreview(null);setVipaAudit(null);
+  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setTrainingResponse(null);setAdaptiveSelection(null);setAdaptationReview(null);setNextWeekPreview(null);setPurposePreview(null);setVipaAudit(null);
   if(!introAthlete||loading)return()=>{live=false};
   (async()=>{
-   const [{data,error},{data:swimData,error:swimError},{data:modelData,error:modelError},{data:responseData,error:responseError},{data:adaptiveData,error:adaptiveError}]=await Promise.all([
+   const [{data,error},{data:swimData,error:swimError},{data:modelData,error:modelError},{data:responseData,error:responseError},{data:adaptiveData,error:adaptiveError},{data:adaptationData,error:adaptationError}]=await Promise.all([
      supabase.rpc('coach_athlete_setup_status',{p_athlete_id:introAthlete}),
      supabase.rpc('coach_swim_intelligence_preview',{p_athlete_id:introAthlete}),
      supabase.rpc('coach_training_intelligence_preview',{p_athlete_id:introAthlete}),
      supabase.rpc('coach_training_response_preview',{p_athlete_id:introAthlete}),
-     supabase.rpc('coach_adaptive_session_selection_v1',{p_athlete_id:introAthlete,p_primary_focus:'aerobic_development'})
+     supabase.rpc('coach_adaptive_session_selection_v1',{p_athlete_id:introAthlete,p_primary_focus:'aerobic_development'}),
+     supabase.rpc('coach_preview_adaptation_v1',{p_athlete_id:introAthlete})
    ]);
    if(!live)return;
    if(!swimError&&swimData?.status==='review_only')setSwimAssessment(swimData);
    if(!modelError&&modelData?.model_version==='coach_intelligence_v2')setCoachingModel(modelData);
    if(!responseError&&responseData?.status==='review_only')setTrainingResponse(responseData);
    if(!adaptiveError&&adaptiveData?.model_version==='adaptive_selection_v1')setAdaptiveSelection(adaptiveData);
+   if(!adaptationError&&adaptationData?.model_version==='adaptation_review_v1'&&adaptationData.calendar_changed===false)setAdaptationReview(adaptationData);
    if(error){setError('Unable to check athlete history status: '+error.message);return;}
    const status=data as {status:string;label:string;safe_to_use_no_history_path:boolean};
    setSetupStatus(status);
@@ -340,7 +343,7 @@ export default function CoachWeeklyReview(){
      <span style={{fontSize:13}}><strong>Mersey Tri beta branding</strong><small style={{display:'block',color:'#b8d2e3',marginTop:3}}>{merseyBeta?'Enabled for athlete dashboard':'Default AZUR dashboard header'}</small></span>
      <button type="button" disabled={merseyLoading||Boolean(busy)} onClick={()=>void setMerseyCohort()} style={{borderRadius:10,minWidth:78,background:merseyBeta?'#1779b0':'#203d51',color:'white',padding:'9px 12px'}}>{merseyLoading?'Saving…':merseyBeta?'Enabled':'Enable'}</button>
    </div>}
-   {(trainingResponse||adaptiveSelection||coachingModel)&&<details style={{padding:'14px',border:'1px solid #3f7894',borderRadius:14,background:'#122e46'}}>
+   {(trainingResponse||adaptiveSelection||adaptationReview||coachingModel)&&<details style={{padding:'14px',border:'1px solid #3f7894',borderRadius:14,background:'#122e46'}}>
     <summary style={{cursor:'pointer',fontWeight:800,fontSize:15}}>VIPA intelligence · Training assessment and evidence</summary>
     <div style={{display:'grid',gap:10,marginTop:12}}>
    {trainingResponse&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
@@ -355,6 +358,20 @@ export default function CoachWeeklyReview(){
        </details>}
        <p><strong>Coach guidance:</strong> {trainingResponse.coach_recommendation}</p>
        <small style={{color:'#b9d5e5'}}>Missing records are not evidence of poor fitness or missed training. Do not increase intensity or volume automatically; significant changes require coach approval.</small>
+      </div>
+   </details>}
+   {adaptationReview&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
+      <summary style={{cursor:'pointer',fontWeight:800}}>Next-session adaptation · {adaptationReview.progression_review_eligible?'Coach progression review possible':'Maintain and assess'}</summary>
+      <div style={{display:'grid',gap:9,marginTop:10,fontSize:13}}>
+       <p style={{margin:0}}>Evidence: <strong>{String(adaptationReview.evidence_quality||'insufficient').replaceAll('_',' ')}</strong> · Recovery review: <strong>{adaptationReview.recovery_review_needed?'required':'not flagged by available data'}</strong></p>
+       {Array.isArray(adaptationReview.sports)&&adaptationReview.sports.map((s:any)=><details key={s.sport} style={{padding:'10px 12px',border:'1px solid #365c76',borderRadius:10}}>
+        <summary style={{cursor:'pointer',textTransform:'capitalize',fontWeight:700}}>{s.sport} · {String(s.decision).replaceAll('_',' ')}</summary>
+        {s.next_published_session?<p><strong>Next session:</strong> {s.next_published_session.title} · {s.next_published_session.date} · {s.next_published_session.duration_minutes} min</p>:<p>No upcoming published workout found for this discipline.</p>}
+        <p><strong>Suggested action:</strong> {s.suggested_review}</p>
+        <p><strong>Why:</strong> {s.reason}</p>
+        <small style={{color:'#b7d9e9'}}>Last 28 days: {s.confirmed_recent_activities} confirmed activities · {s.rated_sessions} rated sessions · {s.high_rpe_sessions} high-RPE reports</small>
+       </details>)}
+       <small style={{color:'#b9d5e5'}}>Recommendations only. Published sessions are unchanged and every significant change requires coach review.</small>
       </div>
    </details>}
    {adaptiveSelection&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
