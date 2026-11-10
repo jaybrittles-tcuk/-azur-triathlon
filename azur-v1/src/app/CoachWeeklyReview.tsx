@@ -33,6 +33,7 @@ export default function CoachWeeklyReview(){
  const [nextWeekPreview,setNextWeekPreview]=useState<any>(null);
  const [setupStatus,setSetupStatus]=useState<{status:string;label:string;safe_to_use_no_history_path:boolean}|null>(null);
  const [swimAssessment,setSwimAssessment]=useState<{recommended_focus:string;recommended_practice:string;execution_cue:string;why_today_matters:string;focus_source:string;css_status:string;next_evidence:string}|null>(null);
+ const [coachingModel,setCoachingModel]=useState<any>(null);
  const [autoPreviewLoading,setAutoPreviewLoading]=useState(false);
  const nextMonday=(()=>{const d=new Date();d.setUTCHours(12,0,0,0);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)+7);return d.toISOString().slice(0,10)})();
  useEffect(()=>{let live=true;(async()=>{
@@ -76,15 +77,17 @@ export default function CoachWeeklyReview(){
  })();return()=>{live=false};},[reload]);
  useEffect(()=>{
   let live=true;
-  setSetupStatus(null);setSwimAssessment(null);setNextWeekPreview(null);
+  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setNextWeekPreview(null);
   if(!introAthlete||loading)return()=>{live=false};
   (async()=>{
-   const [{data,error},{data:swimData,error:swimError}]=await Promise.all([
+   const [{data,error},{data:swimData,error:swimError},{data:modelData,error:modelError}]=await Promise.all([
      supabase.rpc('coach_athlete_setup_status',{p_athlete_id:introAthlete}),
-     supabase.rpc('coach_swim_intelligence_preview',{p_athlete_id:introAthlete})
+     supabase.rpc('coach_swim_intelligence_preview',{p_athlete_id:introAthlete}),
+     supabase.rpc('coach_training_intelligence_preview',{p_athlete_id:introAthlete})
    ]);
    if(!live)return;
    if(!swimError&&swimData?.status==='review_only')setSwimAssessment(swimData);
+   if(!modelError&&modelData?.model_version==='coach_intelligence_v2')setCoachingModel(modelData);
    if(error){setError('Unable to check athlete history status: '+error.message);return;}
    const status=data as {status:string;label:string;safe_to_use_no_history_path:boolean};
    setSetupStatus(status);
@@ -207,6 +210,21 @@ export default function CoachWeeklyReview(){
      <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
     </select></label>
    {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>}
+   {coachingModel&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
+     <summary style={{cursor:'pointer',fontWeight:800}}>AZUR Coaching Intelligence · {coachingModel.primary_priority}</summary>
+     <div style={{display:'grid',gap:9,paddingTop:12,fontSize:13}}>
+       <p><strong>Priority:</strong> {coachingModel.priority_reason}</p>
+       <p><strong>Phase emphasis:</strong> {String(coachingModel.suggested_phase_emphasis).replaceAll('_',' ')} · {coachingModel.race_days_remaining==null?'Race date not available':coachingModel.race_days_remaining+' days to race'}</p>
+       <p>{coachingModel.phase_reason}</p>
+       <p><strong>Confidence:</strong> {coachingModel.evidence_confidence} · {String(coachingModel.evidence_status).replaceAll('_',' ')}</p>
+       <details><summary>Swim · {coachingModel.swim?.recommended_focus}</summary><p>{coachingModel.swim?.why_today_matters}</p><p>{coachingModel.swim?.recommended_practice}</p></details>
+       <details><summary>Bike · {coachingModel.bike?.focus}</summary><p>{coachingModel.bike?.rationale}</p><p>Evidence needed: {coachingModel.bike?.next_evidence}</p></details>
+       <details><summary>Run · {coachingModel.run?.focus}</summary><p>{coachingModel.run?.rationale}</p><p>Evidence needed: {coachingModel.run?.next_evidence}</p></details>
+       <details><summary>Recovery and progression</summary><p>{coachingModel.recovery?.decision_rule}</p><p>{coachingModel.volume_guidance}</p></details>
+       <p style={{color:'#f7d69b'}}>{coachingModel.review_warning}</p>
+       <small style={{color:'#aec9d9'}}>Coach review only · No changes made to the athlete calendar</small>
+     </div>
+   </details>}
    {swimAssessment&&<details style={{padding:'10px 12px',border:'1px solid #35627d',borderRadius:12,background:'#153751'}}>
      <summary style={{cursor:'pointer',fontWeight:700}}>AZUR Swim Intelligence · {swimAssessment.recommended_focus}</summary>
      <p style={{fontSize:13,margin:'10px 0'}}><strong>Recommended practice:</strong> {swimAssessment.recommended_practice}</p>
