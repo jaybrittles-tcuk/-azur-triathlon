@@ -340,6 +340,9 @@ export default function CoachWeeklyReview(){
      <span style={{fontSize:13}}><strong>Mersey Tri beta branding</strong><small style={{display:'block',color:'#b8d2e3',marginTop:3}}>{merseyBeta?'Enabled for athlete dashboard':'Default AZUR dashboard header'}</small></span>
      <button type="button" disabled={merseyLoading||Boolean(busy)} onClick={()=>void setMerseyCohort()} style={{borderRadius:10,minWidth:78,background:merseyBeta?'#1779b0':'#203d51',color:'white',padding:'9px 12px'}}>{merseyLoading?'Saving…':merseyBeta?'Enabled':'Enable'}</button>
    </div>}
+   {(trainingResponse||adaptiveSelection||coachingModel)&&<details style={{padding:'14px',border:'1px solid #3f7894',borderRadius:14,background:'#122e46'}}>
+    <summary style={{cursor:'pointer',fontWeight:800,fontSize:15}}>VIPA intelligence · Training assessment and evidence</summary>
+    <div style={{display:'grid',gap:10,marginTop:12}}>
    {trainingResponse&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
       <summary style={{cursor:'pointer',fontWeight:800}}>Training Response · {trainingResponse.response_category==='insufficient_completed_evidence'?'Gather athlete feedback':'Coach evidence review'}</summary>
       <div style={{fontSize:13,paddingTop:10,display:'grid',gap:8}}>
@@ -377,10 +380,12 @@ export default function CoachWeeklyReview(){
        <small style={{color:'#aec9d9'}}>Coach review only · No changes made to the athlete calendar</small>
      </div>
    </details>}
+    </div>
+   </details>}
    {introAthlete&&setupStatus?.safe_to_use_no_history_path&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
-     <summary style={{cursor:'pointer',fontWeight:700}}>Session Purpose Engine · V3 preview</summary>
-     <p style={{fontSize:13,color:'#bfdaec',marginTop:10}}>See how AZUR selects each workout's purpose from the athlete's priority, phase and available evidence. Preview is read-only; publication requires your explicit approval and never overwrites existing workouts.</p>
-     <button type="button" disabled={Boolean(busy)} onClick={()=>void previewPurposeSessions()}>{busy==='purpose-preview'?'Analysing purposes…':'Generate purpose-based preview'}</button>
+     <summary style={{cursor:'pointer',fontWeight:800,fontSize:15}}>VIPA training week · Preview and approve</summary>
+     <p style={{fontSize:13,color:'#bfdaec',marginTop:10}}>Review individual session purposes, varied interval structures and VIPA quality checks. Your athlete's calendar stays unchanged until you explicitly approve.</p>
+     <button type="button" style={{display:'block',width:'100%',background:'#1592ef',border:'1px solid #78caff',color:'#fff',borderRadius:12,padding:'13px 16px',minHeight:48,fontSize:14,fontWeight:800,cursor:'pointer',whiteSpace:'normal'}} disabled={Boolean(busy)} onClick={()=>void previewPurposeSessions()}>{busy==='purpose-preview'?'Checking week quality…':'Generate VIPA week preview'}</button>
      {purposePreview&&<div style={{marginTop:12}}>
         <strong>Week of {purposePreview.week_start} · {purposePreview.session_count} sessions · {purposePreview.total_minutes} minutes</strong>
         <p style={{fontSize:12,color:'#b6ccdc'}}>Preview only · No intensity increase · Existing calendar remains unchanged until approved</p>
