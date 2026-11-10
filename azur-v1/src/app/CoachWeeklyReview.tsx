@@ -34,6 +34,7 @@ export default function CoachWeeklyReview(){
  const [setupStatus,setSetupStatus]=useState<{status:string;label:string;safe_to_use_no_history_path:boolean}|null>(null);
  const [swimAssessment,setSwimAssessment]=useState<{recommended_focus:string;recommended_practice:string;execution_cue:string;why_today_matters:string;focus_source:string;css_status:string;next_evidence:string}|null>(null);
  const [coachingModel,setCoachingModel]=useState<any>(null);
+ const [purposePreview,setPurposePreview]=useState<any>(null);
  const [autoPreviewLoading,setAutoPreviewLoading]=useState(false);
  const nextMonday=(()=>{const d=new Date();d.setUTCHours(12,0,0,0);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)+7);return d.toISOString().slice(0,10)})();
  useEffect(()=>{let live=true;(async()=>{
@@ -77,7 +78,7 @@ export default function CoachWeeklyReview(){
  })();return()=>{live=false};},[reload]);
  useEffect(()=>{
   let live=true;
-  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setNextWeekPreview(null);
+  setSetupStatus(null);setSwimAssessment(null);setCoachingModel(null);setNextWeekPreview(null);setPurposePreview(null);
   if(!introAthlete||loading)return()=>{live=false};
   (async()=>{
    const [{data,error},{data:swimData,error:swimError},{data:modelData,error:modelError}]=await Promise.all([
@@ -184,6 +185,21 @@ export default function CoachWeeklyReview(){
   }catch(e){setError(e instanceof Error?e.message:'Next-week publication failed');}
   finally{setBusy('');}
  }
+ async function previewPurposeSessions(){
+  setBusy('purpose-preview');setError('');setPurposePreview(null);
+  try{
+   if(!introAthlete||!setupStatus?.safe_to_use_no_history_path)throw new Error('A verified introductory pathway is required');
+   // Do not propose changes to an already-published upcoming week.
+   const startDate=new Date(nextMonday+'T12:00:00Z');
+   if(nextWeekPublished.includes(introAthlete))startDate.setUTCDate(startDate.getUTCDate()+7);
+   const previewWeek=startDate.toISOString().slice(0,10);
+   const {data,error}=await supabase.rpc('coach_preview_session_purpose_v3',{p_athlete_id:introAthlete,p_week_start:previewWeek});
+   if(error)throw error;
+   if(data?.planner_version!=='purpose_v3_preview'||data?.calendar_changed!==false||data?.requires_coach_approval!==true)throw new Error('Purpose-model safety verification failed');
+   setPurposePreview(data);
+  }catch(e){setError(e instanceof Error?e.message:'Purpose preview unavailable');}
+  finally{setBusy('');}
+ }
  const activeRow=rows.find(row=>row.athlete_id===introAthlete && row.phase==='foundation_no_history');
  const otherRows=rows.filter(row=>row.id!==activeRow?.id);
  const selectedName=introAthletes.find(a=>a.id===introAthlete)?.name||'Athlete';
@@ -193,6 +209,12 @@ export default function CoachWeeklyReview(){
   return <details key={i} style={{padding:'10px 0',borderBottom:'1px solid #284b62'}}>
     <summary style={{cursor:'pointer',fontSize:14}}><strong>{String(x.title||'Workout')}</strong> <span style={{color:'#9bbbd0'}}>{Number(x.durationMin||0)} min · {String(x.sport||'').toUpperCase()}</span></summary>
     <p style={{fontSize:13,color:'#c8dce9',lineHeight:1.5}}>{String(x.rationale||'Controlled introductory session')}</p>
+    {x.prescription?.purpose&&<div style={{fontSize:12,color:'#add9f4',padding:'8px 0'}}>
+      <strong>Primary adaptation:</strong> {x.prescription.purpose.primaryAdaptation}
+      <p style={{margin:'5px 0'}}>Coach execution cue: {x.prescription.purpose.executionCue}</p>
+      <p style={{margin:'5px 0'}}>Monitor next: {x.prescription.purpose.responseToMonitor}</p>
+      <small>Evidence: {String(x.prescription.purpose.evidenceSource).replaceAll('_',' ')} · {x.prescription.purpose.evidenceConfidence} confidence</small>
+    </div>}
     <div style={{fontSize:12,color:'#b7d0df'}}>{Array.isArray(x.prescription?.steps)?x.prescription.steps.map((s:any,j:number)=><p key={j} style={{margin:'5px 0'}}>{s.durationMin} min · {s.target}</p>):null}
       {Array.isArray(x.prescription?.poolSegments)&&x.prescription.poolSegments.length>0&&<details><summary>Swim sets · {x.prescription.totalDistanceMeters} m</summary>
        {x.prescription.poolSegments.map((s:any,j:number)=><p key={j}>{s.repeats} × {s.distanceMeters}m · {s.target} · {s.restSeconds}s rest</p>)}
@@ -206,7 +228,7 @@ export default function CoachWeeklyReview(){
   {error&&<p role="alert" style={{color:'#ffc7a6'}}>{error}</p>}
   <div style={{padding:16,borderRadius:18,background:'#102b42',border:'1px solid #31566e',display:'grid',gap:12,color:'#ecf6ff'}}>
    <label style={{fontSize:13,fontWeight:700}}>Athlete
-    <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setNextWeekPreview(null);setIntroMessage('');}}>
+    <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setNextWeekPreview(null);setPurposePreview(null);setIntroMessage('');}}>
      <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
     </select></label>
    {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>}
@@ -224,6 +246,16 @@ export default function CoachWeeklyReview(){
        <p style={{color:'#f7d69b'}}>{coachingModel.review_warning}</p>
        <small style={{color:'#aec9d9'}}>Coach review only · No changes made to the athlete calendar</small>
      </div>
+   </details>}
+   {introAthlete&&setupStatus?.safe_to_use_no_history_path&&<details style={{padding:'12px',border:'1px solid #376a86',borderRadius:12,background:'#153751'}}>
+     <summary style={{cursor:'pointer',fontWeight:700}}>Session Purpose Engine · V3 preview</summary>
+     <p style={{fontSize:13,color:'#bfdaec',marginTop:10}}>See how AZUR selects each workout's purpose from the athlete's priority, phase and available evidence. Read-only: does not replace published workouts.</p>
+     <button type="button" disabled={Boolean(busy)} onClick={()=>void previewPurposeSessions()}>{busy==='purpose-preview'?'Analysing purposes…':'Generate purpose-based preview'}</button>
+     {purposePreview&&<div style={{marginTop:12}}>
+        <strong>Week of {purposePreview.week_start} · {purposePreview.session_count} sessions · {purposePreview.total_minutes} minutes</strong>
+        <p style={{fontSize:12,color:'#b6ccdc'}}>Proposed for coach review only · No intensity increase · No calendar changes</p>
+        <div>{sessionList(purposePreview.sessions||[])}</div>
+     </div>}
    </details>}
    {swimAssessment&&<details style={{padding:'10px 12px',border:'1px solid #35627d',borderRadius:12,background:'#153751'}}>
      <summary style={{cursor:'pointer',fontWeight:700}}>AZUR Swim Intelligence · {swimAssessment.recommended_focus}</summary>
