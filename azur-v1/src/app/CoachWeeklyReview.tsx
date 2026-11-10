@@ -32,6 +32,7 @@ export default function CoachWeeklyReview(){
  const [nextWeekPublished,setNextWeekPublished]=useState<string[]>([]);
  const [nextWeekPreview,setNextWeekPreview]=useState<any>(null);
  const [setupStatus,setSetupStatus]=useState<{status:string;label:string;safe_to_use_no_history_path:boolean}|null>(null);
+ const [swimAssessment,setSwimAssessment]=useState<{recommended_focus:string;recommended_practice:string;execution_cue:string;why_today_matters:string;focus_source:string;css_status:string;next_evidence:string}|null>(null);
  const [autoPreviewLoading,setAutoPreviewLoading]=useState(false);
  const nextMonday=(()=>{const d=new Date();d.setUTCHours(12,0,0,0);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7)+7);return d.toISOString().slice(0,10)})();
  useEffect(()=>{let live=true;(async()=>{
@@ -75,11 +76,15 @@ export default function CoachWeeklyReview(){
  })();return()=>{live=false};},[reload]);
  useEffect(()=>{
   let live=true;
-  setSetupStatus(null);setNextWeekPreview(null);
+  setSetupStatus(null);setSwimAssessment(null);setNextWeekPreview(null);
   if(!introAthlete||loading)return()=>{live=false};
   (async()=>{
-   const {data,error}=await supabase.rpc('coach_athlete_setup_status',{p_athlete_id:introAthlete});
+   const [{data,error},{data:swimData,error:swimError}]=await Promise.all([
+     supabase.rpc('coach_athlete_setup_status',{p_athlete_id:introAthlete}),
+     supabase.rpc('coach_swim_intelligence_preview',{p_athlete_id:introAthlete})
+   ]);
    if(!live)return;
+   if(!swimError&&swimData?.status==='review_only')setSwimAssessment(swimData);
    if(error){setError('Unable to check athlete history status: '+error.message);return;}
    const status=data as {status:string;label:string;safe_to_use_no_history_path:boolean};
    setSetupStatus(status);
@@ -201,7 +206,15 @@ export default function CoachWeeklyReview(){
     <select style={{display:'block',width:'100%',marginTop:6,padding:12,borderRadius:10,background:'#173c55',color:'white'}} value={introAthlete} onChange={e=>{setIntroAthlete(e.target.value);setIntroPreview(null);setNextWeekPreview(null);setIntroMessage('');}}>
      <option value="">Choose athlete</option>{introAthletes.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
     </select></label>
-   {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>}
+   {introAthlete&&<div style={{fontSize:13,color:'#c4daeb'}}><strong>{selectedName}</strong> · {setupStatus?.label||'Checking training-history status…'}</div>
+   {swimAssessment&&<details style={{padding:'10px 12px',border:'1px solid #35627d',borderRadius:12,background:'#153751'}}>
+     <summary style={{cursor:'pointer',fontWeight:700}}>AZUR Swim Intelligence · {swimAssessment.recommended_focus}</summary>
+     <p style={{fontSize:13,margin:'10px 0'}}><strong>Recommended practice:</strong> {swimAssessment.recommended_practice}</p>
+     <p style={{fontSize:13}}><strong>Execution:</strong> {swimAssessment.execution_cue}</p>
+     <p style={{fontSize:13}}><strong>Why it matters:</strong> {swimAssessment.why_today_matters}</p>
+     <p style={{fontSize:12,color:'#c2dbe8'}}>Focus evidence: {swimAssessment.focus_source==='athlete_self_report'?'Athlete-reported, not coach-confirmed':'Not yet assessed'} · CSS: {swimAssessment.css_status==='unknown_no_pace_prescription'?'Unknown — no CSS pace targets':'Reported, pending validation'}</p>
+     <p style={{fontSize:12,color:'#c2dbe8'}}>Next: {swimAssessment.next_evidence}</p>
+   </details>}
    {!activeRow&&!publishedAthletes.includes(introAthlete)&&setupStatus?.safe_to_use_no_history_path&&<button type="button" disabled={!introAthlete||Boolean(busy)} onClick={()=>void prepareIntro(false)}>Preview workouts (optional)</button>}
    {introAthlete&&(publishedAthletes.includes(introAthlete)?<p role="status" style={{color:'#a5e6cc',fontWeight:700}}>Week published · Training is on the athlete calendar</p>:setupStatus?.safe_to_use_no_history_path?<button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700}} disabled={Boolean(busy)} onClick={()=>void approveAndPublishIntro()}>{busy==='intro-publish'?'Approving and publishing…':'Approve & Publish first week'}</button>:<p style={{fontSize:13,color:'#f8d27a'}}>Training assessment required before coach publication. Device import is optional, but unresolved import states must not be mistaken for zero history.</p>)}
    {introPreview&&!activeRow&&setupStatus?.safe_to_use_no_history_path&&<>
