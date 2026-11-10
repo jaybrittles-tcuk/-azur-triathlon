@@ -367,6 +367,19 @@ export default function CoachWeeklyReview(){
           <p style={{margin:'8px 0'}}><strong>Readiness:</strong> {String(purposePreview.purpose_engine.under15hMixPolicy.readiness_status).replaceAll('_',' ')}</p>
           <p style={{fontSize:12,color:'#a5c5d8'}}>Suggested zone proportions are illustrative only, not a compulsory quota or a substitute for sport-specific thresholds and coach review.</p>
         </details>}
+        {purposePreview.purpose_engine?.intervalVarietyGuide&&<details style={{border:'1px solid #3b637b',borderRadius:10,padding:'10px 12px',margin:'12px 0',fontSize:13}}>
+          <summary style={{cursor:'pointer',fontWeight:700}}>Interval variety · Swim / Bike / Run progression</summary>
+          <p style={{color:'#c6dfec'}}>{purposePreview.purpose_engine.intervalVarietyGuide.weekly_principle}</p>
+          <p style={{color:'#f3d39e'}}>{purposePreview.purpose_engine.intervalVarietyGuide.current_selection}</p>
+          {(['swim','bike','run'] as const).map(sport=><details key={sport} style={{margin:'9px 0',padding:'8px 0',borderTop:'1px solid #355c75'}}>
+             <summary style={{cursor:'pointer',fontWeight:700,textTransform:'capitalize'}}>{sport} · Foundation to race-specific examples</summary>
+             <p><strong>Early phase:</strong> {purposePreview.purpose_engine.intervalVarietyGuide[sport]?.foundation?.session}</p>
+             <p><strong>Race-specific option:</strong> {purposePreview.purpose_engine.intervalVarietyGuide[sport]?.race_specific?.session}</p>
+             <p><strong>Only when ready:</strong> {purposePreview.purpose_engine.intervalVarietyGuide[sport]?.next_evidence}</p>
+          </details>)}
+          <p style={{fontSize:12,color:'#b9d4e3'}}>{purposePreview.purpose_engine.intervalVarietyGuide.weekly_dose_guard}</p>
+          <small style={{color:'#b9d4e3'}}>Coach guidance only · These examples are not extra scheduled workouts</small>
+        </details>}
         <div>{sessionList(purposePreview.sessions||[])}</div>
         <button type="button" style={{background:'#1592ef',color:'#fff',borderRadius:12,minHeight:48,fontWeight:700,marginTop:12}} disabled={Boolean(busy)}
          onClick={()=>void approvePurposeWeek()}>{busy==='purpose-publish'?'Publishing approved V3 week…':'Approve & Publish V3 week'}</button>
