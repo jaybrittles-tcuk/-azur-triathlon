@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity';
 import WorkoutTargetDetails from './WorkoutTargetDetails';
@@ -34,43 +33,36 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
  const middle=intervals.filter(x=>x.kind==='work'||x.kind==='recovery');
  const grouped:{count:number;label:string}[]=[];
  middle.forEach(x=>{const label=`${x.kind==='work'?'Work':'Recovery'}: ${describeBlock(x)}`;const prev=grouped[grouped.length-1];if(prev?.label===label)prev.count++;else grouped.push({count:1,label});});
- return <section className="azur-premium-workout-tabs">
-  <div className="azur-workout-tab-nav" role="tablist" aria-label="Workout information">
-   {(['overview','intervals','notes'] as const).map(t=><button type="button" key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t==='intervals'?'Workout':t==='notes'?'Coaching':'Overview'}</button>)}
-  </div>
-  {tab==='overview'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <p>{rationale||'Review this session and its prescribed training objective.'}</p>
-   <div className="azur-workout-facts">
-    <div><small>Scheduled</small><strong>{plannedMinutes} min</strong></div>
-    <div><small>Recorded</small><strong>{completedMinutes==null?'Awaiting activity':completedMinutes+' min'}</strong></div>
-    {poolSegments.length>0&&<div><small>Prescribed pool sets</small><strong>{swimMeters} m</strong></div>}
-    <div><small>Workout structure</small><strong>{intervals.length?intervals.length+' timed blocks':'Coach-prescribed'}</strong></div>
-   </div>
-   {completedMinutes!=null&&<p>Recorded duration difference: {completedMinutes-plannedMinutes>=0?'+':''}{completedMinutes-plannedMinutes} min{completedSource?' · '+completedSource:''}. Duration alone does not establish intensity compliance.</p>}
-   {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Workout for prescribed targets.</p>}
-  </div>}
-  {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
-   {poolSegments.length>0&&<div style={{padding:'12px 14px',border:'1px solid #28546a',borderRadius:14,background:'#0d2940',marginBottom:12}}>
-    <strong>Pool intervals · {swimMeters} m prescribed</strong>
-    {poolSegments.map((segment,index)=><div key={index} style={{padding:'9px 0',borderBottom:index===poolSegments.length-1?'none':'1px solid #28485e'}}>
-      <strong>{Number(segment.repeats)||0} × {Number(segment.distanceMeters)||0} m</strong> · {String(segment.purpose||'Swim')} · {Number(segment.restSeconds)||0}s recovery
-      <div style={{opacity:.82,fontSize:13}}>{String(segment.target||'Comfortable, controlled effort')}</div>
-    </div>)}
-    {estimatedSwimSeconds>plannedMinutes*60&&<p role="note" style={{fontSize:12,color:'#f9c56e'}}>The interval estimate exceeds the session time. Ask your coach to review before swimming.</p>}
-    <p style={{fontSize:12,opacity:.8,marginBottom:0}}>Warm-up and cool-down remain part of the timed session. Distances must be adjusted to your actual pace and available time.</p>
+ return <section className="azur-premium-workout-tabs azur-v3-unified-workout" aria-label="Prescribed workout">
+   <header className="azur-v3-workout-header">
+     <div><span className="azur-v3-eyebrow">YOUR SESSION</span><h3>Workout structure</h3></div>
+     <strong>{poolSegments.length>0&&swimMeters>0?swimMeters+' m':plannedMinutes+' min'}</strong>
+   </header>
+   {intervals.length>0&&<div className="azur-v3-interval-graphic"><CalendarIntensityProfile steps={source?.steps}/></div>}
+   {poolSegments.length>0&&<div className="azur-v3-session-sets">
+     <div className="azur-v3-set-label">POOL SETS</div>
+     {poolSegments.map((segment,index)=><div key={index} className="azur-v3-set-row">
+       <div><strong>{Number(segment.repeats)||0} × {Number(segment.distanceMeters)||0} m</strong>
+       <p>{String(segment.target||'Comfortable controlled effort')}</p></div>
+       <span>{Number(segment.restSeconds)||0}s rest</span>
+     </div>)}
+     {estimatedSwimSeconds>plannedMinutes*60&&<p role="note" className="azur-v3-evidence-warning">Estimated swim interval time exceeds the planned duration. Ask your coach to review the structure.</p>}
    </div>}
-   {intervals.length > 0 && <CalendarIntensityProfile steps={source?.steps} />}
-   {intervals.length ? <div className="azur-workout-compact-prescription" style={{padding:'12px 2px',lineHeight:1.55}}>
-    <h4 style={{margin:'0 0 10px'}}>Your workout</h4>
-    {warmups.length>0&&<p style={{margin:'8px 0'}}><strong>Warm-up:</strong> {warmups.map(describeBlock).join(' · ')}</p>}
-    {middle.length>0&&<p style={{margin:'8px 0'}}><strong>Main set:</strong> {grouped.map(x=>(x.count>1?x.count+' × ':'')+x.label).join(' · ')}</p>}
-    {cooldowns.length>0&&<p style={{margin:'8px 0'}}><strong>Cool-down:</strong> {cooldowns.map(describeBlock).join(' · ')}</p>}
-    <details style={{marginTop:14}}><summary style={{cursor:'pointer',fontWeight:600}}>View all {intervals.length} interval blocks and targets</summary><WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/></details>
-   </div> : <p>Review the coach-prescribed warm-up, main set and cool-down in the detailed instructions below.</p>}
-   {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
-  </div>}
-  {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content">
-   {coachingContent ?? <p>Coaching insights are not available for this workout yet.</p>}
-  </div>}
+   {intervals.length>0?<div className="azur-v3-prescription">
+     {warmups.length>0&&<div className="azur-v3-prescription-row"><strong>Warm-up</strong><p>{warmups.map(describeBlock).join(' · ')}</p></div>}
+     {middle.length>0&&<div className="azur-v3-prescription-row"><strong>Main set</strong><p>{grouped.map(x=>(x.count>1?x.count+' × ':'')+x.label).join(' · ')}</p></div>}
+     {cooldowns.length>0&&<div className="azur-v3-prescription-row"><strong>Cool-down</strong><p>{cooldowns.map(describeBlock).join(' · ')}</p></div>}
+   </div>:poolSegments.length===0&&<p className="azur-v3-evidence-warning">Structured intervals are not available in this prescription. Review your coach's instructions before training.</p>}
+   {cadenceNotes.length>0&&<p className="azur-v3-workout-cue">Cadence targets: {[...new Set(cadenceNotes)].join(', ')}</p>}
+   <details className="azur-v3-workout-disclosure">
+     <summary>Why today matters <span>›</span></summary>
+     <p>{rationale||'Follow the prescribed workout at a sustainable effort and report how it felt.'}</p>
+   </details>
+   <details className="azur-v3-workout-disclosure">
+     <summary>Detailed targets &amp; coaching <span>›</span></summary>
+     {intervals.length>0&&<WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/>}
+     {coachingContent}
+     {completedMinutes!=null&&<p className="azur-v3-workout-cue">Recorded {completedMinutes} min versus {plannedMinutes} min planned{completedSource?' · '+completedSource:''}. Duration alone does not confirm intensity compliance.</p>}
+   </details>
  </section>;
 }
