@@ -7532,3 +7532,26 @@ strong {
  .athlete-agenda .session-detail-modal .azur-v5-rpe-grid{gap:6px!important}
  .athlete-agenda .session-detail-modal .azur-v5-rpe-choice{min-height:44px!important}
 }
+
+
+/* V3 interval readability: repeat pairs are grouped without losing exact targets. */
+.athlete-agenda .session-detail-modal .azur-v3-mainset-blocks{
+ display:flex;flex-direction:column;gap:10px;min-width:0;
+}
+.athlete-agenda .session-detail-modal .azur-v3-mainset-block{
+ display:flex;flex-direction:column;gap:3px;
+ padding:10px 13px!important;border-left:3px solid #62b8e8!important;
+ border-radius:7px!important;background:#142233!important;
+ min-width:0!important;
+}
+.athlete-agenda .session-detail-modal .azur-v3-mainset-block>strong{
+ font-size:13px!important;color:#ecf4fb!important;
+ letter-spacing:.01em!important;
+}
+.athlete-agenda .session-detail-modal .azur-v3-mainset-block>span{
+ font-size:13px!important;line-height:1.55!important;color:#abc4d5!important;
+ overflow-wrap:anywhere!important;
+}
+.athlete-agenda .session-detail-modal .azur-v3-mainset-row{
+ align-items:start!important;
+}
