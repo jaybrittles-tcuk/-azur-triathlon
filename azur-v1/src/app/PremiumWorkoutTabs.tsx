@@ -9,6 +9,8 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
  const intervals=normalizeWorkoutIntervals(source?.steps);
  const valid=intervals.filter(x=>x.durationSec!==null);
  const duration=valid.reduce((n,x)=>n+(x.durationSec||0),0)/60;
+ const distanceBased=intervals.some(x=>x.distanceM!==null && x.durationSec===null);
+ const prescribedDistance=intervals.every(x=>x.distanceM!==null)?intervals.reduce((n,x)=>n+(x.distanceM||0),0):null;
  const cadenceNotes:string[]=[];
  const addCadence=(item:unknown)=>{
   if(!item||typeof item!=='object')return;
@@ -34,13 +36,15 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    <div className="azur-workout-facts">
     <div><small>Scheduled</small><strong>{plannedMinutes} min</strong></div>
     <div><small>Recorded</small><strong>{completedMinutes==null?'Awaiting activity':completedMinutes+' min'}</strong></div>
-    <div><small>Workout structure</small><strong>{intervals.length?intervals.length+' timed blocks':'Coach-prescribed'}</strong></div>
+    <div><small>Workout structure</small><strong>{intervals.length?intervals.length+' prescribed blocks':'Coach-prescribed'}</strong></div>
    </div>
    {completedMinutes!=null&&<p>Recorded duration difference: {completedMinutes-plannedMinutes>=0?'+':''}{completedMinutes-plannedMinutes} min{completedSource?' · '+completedSource:''}. Duration alone does not establish intensity compliance.</p>}
-   {intervals.length>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. See Workout for prescribed targets.</p>}
+   {prescribedDistance!==null&&<p className="azur-workout-footnote">Prescribed distance: {prescribedDistance} m.</p>}
+   {duration>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. Distance-based intervals are not converted into estimated durations.</p>}
   </div>}
   {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
-   {intervals.length > 0 && <CalendarIntensityProfile steps={source?.steps} />}
+   {intervals.length > 0 && !distanceBased && <CalendarIntensityProfile steps={source?.steps} />}
+   {distanceBased&&<p className="azur-workout-footnote">Distance-based workout · Follow the prescribed repetitions and recovery. No estimated time-based intensity chart is shown.</p>}
    {intervals.length ? <div className="azur-workout-compact-prescription" style={{padding:'12px 2px',lineHeight:1.55}}>
     <h4 style={{margin:'0 0 10px'}}>Your workout</h4>
     {warmups.length>0&&<p style={{margin:'8px 0'}}><strong>Warm-up:</strong> {warmups.map(describeBlock).join(' · ')}</p>}
