@@ -18,6 +18,8 @@ export default function CalendarIntensityProfile({ steps }: { steps: unknown }) 
   const min = Math.min(...performance);
   const max = Math.max(...performance);
   const span = max - min;
+  // A flat profile is not an informative interval chart; show the prescription instead.
+  if (span < 0.000001) return null;
   return (
     <div className="calendar-intensity-profile" style={{position:"relative",display:"block",width:"100%",minWidth:0,overflow:"hidden",padding:"2px 0",boxSizing:"border-box",clear:"both"}}>
       <div className="calendar-intensity-profile-head" style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
