@@ -2,6 +2,7 @@ import BenchmarkHistory from './BenchmarkHistory';
 import BenchmarkTrainingZones from './BenchmarkTrainingZones';
 import AthleteDashboard from './AthleteDashboard';
 import CoachInvitations from './CoachInvitations';
+import AcceptCoachInvitation from './AcceptCoachInvitation';
 import AthleteOnboardingDraft from './AthleteOnboardingDraft';
 import PremiumWorkoutTabs from './PremiumWorkoutTabs';
 import { auditAthleteInstructions } from '../lib/calculations/prescriptionAudit';
@@ -1202,11 +1203,14 @@ export function App() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true';
+  const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true' || (new URLSearchParams(window.location.search).get('join') === '1' && /^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(new URLSearchParams(window.location.search).get('invitation') || ''));
   const [registrationMode, setRegistrationMode] = useState(() => new URLSearchParams(window.location.search).get('join') === '1');
   const [registrationNotice, setRegistrationNotice] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [recoveryMode,setRecoveryMode]=useState(false);
+  const [passwordRecoverySession,setPasswordRecoverySession]=useState(() => window.location.pathname === '/reset-password' || new URLSearchParams(window.location.hash.slice(1)).get('type') === 'recovery');
+  const [showAuthPassword,setShowAuthPassword]=useState(false);
   const [athleteName, setAthleteName] = useState('Athlete');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -1292,6 +1296,7 @@ const [primaryRace, setPrimaryRace] = useState({
   const [selectedId, setSelectedId] = useState('');
   const [sessionDetailOpen, setSessionDetailOpen] = useState(false);
   const [calendarWeekOffset, setCalendarWeekOffset] = useState(0);
+  const [calendarMonthExpanded, setCalendarMonthExpanded] = useState(false);
   const [calendarFocusedDate, setCalendarFocusedDate] = useState<string | null>(null);
   const [movingSessionId, setMovingSessionId] = useState<string | null>(null);
   const [moveTargetDate, setMoveTargetDate] = useState('');
@@ -1613,7 +1618,7 @@ async function loadAthleteProfile(userId: string, isCoach = false) {
     return;
   }
 
-  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/privacy') {
+  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/accept-invitation' && window.location.pathname !== '/reset-password' && window.location.pathname !== '/privacy') {
     onboardingRedirectStarted.current = true;
     window.location.replace('/onboarding');
     return;
@@ -1908,6 +1913,7 @@ if (data.session?.user) {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange((_event, session) => {
+    if(_event==='PASSWORD_RECOVERY')setPasswordRecoverySession(true);
     syncIntervalsReviewOwner(session?.user.id ?? null);
     setIsAuthenticated(!!session);
 
@@ -6759,17 +6765,18 @@ color:
 )}
 {moveMessage && <p role="status" className="calendar-move-message">{moveMessage}</p>}
 <section className="panel calendar-toolbar calendar-week-strip"><div className="agenda-date-nav">
-    <button aria-label="Previous four weeks" onClick={() => {setCalendarWeekOffset(gridWeekOffset-4);setCalendarFocusedDate(null)}}>‹</button>
-    <strong>{gridStart.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – {dateGrid[27].date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</strong>
-    <button aria-label="Next four weeks" onClick={() => {setCalendarWeekOffset(gridWeekOffset+4);setCalendarFocusedDate(null)}}>›</button>
+    <button aria-label={calendarMonthExpanded ? 'Previous four weeks' : 'Previous week'} onClick={() => {setCalendarWeekOffset(calendarWeekOffset-(calendarMonthExpanded?4:1));setCalendarFocusedDate(null)}}>‹</button>
+    <strong>{calendarMonthExpanded ? `${gridStart.toLocaleDateString('en-GB',{day:'numeric',month:'short'})} – ${dateGrid[27].date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}` : `Week of ${calendarWeekDates[0].date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`}</strong>
+    <button aria-label={calendarMonthExpanded ? 'Next four weeks' : 'Next week'} onClick={() => {setCalendarWeekOffset(calendarWeekOffset+(calendarMonthExpanded?4:1));setCalendarFocusedDate(null)}}>›</button>
     <button onClick={() => {setCalendarWeekOffset(0);setCalendarFocusedDate(todayKey)}}>Today</button>
   </div>
-  <div className="agenda-dates" role="group" aria-label="Four-week calendar">
+  <button type="button" className="agenda-expand-button" aria-expanded={calendarMonthExpanded} onClick={() => setCalendarMonthExpanded(!calendarMonthExpanded)}>{calendarMonthExpanded ? 'Show week' : 'View 4 weeks'}</button>
+  <div className="agenda-dates" role="group" aria-label={calendarMonthExpanded ? 'Four-week calendar' : 'Weekly calendar'}>
     {days.map(day => <small key={day} aria-hidden="true">{day[0]}</small>)}
-    {dateGrid.map(({date,key,sports},index) => <button key={key} type="button"
+    {(calendarMonthExpanded ? dateGrid : dateGrid.slice((calendarWeekOffset-gridWeekOffset)*7,(calendarWeekOffset-gridWeekOffset+1)*7)).map(({date,key,sports},index) => <button key={key} type="button"
       aria-label={date.toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long',year:'numeric'}) + (sports.size ? ', '+[...sports].join(', ') : '')}
       aria-current={key===todayKey?'date':undefined} aria-pressed={focusedDay?.dateKey===key}
-      onClick={()=>{setCalendarWeekOffset(gridWeekOffset+Math.floor(index/7));setCalendarFocusedDate(key)}}>
+      onClick={()=>{if(calendarMonthExpanded)setCalendarWeekOffset(gridWeekOffset+Math.floor(index/7));setCalendarFocusedDate(key)}}>
       {date.getDate()}<span aria-hidden="true">{[...sports].map(sport=><i className={sport} key={sport}/>)}</span>
     </button>)}
   </div>
@@ -6944,7 +6951,7 @@ onClick={() => {
       ? `${Math.round(
           session.completedMatchConfidence,
         )}% match`
-      : `Priority ${session.priority}`}
+      : `${session.sessionClass.replace(/_/g, ' ')} · planned`}
   </span>
 </div>
 
@@ -7075,7 +7082,7 @@ onClick={() => {
 
   <span>{formatDuration(selected.durationMin)}</span>
 
-  <span>Priority {selected.priority}</span>
+  <span>{selected.sessionClass?.replace(/_/g, ' ') || 'Training session'}</span>
 </div>
             </div>
 
@@ -7090,6 +7097,13 @@ onClick={() => {
 
           {(() => {
             const check = auditAthleteInstructions(selected.prescription);
+            // Legacy onboarding foundation workouts store a fully specified RPE timeline in prescription.steps.
+            // Validate the actual steps; do not show a false missing-interval warning for these sessions.
+            const simpleSteps = selected.prescription?.steps;
+            if (Array.isArray(simpleSteps) && simpleSteps.length > 0 &&
+                simpleSteps.every((step: any) => Number.isFinite(Number(step.durationMin)) && Number(step.durationMin) > 0 &&
+                  typeof step.target === 'string' && step.target.trim().length > 0) &&
+                simpleSteps.reduce((total: number, step: any) => total + Number(step.durationMin), 0) === selected.durationMin) return null;
             if (check.complete) return null;
             return <div className="session-prescription-warning" role="note">
               <strong>Prescription needs coach clarification</strong>
@@ -7097,10 +7111,24 @@ onClick={() => {
               <small>Do not infer missing targets or rest periods. Ask your coach before completing an unclear session.</small>
             </div>;
           })()}
+          {Array.isArray(selected.prescription?.steps) && selected.prescription.steps.length > 0 && !(Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) && (
+            <section className="session-foundation-timeline" aria-label="Your prescribed workout">
+              <span className="eyebrow">YOUR WORKOUT</span>
+              <h3>Follow your session, step by step</h3>
+              {selected.prescription.steps.map((step: any, index: number) => (
+                <div className="session-foundation-step" key={index}>
+                  <span className="session-foundation-step-index">{index + 1}</span>
+                  <div><strong>{index === 0 ? 'Warm-up' : index === selected.prescription.steps.length - 1 ? 'Cool-down' : 'Main set'}</strong><p>{String(step.target || 'Effort not supplied — check with your coach')}</p></div>
+                  <strong>{step.durationMin} min</strong>
+                </div>
+              ))}
+              <p className="session-foundation-coaching">Why today matters: controlled aerobic work helps establish repeatable training habits and endurance without unnecessary fatigue. Keep effort conversational where prescribed; report how the session felt so future training can be adjusted.</p>
+            </section>
+          )}
           {[selected.prescription?.warmup, selected.prescription?.main_set, selected.prescription?.cooldown].some(blocks => Array.isArray(blocks) && blocks.length) || selected.prescription?.fueling || selected.prescription?.focus || (Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) ? (
           <>
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} />
-<details open={!(Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0)} key={selected.id} className="session-prescription-disclosure session-prescription-v2">
+{!(Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) && <details open={false} key={selected.id} className="session-prescription-disclosure session-prescription-v2">
             <summary><span><strong>Detailed workout instructions</strong><small>Warm-up · Main set · Cool-down · Fuelling</small></span><span aria-hidden="true">⌄</span></summary>
             <div className="session-prescription-sections">
             <details><summary>View workout timeline</summary><CalendarPrescriptionSteps prescription={selected.prescription} /></details>
@@ -7241,17 +7269,14 @@ onClick={() => {
 )}
 
 </div>
-          </details>
+          </details>}
           </>
           ) : <WorkoutTargetDetails prescription={selected.prescription} ftpWatts={athleteProfile.ftp} />}
 
           <div className="editor-grid">
 
 
-{selected.status !== 'completed' && <div className="session-block">
-  <span className="eyebrow">PLANNED DURATION</span>
-  <strong>{formatDuration(selected.durationMin)}</strong>
-</div>}
+{/* Planned duration is already visible in the workout header and Overview tab. */}
 {selected.status === 'completed' &&
   selected.completedDurationSec && (
     <div className="wide session-block completed-session-summary session-analysis-v3-summary">
@@ -7770,14 +7795,66 @@ const sessionVerdict =
   </div>
 )}
 
-<div className="wide session-block session-intent-v2" aria-label="Why this session matters">
-  <span className="eyebrow">SESSION PURPOSE</span>
-  <strong>{selected.prescription?.focus || Object.values(selected.targets)[0]?.toString() || 'Session-specific training focus'}</strong>
-  {selected.rationale && <p>{selected.rationale}</p>}
-</div>
+<details className="wide session-block session-intent-v2 azur-premium-disclosure" aria-label="AZUR coaching intelligence">
+  <summary><strong>AZUR Intelligence</strong><span>Session purpose · athlete context · coaching guidance</span></summary>
+  <p><strong>Why this workout:</strong> {String(selected.rationale || selected.prescription?.focus || 'Your coach has not yet supplied a session-specific rationale.').replace(/^Why today matters:\s*/i, '')}</p>
+  <p><strong>How it should feel:</strong> {selected.sport === 'bike'
+    ? 'Keep the easy portions genuinely easy and the work intervals repeatable. Watch for rising perceived effort or deteriorating cadence at the same prescribed target.'
+    : selected.sport === 'run'
+    ? 'Keep the effort aligned with the prescribed pace or RPE. Look for controlled breathing and consistent form rather than forcing a faster split.'
+    : selected.sport === 'swim'
+    ? 'Aim for consistent stroke quality and controlled breathing across repeats. If technique deteriorates, report it rather than forcing the pace.'
+    : 'Follow the prescribed targets and note any unusual change in effort or technique.'}</p>
+  <p><strong>What we know:</strong> {(() => {
+    const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
+    const prior = weekSessions.filter(session => {
+      const time = new Date(session.plannedDate + 'T12:00:00').getTime();
+      return Number.isFinite(time) && time < anchor && time >= anchor - 14 * 86400000;
+    });
+    const completed = prior.filter(session => session.status === 'completed');
+    const recorded = completed.filter(session => session.completedDurationSec != null && Number.isFinite(session.completedDurationSec) && session.completedDurationSec > 0);
+    return recorded.length
+      ? `In the preceding 14 days, ${recorded.length} calendar-linked sessions have recorded durations totalling ${(recorded.reduce((sum, session) => sum + (session.completedDurationSec || 0), 0) / 3600).toFixed(1)} hours. This is observed activity, not a recovery or readiness score.`
+      : 'There are no calendar-linked completed sessions with valid duration in the preceding 14 days. Training readiness cannot be established from this record.';
+  })()}</p>
+  {selected.sport === 'bike' && (
+    <p><strong>Power guidance:</strong> {Number.isFinite(Number(athleteProfile.ftp)) && Number(athleteProfile.ftp) >= 75 && Number(athleteProfile.ftp) <= 600
+      ? `A recorded FTP of ${athleteProfile.ftp} W is available. Use it only where this workout explicitly prescribes an FTP-based target.`
+      : 'A usable FTP is not available. Any placeholder or implausible FTP is excluded from coaching guidance; use the explicitly prescribed RPE targets until your threshold is confirmed.'}</p>
+  )}
+  <p><strong>Training history signal:</strong> {(() => {
+    const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
+    const window = (days: number) => weekSessions.filter(session => {
+      const time = new Date(session.plannedDate + 'T12:00:00').getTime();
+      return Number.isFinite(time) && time < anchor && time >= anchor - days * 86400000
+        && session.status === 'completed' && session.completedDurationSec != null
+        && Number.isFinite(session.completedDurationSec) && session.completedDurationSec > 0;
+    });
+    const recent = window(7);
+    const previous = window(14).filter(session => new Date(session.plannedDate + 'T12:00:00').getTime() < anchor - 7 * 86400000);
+    const hours = (sessions: typeof recent) => sessions.reduce((sum, session) => sum + (session.completedDurationSec || 0), 0) / 3600;
+    if (recent.length < 2 || previous.length < 2) return 'Not enough recorded sessions in both 7-day windows to compare training volume reliably. Keep the plan under coach review and report how sessions feel.';
+    const currentHours = hours(recent);
+    const previousHours = hours(previous);
+    if (previousHours <= 0) return 'The earlier week has no usable duration baseline. A volume comparison is unavailable.';
+    const change = (currentHours / previousHours - 1) * 100;
+    if (change > 25) return `Recorded duration is ${Math.round(change)}% higher than the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). Check fatigue and session quality with your coach; duration alone cannot determine safe progression.`;
+    if (change < -25) return `Recorded duration is ${Math.round(Math.abs(change))}% lower than the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). This may reflect scheduling, missing imports or reduced training; it is not automatically a recovery improvement.`;
+    return `Recorded duration is within 25% of the preceding 7-day window (${currentHours.toFixed(1)} versus ${previousHours.toFixed(1)} h). Similar duration does not confirm stable intensity or recovery.`;
+  })()}</p>
+  <p><strong>What happens next:</strong> {selected.status === 'completed'
+    ? 'Review recorded duration alongside your own RPE and notes. Flag unexpectedly high effort, discomfort or incomplete intervals for coach review before changing future intensity.'
+    : 'After training, record session RPE and any unexpected fatigue or changes from the plan. Your coach can compare those observations with completed activity before approving significant changes.'}</p>
+  <details className="azur-intelligence-evidence">
+    <summary>View supporting training data</summary>
+    <p>{calendarWeekSessions.length} sessions scheduled in the selected calendar week, totalling {(calendarWeekSessions.reduce((sum, session) => sum + session.durationMin, 0) / 60).toFixed(1)} planned hours. {calendarWeekSessions.filter(session => session.status === 'completed').length} are marked complete. Scheduled time is not completed training load.</p>
+    {selected.status === 'completed' && selected.completedDurationSec != null && selected.durationMin > 0 && <p>Recorded {Math.round(selected.completedDurationSec / 60)} minutes versus {selected.durationMin} planned minutes.</p>}
+    {selected.status === 'completed' && Number(sessionFeedback.rpe) >= 1 && Number(sessionFeedback.rpe) <= 10 && <p>Athlete-reported RPE: {sessionFeedback.rpe}/10 (subjective, not device-measured).</p>}
+  </details>
+</details>
 {(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2" open={Boolean(editableManualId)}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
-<div className="wide session-block session-analysis-v3-feedback">
-  <span className="eyebrow">ATHLETE FEEDBACK</span>
+<details className="wide session-block session-analysis-v3-feedback azur-premium-disclosure" open={selected.status==='completed'}>
+  <summary><strong>Athlete feedback</strong><span>Session effort and notes</span></summary>
 
   <div className="session-block-item">
     <label>
@@ -7817,9 +7894,6 @@ const sessionVerdict =
       />
     </label>
   </div>
-</div>
-
-          </div>
 
 <button
   type="button"
@@ -7838,7 +7912,9 @@ const sessionVerdict =
   <small className="feedback-message">
     {sessionFeedbackMessage}
   </small>
-)}         
+)}
+</details>
+          </div>
           </aside>
   </div>
 )}
@@ -9598,6 +9674,25 @@ onClick={handleImportActivities}
     );
   }
 
+  async function handleRecoveryRequest(event:React.FormEvent){
+    event.preventDefault();setAuthLoading(true);setAuthError('');setRegistrationNotice('');
+    const invitationId=new URLSearchParams(window.location.search).get('invitation');
+     const recoveryUrl=new URL('/reset-password',window.location.origin);
+     if(invitationId)recoveryUrl.searchParams.set('invitation',invitationId);
+     const {error}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:recoveryUrl.toString()});
+    setAuthLoading(false);
+    if(error){setAuthError(error.message);return;}
+    setRegistrationNotice('If this email belongs to an AZUR account, a password reset link has been sent. Check your inbox and spam folder.');
+  }
+  async function handleRecoveryUpdate(event:React.FormEvent){
+    event.preventDefault();if(password.length<12){setAuthError('Use a password of at least 12 characters.');return;}
+    setAuthLoading(true);setAuthError('');
+    const {error}=await supabase.auth.updateUser({password});setAuthLoading(false);
+    if(error){setAuthError(error.message);return;}
+    setPassword('');setPasswordRecoverySession(false);
+     const invitationId=new URLSearchParams(window.location.search).get('invitation');
+     window.location.replace(invitationId?'/accept-invitation?invitation='+encodeURIComponent(invitationId):'/');
+  }
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
 
@@ -9611,6 +9706,9 @@ onClick={handleImportActivities}
 
     if (error) {
       setAuthError(error.message);
+    } else {
+      const invitationId=new URLSearchParams(window.location.search).get('invitation');
+      if(invitationId){window.location.assign('/accept-invitation?invitation='+encodeURIComponent(invitationId));return;}
     }
 
     setAuthLoading(false);
@@ -9619,9 +9717,11 @@ async function handleRegister(event: React.FormEvent) {
   event.preventDefault();
   if (password.length < 12) { setAuthError('Use a password of at least 12 characters.'); return; }
   setAuthLoading(true); setAuthError(''); setRegistrationNotice('');
-  const {data,error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{emailRedirectTo:window.location.origin+'/onboarding'}});
+  const invitationId=new URLSearchParams(window.location.search).get('invitation');
+  const invitationReturn=invitationId?window.location.origin+'/accept-invitation?invitation='+encodeURIComponent(invitationId):window.location.origin+'/onboarding';
+  const {data,error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{emailRedirectTo:invitationReturn}});
   if(error) setAuthError(error.message);
-  else { setPassword(''); if(data.session){window.location.assign('/onboarding');return;} setRegistrationNotice('Check your email to confirm your account. After confirmation, sign in to complete onboarding in its own full-screen view.'); }
+  else { setPassword(''); if(data.session){window.location.assign(invitationReturn);return;} setRegistrationNotice('Check your email to confirm your account. After confirmation, return to your invitation link to accept and begin athlete setup.'); }
   setAuthLoading(false);
 }
 async function handleSignOut() {
@@ -9826,25 +9926,25 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || passwordRecoverySession) {
     return (
       <div className="login-screen">
-        <form className="login-card" onSubmit={registrationMode && betaRegistrationEnabled ? handleRegister : handleLogin}>
+        <form className="login-card" onSubmit={passwordRecoverySession?handleRecoveryUpdate:recoveryMode?handleRecoveryRequest:registrationMode && betaRegistrationEnabled ? handleRegister : handleLogin}>
           <img
             src="/brand/azur-logo.png"
             alt="Azur Triathlon Coaching"
             className="login-logo"
           />
 
-          <span className="eyebrow">{registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
+          <span className="eyebrow">{passwordRecoverySession?'PASSWORD RESET':recoveryMode?'ACCOUNT RECOVERY':registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
 
-          <h2>{registrationMode ? 'Join AZUR' : 'Welcome to Azur'}</h2>
+          <h2>{passwordRecoverySession?'Choose a new password':recoveryMode?'Reset your password':registrationMode ? 'Join AZUR' : 'Welcome to Azur'}</h2>
 
           <p>
-            {registrationMode ? 'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.' : 'Sign in to access your training, performance and recovery data.'}
+            {passwordRecoverySession?'Enter a new password of at least 12 characters.':recoveryMode?'Enter your account email to receive a secure password reset link.':registrationMode ? 'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.' : 'Sign in to access your training, performance and recovery data.'}
           </p>
 
-          <label>
+          {!passwordRecoverySession&&<label>
             <span>Email</span>
 
             <input
@@ -9853,18 +9953,19 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
               onChange={(event) => setEmail(event.target.value)}
               required
             />
-          </label>
+          </label>}
 
-          <label>
+          {!recoveryMode && <label>
             <span>Password</span>
 
             <input
-              type="password"
+              type={showAuthPassword?"text":"password"}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
             />
-          </label>
+          </label>}
+          {!recoveryMode&&<button type="button" className="azur-auth-switch" onClick={()=>setShowAuthPassword(v=>!v)}>{showAuthPassword?"Hide password":"Show password"}</button>}
 
           {authError && (
             <div className="login-error">{authError}</div>
@@ -9875,9 +9976,10 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
             type="submit"
             disabled={authLoading}
           >
-            {authLoading ? (registrationMode ? 'Creating account...' : 'Signing in...') : registrationMode ? 'Create athlete account' : 'Sign in'}
+            {authLoading?'Please wait…':passwordRecoverySession?'Save new password':recoveryMode?'Send password reset email':registrationMode?'Create athlete account':'Sign in'}
           </button>
-        {betaRegistrationEnabled && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
+        {!passwordRecoverySession&&<button type="button" className="azur-auth-switch" onClick={()=>{setRecoveryMode(v=>!v);setAuthError("");setRegistrationNotice("");}}>{recoveryMode?"Back to sign in":"Forgot password?"}</button>}
+        {!recoveryMode&&!passwordRecoverySession&&betaRegistrationEnabled && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
           {registrationNotice && <p className="azur-registration-notice" role="status">{registrationNotice}</p>}
         </form>
 
@@ -9885,8 +9987,10 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     );
   }
 
+  if (window.location.pathname === '/accept-invitation') return <AcceptCoachInvitation />;
+
   if (window.location.pathname === '/onboarding') {
-    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer"><CoachInvitations mode="athlete" /><a href="/" className="azur-onboarding-exit">Go to dashboard</a></div></main>
+    return <main className="azur-onboarding-page"><header className="azur-onboarding-page-header"><img src="/brand/azur-logo.png" alt="Azur Triathlon Coaching" /><div><span className="eyebrow">ATHLETE SETUP</span><h1>Welcome to AZUR</h1><p>Set up your training around your goals and your life.</p></div></header><AthleteOnboardingDraft /><div className="azur-onboarding-page-footer"><p>Already linked to your coach? Your training plan will be prepared after setup.</p><a href="/" className="azur-onboarding-exit">Return to dashboard</a></div></main>
   }
 
   return (
