@@ -24,20 +24,23 @@ export default function CalendarIntensityProfile({ steps }: { steps: unknown }) 
         <strong>Prescribed intensity</strong>
         <span>{targets[0].unit} · relative scale</span>
       </div>
-      <div className="calendar-intensity-bars" style={{display:"flex",alignItems:"flex-end",height:36,width:"100%",minWidth:0,overflow:"hidden",background:"#0d1016",borderRadius:7,padding:"4px",boxSizing:"border-box"}} role="img"
+      <div className="calendar-intensity-bars azur-v3-timeline-bars" style={{display:"flex",alignItems:"flex-end",height:82,width:"100%",minWidth:0,overflow:"hidden",background:"transparent",borderRadius:4,padding:"5px 0 0",boxSizing:"border-box",gap:2,borderBottom:"1px solid #344252"}} role="img"
         aria-label={`Workout intensity profile: ${intervals.length} timed segments; relative bar heights compare ${targets[0].unit} within this workout`}>
         {intervals.map((part, index) => {
           const height = span === 0 ? 58 : 25 + 75 * (performance[index] - min) / span;
           return (
             <span key={index}
               className={`calendar-intensity-bar ${part.kind}`}
-              style={{ flexGrow: part.durationSec ?? 0, flexBasis: 0, height: `${height}%`, minWidth: 2, backgroundColor:metric==="ftp_percent"?ftpZoneColor(values[index]):metric==="rpe"?rpeEffortColor(values[index]):"#8298a8",borderRadius:2,alignSelf:"flex-end" }}
+              style={{ flexGrow: part.durationSec ?? 0, flexBasis: 0, height: `${height}%`, minWidth: 2, backgroundColor:metric==="ftp_percent"?ftpZoneColor(values[index]):metric==="rpe"?rpeEffortColor(values[index]):"#8298a8",borderRadius:"3px 3px 0 0",alignSelf:"flex-end",opacity:part.kind==="recovery"?0.74:1 }}
               title={`${part.kind}: ${Math.round((part.durationSec ?? 0) / 60 * 10) / 10} min · ${targets[index].low}–${targets[index].high} ${targets[index].unit}`}
             />
           );
         })}
       </div>
-      <small style={{display:"block",marginTop:4,lineHeight:1.3,fontSize:"0.7rem",color:"#98a6b5"}}>Bar width = time · Height = relative effort{metric==="ftp_percent"?" · Colours = cycling FTP zones":metric==="rpe"?" · Colours = perceived effort (not FTP zones)":" · No inferred power zones"}</small>
+      <div className="azur-v3-timeline-scale" aria-hidden="true" style={{display:"flex",justifyContent:"space-between",marginTop:6,color:"#8c9eae",fontSize:11,fontVariantNumeric:"tabular-nums"}}>
+        {[0,.25,.5,.75,1].map(part=><span key={part}>{Math.round(total*part/60)}m</span>)}
+      </div>
+      <small style={{display:"block",marginTop:8,lineHeight:1.45,fontSize:"0.7rem",color:"#98a6b5"}}>Width = duration · Height = relative target{metric==="ftp_percent"?" · FTP zone colours":metric==="rpe"?" · RPE colours (not FTP zones)":" · Not a measured intensity trace"}</small>
     </div>
   );
 }
