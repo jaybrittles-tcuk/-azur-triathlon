@@ -7115,7 +7115,7 @@ onClick={() => {
 </details>
         </div>
 
-{sessionDetailOpen && (
+{sessionDetailOpen && selected && (
   <div
     className="session-detail-overlay"
     onClick={() => setSessionDetailOpen(false)}
