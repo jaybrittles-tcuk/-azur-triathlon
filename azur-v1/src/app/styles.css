@@ -7017,3 +7017,132 @@ strong {
  .awd-mersey-artwork{max-height:96px;width:min(100%,300px)}
  .awd-mersey-artwork img{height:96px}
 }
+
+
+/* AZUR workout V4 — refined phone-first hierarchy, scoped to athlete session detail. */
+.athlete-agenda .session-detail-overlay .session-detail-modal {
+ --v4-ink:#edf4fb;--v4-muted:#9aaec0;--v4-line:#293849;
+ background:#0b121d!important;
+ border:1px solid #223044!important;
+ border-radius:22px 22px 0 0!important;
+ box-shadow:0 -12px 55px #0008!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-workout-heading{
+ background:transparent!important;border:none!important;
+ box-shadow:none!important;border-radius:0!important;
+ padding:2px 8px 13px!important;margin:0 0 10px!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-workout-heading h3{
+ font-weight:750!important;letter-spacing:-.045em!important;
+ font-size:clamp(24px,6vw,31px)!important;line-height:1.16!important;
+ max-width:18ch;
+}
+.athlete-agenda .session-detail-modal .azur-v4-workout-meta{
+ display:flex;flex-wrap:wrap;gap:7px!important;align-items:center;
+}
+.athlete-agenda .session-detail-modal .azur-v4-workout-meta span{
+ background:transparent!important;border:none!important;
+ color:#9fb2c4!important;padding:0!important;
+ font-size:12px!important;font-weight:600!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-workout-meta span+span:before{
+ content:"·";margin-right:7px;color:#50687e;
+}
+.athlete-agenda .session-detail-modal .azur-premium-workout-tabs{
+ background:transparent!important;border:0!important;border-radius:0!important;
+ padding:0!important;margin:6px 0 14px!important;box-shadow:none!important;
+}
+.athlete-agenda .session-detail-modal .azur-workout-tab-nav{
+ display:flex!important;gap:20px!important;padding:0!important;
+ background:transparent!important;border-bottom:1px solid #2b3948!important;
+ border-radius:0!important;
+}
+.athlete-agenda .session-detail-modal .azur-workout-tab-nav button{
+ background:transparent!important;border:0!important;border-radius:0!important;
+ font-size:13px!important;font-weight:700!important;padding:13px 2px!important;
+ min-height:42px!important;color:#8ea6b8!important;
+ border-bottom:2px solid transparent!important;
+}
+.athlete-agenda .session-detail-modal .azur-workout-tab-nav button[aria-selected="true"]{
+ background:transparent!important;color:#f1f7fd!important;
+ border-bottom-color:#4baefa!important;
+}
+.athlete-agenda .session-detail-modal .azur-workout-tab-content{
+ background:transparent!important;border:0!important;
+ padding:15px 4px!important;
+}
+.athlete-agenda .session-detail-modal .calendar-intensity-profile{
+ background:transparent!important;border:none!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-completion-summary{
+ background:#121e2b!important;border:1px solid #26394b!important;
+ padding:14px!important;border-radius:14px!important;margin-top:12px!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-completion-summary .completed-session-heading strong{
+ font-size:17px!important;
+}
+.athlete-agenda .session-detail-modal .azur-manual-training-insights{
+ border:1px solid #2a4052!important;border-radius:14px!important;
+ background:#101d2b!important;padding:0!important;margin:10px 0!important;
+ box-shadow:none!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-insight-summary{
+ display:flex;justify-content:space-between;align-items:center;
+ cursor:pointer;list-style:none;padding:15px!important;
+ color:#e6f2fc!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-insight-summary::-webkit-details-marker{display:none}
+.athlete-agenda .session-detail-modal .azur-v4-insight-summary strong{display:block;font-size:14px}
+.athlete-agenda .session-detail-modal .azur-v4-insight-summary small{
+ display:block;color:#96b1c5!important;font-size:11px;margin-top:4px
+}
+.athlete-agenda .session-detail-modal .azur-manual-training-insights[open] > :not(summary){
+ margin-left:14px!important;margin-right:14px!important;
+}
+.athlete-agenda .session-detail-modal .azur-manual-insight-metrics{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:8px!important;margin-top:8px!important;
+}
+.athlete-agenda .session-detail-modal .azur-manual-insight-metrics>div{
+ background:#17283a!important;border:1px solid #2b4358!important;
+ border-radius:11px!important;padding:10px!important;
+}
+.athlete-agenda .session-detail-modal .azur-manual-insight-metrics strong{font-size:18px!important}
+.athlete-agenda .session-detail-modal .azur-v4-recovery{
+ background:#121d2b!important;border:1px solid #2b3b4d!important;
+ padding:0!important;border-radius:16px!important;overflow:hidden;
+ box-shadow:none!important;margin:12px 0!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-recovery>summary{
+ padding:16px!important;font-size:14px!important;
+ background:#121d2b!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-recovery>summary strong{font-size:16px!important}
+.athlete-agenda .session-detail-modal .azur-v4-recovery .session-block-item{
+ padding:9px 16px!important;background:transparent!important;
+ border:0!important;margin:0!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-recovery label span{
+ font-size:13px!important;font-weight:650!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-recovery input[type="range"]{
+ width:100%!important;max-width:100%!important;accent-color:#50aef0!important;
+ display:block!important;margin:10px 0 4px!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-recovery select,
+.athlete-agenda .session-detail-modal .azur-v4-recovery textarea{
+ width:100%!important;min-width:0!important;background:#182a3d!important;
+ border:1px solid #37536b!important;border-radius:10px!important;
+ color:#f0f6ff!important;font-size:14px!important;
+}
+.athlete-agenda .session-detail-modal .azur-v4-recovery textarea{min-height:75px!important}
+.athlete-agenda .session-detail-modal .azur-v4-recovery .primary-button{
+ width:calc(100% - 32px)!important;margin:12px 16px 16px!important;
+ min-height:46px!important;border-radius:11px!important;font-size:14px!important;
+}
+@media(max-width:560px){
+ .athlete-agenda .session-detail-overlay .session-detail-modal{
+ padding:14px 14px max(22px,env(safe-area-inset-bottom))!important;
+ }
+ .athlete-agenda .session-detail-modal .azur-v4-workout-heading h3{font-size:24px!important}
+}
