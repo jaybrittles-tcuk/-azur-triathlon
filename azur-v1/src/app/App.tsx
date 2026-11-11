@@ -7660,7 +7660,7 @@ const sessionVerdict =
     </strong>
   </div>
 </div>}
-      {selected.completedMetrics && (
+      {selected.completedMetrics && selected.completedSource !== 'manual' && (
         <details className="completed-activity-details azur-collapsible-detail">
           <summary className="completed-activity-title">
             <span>ACTIVITY DATA</span>
