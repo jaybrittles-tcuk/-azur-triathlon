@@ -7324,3 +7324,154 @@ strong {
  .azur-v3-calendar-sports{gap:4px;padding:14px 7px}
  .azur-v3-calendar-meter{width:54px;height:54px}
 }
+
+
+/* AZUR V3 refinement — cohesive dark athlete home and low-noise training calendar. */
+.azur-white-dashboard{
+ background:#0b0e13!important;color:#e9eef4!important;
+ border-radius:0!important;box-shadow:none!important;
+ max-width:900px!important;
+}
+.azur-white-dashboard .awd-hero{
+ min-height:365px!important;
+ padding:21px 23px 56px!important;
+ background-image:linear-gradient(180deg,rgba(6,10,18,.26) 0%,rgba(6,10,18,.45) 31%,rgba(8,12,20,.97) 100%),url('/race-images/roth.jpg')!important;
+ background-size:cover!important;background-position:center 47%!important;
+}
+.azur-white-dashboard .awd-hero.awd-hero-mersey{
+ background-image:linear-gradient(180deg,rgba(6,10,18,.26) 0%,rgba(6,10,18,.45) 31%,rgba(8,12,20,.97) 100%),url('/race-images/roth.jpg')!important;
+}
+.azur-white-dashboard .awd-v3-race-story{margin-top:14px;max-width:510px}
+.azur-white-dashboard .awd-v3-race-story .awd-greeting{
+ color:#e0ebf6!important;opacity:.95;font-size:15px!important;margin-bottom:18px!important
+}
+.azur-white-dashboard .awd-v3-phase-tag{
+ display:inline-flex;align-items:center;gap:7px;
+ color:#d5ecfb;background:#102f479e;border:1px solid #64b1e48c;
+ padding:6px 11px;border-radius:999px;font-weight:700;font-size:11px;
+ letter-spacing:.06em;text-transform:uppercase;
+}
+.azur-white-dashboard .awd-v3-race-story h1{
+ margin:14px 0 9px!important;font-size:clamp(24px,6.8vw,35px)!important;
+ font-weight:750!important;line-height:1.14!important;letter-spacing:-.04em!important
+}
+.azur-white-dashboard .awd-v3-countdown{
+ display:flex;align-items:baseline;gap:10px;color:#eaf5ff;
+ margin:4px 0 12px!important
+}
+.azur-white-dashboard .awd-v3-countdown strong{
+ font-size:clamp(45px,12vw,64px);font-weight:600;line-height:1;letter-spacing:-.06em;
+}
+.azur-white-dashboard .awd-v3-countdown span{
+ font-size:13px;color:#cadce9
+}
+.azur-white-dashboard .awd-v3-race-progress{margin-top:13px!important;gap:7px!important}
+.azur-white-dashboard .awd-v3-race-progress span{
+ background:#09141fa8!important;border:1px solid #ffffff32!important;
+ color:#dceaf6!important;font-size:11px!important;padding:5px 9px!important;
+}
+.azur-white-dashboard .awd-body{
+ background:#0b0e13!important;gap:12px!important;
+ margin-top:0!important;padding:15px 16px 26px!important;
+}
+.azur-white-dashboard .awd-card{
+ background:#15191f!important;border:1px solid #30363f!important;
+ border-radius:18px!important;box-shadow:none!important;
+ color:#e7eef6!important;
+}
+.azur-white-dashboard .awd-heading h2,
+.azur-white-dashboard .awd-eyebrow{color:#99aab9!important}
+.azur-white-dashboard .awd-workout-title h3{color:#f0f4f8!important}
+.azur-white-dashboard .awd-workout-title p{color:#a2b4c4!important}
+.azur-white-dashboard .awd-heading>button{color:#93c7eb!important}
+.azur-white-dashboard .awd-workout+.awd-workout{border-top-color:#303944!important}
+.azur-white-dashboard .awd-workout .awd-target,
+.azur-white-dashboard .awd-workout .awd-target span{color:#bdcbd7!important}
+.azur-white-dashboard .awd-sport-icon{background:#173347!important;color:#58b6e4!important}
+.azur-white-dashboard .bike .awd-sport-icon{background:#352434!important;color:#e89bc3!important}
+.azur-white-dashboard .run .awd-sport-icon{background:#342719!important;color:#eeb56a!important}
+.azur-white-dashboard .awd-primary{
+ background:#2c87c3!important;color:white!important;
+ border:0!important;border-radius:11px!important;box-shadow:none!important;
+}
+.azur-white-dashboard .awd-unscheduled h3{color:#e6eef6!important}
+.azur-white-dashboard .awd-unscheduled p{color:#aab9c6!important}
+.azur-white-dashboard .awd-v3-strategy{padding:0!important}
+.azur-white-dashboard .awd-v3-strategy>summary{
+ padding:18px!important;display:flex;gap:15px;align-items:center;
+ justify-content:space-between;list-style:none;cursor:pointer;
+}
+.azur-white-dashboard .awd-v3-strategy>summary::-webkit-details-marker{display:none}
+.azur-white-dashboard .awd-v3-strategy>summary strong{
+ display:block;color:#e6f0f8;font-size:15px;
+}
+.azur-white-dashboard .awd-v3-strategy>summary small{
+ display:block;color:#96abbc;margin-top:5px;font-size:12px
+}
+.azur-white-dashboard .awd-v3-strategy>summary>svg{color:#8aaac0}
+.azur-white-dashboard .awd-v3-strategy[open]>summary>svg{transform:rotate(90deg)}
+.azur-white-dashboard .awd-v3-strategy-body{padding:0 14px 17px}
+.azur-white-dashboard .awd-v3-week .awd-week-total,
+.azur-white-dashboard .awd-v3-week .awd-week-total strong,
+.azur-white-dashboard .awd-v3-ring-item>strong{color:#e8f2f8!important}
+.azur-white-dashboard .awd-v3-week .awd-week-total span,
+.azur-white-dashboard .awd-week .awd-note{color:#a4b8c6!important}
+.azur-white-dashboard .awd-v3-next{padding:17px 15px 8px!important}
+.azur-white-dashboard .awd-v3-upcoming-session{border-top-color:#323943!important}
+.azur-white-dashboard .awd-v3-ring-item .awd-v3-progress-ring:before{background:#15191f!important}
+.azur-white-dashboard .awd-v3-ring-item>span{color:#a1b2c1!important}
+.azur-white-dashboard .awd-v3-upcoming-name strong{color:#f0f5fa!important}
+.azur-white-dashboard .awd-readiness{background:#151c23!important}
+.azur-white-dashboard .awd-readiness strong{color:#e6f2f9!important}
+.azur-white-dashboard .awd-readiness small{color:#99b1c5!important}
+.azur-white-dashboard .awd-insight{background:#101d28!important}
+.azur-white-dashboard .awd-insight p{color:#cedce8!important}
+.azur-white-dashboard .awd-load-link{border-top-color:#303b49!important;color:#c9dce9!important}
+.azur-white-dashboard .awd-more-link{color:#a4cbe8!important}
+.calendar-layout.athlete-agenda .calendar-day{
+ border:0!important;border-bottom:1px solid #2d3540!important;
+ border-radius:0!important;background:transparent!important;
+ padding:12px 0!important;
+}
+.calendar-layout.athlete-agenda .calendar-day-head{
+ padding:4px 2px 11px!important;
+}
+.calendar-layout.athlete-agenda .calendar-day-head strong{color:#e5edf6!important}
+.calendar-layout.athlete-agenda .day-stack{gap:7px!important}
+.calendar-layout.athlete-agenda .calendar-session{
+ padding:13px 13px!important;background:#171c22!important;
+ border:1px solid #303741!important;border-radius:14px!important;
+ box-shadow:none!important;
+}
+.calendar-layout.athlete-agenda .calendar-session>strong{
+ display:block;color:#f0f5fa!important;
+ font-size:14px!important;line-height:1.3!important;
+}
+.calendar-layout.athlete-agenda .calendar-session-top{
+ color:#a7b8c7!important;font-size:11px!important;
+}
+.calendar-layout.athlete-agenda .calendar-session-meta{color:#a6b7c8!important}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-profile{
+ margin:8px 0 5px!important
+}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-bars{
+ height:29px!important;max-height:29px!important;
+ background:transparent!important
+}
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-profile-head,
+.calendar-layout.athlete-agenda .calendar-session .azur-v3-timeline-scale,
+.calendar-layout.athlete-agenda .calendar-session .calendar-intensity-profile>small{
+ display:none!important;
+}
+.calendar-layout.athlete-agenda .calendar-session-purpose{
+ margin:8px 0 0!important
+}
+.calendar-layout.athlete-agenda .calendar-week-overview{
+ background:#121820!important;border:1px solid #2c3541!important;
+ border-radius:14px!important;
+}
+@media(max-width:560px){
+ .azur-white-dashboard .awd-hero{min-height:340px!important;padding:17px 18px 30px!important}
+ .azur-white-dashboard .awd-body{padding:13px 14px 26px!important}
+ .calendar-layout.athlete-agenda .calendar-day{padding:11px 0!important}
+}
