@@ -365,6 +365,8 @@ export default function CoachWeeklyReview(){
       <summary style={{cursor:'pointer',fontWeight:800}}>Next-session adaptation · {adaptationReview.progression_review_eligible?'Coach progression review possible':'Maintain and assess'}</summary>
       <div style={{display:'grid',gap:9,marginTop:10,fontSize:13}}>
        <p style={{margin:0}}>Evidence: <strong>{String(adaptationReview.evidence_quality||'insufficient').replaceAll('_',' ')}</strong> · Recovery review: <strong>{adaptationReview.recovery_review_needed?'required':'not flagged by available data'}</strong></p>
+       <p style={{margin:0,color:adaptationReview.athlete_recovery_flags_last14_days>0?'#f5d297':'#b8d7e9'}}><strong>Athlete check-ins (14 days):</strong> {adaptationReview.athlete_checkins_last14_days??0} · Recovery flags: {adaptationReview.athlete_recovery_flags_last14_days??0}</p>
+       {(adaptationReview.athlete_checkins_last14_days>0)&&<p style={{margin:0}}><strong>Latest athlete report:</strong> {String(adaptationReview.latest_recovery_feeling||'not_reported').replaceAll('_',' ')} · {String(adaptationReview.latest_athlete_concern||'not_reported').replaceAll('_',' ')}</p>}
        {Array.isArray(adaptationReview.sports)&&adaptationReview.sports.map((s:any)=><details key={s.sport} style={{padding:'10px 12px',border:'1px solid #365c76',borderRadius:10}}>
         <summary style={{cursor:'pointer',textTransform:'capitalize',fontWeight:700}}>{s.sport} · {String(s.decision).replaceAll('_',' ')}</summary>
         {s.next_published_session?<p><strong>Next session:</strong> {s.next_published_session.title} · {s.next_published_session.date} · {s.next_published_session.duration_minutes} min</p>:<p>No upcoming published workout found for this discipline.</p>}
