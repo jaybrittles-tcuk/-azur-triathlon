@@ -30,8 +30,24 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
  const warmups=intervals.filter(x=>x.kind==='warmup');
  const cooldowns=intervals.filter(x=>x.kind==='cooldown');
  const middle=intervals.filter(x=>x.kind==='work'||x.kind==='recovery');
- const grouped:{count:number;label:string}[]=[];
- middle.forEach(x=>{const label=`${x.kind==='work'?'Work':'Recovery'}: ${describeBlock(x)}`;const prev=grouped[grouped.length-1];if(prev?.label===label)prev.count++;else grouped.push({count:1,label});});
+ const mainRows:{label:string;detail:string}[]=[];
+ const same=(a:(typeof middle)[number],b:(typeof middle)[number])=>a.kind===b.kind&&describeBlock(a)===describeBlock(b);
+ for(let i=0;i<middle.length;){
+  const work=middle[i],recovery=middle[i+1];
+  if(work?.kind==='work'&&recovery?.kind==='recovery'){
+   let repeats=1;
+   while(i+(repeats+1)*2<=middle.length&&same(middle[i+repeats*2],work)&&same(middle[i+repeats*2+1],recovery))repeats++;
+   if(repeats>1){
+    mainRows.push({label:repeats+' × repeat',detail:'Work '+describeBlock(work)+' · Recovery '+describeBlock(recovery)});
+    i+=repeats*2;continue;
+   }
+  }
+  let repeats=1;
+  while(i+repeats<middle.length&&same(middle[i+repeats],work))repeats++;
+  mainRows.push({label:(repeats>1?repeats+' × ':'')+(work.kind==='work'?'Work':'Recovery'),detail:describeBlock(work)});
+  i+=repeats;
+ }
+
  return <section className="azur-premium-workout-tabs azur-v3-unified-workout" aria-label="Prescribed workout">
    <header className="azur-v3-workout-header">
      <div><span className="azur-v3-eyebrow">YOUR SESSION</span><h3>Workout structure</h3></div>
@@ -49,7 +65,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    </div>}
    {intervals.length>0?<div className="azur-v3-prescription">
      {warmups.length>0&&<div className="azur-v3-prescription-row"><strong>Warm-up</strong><p>{warmups.map(describeBlock).join(' · ')}</p></div>}
-     {middle.length>0&&<div className="azur-v3-prescription-row"><strong>Main set</strong><p>{grouped.map(x=>(x.count>1?x.count+' × ':'')+x.label).join(' · ')}</p></div>}
+     {middle.length>0&&<div className="azur-v3-prescription-row azur-v3-mainset-row"><strong>Main set</strong><div className="azur-v3-mainset-blocks">{mainRows.map((row,i)=><div key={i} className="azur-v3-mainset-block"><strong>{row.label}</strong><span>{row.detail}</span></div>)}</div></div>}
      {cooldowns.length>0&&<div className="azur-v3-prescription-row"><strong>Cool-down</strong><p>{cooldowns.map(describeBlock).join(' · ')}</p></div>}
    </div>:poolSegments.length===0&&<p className="azur-v3-evidence-warning">Structured intervals are not available in this prescription. Review your coach's instructions before training.</p>}
    {cadenceNotes.length>0&&<p className="azur-v3-workout-cue">Cadence targets: {[...new Set(cadenceNotes)].join(', ')}</p>}
