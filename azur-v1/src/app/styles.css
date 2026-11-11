@@ -7233,3 +7233,94 @@ strong {
   grid-template-columns:78px minmax(0,1fr);gap:9px
  }
 }
+
+
+/* AZUR V3 — athlete home, race overview, weekly sport progress and calendar. */
+.azur-white-dashboard .awd-v3-race-progress{
+ display:flex;gap:12px;flex-wrap:wrap;margin-top:15px;
+ color:#e7f2ff;font-size:12px;font-weight:700;
+}
+.azur-white-dashboard .awd-v3-race-progress span{
+ border:1px solid #ffffff42;border-radius:99px;background:#07192772;padding:6px 11px;
+}
+.azur-white-dashboard .awd-v3-next{padding:18px 17px 9px!important}
+.azur-white-dashboard .awd-v3-upcoming-session{
+ width:100%;border:0!important;border-top:1px solid #344151!important;
+ display:flex;gap:11px;align-items:center;text-align:left;
+ padding:15px 0!important;background:transparent!important;color:#e9f2f9!important;
+}
+.azur-white-dashboard .awd-v3-upcoming-session>svg{flex:none;color:#79c8e7}
+.azur-white-dashboard .awd-v3-upcoming-session.bike>svg{color:#ee90bd}
+.azur-white-dashboard .awd-v3-upcoming-session.run>svg{color:#eab36d}
+.azur-white-dashboard .awd-v3-upcoming-date{
+ font-size:11px;color:#92a9bc;min-width:47px;text-transform:uppercase;font-weight:750;
+}
+.azur-white-dashboard .awd-v3-upcoming-name{flex:1;min-width:0}
+.azur-white-dashboard .awd-v3-upcoming-name strong{
+ display:block;font-size:13px;line-height:1.35;color:#e8f3fc;
+ white-space:nowrap;text-overflow:ellipsis;overflow:hidden;
+}
+.azur-white-dashboard .awd-v3-upcoming-name small{font-size:11px;color:#91aabe}
+.azur-white-dashboard .awd-v3-upcoming-session>svg:last-child{color:#7892a9}
+.azur-white-dashboard .awd-v3-sport-rings{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;
+ margin:15px 0 12px;
+}
+.azur-white-dashboard .awd-v3-ring-item{
+ text-align:center;display:flex;flex-direction:column;align-items:center;gap:7px;
+ min-width:0;
+}
+.azur-white-dashboard .awd-v3-progress-ring{
+ --azur-sport:#4dbfe6;--ring-fill:0%;
+ width:76px;height:76px;border-radius:50%;
+ background:conic-gradient(var(--azur-sport) var(--ring-fill),#314353 var(--ring-fill));
+ display:grid;place-items:center;position:relative;
+}
+.azur-white-dashboard .awd-v3-ring-item.bike .awd-v3-progress-ring{--azur-sport:#e899bf}
+.azur-white-dashboard .awd-v3-ring-item.run .awd-v3-progress-ring{--azur-sport:#e9a869}
+.azur-white-dashboard .awd-v3-progress-ring:before{
+ content:"";position:absolute;inset:8px;background:#152334;border-radius:50%;
+}
+.azur-white-dashboard .awd-v3-progress-ring svg{
+ position:relative;z-index:1;color:var(--azur-sport)
+}
+.azur-white-dashboard .awd-v3-ring-item>strong{font-size:13px;color:#ecf5fa;white-space:nowrap}
+.azur-white-dashboard .awd-v3-ring-item>strong small{font-size:10px;color:#96aabc;font-weight:500}
+.azur-white-dashboard .awd-v3-ring-item>span{font-size:10px;color:#94aabd;letter-spacing:.025em}
+.azur-white-dashboard .awd-v3-week-evidence{border-top:1px solid #314458;margin:12px 0 8px}
+.azur-white-dashboard .awd-v3-week-evidence summary{
+ cursor:pointer;font-size:12px;color:#a6c0d1;padding:12px 2px;
+}
+.azur-v3-calendar-sports{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+ padding:17px 14px 12px;margin:12px 0!important;border:1px solid #28394a;
+ border-radius:18px;background:#131d2b;
+}
+.azur-v3-calendar-sport{
+ min-width:0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;
+ color:#e4f2fa;
+}
+.azur-v3-calendar-meter{
+ --azur-sport:#38bde8;--meter-fill:0%;
+ width:62px;height:62px;border-radius:50%;display:grid;place-items:center;
+ background:conic-gradient(var(--azur-sport) var(--meter-fill),#2c3846 var(--meter-fill));
+ position:relative;
+}
+.azur-v3-calendar-sport.bike .azur-v3-calendar-meter{--azur-sport:#ed91c0}
+.azur-v3-calendar-sport.run .azur-v3-calendar-meter{--azur-sport:#e8a55d}
+.azur-v3-calendar-meter:before{
+ content:"";position:absolute;inset:7px;background:#131d2b;border-radius:50%;
+}
+.azur-v3-calendar-meter span{position:relative;color:var(--azur-sport);font-size:23px;font-weight:700}
+.azur-v3-calendar-sport strong{font-size:14px!important;white-space:nowrap}
+.azur-v3-calendar-sport strong small{font-size:10px;color:#99afc2!important;font-weight:500}
+.azur-v3-calendar-sport>span{font-size:11px;text-transform:capitalize;color:#9ab2c6}
+.azur-v3-calendar-evidence{
+ grid-column:1/-1;text-align:center;color:#8ba9bc;font-size:11px;margin-top:4px
+}
+@media(max-width:390px){
+ .azur-white-dashboard .awd-v3-progress-ring{width:65px;height:65px}
+ .azur-white-dashboard .awd-v3-sport-rings{gap:4px}
+ .azur-v3-calendar-sports{gap:4px;padding:14px 7px}
+ .azur-v3-calendar-meter{width:54px;height:54px}
+}
