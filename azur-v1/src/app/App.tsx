@@ -7417,21 +7417,105 @@ onClick={() => {
 
           <div className="editor-grid">
 
+{/* A fast athlete check-in comes before optional recorded analytics. */}
+{selected.status==='completed'&&<details className="wide session-block session-analysis-v3-feedback azur-premium-disclosure azur-v4-recovery">
+  <summary><strong>How did it feel?</strong><span>3 quick answers · optional note</span></summary>
+
+  <div className="session-block-item azur-v5-effort">
+    <strong className="azur-v5-field-heading">How hard was this session?</strong>
+    <div className="azur-v5-rpe-grid" role="group" aria-label="Session effort, from 1 very easy to 10 maximal">
+      {Array.from({length:10},(_,i)=>i+1).map(n=><button
+        key={n} type="button" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed}
+        aria-pressed={Number(sessionFeedback.rpe)===n}
+        className={`azur-v5-rpe-choice ${Number(sessionFeedback.rpe)===n?'is-selected':''}`}
+        onClick={()=>setSessionFeedback(previous=>({...previous,rpe:String(n)}))}
+      >{n}</button>)}
+    </div>
+    <div className="azur-v5-rpe-hint"><span>Very easy</span><span>{sessionFeedback.rpe?'Selected: '+sessionFeedback.rpe+' / 10':'Choose an effort'}</span><span>Maximal</span></div>
+  </div>
+
+  {selected.status==='completed'&&<div className="session-block-item" style={{display:'grid',gap:12}}>
+    <label style={{display:'grid',gap:6}}>
+      <span>How do you feel now?</span>
+      <select aria-label="Post-workout recovery feeling" value={postWorkoutRecovery} onChange={event=>setPostWorkoutRecovery(event.target.value)}
+        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
+        <option value="">Choose your recovery feeling</option>
+        <option value="fresh">Fresh · Could have done more</option>
+        <option value="okay">Okay · As expected</option>
+        <option value="tired">Tired · Need some recovery</option>
+        <option value="very_tired">Very tired · Struggled to recover</option>
+      </select>
+    </label>
+    <label style={{display:'grid',gap:6}}>
+      <span>Anything your coach should know?</span>
+      <select aria-label="Post-workout concerns" value={postWorkoutConcern} onChange={event=>setPostWorkoutConcern(event.target.value)}
+        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
+        <option value="none">No concerns</option>
+        <option value="soreness">Unusual soreness</option>
+        <option value="pain">Pain or possible injury</option>
+        <option value="illness">Feeling unwell</option>
+        <option value="other">Other concern</option>
+      </select>
+    </label>
+    {(postWorkoutConcern!=='none'||postWorkoutRecovery==='very_tired')&&<small style={{color:'#f6d29d'}}>Your coach will see this recovery flag. AZUR will not automatically increase your training based on this session.</small>}
+  </div>}
+  <div className="session-block-item">
+    <label>
+      <span>Optional note for your coach</span>
+
+      <textarea
+        aria-label="Athlete notes"
+        rows={2}
+        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.notes}
+        onChange={(event) =>
+          setSessionFeedback({
+            ...sessionFeedback,
+            notes: event.target.value,
+          })
+        }
+        placeholder="Anything else? (optional)"
+      />
+    </label>
+  </div>
+
+<button
+  type="button"
+  className="primary-button"
+  onClick={()=>void handleSessionFeedbackSave()}
+  disabled={sessionFeedbackSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed}
+>
+  <Save size={17} />
+
+  {sessionFeedbackSaving
+    ? 'Saving feedback...'
+    : 'Save recovery check-in'}
+</button>
+
+{sessionFeedbackMessage && (
+  <small className="feedback-message">
+    {sessionFeedbackMessage}
+  </small>
+)}
+</details>}
+
+
 
 {/* Planned duration is already visible in the workout header and Overview tab. */}
 {selected.status === 'completed' &&
   selected.completedDurationSec && (
     <div className="wide session-block completed-session-summary session-analysis-v3-summary azur-v4-completion-summary">
-      <div className="completed-session-heading">
-        <div>
-          <span className="eyebrow">SESSION COMPLETE</span>
-          <strong>Completed activity{selected.completedSource === 'garmin' ? ' · Garmin' : selected.completedSource === 'manual_fit' ? ' · FIT upload' : ''}</strong>
-          <small>Planned {formatDuration(selected.durationMin)} · Actual {formatDuration(Math.round(selected.completedDurationSec / 60))} · {selected.durationMin > 0 ? Math.round(selected.completedDurationSec / 60 / selected.durationMin * 100) + '% of planned time' : 'Duration recorded'}</small>
-        </div>
-
-        <span className="completed-check">✓</span>
-      </div>
-                    {selected.completedRoute && selected.completedRoute.length > 1 && (
+      <div className="azur-v6-result">
+ <div className="azur-v6-result-top"><span className="azur-v6-result-label">WORKOUT RECORDED</span><span className="azur-v6-result-source">{selected.completedSource==='manual'?'Athlete reported':selected.completedSource==='garmin'?'Garmin':selected.completedSource==='manual_fit'?'FIT upload':'Imported activity'}</span></div>
+ <div className="azur-v6-result-metrics">
+  <div><small>Planned</small><strong>{formatDuration(selected.durationMin)}</strong></div>
+  <span className="azur-v6-result-arrow" aria-hidden="true">→</span>
+  <div><small>Recorded</small><strong>{formatDuration(Math.round(selected.completedDurationSec/60))}</strong></div>
+  <div><small>Time</small><strong>{selected.durationMin>0?Math.round(selected.completedDurationSec/60/selected.durationMin*100)+'%':'—'}</strong></div>
+ </div>
+ <p>Time completed compared with the plan. This does not confirm intensity, technique or recovery.</p>
+ </div>
+ <details className="azur-v6-recorded-evidence"><summary><strong>Recorded activity data</strong><span>Charts, match analysis and training metrics</span></summary>
+ {selected.completedRoute && selected.completedRoute.length > 1 && (
   <RouteMap points={selected.completedRoute} />
 )}
       {selected.completedSeries && selected.completedSeries.length > 1 && (
@@ -7523,6 +7607,7 @@ const sessionVerdict =
     </div>
   );
 })()}
+ </details>
  {selected?.completedDurationSec && selected.completedSource === 'manual' && (
    <details className="azur-manual-training-insights" aria-label="AZUR training insights">
      <summary className="azur-v4-insight-summary"><span><strong>Training analysis</strong><small>Session interpretation and evidence · optional</small></span><span aria-hidden="true">⌄</span></summary>
@@ -7931,85 +8016,7 @@ const sessionVerdict =
 
 
 {(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2"><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Save your time, distance and effort here. Once recorded, the short recovery check-in becomes available below.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
-{selected.status==='completed'&&<details className="wide session-block session-analysis-v3-feedback azur-premium-disclosure azur-v4-recovery">
-  <summary><strong>How did it feel?</strong><span>3 quick answers · optional note</span></summary>
 
-  <div className="session-block-item azur-v5-effort">
-    <strong className="azur-v5-field-heading">How hard was this session?</strong>
-    <div className="azur-v5-rpe-grid" role="group" aria-label="Session effort, from 1 very easy to 10 maximal">
-      {Array.from({length:10},(_,i)=>i+1).map(n=><button
-        key={n} type="button" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed}
-        aria-pressed={Number(sessionFeedback.rpe)===n}
-        className={`azur-v5-rpe-choice ${Number(sessionFeedback.rpe)===n?'is-selected':''}`}
-        onClick={()=>setSessionFeedback(previous=>({...previous,rpe:String(n)}))}
-      >{n}</button>)}
-    </div>
-    <div className="azur-v5-rpe-hint"><span>Very easy</span><span>{sessionFeedback.rpe?'Selected: '+sessionFeedback.rpe+' / 10':'Choose an effort'}</span><span>Maximal</span></div>
-  </div>
-
-  {selected.status==='completed'&&<div className="session-block-item" style={{display:'grid',gap:12}}>
-    <label style={{display:'grid',gap:6}}>
-      <span>How do you feel now?</span>
-      <select aria-label="Post-workout recovery feeling" value={postWorkoutRecovery} onChange={event=>setPostWorkoutRecovery(event.target.value)}
-        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
-        <option value="">Choose your recovery feeling</option>
-        <option value="fresh">Fresh · Could have done more</option>
-        <option value="okay">Okay · As expected</option>
-        <option value="tired">Tired · Need some recovery</option>
-        <option value="very_tired">Very tired · Struggled to recover</option>
-      </select>
-    </label>
-    <label style={{display:'grid',gap:6}}>
-      <span>Anything your coach should know?</span>
-      <select aria-label="Post-workout concerns" value={postWorkoutConcern} onChange={event=>setPostWorkoutConcern(event.target.value)}
-        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
-        <option value="none">No concerns</option>
-        <option value="soreness">Unusual soreness</option>
-        <option value="pain">Pain or possible injury</option>
-        <option value="illness">Feeling unwell</option>
-        <option value="other">Other concern</option>
-      </select>
-    </label>
-    {(postWorkoutConcern!=='none'||postWorkoutRecovery==='very_tired')&&<small style={{color:'#f6d29d'}}>Your coach will see this recovery flag. AZUR will not automatically increase your training based on this session.</small>}
-  </div>}
-  <div className="session-block-item">
-    <label>
-      <span>Optional note for your coach</span>
-
-      <textarea
-        aria-label="Athlete notes"
-        rows={2}
-        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.notes}
-        onChange={(event) =>
-          setSessionFeedback({
-            ...sessionFeedback,
-            notes: event.target.value,
-          })
-        }
-        placeholder="Anything else? (optional)"
-      />
-    </label>
-  </div>
-
-<button
-  type="button"
-  className="primary-button"
-  onClick={()=>void handleSessionFeedbackSave()}
-  disabled={sessionFeedbackSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed}
->
-  <Save size={17} />
-
-  {sessionFeedbackSaving
-    ? 'Saving feedback...'
-    : 'Save recovery check-in'}
-</button>
-
-{sessionFeedbackMessage && (
-  <small className="feedback-message">
-    {sessionFeedbackMessage}
-  </small>
-)}
-</details>}
           </div>
           </aside>
   </div>
