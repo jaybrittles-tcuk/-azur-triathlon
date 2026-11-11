@@ -6848,14 +6848,7 @@ color:
   <div className="calendar-strip-footer">
     <small>
       Selected week · {calendarWeekSessions.length} {calendarWeekSessions.length === 1 ? 'session' : 'sessions'} · {completedCount} completed · {plannedCount} planned ·{' '}
-      {(
-        calendarWeekSessions.reduce(
-          (total, session) =>
-            total + session.durationMin,
-          0,
-        ) / 60
-      ).toFixed(1)}
-      h planned
+      {calendarWeekSessions.filter(session=>session.status==='completed').length===calendarWeekSessions.length&&calendarWeekSessions.length>0?'all done':'in progress'}
     </small>
 
     {calendarWeekOffset !== 0 && (
@@ -7016,7 +7009,7 @@ onClick={() => {
       ? `${Math.round(
           session.completedMatchConfidence,
         )}% match`
-      : `${session.sessionClass.replace(/_/g, ' ')} · planned`}
+      : session.status === 'completed' ? 'Workout recorded' : `${session.sessionClass.replace(/_/g, ' ')} · planned`}
   </span>
 </div>
 
@@ -7079,11 +7072,11 @@ onClick={() => {
     })
   }
 </section>
-<section className="panel calendar-week-overview" aria-label="Training week overview">
-  <div className="calendar-week-overview-heading">
-    <strong>Your training week</strong>
-    <small>Based on sessions currently saved in your calendar</small>
-  </div>
+<details className="panel calendar-week-overview" aria-label="Training week overview">
+  <summary className="calendar-week-overview-heading" style={{cursor:'pointer'}}>
+    <strong>Week details</strong>
+    <small style={{display:'block'}}>Training totals and coaching focus · expand</small>
+  </summary>
   {calendarWeekSessions.length > 0 ? (
     <>
       <div className="calendar-week-overview-stats">
@@ -7105,7 +7098,7 @@ onClick={() => {
         : 'There are no planned sessions in this week. This does not indicate a recovery week or zero training load.'}</p>
     </div>
   )}
-</section>
+</details>
         </div>
 
 {sessionDetailOpen && (
@@ -7985,27 +7978,29 @@ const sessionVerdict =
 )}
 
 
-{(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2" open={Boolean(editableManualId)}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
-<details className="wide session-block session-analysis-v3-feedback azur-premium-disclosure" open={selected.status==='completed'}>
-  <summary><strong>Post-workout check-in</strong><span>Effort, recovery and concerns · about 20 seconds</span></summary>
+{(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2"><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Save your time, distance and effort here. Once recorded, the short recovery check-in becomes available below.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
+{selected.status==='completed'&&<details className="wide session-block session-analysis-v3-feedback azur-premium-disclosure" open>
+  <summary><strong>Recovery check-in</strong><span>How you felt after this workout · about 20 seconds</span></summary>
 
   <div className="session-block-item">
     <label>
-      <span>How hard was that? · Effort 1–10</span>
+      <span>Session effort · RPE 1–10</span>
 
       <input
-        type="number"
+        type="range"
         min="1"
         max="10"
-        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe}
+        step="1"
+        aria-label="Rate session effort from one to ten"
+        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe||"5"}
         onChange={(event) =>
           setSessionFeedback({
             ...sessionFeedback,
             rpe: event.target.value,
           })
         }
-        placeholder="1–10"
       />
+      <small style={{display:"block",marginTop:8}}>Selected effort: <strong>{sessionFeedback.rpe||"Not rated"}</strong> / 10</small>
     </label>
   </div>
 
@@ -8036,7 +8031,7 @@ const sessionVerdict =
   </div>}
   <div className="session-block-item">
     <label>
-      <span>Notes</span>
+      <span>Optional note for your coach</span>
 
       <textarea
         aria-label="Athlete notes"
@@ -8063,7 +8058,7 @@ const sessionVerdict =
 
   {sessionFeedbackSaving
     ? 'Saving feedback...'
-    : 'Save athlete feedback'}
+    : 'Save recovery check-in'}
 </button>
 
 {sessionFeedbackMessage && (
@@ -8071,7 +8066,7 @@ const sessionVerdict =
     {sessionFeedbackMessage}
   </small>
 )}
-</details>
+</details>}
           </div>
           </aside>
   </div>
