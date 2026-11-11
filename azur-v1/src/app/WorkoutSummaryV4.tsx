@@ -19,7 +19,8 @@ const intensity=(target:unknown)=>{
 export default function WorkoutSummaryV4({prescription,rationale,sport,plannedMinutes}:Props){
  const steps=(Array.isArray(prescription?.steps)?prescription.steps:[]).filter((s:Step)=>Number(s?.durationMin)>0) as Step[];
  const pool=(Array.isArray(prescription?.poolSegments)?prescription.poolSegments:[]) as PoolSet[];
- const poolMetres=pool.reduce((n,s)=>n+(Number(s.repeats)||0)*(Number(s.distanceMeters)||0),0);
+ const poolMetres=pool.reduce((n,s)=>n+(Number(s.repeats)||1)*(Number(s.distanceMeters)||0),0);
+ const isPoolSwim=sport==='swim'&&poolMetres>0;
  const validTime=steps.reduce((n,s)=>n+Number(s.durationMin||0),0);
  const total=validTime>0?validTime:plannedMinutes;
  const groupLabels=(steps:Step[])=>{
@@ -37,7 +38,7 @@ export default function WorkoutSummaryV4({prescription,rationale,sport,plannedMi
  const why=tidy(prescription?.purpose?.selectionReason||rationale||prescription?.focus||'Build consistent training with an effort your coach can review.');
  return <section className="azur-v3-unified-workout azur-v3-foundation-workout" aria-label="Your workout prescription">
    <header className="azur-v3-workout-header"><div><span className="azur-v3-eyebrow">YOUR SESSION</span><h3>Workout structure</h3></div><strong>{sport==='swim'&&poolMetres>0?poolMetres+' m':plannedMinutes+' min'}</strong></header>
-   {steps.length>0&&<>
+   {isPoolSwim?<div className="azur-v3-pool-profile" role="img" aria-label={`Pool workout: ${pool.map(s=>`${Number(s.repeats)||1} by ${Number(s.distanceMeters)||0} metres with ${Number(s.restSeconds)||0} seconds rest`).join('; ')}`} style={{display:'flex',alignItems:'end',gap:6,minHeight:92,padding:'12px 4px 8px',borderBottom:'1px solid #36516c'}}>{pool.map((set,i)=><div key={i} style={{flex:Math.max(1,(Number(set.repeats)||1)*(Number(set.distanceMeters)||1)),minWidth:0,display:'flex',alignItems:'end',gap:2,height:76}}>{Array.from({length:Math.min(20,Math.max(1,Number(set.repeats)||1))},(_,j)=><span key={j} style={{flex:1,minWidth:2,height:`${Math.max(22,Math.min(100,Number(set.distanceMeters)||50))}%`,background:i%2===0?'#4e91d2':'#79b7df',borderRadius:'3px 3px 0 0'}}/>)}</div>)}</div>:steps.length>0&&<>
      <div className="azur-v3-interval-graphic azur-v3-foundation-chart" role="img" aria-label="Illustrative relative intensity from the prescribed effort descriptions, not recorded activity data">
       {steps.map((s,i)=><span key={i} title={s.durationMin+' min · '+tidy(s.target)} style={{height:(20+intensity(s.target)*70)+'%',flexGrow:Math.max(1,Number(s.durationMin)||1),flexBasis:0,minWidth:3,background:intensity(s.target)>=.8?'#ecc15d':intensity(s.target)>=.5?'#4e91d2':'#67899f'}}/>)}
      </div>
@@ -53,7 +54,7 @@ export default function WorkoutSummaryV4({prescription,rationale,sport,plannedMi
      </div>)}
      {groups.some(g=>g.label==='Recovery')&&<p className="azur-v3-workout-cue">Recovery intervals are included in the full breakdown.</p>}
     </div>}
-   {steps.length>0&&<details className="azur-v3-workout-disclosure">
+   {steps.length>0&&!isPoolSwim&&<details className="azur-v3-workout-disclosure">
      <summary>Full interval breakdown <span>›</span></summary>
      <ol className="azur-v3-foundation-steps">{steps.map((s,i)=><li key={i}><strong>{s.durationMin} min</strong><span>{tidy(s.target)}</span></li>)}</ol>
    </details>}
@@ -62,6 +63,6 @@ export default function WorkoutSummaryV4({prescription,rationale,sport,plannedMi
      <p>{why}</p>
      {prescription?.purpose?.responseToMonitor&&<p>What we'll monitor: {tidy(prescription.purpose.responseToMonitor)}</p>}
    </details>
-   {validTime>0&&Math.abs(validTime-plannedMinutes)>1&&<p className="azur-v3-evidence-warning" role="note">The listed intervals total {validTime} min; the calendar lists {plannedMinutes} min. Check with your coach before following conflicting durations.</p>}
+   {!isPoolSwim&&validTime>0&&Math.abs(validTime-plannedMinutes)>1&&<p className="azur-v3-evidence-warning" role="note">The listed intervals total {validTime} min; the calendar lists {plannedMinutes} min. Check with your coach before following conflicting durations.</p>}
  </section>;
 }
