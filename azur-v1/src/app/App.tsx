@@ -1331,6 +1331,8 @@ const [sessionFeedback, setSessionFeedback] = useState({
   rpe: '',
   notes: '',
 });
+const [postWorkoutRecovery,setPostWorkoutRecovery]=useState('');
+const [postWorkoutConcern,setPostWorkoutConcern]=useState('none');
 const [nextSessionDecision, setNextSessionDecision] =
   useState<'accepted' | 'kept' | null>(null);const [sessionFeedbackSaving, setSessionFeedbackSaving] = useState(false);
   const [isSavingAdjustment, setIsSavingAdjustment] =
@@ -2411,7 +2413,7 @@ useEffect(()=>{
   let cancelled=false;
   setSessionFeedbackLoadFailed(false);
   setEditableManualId(null);setManualDuration('');setManualDistance('');
-  setSessionFeedback({rpe:'',notes:''});setSessionFeedbackMessage('');
+  setSessionFeedback({rpe:'',notes:''});setSessionFeedbackMessage('');setPostWorkoutRecovery('');setPostWorkoutConcern('none');
   const sessionId=selected?.id;
   if(!sessionId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(sessionId)){
     setSessionFeedbackLoading(false);return;
@@ -2419,14 +2421,17 @@ useEffect(()=>{
   setSessionFeedbackLoading(true);
   void (async()=>{
     try{
-      const [feedback,records]=await Promise.all([
+      const [feedback,records,postWorkout]=await Promise.all([
         supabase.from('session_feedback').select('session_rpe,notes').eq('planned_session_id',sessionId).maybeSingle(),
         selected.status==='completed'
           ?supabase.from('completed_activity').select('id,source,duration_sec,distance_m,session_rpe,notes').eq('planned_session_id',sessionId)
           :Promise.resolve({data:[],error:null}),
+        supabase.from('athlete_postworkout_checkin').select('recovery_feeling,concern').eq('planned_session_id',sessionId).maybeSingle(),
       ]);
       if(cancelled)return;
-      if(feedback.error||records.error)throw feedback.error||records.error;
+      if(feedback.error||records.error||postWorkout.error)throw feedback.error||records.error||postWorkout.error;
+      setPostWorkoutRecovery(postWorkout.data?.recovery_feeling??'');
+      setPostWorkoutConcern(postWorkout.data?.concern??'none');
       const rows=records.data??[];
       const manual=rows.length===1 && rows[0].source==='manual'?rows[0]:null;
       const saved=feedback.data??manual;
@@ -7982,11 +7987,11 @@ const sessionVerdict =
 
 {(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2" open={Boolean(editableManualId)}><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Add optional notes in Athlete Feedback below. You can save a completion without leaving this section.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
 <details className="wide session-block session-analysis-v3-feedback azur-premium-disclosure" open={selected.status==='completed'}>
-  <summary><strong>Athlete feedback</strong><span>Session effort and notes</span></summary>
+  <summary><strong>Post-workout check-in</strong><span>Effort, recovery and concerns · about 20 seconds</span></summary>
 
   <div className="session-block-item">
     <label>
-      <span>Session RPE</span>
+      <span>How hard was that? · Effort 1–10</span>
 
       <input
         type="number"
@@ -8004,6 +8009,31 @@ const sessionVerdict =
     </label>
   </div>
 
+  {selected.status==='completed'&&<div className="session-block-item" style={{display:'grid',gap:12}}>
+    <label style={{display:'grid',gap:6}}>
+      <span>How do you feel after training?</span>
+      <select aria-label="Post-workout recovery feeling" value={postWorkoutRecovery} onChange={event=>setPostWorkoutRecovery(event.target.value)}
+        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
+        <option value="">Choose your recovery feeling</option>
+        <option value="fresh">Fresh · Could have done more</option>
+        <option value="okay">Okay · As expected</option>
+        <option value="tired">Tired · Need some recovery</option>
+        <option value="very_tired">Very tired · Struggled to recover</option>
+      </select>
+    </label>
+    <label style={{display:'grid',gap:6}}>
+      <span>Any soreness or concerns?</span>
+      <select aria-label="Post-workout concerns" value={postWorkoutConcern} onChange={event=>setPostWorkoutConcern(event.target.value)}
+        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
+        <option value="none">No concerns</option>
+        <option value="soreness">Unusual soreness</option>
+        <option value="pain">Pain or possible injury</option>
+        <option value="illness">Feeling unwell</option>
+        <option value="other">Other concern</option>
+      </select>
+    </label>
+    {(postWorkoutConcern!=='none'||postWorkoutRecovery==='very_tired')&&<small style={{color:'#f6d29d'}}>Your coach will see this recovery flag. AZUR will not automatically increase your training based on this session.</small>}
+  </div>}
   <div className="session-block-item">
     <label>
       <span>Notes</span>
@@ -10079,11 +10109,15 @@ async function handleProfileSave() {
     return;
   }
 
-  const { error } = await supabase.rpc('athlete_save_session_feedback', {
-    p_session_id:selected.id,
-    p_rpe:feedbackRpe?Number(feedbackRpe):null,
-    p_notes:sessionFeedback.notes.trim()||null,
-  });
+  if(selected.status==='completed' && (!feedbackRpe||!postWorkoutRecovery)){setSessionFeedbackSaving(false);setSessionFeedbackMessage('Choose session effort and how you feel after the workout.');return;}
+  const { error } = selected.status==='completed'
+    ?await supabase.rpc('athlete_save_postworkout_checkin',{
+      p_session_id:selected.id,p_rpe:Number(feedbackRpe),p_notes:sessionFeedback.notes.trim()||null,
+      p_recovery:postWorkoutRecovery,p_concern:postWorkoutConcern
+    })
+    :await supabase.rpc('athlete_save_session_feedback',{
+      p_session_id:selected.id,p_rpe:feedbackRpe?Number(feedbackRpe):null,p_notes:sessionFeedback.notes.trim()||null
+    });
 
   if (error) {
     console.error('Unable to save session feedback:', error);
