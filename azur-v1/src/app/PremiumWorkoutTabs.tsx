@@ -53,7 +53,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
      <div><span className="azur-v3-eyebrow">YOUR SESSION</span><h3>Workout structure</h3></div>
      <strong>{poolSegments.length>0&&swimMeters>0?swimMeters+' m':plannedMinutes+' min'}</strong>
    </header>
-   {intervals.length>0&&<div className="azur-v3-interval-graphic"><CalendarIntensityProfile steps={source?.steps}/></div>}
+   {poolSegments.length>0&&swimMeters>0?<div className="azur-v3-pool-profile" role="img" aria-label={'Swim sets: '+poolSegments.map(segment=>`${Number(segment.repeats)||0} by ${Number(segment.distanceMeters)||0} metres`).join(', ')} style={{display:'flex',alignItems:'flex-end',gap:8,height:100,padding:'12px 0 8px',borderBottom:'1px solid #34506b'}}>{poolSegments.map((segment,index)=><div key={index} style={{flex:Math.max(1,(Number(segment.repeats)||1)*(Number(segment.distanceMeters)||1)),height:78,display:'flex',alignItems:'flex-end',gap:3}}>{Array.from({length:Math.min(20,Math.max(1,Number(segment.repeats)||1))},(_,i)=><span key={i} style={{flex:1,minWidth:2,height:`${Math.min(100,Math.max(35,Number(segment.distanceMeters)||50))}%`,borderRadius:'3px 3px 0 0',background:index%2===0?'#4e91d2':'#78b7df'}}/>)}</div>)}</div>:intervals.length>0&&<div className="azur-v3-interval-graphic"><CalendarIntensityProfile steps={source?.steps}/></div>}
    {poolSegments.length>0&&<div className="azur-v3-session-sets">
      <div className="azur-v3-set-label">POOL SETS</div>
      {poolSegments.map((segment,index)=><div key={index} className="azur-v3-set-row">
@@ -63,7 +63,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
      </div>)}
      {estimatedSwimSeconds>plannedMinutes*60&&<p role="note" className="azur-v3-evidence-warning">Estimated swim interval time exceeds the planned duration. Ask your coach to review the structure.</p>}
    </div>}
-   {intervals.length>0?<div className="azur-v3-prescription">
+   {intervals.length>0&&poolSegments.length===0?<div className="azur-v3-prescription">
      {warmups.length>0&&<div className="azur-v3-prescription-row"><strong>Warm-up</strong><p>{warmups.map(describeBlock).join(' · ')}</p></div>}
      {middle.length>0&&<div className="azur-v3-prescription-row azur-v3-mainset-row"><strong>Main set</strong><div className="azur-v3-mainset-blocks">{mainRows.map((row,i)=><div key={i} className="azur-v3-mainset-block"><strong>{row.label}</strong><span>{row.detail}</span></div>)}</div></div>}
      {cooldowns.length>0&&<div className="azur-v3-prescription-row"><strong>Cool-down</strong><p>{cooldowns.map(describeBlock).join(' · ')}</p></div>}
@@ -75,7 +75,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    </details>
    <details className="azur-v3-workout-disclosure">
      <summary>Detailed targets &amp; coaching <span>›</span></summary>
-     {intervals.length>0&&<WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/>}
+     {intervals.length>0&&poolSegments.length===0&&<WorkoutTargetDetails prescription={prescription} ftpWatts={ftpWatts}/>}
      {coachingContent}
      {completedMinutes!=null&&<p className="azur-v3-workout-cue">Recorded {completedMinutes} min versus {plannedMinutes} min planned{completedSource?' · '+completedSource:''}. Duration alone does not confirm intensity compliance.</p>}
    </details>
