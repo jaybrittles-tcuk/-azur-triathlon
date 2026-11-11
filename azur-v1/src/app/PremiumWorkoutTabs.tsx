@@ -4,7 +4,6 @@ import WorkoutTargetDetails from './WorkoutTargetDetails';
 import CalendarIntensityProfile from './CalendarIntensityProfile';
 type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null;coachingContent?:ReactNode};
 export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource,coachingContent}:Props){
- const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('intervals');
  const poolSegments=Array.isArray(prescription?.poolSegments)?prescription.poolSegments.filter((segment):segment is Record<string,unknown>=>!!segment&&typeof segment==='object'&&!Array.isArray(segment)):[];
  const swimMeters=poolSegments.reduce((sum,segment)=>sum+Math.max(0,Number(segment.repeats)||0)*Math.max(0,Number(segment.distanceMeters)||0),0);
  const estimatedSwimSeconds=poolSegments.reduce((sum,segment)=>{
