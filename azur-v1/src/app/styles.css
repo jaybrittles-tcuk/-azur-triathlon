@@ -7631,3 +7631,41 @@ strong {
  .athlete-agenda .session-detail-modal .azur-v7-result-stats strong{font-size:17px!important}
  .athlete-agenda .session-detail-modal .azur-v7-recorded-details>summary{align-items:flex-start;flex-direction:column}
 }
+
+
+/* Unified V3 foundation visual language. */
+.athlete-agenda .session-detail-modal .azur-v3-foundation-workout{
+ background:transparent!important;border:0!important;border-radius:0!important;
+ padding:6px 4px 4px!important;margin:0 0 12px!important;box-shadow:none!important;
+}
+.athlete-agenda .session-detail-modal .azur-v3-foundation-chart{
+ display:flex!important;align-items:flex-end!important;gap:3px!important;
+ height:90px!important;padding:6px 0 0!important;
+ border-bottom:1px solid #30475a!important;overflow:hidden!important;
+}
+.athlete-agenda .session-detail-modal .azur-v3-foundation-chart span{
+ display:block!important;border-radius:3px 3px 0 0!important;
+}
+.athlete-agenda .session-detail-modal .azur-v3-foundation-scale{
+ display:flex!important;justify-content:space-between!important;
+ font-size:11px!important;color:#95a9bb!important;margin:7px 0 10px!important;
+}
+.athlete-agenda .session-detail-modal .azur-v3-foundation-row{
+ min-width:0;display:flex;flex-direction:column;gap:4px;
+}
+.athlete-agenda .session-detail-modal .azur-v3-foundation-row b{
+ font-size:14px!important;color:#e5eef6!important
+}
+.athlete-agenda .session-detail-modal .azur-v3-foundation-row span{
+ font-size:13px!important;line-height:1.45!important;color:#a9c0d1!important;
+ overflow-wrap:anywhere;
+}
+.athlete-agenda .session-detail-modal .azur-v3-foundation-steps{
+ padding:0 4px 12px 24px!important;margin:0!important;
+}
+.athlete-agenda .session-detail-modal .azur-v3-foundation-steps li{
+ padding:7px 3px!important;color:#b8cfdf!important;font-size:13px!important;
+}
+.athlete-agenda .session-detail-modal .azur-v3-foundation-steps li strong{
+ color:#e7f4fc!important;margin-right:10px!important;
+}
