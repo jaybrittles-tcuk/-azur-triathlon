@@ -7526,18 +7526,11 @@ const sessionVerdict =
  {selected?.completedDurationSec && selected.completedSource === 'manual' && (
    <details className="azur-manual-training-insights" aria-label="AZUR training insights">
      <summary className="azur-v4-insight-summary"><span><strong>Training analysis</strong><small>Session interpretation and evidence · optional</small></span><span aria-hidden="true">⌄</span></summary>
-     <div className="azur-manual-insight-metrics">
-       <div><small>Planned</small><strong>{selected.durationMin} min</strong></div>
-       <div><small>Recorded</small><strong>{Math.round(selected.completedDurationSec/60)} min</strong></div>
-       <div><small>Distance reported</small><strong>{selected.completedDistanceM == null ? 'Not recorded' : `${(selected.completedDistanceM/1000).toFixed(2)} km`}</strong></div>
-       <div><small>Reported RPE</small><strong>{selected.completedRpe ?? 'Not recorded'}</strong></div>
-     </div>
+     <p className="azur-v5-analysis-context">Manual record · {selected.completedDistanceM == null ? 'No distance reported' : `${(selected.completedDistanceM/1000).toFixed(1)} km reported`} · {selected.completedRpe == null ? 'Effort not rated' : `RPE ${selected.completedRpe}/10`}</p>
      {selected.sport === 'bike' && selected.completedDistanceM != null && selected.completedDurationSec > 0 && (selected.completedDistanceM / 1000) / (selected.completedDurationSec / 3600) > 80 && (
        <p className="azur-insight-data-warning" role="status"><strong>CHECK REPORTED DATA</strong> The distance and duration imply an unusually high average cycling speed. Please review the entries. AZUR will not interpret these values as verified performance or recommend a training change from them.</p>
      )}
-     <p className="azur-insight-observation"><strong>01 · OBSERVATION</strong> {matchCompletionPercent===null?'Completion duration unavailable.':matchCompletionPercent>=100?'The recorded duration met or exceeded the planned duration.':'The recorded duration was shorter than planned.'} This does not verify that prescribed intensity or technique targets were achieved.</p>
-     <p className="azur-insight-interpretation"><strong>02 · INTERPRETATION</strong> Duration and RPE are athlete-reported; power, pace and heart rate were not measured by this entry.</p>
-     <p className="azur-insight-decision"><strong>03 · COACHING DECISION</strong> No change to upcoming training is proposed from this manual record alone. Your coach can review it alongside other training and recovery evidence.</p>
+     <p className="azur-v5-analysis-context">{matchCompletionPercent===null?'Completion time is not available.':matchCompletionPercent>=100?'You recorded at least the planned duration.':'You recorded less than the planned duration.'} Because this is a manual entry, intensity and technique remain unverified. Your coach can consider the result alongside recovery and other training; no automatic plan change has been made.</p>
    </details>
  )}
  {selected?.completedDurationSec && nextPlannedSession?.prescription?.azur_adaptation?.status==='accepted' && (
@@ -7939,33 +7932,24 @@ const sessionVerdict =
 
 {(selected.status!=='completed'||editableManualId)&&<details className="wide session-block azur-manual-completion azur-collapsible-detail session-completion-v2"><summary className="azur-edit-summary">{editableManualId?'Edit recorded workout':'Record workout completion'}<span>{editableManualId?'Change duration, distance or effort':'Enter actual workout details'}</span></summary><p>For training without a connected device. Save your actual session details; an existing imported activity cannot be overwritten.</p><div className="azur-manual-fields"><label>Actual duration (minutes)<input type="number" min="1" max="1440" step="0.5" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDuration} onChange={e=>setManualDuration(e.target.value)} placeholder="e.g. 55"/></label><label>Distance (km, optional)<input type="number" min="0" max="1000" step="0.01" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={manualDistance} onChange={e=>setManualDistance(e.target.value)} placeholder="e.g. 10.2"/></label></div><label className="azur-manual-rpe">Session effort (RPE 1–10)<input type="number" min="1" max="10" step="1" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe} onChange={e=>setSessionFeedback(previous=>({...previous,rpe:e.target.value}))} placeholder="e.g. 4" /></label><small>Save your time, distance and effort here. Once recorded, the short recovery check-in becomes available below.</small>{selected.plannedDate>todayKey&&<p className="azur-manual-date-note">Scheduled for {new Date(selected.plannedDate+'T12:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Future sessions can only be marked complete within one day of the scheduled date.</p>}<button type="button" className="primary-button" disabled={manualSaving||sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>void handleManualCompletion()}>{manualSaving?'Saving…':editableManualId?'Save manual changes':'Mark workout complete'}</button>{manualMessage&&<p role="status">{manualMessage}</p>}</details>}
 {selected.status==='completed'&&<details className="wide session-block session-analysis-v3-feedback azur-premium-disclosure azur-v4-recovery">
-  <summary><strong>How did it feel?</strong><span>Effort · recovery · any concerns</span></summary>
+  <summary><strong>How did it feel?</strong><span>3 quick answers · optional note</span></summary>
 
-  <div className="session-block-item">
-    <label>
-      <span>Session effort · RPE 1–10</span>
-
-      <input
-        type="range"
-        min="1"
-        max="10"
-        step="1"
-        aria-label="Rate session effort from one to ten"
-        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.rpe||"5"}
-        onChange={(event) =>
-          setSessionFeedback({
-            ...sessionFeedback,
-            rpe: event.target.value,
-          })
-        }
-      />
-      <small style={{display:"block",marginTop:8}}>Selected effort: <strong>{sessionFeedback.rpe||"Not rated"}</strong> / 10</small>
-    </label>
+  <div className="session-block-item azur-v5-effort">
+    <strong className="azur-v5-field-heading">How hard was this session?</strong>
+    <div className="azur-v5-rpe-grid" role="group" aria-label="Session effort, from 1 very easy to 10 maximal">
+      {Array.from({length:10},(_,i)=>i+1).map(n=><button
+        key={n} type="button" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed}
+        aria-pressed={Number(sessionFeedback.rpe)===n}
+        className={`azur-v5-rpe-choice ${Number(sessionFeedback.rpe)===n?'is-selected':''}`}
+        onClick={()=>setSessionFeedback(previous=>({...previous,rpe:String(n)}))}
+      >{n}</button>)}
+    </div>
+    <div className="azur-v5-rpe-hint"><span>Very easy</span><span>{sessionFeedback.rpe?'Selected: '+sessionFeedback.rpe+' / 10':'Choose an effort'}</span><span>Maximal</span></div>
   </div>
 
   {selected.status==='completed'&&<div className="session-block-item" style={{display:'grid',gap:12}}>
     <label style={{display:'grid',gap:6}}>
-      <span>How do you feel after training?</span>
+      <span>How do you feel now?</span>
       <select aria-label="Post-workout recovery feeling" value={postWorkoutRecovery} onChange={event=>setPostWorkoutRecovery(event.target.value)}
         disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
         <option value="">Choose your recovery feeling</option>
@@ -7976,7 +7960,7 @@ const sessionVerdict =
       </select>
     </label>
     <label style={{display:'grid',gap:6}}>
-      <span>Any soreness or concerns?</span>
+      <span>Anything your coach should know?</span>
       <select aria-label="Post-workout concerns" value={postWorkoutConcern} onChange={event=>setPostWorkoutConcern(event.target.value)}
         disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
         <option value="none">No concerns</option>
@@ -7994,7 +7978,7 @@ const sessionVerdict =
 
       <textarea
         aria-label="Athlete notes"
-        rows={4}
+        rows={2}
         disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} value={sessionFeedback.notes}
         onChange={(event) =>
           setSessionFeedback({
@@ -8002,7 +7986,7 @@ const sessionVerdict =
             notes: event.target.value,
           })
         }
-        placeholder="Effort, fatigue, discomfort or changes from the plan…"
+        placeholder="Anything else? (optional)"
       />
     </label>
   </div>
