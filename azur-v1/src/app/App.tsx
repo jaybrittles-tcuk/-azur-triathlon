@@ -6848,8 +6848,7 @@ color:
   </div>
   <div className="calendar-strip-footer">
     <small>
-      Selected week · {calendarWeekSessions.length} {calendarWeekSessions.length === 1 ? 'session' : 'sessions'} · {completedCount} completed · {plannedCount} planned ·{' '}
-      {calendarWeekSessions.filter(session=>session.status==='completed').length===calendarWeekSessions.length&&calendarWeekSessions.length>0?'all done':'in progress'}
+      {calendarWeekSessions.length} {calendarWeekSessions.length === 1 ? 'session' : 'sessions'} · {completedCount} recorded · {plannedCount} remaining
     </small>
 
     {calendarWeekOffset !== 0 && (
@@ -6862,6 +6861,20 @@ color:
     )}
   </div>
 </section>
+{calendarWeekSessions.length>0&&<section className="azur-v3-calendar-sports" aria-label="Planned and completed minutes by discipline">
+ {(['swim','bike','run'] as const).map(sport=>{
+   const sportSessions=calendarWeekSessions.filter(s=>s.sport===sport);
+   const planned=sportSessions.reduce((n,s)=>n+(Number(s.durationMin)||0),0);
+   const recorded=sportSessions.filter(s=>s.status==='completed').reduce((n,s)=>n+(Number(s.durationMin)||0),0);
+   const fraction=planned>0?Math.min(100,recorded/planned*100):0;
+   return <div key={sport} className={`azur-v3-calendar-sport ${sport}`}>
+     <div className="azur-v3-calendar-meter" style={{'--meter-fill':fraction+'%'} as React.CSSProperties} role="progressbar" aria-label={sport+' recorded planned duration'} aria-valuemin={0} aria-valuemax={planned||1} aria-valuenow={recorded}><span>{sport==='swim'?'≈':sport==='bike'?'◉':'↗'}</span></div>
+     <strong>{Math.round(recorded)}<small> / {Math.round(planned)} min</small></strong>
+     <span>{sport}</span>
+   </div>
+ })}
+ <small className="azur-v3-calendar-evidence">Recorded planned minutes · not validated training load</small>
+</section>}
 
 <div className="calendar-focus-toolbar">
   <div><strong>{focusedDay ? focusedDay.date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}) : 'Full training week'}</strong></div>
