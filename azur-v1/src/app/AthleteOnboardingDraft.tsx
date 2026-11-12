@@ -1,3 +1,5 @@
+import AthleteSchedulePreferences from './AthleteSchedulePreferences';
+import { defaultSchedulingPreferences, type SchedulingPreferences, type Weekday } from '../domain/schedulingPreferences';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -19,6 +21,7 @@ export default function AthleteOnboardingDraft(){
  const [raceDate,setRaceDate]=useState('');
  const [hours,setHours]=useState('8');
  const [trainingDays,setTrainingDays]=useState<string[]>([]);
+ const [schedulePrefs,setSchedulePrefs]=useState<SchedulingPreferences>(defaultSchedulingPreferences);
  const [recentHours,setRecentHours]=useState('');
  const [ftp,setFtp]=useState('');
  const [css,setCss]=useState('');
@@ -61,7 +64,8 @@ export default function AthleteOnboardingDraft(){
     setExperience(data.experience);setHours(String(data.weekly_hours));
     setDevice(data.device as Device);
     setBackground(['novice','regular','established'].includes(data.training_background)?data.training_background:'');setBackgroundTouched(true);setConsistency(['under4','4to7','8plus'].includes(data.training_consistency)?data.training_consistency:'');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);
-    setTrainingDays((data.training_days||[]).map((day:number)=>weekdays[day]).filter(Boolean));setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
+    setTrainingDays((data.training_days||[]).map((day:number)=>weekdays[day]).filter(Boolean));
+    setSchedulePrefs(previous=>({...previous,availableDays:(data.training_days||[]).filter((day:number)=>Number.isInteger(day)&&day>=0&&day<7) as Weekday[]}));setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
     setFtp(data.ftp_watts==null?'':String(data.ftp_watts));setCss(data.swim_css_seconds_per_100m==null?'':formatPace(String(data.swim_css_seconds_per_100m)));setRunThreshold(data.run_threshold_seconds_per_km==null?'':formatPace(String(data.run_threshold_seconds_per_km)));setStep(Math.min(4,Math.max(0,data.onboarding_step)));
     // Existing athlete data is always preserved; no automatic plan changes.
    }
@@ -164,8 +168,8 @@ export default function AthleteOnboardingDraft(){
   {step===1&&<div>
    <h3>Training that fits your life</h3><p>Choose the time you can consistently protect. AZUR will adapt training to your real week, not the other way around.</p>
    <label>Typical hours available per week<input type="number" min={2} max={25} value={hours} onFocus={e=>e.currentTarget.select()} onChange={e=>setHours(e.target.value)}/></label>
-   <p>Choose the days you can realistically train.</p>
-   <div className="azur-onboarding-options">{weekdays.map(day=><label key={day} className={trainingDays.includes(day)?'selected':''}><input type="checkbox" checked={trainingDays.includes(day)} onChange={e=>setTrainingDays(previous=>e.target.checked?[...previous,day]:previous.filter(d=>d!==day))}/>{day}</label>)}</div>
+   <AthleteSchedulePreferences value={schedulePrefs} onChange={next=>{setSchedulePrefs(next);setTrainingDays(next.availableDays.map(day=>weekdays[day]));}}/>
+   <p role="note">Your available training days are saved with onboarding. Detailed sport preferences are a V2 preview and are not yet saved or applied to your generated plan.</p>
    <label>Hours actually trained per week recently (optional)<input type="number" min={0} max={25} step="0.5" value={recentHours} onChange={e=>setRecentHours(e.target.value)} placeholder="Unknown"/></label>
    {recentHours!==''&&Number(recentHours)<hours&&<p role="note">You currently train {recentHours} hours per week and have {hours} hours available. AZUR will build gradually rather than immediately filling your available time.</p>}
    <p>Your event experience and recent training history are separate. An experienced racer returning after a break may still need a conservative first two weeks.</p>
