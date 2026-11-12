@@ -119,6 +119,17 @@ export default function AthleteOnboardingDraft(){
    });
    setSaving(false);
    if(error){setMessage('Unable to finish setup and create your training plan: '+error.message);return;}
+   if(data?.status==='review_required'||(data?.status==='ready'&&Number.isInteger(data.sessions)&&data.sessions>=1)){
+    // The planning RPC currently writes onboarding_step=3 even on success.
+    // Mark completion separately so the app doesn't send the athlete back into setup.
+    const {error:completionError}=await supabase.from('athlete_onboarding')
+      .update({onboarding_step:5,updated_at:new Date().toISOString()})
+      .eq('user_id',userId);
+    if(completionError){
+     setMessage('Your setup was processed, but we could not confirm completion. Please contact your coach: '+completionError.message);
+     return;
+    }
+   }
    if(data?.status==='review_required'){
     setMessage('Your setup is saved. Coach review is required before training can be allocated: '+(data.reason||'safety review'));
     setReady(true);return;
