@@ -6986,7 +6986,7 @@ onClick={() => {
 </div>
 
                         <strong>{session.title}</strong>
-<CalendarIntensityProfile steps={(session.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />
+{session.sport==='swim'&&Array.isArray((session.prescription as {poolSegments?:unknown}|undefined)?.poolSegments)&&((session.prescription as {poolSegments?:unknown[]}).poolSegments?.length||0)>0?<div className="azur-calendar-pool-sets" style={{display:'flex',gap:8,margin:'12px 0',width:'100%'}}>{((session.prescription as {poolSegments?:Array<{repeats?:number;distanceMeters?:number;restSeconds?:number}>}).poolSegments||[]).map((set,index)=><div key={index} style={{flex:Math.max(1,(Number(set.repeats)||1)*(Number(set.distanceMeters)||1)),minWidth:0,padding:'8px 6px',borderRadius:8,background:'#19344c',border:'1px solid #315b7a',textAlign:'center'}}><strong style={{display:'block',fontSize:13,color:'#dceefe'}}>{Number(set.repeats)||0} × {Number(set.distanceMeters)||0}m</strong><span style={{fontSize:11,color:'#a8bed1'}}>{Number(set.restSeconds)||0}s rest</span></div>)}</div>:<CalendarIntensityProfile steps={(session.prescription as { azurWorkout?: { steps?: unknown } } | undefined)?.azurWorkout?.steps} />}
 <div className="calendar-session-purpose">
   {session.status === 'completed' && session.completedDurationSec != null ? (
     <div className="calendar-actual-comparison">
