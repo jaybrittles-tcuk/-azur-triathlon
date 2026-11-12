@@ -9915,11 +9915,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     return (
       <div className="login-screen">
         <div className="login-card">
-          <img
-            src="/brand/azur-logo.png"
-            alt="Azur Triathlon Coaching"
-            className="login-logo"
-          />
+          <div className="azur-auth-wordmark" aria-label="AZUR Triathlon Coaching"><span>AZUR</span><small>TRIATHLON COACHING</small></div>
 
           <p>Loading Azur...</p>
         </div>
