@@ -167,8 +167,14 @@ export default function AthleteOnboardingDraft(){
   <button type="button" style={{width:'100%',padding:'16px',borderRadius:12,background:'#168bc5',color:'white',fontWeight:700,fontSize:17,border:0}} onClick={()=>window.location.assign('/')}>Explore my training calendar →</button>
  </section>;
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
+  <div className="azur-onboarding-intro">
+   <span className="eyebrow">PERSONALISED ATHLETE SETUP</span>
+   <h2>{['Your goal. Your journey.','Training that fits your life.','Understand your starting point.','Bring your training together.','Your next chapter starts here.'][step]}</h2>
+   <p>{['Tell us what you are working towards. Your plan begins with your goals, not a generic template.','Choose the days and routines that work in real life. We will respect your existing training and coach-approved limits.','Add the fitness information you know. You can leave benchmarks blank rather than guess.','Tell us how you record training. Connections and historical analysis are managed separately.','Review your information before your coach-approved training starts.'][step]}</p>
+  </div>
   <div className="azur-onboarding-progress"><strong>YOUR AZUR JOURNEY</strong><span>Step {step+1} of 5</span></div>
-  <div className="azur-onboarding-track"><span style={{width:`${(step+1)/5*100}%`}}/></div>
+  <div className="azur-onboarding-track" role="progressbar" aria-label="Onboarding progress" aria-valuemin={0} aria-valuemax={5} aria-valuenow={step+1}><span style={{width:`${(step+1)/5*100}%`}}/></div>
+  <ol className="azur-onboarding-milestones" aria-label="Setup stages">{['Goal','Lifestyle','Fitness','Devices','Review'].map((label,i)=><li key={label} aria-current={i===step?'step':undefined} className={i===step?'current':i<step?'completed':''}><span>{i<step?'✓':i+1}</span><small>{label}</small></li>)}</ol>
   {step===0&&<div>
    <h3>What are you training towards?</h3><p>Your goal sets the direction. Your current fitness and availability determine where we begin.</p>
    <label>Your name<input type="text" maxLength={90} required value={displayName} onChange={e=>setDisplayName(e.target.value)}/></label>
