@@ -9927,11 +9927,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
     return (
       <div className="login-screen">
         <form className="login-card" onSubmit={passwordRecoverySession?handleRecoveryUpdate:recoveryMode?handleRecoveryRequest:registrationMode && betaRegistrationEnabled ? handleRegister : handleLogin}>
-          <img
-            src="/brand/azur-logo.png"
-            alt="Azur Triathlon Coaching"
-            className="login-logo"
-          />
+          <div className="azur-auth-wordmark" aria-label="AZUR Triathlon Coaching"><span>AZUR</span><small>TRIATHLON COACHING</small></div>
 
           <span className="eyebrow">{passwordRecoverySession?'PASSWORD RESET':recoveryMode?'ACCOUNT RECOVERY':invitationEntry?'YOUR COACH HAS INVITED YOU':registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
 
