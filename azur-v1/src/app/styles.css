@@ -6966,3 +6966,30 @@ strong {
   outline:2px solid #38a7e8;
   outline-offset:-3px;
 }
+
+
+/* AZUR V2 invitation-first auth experience; scoped to avoid dashboard regressions. */
+.login-screen {
+  background: radial-gradient(ellipse 80% 42% at 50% 0%, rgba(16,132,194,.20), transparent 75%),linear-gradient(155deg,#040d19,#081b2c 68%,#06111d);
+  padding:max(28px,env(safe-area-inset-top)) 20px max(28px,env(safe-area-inset-bottom));
+}
+.login-screen .login-card {
+  max-width:460px;
+  background:linear-gradient(145deg,rgba(19,43,64,.94),rgba(8,24,40,.98));
+  border:1px solid rgba(112,174,207,.22);
+  box-shadow:0 30px 90px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.045);
+  border-radius:28px;
+  padding:clamp(26px,5vw,42px);
+  gap:20px;
+}
+.login-screen .login-logo {width:138px;margin:0 auto 10px;}
+.login-screen .login-card .eyebrow {color:#77c9ed;letter-spacing:.19em;font-size:11px;text-align:center;}
+.login-screen .login-card h2 {color:#f3f8fc;text-align:center;font-size:clamp(27px,6vw,35px);letter-spacing:-.035em;}
+.login-screen .login-card p {color:#a6b9c9;text-align:center;font-size:14px;line-height:1.65;}
+.login-screen .login-card label {color:#c8d9e7;font-size:13px;gap:9px;}
+.login-screen .login-card input {min-height:50px;background:#071a2b;color:#f7fbff;border:1px solid #36536a;border-radius:13px;}
+.login-screen .login-card input:focus {outline:2px solid rgba(57,183,239,.25);border-color:#4dbdea;}
+.login-screen .login-card .primary-button {min-height:52px;background:linear-gradient(110deg,#1386c6,#1ba5df);border-radius:13px;color:#fff;font-weight:750;}
+.login-screen .azur-auth-switch {color:#8fd6f6;align-self:center;}
+.login-screen .login-error {background:#3b1d2a;color:#ffd3d7;}
+.login-screen .azur-registration-notice {color:#b6eac9;}
