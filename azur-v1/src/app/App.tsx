@@ -7399,11 +7399,11 @@ onClick={() => {
 
   <div className="session-block-item azur-v5-effort">
     <strong className="azur-v5-field-heading">How hard was this session?</strong>
-    <div className="azur-v5-rpe-grid" role="group" aria-label="Session effort, from 1 very easy to 10 maximal">
+    <div className="azur-v5-rpe-grid" style={{display:"grid",gridTemplateColumns:"repeat(5,minmax(0,1fr))",gap:6}} role="group" aria-label="Session effort, from 1 very easy to 10 maximal">
       {Array.from({length:10},(_,i)=>i+1).map(n=><button
         key={n} type="button" disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed}
         aria-pressed={Number(sessionFeedback.rpe)===n}
-        className={`azur-v5-rpe-choice ${Number(sessionFeedback.rpe)===n?'is-selected':''}`}
+        className={`azur-v5-rpe-choice ${Number(sessionFeedback.rpe)===n?'is-selected':''}`} style={{minWidth:0,minHeight:44,padding:"6px 0",fontSize:16,borderRadius:10}}
         onClick={()=>setSessionFeedback(previous=>({...previous,rpe:String(n)}))}
       >{n}</button>)}
     </div>
