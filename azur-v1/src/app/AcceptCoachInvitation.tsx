@@ -26,7 +26,7 @@ export default function AcceptCoachInvitation(){
   if(error||!data){setStatus('We could not verify acceptance: '+(error?.message||'Please request a new link.'));return;}
   window.location.assign('/onboarding');
  }
- return <main className="login-screen"><section className="login-card azur-invitation-card" style={{maxWidth:520,margin:'auto',textAlign:'center'}}><div className="azur-auth-wordmark" aria-label="AZUR Triathlon Coaching"><span>AZUR</span><small>TRIATHLON COACHING</small></div>
+ return <main className="login-screen"><section className="login-card azur-invitation-card" style={{maxWidth:520,margin:'auto',textAlign:'center'}}><img src="/brand/azur-logo.png" className="login-logo" alt="AZUR Triathlon Coaching" />
   <span className="eyebrow">AZUR TRIATHLON COACHING</span>
   <h2>Welcome to your next chapter</h2><p>Personalised training, built around your goals and your life.</p>
   <p role="status">{status}</p>
