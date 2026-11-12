@@ -6993,3 +6993,18 @@ strong {
 .login-screen .azur-auth-switch {color:#8fd6f6;align-self:center;}
 .login-screen .login-error {background:#3b1d2a;color:#ffd3d7;}
 .login-screen .azur-registration-notice {color:#b6eac9;}
+
+
+/* AZUR V2 guided onboarding: quiet, compact, mobile-first progress. */
+.azur-onboarding-intro {padding:8px 0 18px;}
+.azur-onboarding-intro .eyebrow {color:#6bc7ee;letter-spacing:.17em;}
+.azur-onboarding-intro h2 {font-size:clamp(26px,6vw,38px);line-height:1.14;letter-spacing:-.035em;margin:14px 0 12px;color:#eef8fd;}
+.azur-onboarding-intro p {max-width:54ch;color:#a8c1d1;line-height:1.65;margin:0;}
+.azur-onboarding-milestones {list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:0;margin:18px 0 26px;}
+.azur-onboarding-milestones li {display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0;color:#8aa9bc;}
+.azur-onboarding-milestones li span {display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid #3d6178;background:#10283b;color:#b7ccdc;font-size:13px;font-weight:700;}
+.azur-onboarding-milestones li small {font-size:clamp(10px,2.5vw,12px);text-align:center;}
+.azur-onboarding-milestones li.current span {background:#127fb9;border-color:#59bde8;color:white;box-shadow:0 0 0 4px rgba(25,148,205,.14);}
+.azur-onboarding-milestones li.current small {color:#eef8fd;font-weight:750;}
+.azur-onboarding-milestones li.completed span {background:#103f48;border-color:#4d9d9f;color:#9be1d2;}
+@media(max-width:380px){.azur-onboarding-milestones {gap:2px}.azur-onboarding-milestones li span{width:29px;height:29px}}
