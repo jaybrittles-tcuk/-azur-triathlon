@@ -1619,10 +1619,29 @@ async function loadAthleteProfile(userId: string, isCoach = false) {
     return;
   }
 
-  if (!data && !isCoach && !onboardingRedirectStarted.current && window.location.pathname !== '/onboarding' && window.location.pathname !== '/accept-invitation' && window.location.pathname !== '/reset-password' && window.location.pathname !== '/privacy') {
-    onboardingRedirectStarted.current = true;
-    window.location.replace('/onboarding');
-    return;
+  // A partially created athlete profile must never skip invitation-first onboarding.
+  // Existing athletes without an invitation keep their current dashboard access.
+  const onSetupRoute = ['/onboarding','/accept-invitation','/reset-password','/privacy'].includes(window.location.pathname);
+  if (!isCoach && !onSetupRoute && !onboardingRedirectStarted.current) {
+    if (!data) {
+      onboardingRedirectStarted.current = true;
+      window.location.replace('/onboarding');
+      return;
+    }
+    const {data:acceptedInvitation,error:invitationError}=await supabase
+      .from('coach_athlete_invitation').select('id')
+      .eq('accepted_by',userId).not('accepted_at','is',null)
+      .order('accepted_at',{ascending:false}).limit(1).maybeSingle();
+    if (!invitationError && acceptedInvitation) {
+      const {data:onboarding,error:onboardingError}=await supabase
+        .from('athlete_onboarding').select('onboarding_step')
+        .eq('user_id',userId).maybeSingle();
+      if (!onboardingError && (!onboarding || (onboarding.onboarding_step??0)<5)) {
+        onboardingRedirectStarted.current=true;
+        window.location.replace('/onboarding');
+        return;
+      }
+    }
   }
 
   if (data?.display_name) {
