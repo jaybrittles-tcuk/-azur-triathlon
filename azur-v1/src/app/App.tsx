@@ -1204,6 +1204,7 @@ export function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const betaRegistrationEnabled = import.meta.env.VITE_ENABLE_BETA_SIGNUP === 'true' || (new URLSearchParams(window.location.search).get('join') === '1' && /^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(new URLSearchParams(window.location.search).get('invitation') || ''));
+  const invitationEntry = new URLSearchParams(window.location.search).get('join') === '1' && betaRegistrationEnabled;
   const [registrationMode, setRegistrationMode] = useState(() => new URLSearchParams(window.location.search).get('join') === '1');
   const [registrationNotice, setRegistrationNotice] = useState('');
   const [authError, setAuthError] = useState('');
@@ -9936,12 +9937,12 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
             className="login-logo"
           />
 
-          <span className="eyebrow">{passwordRecoverySession?'PASSWORD RESET':recoveryMode?'ACCOUNT RECOVERY':registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
+          <span className="eyebrow">{passwordRecoverySession?'PASSWORD RESET':recoveryMode?'ACCOUNT RECOVERY':invitationEntry?'YOUR COACH HAS INVITED YOU':registrationMode && betaRegistrationEnabled ? 'AZUR BETA REGISTRATION' : 'ATHLETE LOGIN'}</span>
 
-          <h2>{passwordRecoverySession?'Choose a new password':recoveryMode?'Reset your password':registrationMode ? 'Join AZUR' : 'Welcome to Azur'}</h2>
+          <h2>{passwordRecoverySession?'Choose a new password':recoveryMode?'Reset your password':invitationEntry?(registrationMode?'Your journey starts here':'Welcome back to AZUR'):registrationMode ? 'Join AZUR' : 'Welcome to AZUR'}</h2>
 
           <p>
-            {passwordRecoverySession?'Enter a new password of at least 12 characters.':recoveryMode?'Enter your account email to receive a secure password reset link.':registrationMode ? 'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.' : 'Sign in to access your training, performance and recovery data.'}
+            {passwordRecoverySession?'Enter a new password of at least 12 characters.':recoveryMode?'Enter your account email to receive a secure password reset link.':registrationMode ? (invitationEntry?'Create your secure account using the email your coach invited. After confirming your email, accept the invitation to start your personalised setup.':'Create an athlete account. Registration does not automatically assign a coach, connect Garmin or activate a training plan.') : (invitationEntry?'Already registered? Sign in with your invited email to accept your coaching invitation.':'Sign in to access your training, performance and recovery data.')}
           </p>
 
           {!passwordRecoverySession&&<label>
@@ -9979,7 +9980,7 @@ swim_threshold_sec_per_100m: profileDraft.swimThreshold
             {authLoading?'Please wait…':passwordRecoverySession?'Save new password':recoveryMode?'Send password reset email':registrationMode?'Create athlete account':'Sign in'}
           </button>
         {!passwordRecoverySession&&<button type="button" className="azur-auth-switch" onClick={()=>{setRecoveryMode(v=>!v);setAuthError("");setRegistrationNotice("");}}>{recoveryMode?"Back to sign in":"Forgot password?"}</button>}
-        {!recoveryMode&&!passwordRecoverySession&&betaRegistrationEnabled && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already registered? Sign in' : 'New to AZUR? Create an athlete account'}</button>}
+        {!recoveryMode&&!passwordRecoverySession&&betaRegistrationEnabled && <button type="button" className="azur-auth-switch" onClick={() => {setRegistrationMode(v=>!v);setAuthError('');setRegistrationNotice('');setPassword('');}}>{registrationMode ? 'Already have an account? Sign in' : invitationEntry?'New athlete? Create your account':'New to AZUR? Create an athlete account'}</button>}
           {registrationNotice && <p className="azur-registration-notice" role="status">{registrationNotice}</p>}
         </form>
 
