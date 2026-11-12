@@ -7008,3 +7008,35 @@ strong {
 .azur-onboarding-milestones li.current small {color:#eef8fd;font-weight:750;}
 .azur-onboarding-milestones li.completed span {background:#103f48;border-color:#4d9d9f;color:#9be1d2;}
 @media(max-width:380px){.azur-onboarding-milestones {gap:2px}.azur-onboarding-milestones li span{width:29px;height:29px}}
+
+
+/* AZUR V2: refined mobile-first authentication. No boxed logo or bulky card. */
+.login-screen {
+  min-height:100svh;
+  align-items:center;
+  background:radial-gradient(ellipse 75% 40% at 50% -12%,rgba(13,113,174,.20),transparent 85%),#060f1c;
+  padding:calc(20px + env(safe-area-inset-top,0px)) 24px calc(20px + env(safe-area-inset-bottom,0px));
+}
+.login-screen .login-card {
+  width:100%;
+  max-width:380px;
+  padding:22px 4px;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  gap:15px;
+}
+.azur-auth-wordmark {display:flex;flex-direction:column;align-items:center;gap:3px;margin:0 auto 22px;line-height:1;}
+.azur-auth-wordmark>span {font-size:clamp(43px,11vw,56px);font-weight:850;letter-spacing:.16em;color:#e9f5ff;padding-left:.16em;}
+.azur-auth-wordmark>small {font-size:10px;letter-spacing:.31em;font-weight:750;color:#f2c24b;padding-left:.31em;}
+.login-screen .login-card .eyebrow {font-size:10px;letter-spacing:.19em;color:#7fc4e6;}
+.login-screen .login-card h2 {font-size:clamp(27px,7vw,34px);font-weight:700;line-height:1.13;letter-spacing:-.04em;margin:0;}
+.login-screen .login-card p {font-size:13px;line-height:1.55;color:#91a9bd;margin:0 0 5px;}
+.login-screen .login-card label {gap:7px;font-size:12px;font-weight:650;color:#c3d2e0;}
+.login-screen .login-card input {min-height:48px;padding:12px 14px;border-radius:12px;background:#0c1c2c;border-color:#274157;font-size:16px;}
+.login-screen .login-card .primary-button {margin-top:5px;min-height:49px;border-radius:12px;background:#1698d1;box-shadow:0 8px 24px rgba(0,127,191,.15);font-size:15px;}
+.login-screen .login-card .azur-auth-switch {align-self:center;background:transparent;border:0;box-shadow:none;padding:5px 8px;min-height:30px;font-size:12px;font-weight:600;color:#8bd3f4;}
+.login-screen .login-card .azur-auth-switch:hover {background:transparent;color:#d2f1ff;}
+.login-screen .login-card .login-error {font-size:12px;padding:10px 12px;}
+@media(max-height:720px){.login-screen {align-items:flex-start}.azur-auth-wordmark {margin-bottom:12px}.login-screen .login-card {gap:11px;padding:10px 4px}}
