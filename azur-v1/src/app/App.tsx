@@ -7190,7 +7190,7 @@ onClick={() => {
           <>
           <PremiumWorkoutTabs prescription={selected.prescription} rationale={selected.rationale} ftpWatts={athleteProfile.ftp} plannedMinutes={selected.durationMin} completedMinutes={selected.completedDurationSec == null ? null : Math.round(selected.completedDurationSec/60)} completedSource={selected.completedSource} coachingContent={<><section className="azur-coaching-intelligence" aria-label="AZUR coaching intelligence">
   <h4>AZUR Intelligence</h4>
-  <p><strong>Your execution targets</strong></p>
+  <p style={{marginBottom:4,color:"#9db7cd",fontSize:12,fontWeight:700,letterSpacing:".05em"}}>TODAY'S FOCUS</p>
   <p>{sessionCoaching({
     sport: selected.sport,
     steps: selected.prescription?.azurWorkout?.steps,
@@ -7203,7 +7203,7 @@ onClick={() => {
     completed: selected.status === 'completed',
     sessionRpe: Number(sessionFeedback.rpe) || null,
   }).execution}</p>
-  <details className="azur-intelligence-evidence"><summary>Personalised coach guidance</summary>
+  <details className="azur-intelligence-evidence"><summary>Explore your training purpose</summary>
   <p>{sessionCoaching({
     sport: selected.sport,
     steps: selected.prescription?.azurWorkout?.steps,
@@ -7218,7 +7218,7 @@ onClick={() => {
   }).context}</p>
   </details>
   <details className="azur-intelligence-evidence">
-    <summary>Training evidence and coaching safeguards</summary>
+    <summary>Training evidence and safety notes</summary>
       <p><strong>Training history signal:</strong> {(() => {
     const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
     const window = (days: number) => weekSessions.filter(session => {
@@ -7395,7 +7395,7 @@ onClick={() => {
 
 {/* The athlete can give feedback before exploring optional metrics. */}
 {selected.status==='completed'&&<details id="azur-session-action" className="wide session-block session-analysis-v3-feedback azur-premium-disclosure azur-v4-recovery">
-  <summary><strong>How did it feel?</strong><span>3 quick answers · optional note</span></summary>
+  <summary><strong>How did it feel?</strong><span>Effort · recovery · concerns</span></summary>
 
   <div className="session-block-item azur-v5-effort">
     <strong className="azur-v5-field-heading">How hard was this session?</strong>
