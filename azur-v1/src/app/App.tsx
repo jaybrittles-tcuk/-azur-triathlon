@@ -7203,7 +7203,7 @@ onClick={() => {
     completed: selected.status === 'completed',
     sessionRpe: Number(sessionFeedback.rpe) || null,
   }).execution}</p>
-  <details className="azur-intelligence-evidence"><summary>Explore your training purpose</summary>
+  <details className="azur-intelligence-evidence"><summary>Why this session matters</summary>
   <p>{sessionCoaching({
     sport: selected.sport,
     steps: selected.prescription?.azurWorkout?.steps,
@@ -7218,7 +7218,7 @@ onClick={() => {
   }).context}</p>
   </details>
   <details className="azur-intelligence-evidence">
-    <summary>Training evidence and safety notes</summary>
+    <summary>Coaching evidence &amp; safeguards</summary>
       <p><strong>Training history signal:</strong> {(() => {
     const anchor = new Date(selected.plannedDate + 'T12:00:00').getTime();
     const window = (days: number) => weekSessions.filter(session => {
@@ -7443,7 +7443,7 @@ onClick={() => {
 
   {sessionFeedbackSaving
     ? 'Saving feedback...'
-    : 'Save recovery check-in'}
+    : 'Save workout feedback'}
 </button>
 
 {sessionFeedbackMessage && (
