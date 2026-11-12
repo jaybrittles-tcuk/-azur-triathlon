@@ -7411,31 +7411,12 @@ onClick={() => {
   </div>
 
   {selected.status==='completed'&&<div className="session-block-item" style={{display:'grid',gap:12}}>
-    <label style={{display:'grid',gap:6}}>
-      <span>How do you feel now?</span>
-      <select aria-label="Post-workout recovery feeling" value={postWorkoutRecovery} onChange={event=>setPostWorkoutRecovery(event.target.value)}
-        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
-        <option value="">Choose your recovery feeling</option>
-        <option value="fresh">Fresh · Could have done more</option>
-        <option value="okay">Okay · As expected</option>
-        <option value="tired">Tired · Need some recovery</option>
-        <option value="very_tired">Very tired · Struggled to recover</option>
-      </select>
-    </label>
-    <label style={{display:'grid',gap:6}}>
-      <span>Anything your coach should know?</span>
-      <select aria-label="Post-workout concerns" value={postWorkoutConcern} onChange={event=>setPostWorkoutConcern(event.target.value)}
-        disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'10px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}>
-        <option value="none">No concerns</option>
-        <option value="soreness">Unusual soreness</option>
-        <option value="pain">Pain or possible injury</option>
-        <option value="illness">Feeling unwell</option>
-        <option value="other">Other concern</option>
-      </select>
-    </label>
+    <div role="group" aria-label="How do you feel now?" style={{display:'grid',gap:7}}><strong>How do you feel now?</strong><div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:7}}>{[{value:'fresh',label:'Fresh'},{value:'okay',label:'As expected'},{value:'tired',label:'Tired'},{value:'very_tired',label:'Very tired'}].map(option=><button key={option.value} type="button" aria-pressed={postWorkoutRecovery===option.value} disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} onClick={()=>setPostWorkoutRecovery(option.value)} style={{minHeight:44,padding:'9px 6px',borderRadius:10,border:postWorkoutRecovery===option.value?'2px solid #73b9ec':'1px solid #47708b',background:postWorkoutRecovery===option.value?'#285e88':'#172c40',color:'#f0f8ff',fontWeight:postWorkoutRecovery===option.value?700:500}}>{option.label}</button>)}</div></div>
+    <label style={{display:'grid',gap:6}}><span>Anything your coach should know?</span><select aria-label="Post-workout concerns" value={postWorkoutConcern} onChange={event=>setPostWorkoutConcern(event.target.value)} disabled={sessionFeedbackLoading||sessionFeedbackLoadFailed} style={{minHeight:44,borderRadius:10,padding:'9px 12px',background:'#102c43',color:'#f0f8ff',border:'1px solid #47708b'}}><option value="none">No concerns</option><option value="soreness">Unusual soreness</option><option value="pain">Pain or possible injury</option><option value="illness">Feeling unwell</option><option value="other">Other concern</option></select></label>
+    {Number(sessionFeedback.rpe)>=9&&postWorkoutRecovery==='fresh'&&<div role="status" style={{padding:'10px 12px',borderRadius:10,border:'1px solid #8e784c',background:'#2c291f',color:'#f4dba9',fontSize:13}}>You rated this session as near-maximal effort but feel fresh now. That's possible, but please check your effort rating. If both answers are accurate, you can still save them. Your coach can review the combination.</div>}
     {(postWorkoutConcern!=='none'||postWorkoutRecovery==='very_tired')&&<small style={{color:'#f6d29d'}}>Your coach will see this recovery flag. AZUR will not automatically increase your training based on this session.</small>}
   </div>}
-  <div className="session-block-item">
+  <details className="session-block-item" open={Boolean(sessionFeedback.notes)}><summary style={{cursor:"pointer",fontWeight:600}}>Add a note for your coach (optional)</summary>
     <label>
       <span>Optional note for your coach</span>
 
@@ -7452,8 +7433,7 @@ onClick={() => {
         placeholder="Anything else? (optional)"
       />
     </label>
-  </div>
-
+  </details>
 <button
   type="button"
   className="primary-button"
