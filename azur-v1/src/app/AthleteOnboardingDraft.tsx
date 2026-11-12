@@ -73,7 +73,7 @@ export default function AthleteOnboardingDraft(){
     setExperience(data.experience);setHours(String(data.weekly_hours));
     setDevice(data.device as Device);
     setBackground(['novice','regular','established'].includes(data.training_background)?data.training_background:'');setBackgroundTouched(true);setConsistency(['under4','4to7','8plus'].includes(data.training_consistency)?data.training_consistency:'');setConcern(data.current_training_concern||'none');setCanSwim(data.can_swim_200m??true);
-    setTrainingDays((data.training_days||[]).map((day:number)=>weekdays[day]).filter(Boolean));
+    if(!savedSchedule?.preferences)setTrainingDays((data.training_days||[]).map((day:number)=>weekdays[day]).filter(Boolean));
     if(!savedSchedule?.preferences){setSchedulePrefs(previous=>({...previous,availableDays:(data.training_days||[]).filter((day:number)=>Number.isInteger(day)&&day>=0&&day<7) as Weekday[]}));}setRecentHours(data.recent_weekly_hours==null?'':String(data.recent_weekly_hours));
     setFtp(data.ftp_watts==null?'':String(data.ftp_watts));setCss(data.swim_css_seconds_per_100m==null?'':formatPace(String(data.swim_css_seconds_per_100m)));setRunThreshold(data.run_threshold_seconds_per_km==null?'':formatPace(String(data.run_threshold_seconds_per_km)));setStep(Math.min(4,Math.max(0,data.onboarding_step)));
     // Existing athlete data is always preserved; no automatic plan changes.
