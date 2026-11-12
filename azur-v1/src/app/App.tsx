@@ -7416,9 +7416,8 @@ onClick={() => {
     {Number(sessionFeedback.rpe)>=9&&postWorkoutRecovery==='fresh'&&<div role="status" style={{padding:'10px 12px',borderRadius:10,border:'1px solid #8e784c',background:'#2c291f',color:'#f4dba9',fontSize:13}}>You rated this session as near-maximal effort but feel fresh now. That's possible, but please check your effort rating. If both answers are accurate, you can still save them. Your coach can review the combination.</div>}
     {(postWorkoutConcern!=='none'||postWorkoutRecovery==='very_tired')&&<small style={{color:'#f6d29d'}}>Your coach will see this recovery flag. AZUR will not automatically increase your training based on this session.</small>}
   </div>}
-  <details className="session-block-item" open={Boolean(sessionFeedback.notes)}><summary style={{cursor:"pointer",fontWeight:600}}>Add a note for your coach (optional)</summary>
+  <details className="session-block-item"><summary style={{cursor:"pointer",fontWeight:600}}>Add a note for your coach (optional)</summary>
     <label>
-      <span>Optional note for your coach</span>
 
       <textarea
         aria-label="Athlete notes"
