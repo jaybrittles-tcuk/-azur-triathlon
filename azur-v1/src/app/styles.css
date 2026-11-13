@@ -7067,3 +7067,25 @@ strong {
 .azur-review-actions a.primary-button {display:grid;place-items:center;text-decoration:none;min-height:50px;border-radius:12px;background:#168cc4;color:white;font-weight:750;}
 .azur-review-actions button {min-height:44px;border:1px solid #375c74;border-radius:12px;background:transparent;color:#bce3f6;font-weight:700;}
 .azur-review-footnote {font-size:12px;color:#8baabd;line-height:1.6;}
+
+
+/* AZUR V2 refinement: one cohesive navy surface, no green onboarding panels. */
+.azur-onboarding-page {background:#071321;min-height:100svh;padding:16px 16px max(32px,env(safe-area-inset-bottom,0px));}
+.azur-onboarding-page .azur-onboarding-draft {background:#0c1e30;border:1px solid #203c52;box-shadow:0 16px 45px rgba(0,0,0,.14);border-radius:20px;}
+.azur-onboarding-page .azur-onboarding-recap {background:#10263a!important;border:1px solid #2b5068!important;color:#e9f4fb!important;border-radius:15px;}
+.azur-onboarding-page .azur-onboarding-recap h3,.azur-onboarding-page .azur-onboarding-recap strong {color:#f3f9fe;}
+.azur-onboarding-page .azur-onboarding-recap p,.azur-onboarding-page .azur-onboarding-recap small {color:#a8bfd0;}
+.azur-review-complete {padding:clamp(22px,5vw,36px)!important;}
+.azur-review-complete h1 {max-width:14ch;}
+.azur-review-complete .azur-review-symbol {width:43px;height:43px;margin-bottom:19px;background:#113747;border-color:#3981a2;color:#a6e2f8;}
+.azur-review-stats {gap:7px;margin:24px 0 30px;}
+.azur-review-stats>div {padding:14px 11px;background:#0a1929;border:1px solid #29465b;border-radius:11px;}
+.azur-review-stats strong {font-size:clamp(12px,3.2vw,15px);line-height:1.4;display:block;}
+.azur-review-next {margin:20px 0 8px;}
+.azur-review-next h2 {font-size:19px;margin:0 0 20px;}
+.azur-review-next li {padding-bottom:19px;}
+.azur-review-next li p {margin-top:4px;}
+.azur-review-actions {margin:22px 0 12px;}
+.azur-review-actions button.primary-button {display:block;width:100%;min-height:50px;background:#168ec7;border:0;color:#fff;font-weight:750;border-radius:12px;font-size:15px;}
+.azur-review-footnote {margin-top:14px;}
+@media(max-width:390px){.azur-onboarding-page{padding-left:10px;padding-right:10px}.azur-review-complete{padding:20px!important}.azur-review-stats>div{padding:12px 8px}.azur-review-stats small{font-size:10px}.azur-review-next li{padding-left:36px}}
