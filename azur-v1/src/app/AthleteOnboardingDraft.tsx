@@ -163,7 +163,7 @@ export default function AthleteOnboardingDraft(){
   setStep(Math.min(4,nextStep));
   setMessage('');
  }
- if(ready && reviewReason)return <main className="azur-onboarding-page"><section className="azur-onboarding-draft azur-review-complete" style={{maxWidth:660,margin:'6vh auto'}}>
+ if(ready && reviewReason)return <main className="azur-onboarding-page"><section className="azur-onboarding-draft azur-review-complete" style={{maxWidth:660,margin:'24px auto'}}>
   <div className="azur-review-symbol" aria-hidden="true">✓</div>
   <span className="eyebrow">ATHLETE PROFILE RECEIVED</span>
   <h1>You're all set. Your coach is next.</h1>
@@ -178,8 +178,8 @@ export default function AthleteOnboardingDraft(){
    <ol><li><strong>Your coach reviews your baseline.</strong><p>Recent completed volume, training consistency and any return-to-training considerations.</p></li><li><strong>Your starting load is approved.</strong><p>Your available hours are a scheduling ceiling, not a target AZUR will automatically prescribe.</p></li><li><strong>Your calendar becomes available.</strong><p>Sessions and personalised explanations will appear once a plan has been approved and published.</p></li></ol>
   </section>
   <details className="azur-review-detail"><summary>Why is my plan awaiting review?</summary><p>{reviewReason}</p></details>
-  <div className="azur-review-actions"><a className="primary-button" href="/onboarding">View my setup status</a><button type="button" onClick={()=>{setReviewReason(null);setReady(false);setStep(1);window.scrollTo(0,0)}}>Edit training background</button></div>
-  <p className="azur-review-footnote">You don't need to repeat onboarding. If you haven't recently completed consistent training, your coach may start below your available hours.</p>
+  <div className="azur-review-actions"><button type="button" className="primary-button" onClick={()=>{setReviewReason(null);setReady(false);setStep(1);window.scrollTo(0,0)}}>Update my training information</button></div>
+  <p className="azur-review-footnote">Your setup is saved. You can close this screen and return later. Your coach must approve a safe starting load before sessions are published.</p>
  </section></main>;
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
  if(!invitationVerified&&!isCoach)return <section className="azur-onboarding-draft" role="status"><h3>Invitation required</h3><p>{message||'Please accept your coach invitation before onboarding.'}</p><p>Open the invitation email sent by your coach, sign in with that address, and accept the invitation.</p></section>;
