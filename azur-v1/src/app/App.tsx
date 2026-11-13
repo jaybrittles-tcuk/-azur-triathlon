@@ -1637,9 +1637,21 @@ async function loadAthleteProfile(userId: string, isCoach = false) {
         .from('athlete_onboarding').select('onboarding_step')
         .eq('user_id',userId).maybeSingle();
       if (!onboardingError && (!onboarding || (onboarding.onboarding_step??0)<5)) {
-        onboardingRedirectStarted.current=true;
-        window.location.replace('/onboarding');
-        return;
+        // A submitted athlete awaiting coach approval must be able to access
+        // Data Sources and connect history without publishing an unsafe plan.
+        const {data:setupPreferences,error:preferencesError}=await supabase
+          .from('athlete_scheduling_preferences').select('preferences')
+          .eq('user_id',userId).maybeSingle();
+        const prefs=setupPreferences?.preferences;
+        const review=prefs && typeof prefs==='object' && !Array.isArray(prefs)
+          ? (prefs as Record<string,unknown>).coachReview : null;
+        const pendingReview=!preferencesError && !!review && typeof review==='object'
+          && typeof (review as Record<string,unknown>).reason==='string';
+        if (!pendingReview) {
+          onboardingRedirectStarted.current=true;
+          window.location.replace('/onboarding');
+          return;
+        }
       }
     }
   }
