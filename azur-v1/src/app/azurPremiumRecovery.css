@@ -1,0 +1,23 @@
+/* AZUR premium athlete recovery: isolated to athlete surfaces; never change coach tools. */
+.azur-white-dashboard{background:#071524;color:#eaf4ff;border:1px solid rgba(61,144,195,.28);border-radius:22px;box-shadow:0 22px 55px rgba(0,7,19,.34)}
+.azur-white-dashboard .awd-hero{background:linear-gradient(180deg,rgba(4,18,32,.46),rgba(4,18,32,.94)),url('/race-images/roth.jpg') center 40%/cover;border-bottom:1px solid rgba(65,160,216,.2)}
+.azur-white-dashboard .awd-body{background:transparent}
+.azur-white-dashboard .awd-card{background:linear-gradient(145deg,#102b42,#091d30);border:1px solid rgba(83,164,211,.27);box-shadow:0 12px 30px rgba(0,8,20,.2);color:#eaf4ff}
+.azur-white-dashboard .awd-heading h2,.azur-white-dashboard .awd-eyebrow{color:#8fc4e3}
+.azur-white-dashboard .awd-tag{background:rgba(229,187,67,.13);color:#f4d77a;border:1px solid rgba(229,187,67,.28)}
+.azur-white-dashboard .awd-workout+.awd-workout{border-color:rgba(106,166,201,.25)}
+.azur-white-dashboard .awd-workout-title h3,.azur-white-dashboard .awd-unscheduled h3,.azur-white-dashboard .awd-readiness strong,.azur-white-dashboard .awd-week-total strong{color:#f2f9ff}
+.azur-white-dashboard .awd-workout-title p,.azur-white-dashboard .awd-unscheduled p,.azur-white-dashboard .awd-readiness small,.azur-white-dashboard .awd-week-total>span,.azur-white-dashboard .awd-sport-row small,.azur-white-dashboard .awd-note,.azur-white-dashboard .awd-target span{color:#9bb8cc}
+.azur-white-dashboard .awd-target,.azur-white-dashboard .awd-insight>p,.azur-white-dashboard .awd-insight details p{color:#c8dce9}
+.azur-white-dashboard .awd-primary{background:linear-gradient(100deg,#087db6,#126da3);border:1px solid rgba(123,207,250,.3);color:#fff}
+.azur-white-dashboard .awd-primary:hover{background:#168ec6}
+.azur-white-dashboard .awd-readiness-mark{border-color:#37556a;color:#a9c6d8}
+.azur-white-dashboard .awd-sport-row>div{background:#244156}
+.azur-white-dashboard .awd-load-link{border-color:rgba(122,180,215,.2);color:#8dcdf1}
+.azur-white-dashboard .awd-insight{border-left-color:#f1c34b}
+.azur-white-dashboard .awd-insight details,.azur-white-dashboard .awd-insight details button,.azur-white-dashboard .awd-more-link{color:#8dcdf1}
+.azur-white-dashboard .awd-greeting,.azur-white-dashboard .awd-race-meta{color:#c9dfef}
+.mobile-bottom-nav.awd-navigation{background:#091d30!important;border-color:#214760!important;box-shadow:0 -8px 28px rgba(0,7,19,.4)!important}
+.mobile-bottom-nav.awd-navigation button{color:#9dbad0!important}
+.mobile-bottom-nav.awd-navigation button.active{background:rgba(18,130,187,.2)!important;color:#80d4ff!important;border-color:rgba(82,182,234,.35)!important}
+@media(max-width:700px){.azur-white-dashboard{border-radius:18px}.azur-white-dashboard .awd-card{border-radius:16px}}
