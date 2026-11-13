@@ -9587,8 +9587,11 @@ function DataSourcesView() {
             <div className="source-row">
               <div>
                 <strong>Intervals.icu</strong>
-                <small>Zwift activity connection · read-only validation</small>
+                <small>Connect your existing account or review historical activities. Previous imports are preserved.</small>
               </div>
+              <button type="button" className="primary-button" onClick={() => void connectIntervals()}>
+                Connect / reconnect
+              </button>
               <button type="button" className="primary-button" disabled={intervalsLoading} onClick={() => void previewIntervals()}>
                 {intervalsLoading ? 'Checking…' : 'Review 90-day history'}
               </button>
