@@ -7040,3 +7040,30 @@ strong {
 .login-screen .login-card .azur-auth-switch:hover {background:transparent;color:#d2f1ff;}
 .login-screen .login-card .login-error {font-size:12px;padding:10px 12px;}
 @media(max-height:720px){.login-screen {align-items:flex-start}.azur-auth-wordmark {margin-bottom:12px}.login-screen .login-card {gap:11px;padding:10px 4px}}
+
+
+/* AZUR V2 onboarding outcome: athlete-facing coach review, not a failed form. */
+.azur-review-complete {padding:clamp(24px,5vw,42px);text-align:left;}
+.azur-review-symbol {display:grid;place-items:center;width:48px;height:48px;margin-bottom:24px;border-radius:50%;background:#133e42;border:1px solid #4c9b98;color:#b3f4dd;font-size:27px;}
+.azur-review-complete>.eyebrow {color:#79c9ed;font-size:11px;letter-spacing:.16em;font-weight:750;}
+.azur-review-complete h1 {font-size:clamp(30px,7vw,42px);letter-spacing:-.045em;line-height:1.13;margin:12px 0;color:#f3f9ff;}
+.azur-review-lead {font-size:15px;line-height:1.65;color:#a8c0d1;max-width:55ch;}
+.azur-review-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:28px 0;}
+.azur-review-stats>div {padding:14px 10px;border-radius:13px;background:#0b2539;border:1px solid #28485d;min-width:0;}
+.azur-review-stats small {display:block;color:#91b4c9;font-size:11px;margin-bottom:9px;}
+.azur-review-stats strong {font-size:clamp(12px,3.2vw,16px);color:#f4faff;overflow-wrap:anywhere;}
+.azur-review-next {margin:26px 0 18px;}
+.azur-review-next h2 {font-size:19px;color:#f1f9fe;margin-bottom:18px;}
+.azur-review-next ol {list-style:none;counter-reset:azur-review;padding:0;margin:0;}
+.azur-review-next li {counter-increment:azur-review;position:relative;padding:0 0 20px 45px;border-left:1px solid #355a6c;margin-left:14px;}
+.azur-review-next li:last-child {border-left-color:transparent;}
+.azur-review-next li:before {content:counter(azur-review);position:absolute;left:-15px;top:-3px;display:grid;place-items:center;width:29px;height:29px;border-radius:50%;background:#153d56;border:1px solid #4786a7;color:#d4f1ff;font-size:12px;font-weight:800;}
+.azur-review-next li strong {color:#eaf6fc;font-size:14px;}
+.azur-review-next li p {color:#9eb9ca;font-size:13px;line-height:1.6;margin:7px 0 0;}
+.azur-review-detail {padding:14px 0;border-top:1px solid #2d4d62;border-bottom:1px solid #2d4d62;color:#a8c5d5;font-size:13px;}
+.azur-review-detail summary {cursor:pointer;color:#a5ddf5;font-weight:700;}
+.azur-review-detail p {line-height:1.6;}
+.azur-review-actions {display:flex;flex-direction:column;gap:10px;margin:26px 0 12px;}
+.azur-review-actions a.primary-button {display:grid;place-items:center;text-decoration:none;min-height:50px;border-radius:12px;background:#168cc4;color:white;font-weight:750;}
+.azur-review-actions button {min-height:44px;border:1px solid #375c74;border-radius:12px;background:transparent;color:#bce3f6;font-weight:700;}
+.azur-review-footnote {font-size:12px;color:#8baabd;line-height:1.6;}
