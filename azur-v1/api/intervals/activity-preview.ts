@@ -19,7 +19,7 @@ export function createActivityPreviewHandler(fetcher: typeof fetch = globalThis.
  if(!integrationReq.ok)return res.status(502).json({error:'Integration lookup unavailable'});
  const integration=(await integrationReq.json())?.[0];
  if(!integration?.access_token)return res.status(409).json({error:'Intervals.icu approval and athlete authorisation required'});
- const days=Math.max(1,Math.min(31,Number(req.query.days)||7));
+ const requestedDays=Number(req.query.days); const days=Number.isFinite(requestedDays)?Math.max(1,Math.min(90,Math.trunc(requestedDays))):90;
  const oldest=new Date(Date.now()-(days-1)*86400000).toISOString().slice(0,10);
  const newest=new Date().toISOString().slice(0,10);
  const endpoint='https://intervals.icu/api/v1/athlete/0/activities?oldest='+oldest+'&newest='+newest;
