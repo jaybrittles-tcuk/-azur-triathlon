@@ -9514,7 +9514,7 @@ function DataSourcesView() {
     try {
       const {data:{session}} = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Please sign in again.');
-      const response = await fetch('/api/intervals/activity-preview?days=7', {
+      const response = await fetch('/api/intervals/activity-preview?days=90', {
         headers: {Authorization: `Bearer ${session.access_token}`},
       });
       const data = await response.json();
@@ -9590,14 +9590,14 @@ function DataSourcesView() {
                 <small>Zwift activity connection · read-only validation</small>
               </div>
               <button type="button" className="primary-button" disabled={intervalsLoading} onClick={() => void previewIntervals()}>
-                {intervalsLoading ? 'Checking…' : 'Preview rides'}
+                {intervalsLoading ? 'Checking…' : 'Review 90-day history'}
               </button>
             </div>
             {intervalsPreview && (
               <div className="azur-intervals-preview" aria-live="polite">
                 <div className="azur-intervals-review-header"><strong>Ride review</strong><span>Previewing rides leaves your training load unchanged</span></div>
                 {intervalsPreview.error && <p role="alert">{intervalsPreview.error}</p>}
-                {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>No cycling activities returned for the last seven days.</p>}
+                {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>No cycling activities returned for the last 90 days. This does not establish zero training history.</p>}
                 {rideMessage && <p role="status">{rideMessage}</p>}
                 {intervalsPreview.acceptanceEnabled && rideInbox.length > 0 && (
                   <section aria-label="Staged rides awaiting review">
