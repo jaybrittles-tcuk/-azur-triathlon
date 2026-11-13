@@ -5595,7 +5595,10 @@ color:
 }
 function HomeView() {
  return <><AthleteDashboard name={athleteName} avatar={avatarUrl} race={primaryRace} phase={currentMacrocycleWeek?.phase} today={todayKey} sessions={weekSessions} readiness={recoveryReadiness} weeklyStress={trainingLoad.weeklyStress} onSession={id=>{setSelectedId(id);setSessionDetailOpen(true);setActiveNav('Calendar');}} onNavigate={page=>setActiveNav(page as any)} />
- <details className="awd-advanced"><summary>Training settings & plan tools</summary><div className="azur-home-tools"
+</>;
+ }
+ function TrainingToolsView() {
+ return <details className="awd-advanced"><summary>Training settings & plan tools</summary><div className="azur-home-tools"
   style={{
     display: 'grid',
     gridTemplateColumns: 'minmax(0, 1fr)',
@@ -6613,9 +6616,8 @@ color:
     </p>
   </section>
 )}
-</details></>;
+</details>;
  }
-
   function calendarMoveSpacingWarnings(session: Session, targetDate: string): string[] {
     const date = new Date(`${targetDate}T12:00:00`);
     const adjacent = [-1, 1].flatMap((offset) => {
@@ -10339,6 +10341,7 @@ style={
           </button>
         )}</div>
       </section>)}
+      <TrainingToolsView />
       {!isCoachAccount && <CoachInvitations mode="athlete" />}
     </section>
   )
