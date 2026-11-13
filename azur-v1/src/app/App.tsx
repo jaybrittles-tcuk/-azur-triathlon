@@ -9462,6 +9462,36 @@ routePoints.length
   }
 }
 
+function AthleteHistoryBaselineStatus() {
+  const [state,setState]=useState<{loading:boolean;count?:number;excluded?:number;start?:string;end?:string;status?:string;source?:string;error?:string}>({loading:true});
+  useEffect(()=>{
+    let active=true;
+    void (async()=>{
+      const {data:{user},error:authError}=await supabase.auth.getUser();
+      if(!active)return;
+      if(authError||!user){setState({loading:false,error:'Sign in to view your historical baseline.'});return;}
+      const {data,error}=await supabase.from('athlete_history_baseline')
+        .select('activity_count,excluded_count,window_start,window_end,validation_status,source')
+        .eq('owner_user_id',user.id).order('window_end',{ascending:false}).limit(1).maybeSingle();
+      if(!active)return;
+      if(error){setState({loading:false,error:'Historical baseline could not be loaded.'});return;}
+      setState(data?{loading:false,count:data.activity_count,excluded:data.excluded_count,start:data.window_start,end:data.window_end,status:data.validation_status,source:data.source}:{loading:false});
+    })();
+    return()=>{active=false;};
+  },[]);
+  return <section className="panel" aria-label="Historical training baseline">
+    <span className="eyebrow">VIPA · TRAINING HISTORY</span>
+    <h3>Your existing training baseline</h3>
+    {state.loading?<p>Checking saved training history…</p>:state.error?<p role="status">{state.error}</p>:state.count==null?
+      <p>No saved historical baseline is available for this account. This does not mean you have no training history.</p>:
+      <>
+        <p><strong>{state.count} activities analysed</strong> · {state.excluded??0} excluded from the baseline</p>
+        <p>{state.start} to {state.end} · {state.source} · {state.status==='validated'?'Validated baseline':state.status||'Review pending'}</p>
+        <p>Previously excluded activities remain excluded. This summary does not import activities or approve a training plan.</p>
+      </>}
+  </section>;
+}
+
 function DataSourcesView() {
   async function rideRequest(path:string, body?:object) {
     const {data:{session}} = await supabase.auth.getSession();
@@ -9531,6 +9561,7 @@ function DataSourcesView() {
   }
   return (
     <>
+      <AthleteHistoryBaselineStatus />
       <section className="panel">
         <div className="section-heading">
           <div>
