@@ -1693,8 +1693,20 @@ async function loadPrimaryRace(userId: string) {
     .limit(1)
     .single();
 
-  if (error) {
-    console.error('Unable to load primary race:', error);
+  if (error || !data) {
+    // Invitation-first onboarding stores the goal before a formal race row exists.
+    // Show that goal without inventing a published plan or silently changing race records.
+    const {data:setup,error:setupError}=await supabase
+      .from('athlete_onboarding')
+      .select('race_distance,race_date')
+      .eq('user_id',userId)
+      .maybeSingle();
+    if (setupError) console.warn('Unable to load onboarding race goal:',setupError);
+    if (setup?.race_date) {
+      const distance=String(setup.race_distance||'').trim();
+      const label=distance==='140.6'?'IRONMAN':distance==='70.3'?'IRONMAN 70.3':distance?distance+' triathlon':'Your upcoming race';
+      setPrimaryRace(previous=>({...previous,id:'',name:label,raceDate:setup.race_date,priority:'A'}));
+    }
     return;
   }
 
