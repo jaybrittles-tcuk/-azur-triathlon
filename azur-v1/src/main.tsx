@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './app/App';
 import './app/styles.css';
+import './app/azurPremiumRecovery.css';
 const staging=import.meta.env.VITE_AZUR_STAGING==='true';
 
 class AppErrorBoundary extends Component<{children:ReactNode},{failed:boolean}> {
