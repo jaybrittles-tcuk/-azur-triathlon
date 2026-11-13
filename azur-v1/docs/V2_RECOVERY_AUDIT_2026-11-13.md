@@ -24,3 +24,8 @@
 - Review-pending athlete can connect devices but cannot publish unapproved sessions.
 - One coherent premium navy UI, no inherited white panels on Home.
 - No claim of VIPA end-to-end success without data-backed test.
+
+## Preview startup incident
+- Root cause confirmed on iPhone: missing Vite Supabase environment variables because Vercel preview variables were scoped to the previous feature branch.
+- Recovery branch now has its own preview-only staging URL, publishable key, and staging flag; no production variables modified.
+- Rebuild required: Vite embeds these variables at build time. Validate startup and staging banner before resuming VIPA.
