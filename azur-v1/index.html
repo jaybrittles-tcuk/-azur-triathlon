@@ -15,20 +15,36 @@
   <body>
     <div id="root"><main id="azur-startup-fallback" style="min-height:100vh;background:#071525;color:#eaf4fb;display:flex;align-items:center;justify-content:center;padding:24px;font-family:system-ui,sans-serif"><div style="max-width:420px;text-align:center"><strong style="font-size:22px;letter-spacing:0.08em">AZUR</strong><p style="color:#a6c1d6">Loading your training experience…</p><p id="azur-startup-help" style="display:none;color:#eaf4fb">This preview could not start. Open the link directly in Safari and reload. Your training data has not been changed.</p></div></main></div>
     <script>
-      // A module/network failure can prevent React's error boundary from mounting.
-      // Keep a useful fallback instead of an unexplained blank screen.
-      window.addEventListener('error', function (event) {
-        if (event.target && event.target.tagName === 'SCRIPT') {
+      // Preview-only startup diagnostics. No credentials or athlete information are collected.
+      (function () {
+        var preview = location.hostname.endsWith('.vercel.app');
+        var lastError = '';
+        function report(message) {
+          if (!preview) return;
+          lastError = String(message || 'Unknown startup error').slice(0, 220);
           var help = document.getElementById('azur-startup-help');
-          if (help) help.style.display = 'block';
+          if (help) {
+            help.style.display = 'block';
+            help.textContent = 'AZUR startup check: ' + lastError + '. Please send your coach a screenshot.';
+          }
         }
-      }, true);
-      window.setTimeout(function () {
-        if (document.getElementById('azur-startup-fallback')) {
-          var help = document.getElementById('azur-startup-help');
-          if (help) help.style.display = 'block';
-        }
-      }, 12000);
+        window.addEventListener('error', function (event) {
+          if (event.target && event.target.tagName === 'SCRIPT') {
+            report('Application script could not be loaded');
+          } else if (event.message) {
+            report(event.message);
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', function (event) {
+          var reason = event.reason;
+          report(reason && reason.message ? reason.message : 'Application initialization rejected');
+        });
+        window.setTimeout(function () {
+          if (document.getElementById('azur-startup-fallback')) {
+            report(lastError || 'Application did not mount after 12 seconds');
+          }
+        }, 12000);
+      })();
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
