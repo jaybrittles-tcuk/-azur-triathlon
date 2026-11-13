@@ -178,7 +178,7 @@ export default function AthleteOnboardingDraft(){
    <ol><li><strong>Your coach reviews your baseline.</strong><p>Recent completed volume, training consistency and any return-to-training considerations.</p></li><li><strong>Your starting load is approved.</strong><p>Your available hours are a scheduling ceiling, not a target AZUR will automatically prescribe.</p></li><li><strong>Your calendar becomes available.</strong><p>Sessions and personalised explanations will appear once a plan has been approved and published.</p></li></ol>
   </section>
   <details className="azur-review-detail"><summary>Why is my plan awaiting review?</summary><p>{reviewReason}</p></details>
-  <div className="azur-review-actions"><button type="button" className="primary-button" onClick={()=>{setReviewReason(null);setReady(false);setStep(1);window.scrollTo(0,0)}}>Update my training information</button></div>
+  <div className="azur-review-actions"><a className="primary-button" href="/">Continue to my dashboard &amp; device connections</a><button type="button" onClick={()=>{setReviewReason(null);setReady(false);setStep(1);window.scrollTo(0,0)}}>Update my training information</button></div>
   <p className="azur-review-footnote">Your setup is saved. You can close this screen and return later. Your coach must approve a safe starting load before sessions are published.</p>
  </section></main>;
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
