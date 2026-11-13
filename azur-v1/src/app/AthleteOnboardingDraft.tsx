@@ -33,6 +33,7 @@ export default function AthleteOnboardingDraft(){
  const [concern,setConcern]=useState('none');
  const [canSwim,setCanSwim]=useState(true);
  const [ready,setReady]=useState(false);
+ const [reviewReason,setReviewReason]=useState<string|null>(null);
  const [planSummary,setPlanSummary]=useState<{sessions:number;total_minutes?:number;calendar?:{date:string;sport:string;duration_min:number;title:string}[]}|null>(null);
  const [betaAcknowledged,setBetaAcknowledged]=useState(false);
  const [displayName,setDisplayName]=useState('');
@@ -50,7 +51,7 @@ export default function AthleteOnboardingDraft(){
    if(authError || !user){setMessage('Sign in to save your athlete setup.');setLoading(false);return;}
    if(user.app_metadata?.role==='coach'){setIsCoach(true);setLoading(false);return;}
    setUserId(user.id);
-   const {data:acceptedInvite,error:inviteError}=await supabase.from('coach_athlete_invitation').select('id').not('accepted_at','is',null).limit(1);
+   const {data:acceptedInvite,error:inviteError}=await supabase.from('coach_athlete_invitation').select('id').eq('accepted_by',user.id).not('accepted_at','is',null).limit(1);
    if(cancelled)return;
    if(inviteError||!acceptedInvite?.length){setMessage('A coach invitation must be accepted from your email before you can begin setup. Please contact your coach for an invitation.');setLoading(false);return;}
    setInvitationVerified(true);
@@ -131,8 +132,8 @@ export default function AthleteOnboardingDraft(){
     }
    }
    if(data?.status==='review_required'){
-    setMessage('Your setup is saved. Coach review is required before training can be allocated: '+(data.reason||'safety review'));
-    setReady(true);return;
+    setReviewReason(typeof data.reason==='string'?data.reason:'Your coach needs to validate your recent training before prescribing sessions.');
+    setReady(true);setMessage('');return;
    }
    if(data?.status!=='ready'||!Number.isInteger(data.sessions)||data.sessions<1){
     setMessage('Training setup could not be verified. Please contact your coach.');return;
@@ -153,6 +154,24 @@ export default function AthleteOnboardingDraft(){
   setStep(Math.min(4,nextStep));
   setMessage('');
  }
+ if(ready && reviewReason)return <main className="azur-onboarding-page"><section className="azur-onboarding-draft azur-review-complete" style={{maxWidth:660,margin:'6vh auto'}}>
+  <div className="azur-review-symbol" aria-hidden="true">✓</div>
+  <span className="eyebrow">ATHLETE PROFILE RECEIVED</span>
+  <h1>You're all set. Your coach is next.</h1>
+  <p className="azur-review-lead">Your information has been saved successfully. AZUR has paused training allocation until your coach confirms a safe starting point.</p>
+  <div className="azur-review-stats">
+   <div><small>Race goal</small><strong>{race.toUpperCase()}</strong></div>
+   <div><small>Available time</small><strong>{hours} hrs/week</strong></div>
+   <div><small>Recent training</small><strong>{recentHours!==''?`${recentHours} hrs/week`:'To confirm'}</strong></div>
+  </div>
+  <section className="azur-review-next">
+   <h2>What happens next?</h2>
+   <ol><li><strong>Your coach reviews your baseline.</strong><p>Recent completed volume, training consistency and any return-to-training considerations.</p></li><li><strong>Your starting load is approved.</strong><p>Your available hours are a scheduling ceiling, not a target AZUR will automatically prescribe.</p></li><li><strong>Your calendar becomes available.</strong><p>Sessions and personalised explanations will appear once a plan has been approved and published.</p></li></ol>
+  </section>
+  <details className="azur-review-detail"><summary>Why is my plan awaiting review?</summary><p>{reviewReason}</p></details>
+  <div className="azur-review-actions"><a className="primary-button" href="/">Go to athlete dashboard</a><button type="button" onClick={()=>{setReviewReason(null);setReady(false);setStep(1);window.scrollTo(0,0)}}>Edit training background</button></div>
+  <p className="azur-review-footnote">You don't need to repeat onboarding. If you haven't recently completed consistent training, your coach may start below your available hours.</p>
+ </section></main>;
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
  if(!invitationVerified&&!isCoach)return <section className="azur-onboarding-draft" role="status"><h3>Invitation required</h3><p>{message||'Please accept your coach invitation before onboarding.'}</p><p>Open the invitation email sent by your coach, sign in with that address, and accept the invitation.</p></section>;
  if(isCoach)return <section className="azur-onboarding-draft"><h3>Athlete onboarding</h3><p>This setup is for athlete accounts. Coach access and assignments are managed separately.</p></section>;
@@ -234,7 +253,7 @@ export default function AthleteOnboardingDraft(){
   <div className="azur-onboarding-actions" style={{position:"sticky",bottom:0,zIndex:5,display:"flex",gap:12,justifyContent:"flex-end",padding:"14px 8px max(14px, env(safe-area-inset-bottom))",background:"linear-gradient(180deg, rgba(9,28,46,0.96), #091c2e)",borderTop:"1px solid rgba(110,178,216,0.25)",borderRadius:12}}>
    {step>0&&<button type="button" onClick={()=>{setMessage("");setStep(s=>s-1);setReady(false)}}>Back</button>}
    {step<4?<button type="button" disabled={saving} onClick={()=>{if(step===0 && !displayName.trim()){setMessage('Enter your name to continue.');return;}void save(step+1)}}>{saving?"Saving…":"Continue"}</button>
-   :<button type="button" disabled={saving} onClick={()=>void save(5)}>{saving?'Creating plan…':'Finish setup & create plan'}</button>}
+   :<button type="button" disabled={saving||ready} onClick={()=>void save(5)}>{saving?'Checking your starting point…':ready?'Setup submitted':'Finish setup & request your plan'}</button>}
   </div>
   {message && <p role="status" className="azur-onboarding-message">{message}</p>}
   {ready&&<div role="status" className="azur-onboarding-recap"><strong>Draft setup</strong>
