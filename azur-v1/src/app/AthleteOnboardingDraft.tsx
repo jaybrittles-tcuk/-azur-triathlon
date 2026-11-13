@@ -60,6 +60,10 @@ export default function AthleteOnboardingDraft(){
    if(!scheduleLoadError && savedSchedule?.preferences && typeof savedSchedule.preferences==='object'){
     const loaded=savedSchedule.preferences as SchedulingPreferences;
     if(validateSchedulingPreferences(loaded).length===0){
+     const review=(savedSchedule.preferences as Record<string,unknown>).coachReview;
+     if(review&&typeof review==='object'&&typeof (review as Record<string,unknown>).reason==='string'){
+      setReviewReason((review as {reason:string}).reason);setReady(true);
+     }
      setSchedulePrefs(loaded);
      setTrainingDays(loaded.availableDays.map(day=>weekdays[day]));
     }
@@ -132,12 +136,17 @@ export default function AthleteOnboardingDraft(){
     }
    }
    if(data?.status==='review_required'){
-    setReviewReason(typeof data.reason==='string'?data.reason:'Your coach needs to validate your recent training before prescribing sessions.');
-    setReady(true);setMessage('');return;
+    const reason=typeof data.reason==='string'?data.reason:'Your coach needs to validate your recent training before prescribing sessions.';
+    const {error:reviewSaveError}=await supabase.from('athlete_scheduling_preferences').upsert({
+     user_id:userId,preferences:{...schedulePrefs,coachReview:{reason,requestedAt:new Date().toISOString()}},updated_at:new Date().toISOString()
+    },{onConflict:'user_id'});
+    if(reviewSaveError){setMessage('Your coach review was requested, but its status could not be saved: '+reviewSaveError.message);return;}
+    setReviewReason(reason);setReady(true);setMessage('');return;
    }
    if(data?.status!=='ready'||!Number.isInteger(data.sessions)||data.sessions<1){
     setMessage('Training setup could not be verified. Please contact your coach.');return;
    }
+   await supabase.from('athlete_scheduling_preferences').upsert({user_id:userId,preferences:schedulePrefs,updated_at:new Date().toISOString()},{onConflict:'user_id'});
    setPlanSummary({sessions:data.sessions,total_minutes:data.total_minutes,calendar:Array.isArray(data.calendar)?data.calendar:[]});
    setMessage(`Your training plan is ready: ${data.sessions} sessions.`);
    setReady(true);
@@ -169,7 +178,7 @@ export default function AthleteOnboardingDraft(){
    <ol><li><strong>Your coach reviews your baseline.</strong><p>Recent completed volume, training consistency and any return-to-training considerations.</p></li><li><strong>Your starting load is approved.</strong><p>Your available hours are a scheduling ceiling, not a target AZUR will automatically prescribe.</p></li><li><strong>Your calendar becomes available.</strong><p>Sessions and personalised explanations will appear once a plan has been approved and published.</p></li></ol>
   </section>
   <details className="azur-review-detail"><summary>Why is my plan awaiting review?</summary><p>{reviewReason}</p></details>
-  <div className="azur-review-actions"><a className="primary-button" href="/">Go to athlete dashboard</a><button type="button" onClick={()=>{setReviewReason(null);setReady(false);setStep(1);window.scrollTo(0,0)}}>Edit training background</button></div>
+  <div className="azur-review-actions"><a className="primary-button" href="/onboarding">View my setup status</a><button type="button" onClick={()=>{setReviewReason(null);setReady(false);setStep(1);window.scrollTo(0,0)}}>Edit training background</button></div>
   <p className="azur-review-footnote">You don't need to repeat onboarding. If you haven't recently completed consistent training, your coach may start below your available hours.</p>
  </section></main>;
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
