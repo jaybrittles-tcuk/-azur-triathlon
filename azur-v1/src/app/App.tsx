@@ -9531,7 +9531,7 @@ function AthleteHistoryBaselineStatus() {
         }catch{if(active)setApproval({error:'Coach approval unavailable'});}
       }
       const {data,error}=await supabase.from('athlete_history_baseline')
-        .select('activity_count,excluded_count,window_start,window_end,validation_status,source,weekly_summary')
+        .select('activity_count,excluded_count,window_start,window_end,validation_status,source,sport_summary,weekly_summary')
         .eq('owner_user_id',user.id).order('window_end',{ascending:false}).limit(1).maybeSingle();
       if(!active)return;
       if(error){setState({loading:false,error:'Historical baseline could not be loaded.'});return;}
@@ -9540,7 +9540,7 @@ function AthleteHistoryBaselineStatus() {
     })();
     return()=>{active=false;};
   },[]);
-  return <section className="panel" aria-label="Historical training baseline">
+  return <section className="panel azur-history-panel" aria-label="Historical training baseline">
     <span className="eyebrow">VIPA · TRAINING HISTORY</span>
     <h3>Your existing training baseline</h3>
     {state.loading?<p>Checking saved training history…</p>:state.error?<p role="status">{state.error}</p>:state.count==null?
