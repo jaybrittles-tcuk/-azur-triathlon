@@ -9463,7 +9463,7 @@ routePoints.length
 }
 
 function AthleteHistoryBaselineStatus() {
-  const [state,setState]=useState<{loading:boolean;count?:number;excluded?:number;start?:string;end?:string;status?:string;source?:string;error?:string}>({loading:true});
+  const [state,setState]=useState<{loading:boolean;count?:number;excluded?:number;start?:string;end?:string;status?:string;source?:string;weeks?:Array<{week:string;total:number;swim:number;bike:number;run:number}>;error?:string}>({loading:true});
   const [approval,setApproval]=useState<{status?:string;approvedWeeklyHours?:number|null;error?:string}|null>(null);
   useEffect(()=>{
     let active=true;
@@ -9480,11 +9480,11 @@ function AthleteHistoryBaselineStatus() {
         }catch{if(active)setApproval({error:'Coach approval unavailable'});}
       }
       const {data,error}=await supabase.from('athlete_history_baseline')
-        .select('activity_count,excluded_count,window_start,window_end,validation_status,source')
+        .select('activity_count,excluded_count,window_start,window_end,validation_status,source,weekly_summary')
         .eq('owner_user_id',user.id).order('window_end',{ascending:false}).limit(1).maybeSingle();
       if(!active)return;
       if(error){setState({loading:false,error:'Historical baseline could not be loaded.'});return;}
-      setState(data?{loading:false,count:data.activity_count,excluded:data.excluded_count,start:data.window_start,end:data.window_end,status:data.validation_status,source:data.source}:{loading:false});
+      setState(data?{loading:false,count:data.activity_count,excluded:data.excluded_count,start:data.window_start,end:data.window_end,status:data.validation_status,source:data.source,weeks:Array.isArray(data.weekly_summary)?data.weekly_summary:[]}:{loading:false});
     })();
     return()=>{active=false;};
   },[]);
@@ -9496,6 +9496,19 @@ function AthleteHistoryBaselineStatus() {
       <>
         <p><strong>{state.count} activities analysed</strong> · {state.excluded??0} excluded from the baseline</p>
         <p>{state.start} to {state.end} · {state.source} · {state.status==='validated'?'Validated baseline':state.status||'Review pending'}</p>
+        <details><summary>View historical training by week</summary>
+          <p>Previously analysed swim, bike and run time. This is historical evidence, not your future training calendar.</p>
+          <div style={{display:'grid',gap:8}}>
+            {(state.weeks||[]).map(w=><div key={w.week} style={{display:'grid',gridTemplateColumns:'90px 1fr auto',gap:8,alignItems:'center',fontSize:13}}>
+              <span>{w.week}</span>
+              <div style={{height:9,display:'flex',borderRadius:9,overflow:'hidden',background:'#263747'}}>
+                {(['swim','bike','run'] as const).map((sport)=><span key={sport} title={sport} style={{width:(Math.max(0,Number(w[sport])||0)/Math.max(1,Number(w.total)||0)*100)+'%',background:sport==='swim'?'#28B6DB':sport==='bike'?'#A46DE8':'#E7A63B'}}/>)}
+              </div>
+              <strong>{(Number(w.total)/60).toFixed(1)}h</strong>
+            </div>)}
+          </div>
+          <p>Swim · blue | Bike · purple | Run · amber</p>
+        </details>
         <p>Previously excluded activities remain excluded. This summary does not import activities or approve a training plan.</p>
         {approval?.status==='approved'?<p role="status"><strong>Coach-validated starting limit: {approval.approvedWeeklyHours} hours/week.</strong> Approval does not mean a new plan has been published; check your calendar for existing sessions.</p>:approval?.status==='review_required'?<p role="status">Coach review is required before using this history to set a training limit.</p>:approval?.error?<p role="status">{approval.error}</p>:<p>Checking coach approval…</p>}
       </>}
