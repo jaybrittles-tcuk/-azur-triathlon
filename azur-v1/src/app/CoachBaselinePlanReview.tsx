@@ -40,8 +40,8 @@ export default function CoachBaselinePlanReview(){
    setDrafts(draftRows||[]);
   }catch(e){setError(e instanceof Error?e.message:'Review unavailable')}finally{setBusy(false)}
  }
- return <section className="coach-attention-group" aria-label="Validated baseline weekly plan review" style={{padding:18}}>
-  <header className="coach-attention-heading"><div><h3>History-informed weekly review</h3><p>Compare approved training capacity with the calendar. This screen cannot publish or change sessions.</p></div></header>
+ return <section className="coach-attention-group" aria-label="Validated baseline weekly plan review" style={{padding:'16px 14px',paddingBottom:96}}>
+  <header className="coach-attention-heading"><div><h3>History-informed weekly review</h3><p>Approved capacity, weekly plan and saved proposals. Read-only.</p></div></header>
   <div style={{display:'flex',flexWrap:'wrap',gap:10,alignItems:'end'}}>
    <label>Athlete<select value={selected} onChange={e=>{setSelected(e.target.value);setReview(null)}}>{athletes.map(a=><option key={a.id} value={a.id}>{a.display_name}</option>)}</select></label>
    <label>Week<select value={offset} onChange={e=>{setOffset(Number(e.target.value));setReview(null)}}><option value={0}>Current week</option><option value={1}>Next week</option><option value={2}>Following week</option></select></label>
@@ -50,12 +50,11 @@ export default function CoachBaselinePlanReview(){
   {error&&<p role="alert">{error}</p>}
   {review&&<div style={{marginTop:16}}>
    <strong>{review.weekStart} · {review.phase||'No phase set'}</strong>
-   <p>Approved historical capacity: {review.approvedCapacityHours==null?'Not validated':review.approvedCapacityHours.toFixed(1)+' h'} · Saved target: {review.storedTargetHours??'Not set'} h · Calendar: {review.scheduledHours} h across {review.sessionCount} sessions</p>
-   <p>{review.activityCount} historical activities analysed.</p>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:8,margin:'12px 0'}}>{[['Approved capacity',review.approvedCapacityHours==null?'Pending':review.approvedCapacityHours.toFixed(1)+' h'],['Weekly target',review.storedTargetHours==null?'Not set':review.storedTargetHours.toFixed(2)+' h'],['Calendar',review.scheduledHours.toFixed(2)+' h · '+review.sessionCount+' sessions'],['History',review.activityCount+' activities']].map(([label,value])=><div key={label} style={{background:'rgba(10,31,49,.5)',border:'1px solid rgba(120,177,212,.18)',borderRadius:12,padding:'10px 12px',minWidth:0}}><small style={{display:'block',opacity:.75,marginBottom:4}}>{label}</small><strong style={{fontSize:16}}>{value}</strong></div>)}</div>
    {review.blockers.length>0&&<div role="status"><strong>Publication blockers</strong>{review.blockers.map((b,i)=><p key={i}>{b}</p>)}</div>}
-   {review.sessions.map(s=><div key={s.id} style={{padding:'10px 0',borderBottom:'1px solid #31536d'}}><strong>{s.planned_date} · {s.sport} · {s.duration_min} min</strong><p>{s.title} · {s.status}</p></div>)}
-   <p><strong>Review only:</strong> {review.message}</p>
-   <div style={{padding:'12px 0'}}><strong>Saved weekly proposals</strong>{drafts.length===0?<p>No saved proposal exists for this week. The automatic draft generator is not connected.</p>:drafts.map(d=><details key={d.id}><summary>Draft revision {d.revision} · {d.phase} · {Array.isArray(d.sessions)?d.sessions.length:0} sessions</summary><p>Draft ID: {d.id}</p><p>Created: {new Date(d.created_at).toLocaleString()}</p><p>Drafts are not automatically approved or published.</p></details>)}</div>
+   <details style={{marginTop:12}}><summary style={{cursor:'pointer',padding:'10px 0',fontWeight:700}}>View {review.sessionCount} planned sessions</summary><div style={{paddingTop:6}}>{review.sessions.map(s=><div key={s.id} style={{padding:'9px 0',borderBottom:'1px solid #31536d'}}><strong>{s.planned_date} · {s.sport} · {s.duration_min} min</strong><div style={{opacity:.85,fontSize:13,marginTop:3}}>{s.title} · {s.status}</div></div>)}</div></details>
+   <p style={{fontSize:13,opacity:.75,marginTop:12}}><strong>Read-only:</strong> {review.message}</p>
+   <details style={{padding:'12px 0'}}><summary style={{cursor:'pointer',fontWeight:700}}>Saved weekly proposals ({drafts.length})</summary>{drafts.length===0?<p>No saved proposal exists for this week. Automatic generation is not connected.</p>:drafts.map(d=><details key={d.id} style={{marginTop:10}}><summary>Draft revision {d.revision} · {d.phase} · {Array.isArray(d.sessions)?d.sessions.length:0} sessions</summary><p>Draft ID: {d.id}</p><p>Created: {new Date(d.created_at).toLocaleString()}</p><p>Not automatically approved or published.</p></details>)}</details>
   </div>}
  </section>;
 }
