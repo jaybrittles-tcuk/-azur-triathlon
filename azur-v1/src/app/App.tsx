@@ -9465,6 +9465,7 @@ routePoints.length
 function AthleteHistoryBaselineStatus() {
   const [state,setState]=useState<{loading:boolean;count?:number;excluded?:number;start?:string;end?:string;status?:string;source?:string;weeks?:Array<{week:string;total:number;swim:number;bike:number;run:number}>;error?:string}>({loading:true});
   const [approval,setApproval]=useState<{status?:string;approvedWeeklyHours?:number|null;error?:string}|null>(null);
+  const [historyDetail,setHistoryDetail]=useState<{sports?:Record<string,{count:number;minutes:number;distanceKm:number}>;weeks?:Array<{week:string;total:number;swim:number;bike:number;run:number}>}|null>(null);
   useEffect(()=>{
     let active=true;
     void (async()=>{
@@ -9484,6 +9485,7 @@ function AthleteHistoryBaselineStatus() {
         .eq('owner_user_id',user.id).order('window_end',{ascending:false}).limit(1).maybeSingle();
       if(!active)return;
       if(error){setState({loading:false,error:'Historical baseline could not be loaded.'});return;}
+      if(data)setHistoryDetail({sports:data.sport_summary||{},weeks:Array.isArray(data.weekly_summary)?data.weekly_summary:[]});
       setState(data?{loading:false,count:data.activity_count,excluded:data.excluded_count,start:data.window_start,end:data.window_end,status:data.validation_status,source:data.source,weeks:Array.isArray(data.weekly_summary)?data.weekly_summary:[]}:{loading:false});
     })();
     return()=>{active=false;};
@@ -9510,6 +9512,17 @@ function AthleteHistoryBaselineStatus() {
           <p>Swim · blue | Bike · purple | Run · amber</p>
         </details>
         <p>Previously excluded activities remain excluded. This summary does not import activities or approve a training plan.</p>
+        {historyDetail&&<details><summary>View analysed swim, bike and run history</summary>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:8,marginTop:12}}>
+          {(['swim','bike','run'] as const).map(sport=><div key={sport} style={{padding:10,borderRadius:12,background:'#173148',color:'#f5faff'}}>
+            <strong style={{display:'block',textTransform:'capitalize'}}>{sport}</strong>
+            <span>{historyDetail.sports?.[sport]?.count??0} activities</span>
+            <small style={{display:'block'}}>{Math.round((historyDetail.sports?.[sport]?.minutes??0)/60)} hours analysed</small>
+          </div>)}</div>
+          <p>Historical weekly training time (hours):</p>
+          <div style={{maxHeight:230,overflowY:'auto'}}>{(historyDetail.weeks||[]).map(w=><p key={w.week} style={{display:'flex',justifyContent:'space-between',margin:'5px 0'}}><span>{w.week}</span><strong>{(Number(w.total||0)/60).toFixed(1)} h</strong></p>)}</div>
+          <small>This is a validated historical summary, not an individual activity feed or completed calendar sessions.</small>
+        </details>}
         {approval?.status==='approved'?<p role="status"><strong>Coach-validated starting limit: {approval.approvedWeeklyHours} hours/week.</strong> Approval does not mean a new plan has been published; check your calendar for existing sessions.</p>:approval?.status==='review_required'?<p role="status">Coach review is required before using this history to set a training limit.</p>:approval?.error?<p role="status">{approval.error}</p>:<p>Checking coach approval…</p>}
       </>}
   </section>;
