@@ -9464,12 +9464,21 @@ routePoints.length
 
 function AthleteHistoryBaselineStatus() {
   const [state,setState]=useState<{loading:boolean;count?:number;excluded?:number;start?:string;end?:string;status?:string;source?:string;error?:string}>({loading:true});
+  const [approval,setApproval]=useState<{status?:string;approvedWeeklyHours?:number|null;error?:string}|null>(null);
   useEffect(()=>{
     let active=true;
     void (async()=>{
       const {data:{user},error:authError}=await supabase.auth.getUser();
       if(!active)return;
       if(authError||!user){setState({loading:false,error:'Sign in to view your historical baseline.'});return;}
+      const {data:{session}}=await supabase.auth.getSession();
+      if(session?.access_token){
+        try {
+          const response=await fetch('/api/athlete/history-approval',{headers:{Authorization:'Bearer '+session.access_token}});
+          const result=await response.json();
+          if(active)setApproval(response.ok?result:{error:result.error||'Coach approval unavailable'});
+        }catch{if(active)setApproval({error:'Coach approval unavailable'});}
+      }
       const {data,error}=await supabase.from('athlete_history_baseline')
         .select('activity_count,excluded_count,window_start,window_end,validation_status,source')
         .eq('owner_user_id',user.id).order('window_end',{ascending:false}).limit(1).maybeSingle();
@@ -9488,6 +9497,7 @@ function AthleteHistoryBaselineStatus() {
         <p><strong>{state.count} activities analysed</strong> · {state.excluded??0} excluded from the baseline</p>
         <p>{state.start} to {state.end} · {state.source} · {state.status==='validated'?'Validated baseline':state.status||'Review pending'}</p>
         <p>Previously excluded activities remain excluded. This summary does not import activities or approve a training plan.</p>
+        {approval?.status==='approved'?<p role="status"><strong>Coach-validated starting limit: {approval.approvedWeeklyHours} hours/week.</strong> Approval does not mean a new plan has been published; check your calendar for existing sessions.</p>:approval?.status==='review_required'?<p role="status">Coach review is required before using this history to set a training limit.</p>:approval?.error?<p role="status">{approval.error}</p>:<p>Checking coach approval…</p>}
       </>}
   </section>;
 }
