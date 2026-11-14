@@ -25,6 +25,17 @@ export default async function handler(req,res){
   if(de||!draft)return res.status(404).json({error:'Draft not found'});
   const {data:assignment,error:ae}=await admin.from('coach_athlete_assignment').select('athlete_id').eq('athlete_id',draft.athlete_id).eq('coach_user_id',user.id).maybeSingle();
   if(ae||!assignment)return res.status(403).json({error:'Coach not assigned to athlete'});
+  // Never invoke a publisher until the requested revision has a current,
+  // assigned-coach approval and its week has been verified safe to modify.
+  const {data:latest,error:latestError}=await admin.from('weekly_plan_draft').select('id,revision').eq('athlete_id',draft.athlete_id).eq('week_start',draft.week_start).order('revision',{ascending:false}).limit(1);
+  if(latestError||latest?.[0]?.id!==draftId)return res.status(409).json({error:'A newer draft exists. Review the latest revision.'});
+  const {data:decisions,error:decisionError}=await admin.from('weekly_plan_decision').select('decision,coach_user_id').eq('draft_id',draftId).order('decided_at',{ascending:false}).limit(1);
+  if(decisionError||decisions?.[0]?.decision!=='approved'||decisions?.[0]?.coach_user_id!==user.id)return res.status(409).json({error:'Latest decision must approve this draft by the assigned coach'});
+  const sunday=new Date(draft.week_start+'T12:00:00Z');sunday.setUTCDate(sunday.getUTCDate()+6);
+  const {data:existing,error:existingError}=await admin.from('planned_session').select('id,status,locked').eq('athlete_id',draft.athlete_id).eq('is_active_version',true).gte('planned_date',draft.week_start).lte('planned_date',sunday.toISOString().slice(0,10));
+  if(existingError)return res.status(503).json({error:'Unable to verify existing sessions'});
+  if(existing?.some(s=>s.locked||s.status!=='planned'))return res.status(409).json({error:'Completed, locked or edited sessions require separate reconciliation'});
+  if(mode==='full'&&existing?.length)return res.status(409).json({error:'Full publication blocked: existing sessions must be reconciled, not overwritten'});
   const rpc=mode==='additive'?'publish_verified_additive_week':'publish_verified_weekly_draft';
   const {data,error}=await admin.rpc(rpc,{p_draft_id:draftId});
   if(error)return res.status(409).json({error:'Publication denied by database validation'});
