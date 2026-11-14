@@ -10,6 +10,7 @@ export default function CoachBaselinePlanReview(){
  const [offset,setOffset]=useState(1);
  const [review,setReview]=useState<Review|null>(null);
  const [busy,setBusy]=useState(false);
+ const [drafts,setDrafts]=useState<Array<{id:string;week_start:string;revision:number;phase:string;sessions:unknown;created_at:string}>>([]);
  const [error,setError]=useState('');
  useEffect(()=>{let live=true;void(async()=>{
   const {data:{user}}=await supabase.auth.getUser();
@@ -25,7 +26,7 @@ export default function CoachBaselinePlanReview(){
  })();return()=>{live=false}},[]);
  async function inspect(){
   if(!selected)return;
-  setBusy(true);setError('');setReview(null);
+  setBusy(true);setError('');setReview(null);setDrafts([]);
   try{
    const {data:{session}}=await supabase.auth.getSession();
    if(!session?.access_token)throw Error('Sign in to review athlete plans');
@@ -34,6 +35,9 @@ export default function CoachBaselinePlanReview(){
    const result=await response.json();
    if(!response.ok)throw Error(result.error||'Review unavailable');
    setReview(result);
+   const {data:draftRows,error:draftError}=await supabase.from('weekly_plan_draft').select('id,week_start,revision,phase,sessions,created_at').eq('athlete_id',selected).eq('week_start',monday(offset)).order('revision',{ascending:false}).limit(3);
+   if(draftError)throw Error('Calendar review loaded, but saved drafts could not be inspected: '+draftError.message);
+   setDrafts(draftRows||[]);
   }catch(e){setError(e instanceof Error?e.message:'Review unavailable')}finally{setBusy(false)}
  }
  return <section className="coach-attention-group" aria-label="Validated baseline weekly plan review" style={{padding:18}}>
@@ -51,6 +55,7 @@ export default function CoachBaselinePlanReview(){
    {review.blockers.length>0&&<div role="status"><strong>Publication blockers</strong>{review.blockers.map((b,i)=><p key={i}>{b}</p>)}</div>}
    {review.sessions.map(s=><div key={s.id} style={{padding:'10px 0',borderBottom:'1px solid #31536d'}}><strong>{s.planned_date} · {s.sport} · {s.duration_min} min</strong><p>{s.title} · {s.status}</p></div>)}
    <p><strong>Review only:</strong> {review.message}</p>
+   <div style={{padding:'12px 0'}}><strong>Saved weekly proposals</strong>{drafts.length===0?<p>No saved proposal exists for this week. The automatic draft generator is not connected.</p>:drafts.map(d=><details key={d.id}><summary>Draft revision {d.revision} · {d.phase} · {Array.isArray(d.sessions)?d.sessions.length:0} sessions</summary><p>Draft ID: {d.id}</p><p>Created: {new Date(d.created_at).toLocaleString()}</p><p>Drafts are not automatically approved or published.</p></details>)}</div>
   </div>}
  </section>;
 }
