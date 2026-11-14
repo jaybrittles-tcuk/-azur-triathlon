@@ -9464,7 +9464,7 @@ routePoints.length
 
 function AthleteHistoryBaselineStatus() {
   const [state,setState]=useState<{loading:boolean;count?:number;excluded?:number;start?:string;end?:string;status?:string;source?:string;weeks?:Array<{week:string;total:number;swim:number;bike:number;run:number}>;error?:string}>({loading:true});
-  const [approval,setApproval]=useState<{status?:string;approvedWeeklyHours?:number|null;error?:string}|null>(null);
+  const [approval,setApproval]=useState<{status?:string;approvedWeeklyHours?:number|null;error?:string;currentWeek?:{storedTargetHours:number|null;scheduledHours:number;sessionCount:number;completedCount:number;requiresReplanning:boolean}}|null>(null);
   const [historyDetail,setHistoryDetail]=useState<{sports?:Record<string,{count:number;minutes:number;distanceKm:number}>;weeks?:Array<{week:string;total:number;swim:number;bike:number;run:number}>}|null>(null);
   useEffect(()=>{
     let active=true;
@@ -9523,7 +9523,9 @@ function AthleteHistoryBaselineStatus() {
           <div style={{maxHeight:230,overflowY:'auto'}}>{(historyDetail.weeks||[]).map(w=><p key={w.week} style={{display:'flex',justifyContent:'space-between',margin:'5px 0'}}><span>{w.week}</span><strong>{(Number(w.total||0)/60).toFixed(1)} h</strong></p>)}</div>
           <small>This is a validated historical summary, not an individual activity feed or completed calendar sessions.</small>
         </details>}
-        {approval?.status==='approved'?<p role="status"><strong>Coach-validated starting limit: {approval.approvedWeeklyHours} hours/week.</strong> Approval does not mean a new plan has been published; check your calendar for existing sessions.</p>:approval?.status==='review_required'?<p role="status">Coach review is required before using this history to set a training limit.</p>:approval?.error?<p role="status">{approval.error}</p>:<p>Checking coach approval…</p>}
+        {approval?.status==='approved'?<p role="status"><strong>Coach-validated starting limit: {approval.approvedWeeklyHours} hours/week.</strong> This is an upper limit, not an automatic training prescription.
+          {approval.currentWeek&&<span style={{display:'block',marginTop:8}}>Current week: {approval.currentWeek.scheduledHours} hours scheduled across {approval.currentWeek.sessionCount} sessions; {approval.currentWeek.completedCount} completed. Stored week target: {approval.currentWeek.storedTargetHours??'not set'} hours.
+          {approval.currentWeek.requiresReplanning&&<strong style={{display:'block',marginTop:6}}>Your saved foundation week has not been reconciled with the coach-approved baseline. A reviewed plan update is needed; existing sessions have been preserved.</strong>}</span>}</p>:approval?.status==='review_required'?<p role="status">Coach review is required before using this history to set a training limit.</p>:approval?.error?<p role="status">{approval.error}</p>:<p>Checking coach approval…</p>}
       </>}
   </section>;
 }
