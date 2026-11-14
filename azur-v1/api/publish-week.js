@@ -2,7 +2,10 @@ import {createClient} from '@supabase/supabase-js';
 // Vercel server function. Never expose the service key to the browser.
 export default async function handler(req,res){
  res.setHeader('Cache-Control','no-store');
- if(req.method==='GET')return res.status(200).json({publishingEnabled:false,message:'Coach publishing remains disabled pending end-to-end verification'});
+ if(req.method==='GET'){
+  const enabled=process.env.AZUR_WEEK_PUBLISH_ENABLED==='true'&&Boolean(process.env.AZUR_PUBLISH_ALLOWED_ORIGIN&&process.env.SUPABASE_URL&&process.env.SUPABASE_ANON_KEY&&process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return res.status(200).json({publishingEnabled:enabled,message:enabled?'Protected coach publication available':'Coach publishing remains disabled pending end-to-end verification'});
+ }
  if(req.method!=='POST'){res.setHeader('Allow','GET, POST');return res.status(405).json({error:'Method not allowed'});}
  if(process.env.AZUR_WEEK_PUBLISH_ENABLED!=='true')return res.status(503).json({error:'Weekly publishing is disabled'});
  const origin=req.headers.origin;
