@@ -3329,6 +3329,11 @@ if (seasonWeekError) {
 }
 
 if (!seasonWeek) {
+  // A preview must not create season_week rows or mutate the calendar.
+  if (previewOnly) {
+    window.alert('This week has not been scheduled yet. A coach must set the weekly target before a plan can be previewed.');
+    return;
+  }
   const { data: previousWeek, error: previousWeekError } =
     await supabase
       .from('season_week')
@@ -4833,6 +4838,13 @@ if(approvedHistoryReady&&Number(seasonWeek.target_hours)<approvedRecentHours){
   return;
 }
 
+// Never publish an unreviewed foundation week for an athlete with validated
+// historical evidence. Explicit coach approval of capacity is not approval
+// of this specific week's prescription.
+if(approvedHistoryReady){
+  window.alert('Your history-approved training capacity is ready for review. This generated week must be approved by your coach before it can be published.');
+  return;
+}
 const sessionsToSave = generatedSessions.map(
   ({ azurWorkout, ...session }: any) => ({
     ...session,
@@ -4956,24 +4968,13 @@ const todaySession = weekSessions.find(
     session.status === 'edited',
 );
 
-const needsCurrentWeekPlan =
-  currentWeekPlannedSessions.length === 0;  
+// Loading the dashboard must never publish a training week. A week with only
+// completed sessions is not empty, and generation requires explicit review.
+const needsCurrentWeekPlan = calendarWeekSessions.length === 0;
 useEffect(() => {
-
-  if (!authReady || !isAuthenticated) {
-    return;
-  }
-void loadGarminConnection();
-  if (!needsCurrentWeekPlan) {
-    return;
-  }
-
-  generateCurrentWeekPlan();
-}, [
-  authReady,
-  isAuthenticated,
-  needsCurrentWeekPlan,
-]);
+  if (!authReady || !isAuthenticated) return;
+  void loadGarminConnection();
+}, [authReady, isAuthenticated]);
   const [showBaselineForm, setShowBaselineForm] =
   useState(false);
 const [planPreview, setPlanPreview] =
