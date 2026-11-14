@@ -21,3 +21,12 @@
 .mobile-bottom-nav.awd-navigation button{color:#9dbad0!important}
 .mobile-bottom-nav.awd-navigation button.active{background:rgba(18,130,187,.2)!important;color:#80d4ff!important;border-color:rgba(82,182,234,.35)!important}
 @media(max-width:700px){.azur-white-dashboard{border-radius:18px}.azur-white-dashboard .awd-card{border-radius:16px}}
+
+/* Historical VIPA evidence must remain legible in the light Data Sources layout on mobile. */
+.azur-history-panel{background:#102a41!important;color:#eaf5ff!important;border:1px solid #31536d!important;border-radius:20px!important;padding:22px!important;min-height:0!important;height:auto!important}
+.azur-history-panel h3,.azur-history-panel strong{color:#fff!important}
+.azur-history-panel p,.azur-history-panel small{color:#c5d8e7!important;opacity:1!important}
+.azur-history-panel .eyebrow{color:#84caff!important}
+.azur-history-panel details{margin:12px 0;padding:12px;border-radius:12px;background:#17374f;color:#eaf5ff!important}
+.azur-history-panel summary{color:#93d8ff!important;cursor:pointer;font-weight:650}
+.azur-history-panel details p,.azur-history-panel details span{color:#d3e4f0!important}
