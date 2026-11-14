@@ -3465,9 +3465,13 @@ if (!hasSufficientHistory && !hasConfirmedBaseline) {
       Number(activity.duration_sec ?? 0),
     0,
   );
-    const targetHours =
+    // Preview the approved capacity without silently changing an existing foundation week.
+// Publication requires a separate, reviewed reconciliation of existing sessions.
+const targetHours =
   approvedHistoryReady
-    ? Math.min(coachApprovedHistory!.approvedWeeklyHours,Math.max(0,Number(seasonWeek.target_hours??0)),8)
+    ? previewOnly
+      ? Math.min(coachApprovedHistory!.approvedWeeklyHours,approvedRecentHours)
+      : Math.min(coachApprovedHistory!.approvedWeeklyHours,Math.max(0,Number(seasonWeek.target_hours??0)))
     : Number(seasonWeek.target_hours ?? 8);
     
 const recentAverageHours =
@@ -4804,6 +4808,28 @@ setPlanPreviewInsights({
     generatedSessions,
   );
 
+  return;
+}
+
+// Existing active sessions (including completed workouts) must never be duplicated.
+// A coach-reviewed reconciliation is required for underfilled foundation weeks.
+const {data:existingActive,error:existingActiveError}=await supabase
+  .from('planned_session')
+  .select('id,status,locked')
+  .eq('athlete_id',athlete.id)
+  .eq('is_active_version',true)
+  .gte('planned_date',weekStart)
+  .lte('planned_date',toDateKey(new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+6)));
+if(existingActiveError){
+  console.error('Unable to verify existing calendar sessions',existingActiveError);
+  return;
+}
+if((existingActive?.length??0)>0){
+  window.alert('Existing training sessions are preserved. Preview the coach-approved training capacity first; replacing an underfilled week requires coach review.');
+  return;
+}
+if(approvedHistoryReady&&Number(seasonWeek.target_hours)<approvedRecentHours){
+  window.alert('The saved week target is below the approved historical capacity. A reviewed weekly target update is required before publishing.');
   return;
 }
 
