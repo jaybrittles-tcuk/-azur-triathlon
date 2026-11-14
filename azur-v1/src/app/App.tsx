@@ -3422,26 +3422,21 @@ if (baselineError) {
 // A validated historical import is not a completed_activity feed. Use it only
 // when the assigned coach has approved the starting capacity and safety checks.
 const {data:{session:historySession}}=await supabase.auth.getSession();
-let coachApprovedHistory: {approvedWeeklyHours:number;historyActivities:number}|null=null;
+let coachApprovedHistory: {approvedWeeklyHours:number;historyActivities:number;historyMedianHours:number;historyRecentWeeks:number}|null=null;
 if(historySession?.access_token){
   try{
     const response=await fetch('/api/athlete/history-approval',{headers:{Authorization:'Bearer '+historySession.access_token}});
     if(response.ok){
       const review=await response.json();
       if(review.status==='approved'&&Number(review.approvedWeeklyHours)>0&&Number(review.historyActivities)>=12){
-        coachApprovedHistory={approvedWeeklyHours:Number(review.approvedWeeklyHours),historyActivities:Number(review.historyActivities)};
+        coachApprovedHistory={approvedWeeklyHours:Number(review.approvedWeeklyHours),historyActivities:Number(review.historyActivities),historyMedianHours:Number(review.historyMedianHours),historyRecentWeeks:Number(review.historyRecentWeeks)};
       }
     }
   }catch{ /* Keep existing conservative safeguards when approval cannot be verified. */ }
 }
-const {data:historyStats,error:historyStatsError}=coachApprovedHistory
-  ?await supabase.from('athlete_history_robust_review')
-    .select('validation_status,recent_median_hours,recent_mean_hours,recent_weeks,three_sport_weeks')
-    .eq('owner_user_id',user.id).maybeSingle()
-  :{data:null,error:null};
-const approvedHistoryReady=!!(coachApprovedHistory&&!historyStatsError&&historyStats?.validation_status==='validated'&&Number(historyStats.recent_weeks)>=4);
+const approvedHistoryReady=!!(coachApprovedHistory&&coachApprovedHistory.historyRecentWeeks>=4&&coachApprovedHistory.historyMedianHours>0);
 const approvedRecentHours=approvedHistoryReady
-  ?Math.min(coachApprovedHistory!.approvedWeeklyHours,Number(historyStats!.recent_median_hours)||0)
+  ?Math.min(coachApprovedHistory!.approvedWeeklyHours,coachApprovedHistory!.historyMedianHours)
   :0;
 const hasConfirmedBaseline =
   savedBaseline !== null || approvedHistoryReady;
@@ -3471,8 +3466,9 @@ if (!hasSufficientHistory && !hasConfirmedBaseline) {
     0,
   );
     const targetHours =
-  approvedHistoryReady ? Math.min(coachApprovedHistory!.approvedWeeklyHours,Number(seasonWeek.target_hours??coachApprovedHistory!.approvedWeeklyHours)) :
-  Number(seasonWeek.target_hours ?? 8);
+  approvedHistoryReady
+    ? Math.min(coachApprovedHistory!.approvedWeeklyHours,Math.max(0,Number(seasonWeek.target_hours??0)),8)
+    : Number(seasonWeek.target_hours ?? 8);
     
 const recentAverageHours =
   recentTrainingSeconds /
