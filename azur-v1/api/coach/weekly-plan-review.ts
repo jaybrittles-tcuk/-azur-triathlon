@@ -1,8 +1,8 @@
 // Read-only coach planning review. This endpoint never publishes or modifies sessions.
 export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
- const url=process.env.VITE_SUPABASE_URL,service=process.env.SUPABASE_SERVICE_ROLE_KEY,key=process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
- if(!url||!service||!key)return res.status(503).json({error:'Planning review unavailable'});
+ const url=process.env.SUPABASE_URL,service=process.env.SUPABASE_SERVICE_ROLE_KEY,key=process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+ if(!url||!service||!key||!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url))return res.status(503).json({error:'Staging coach review requires a configured server-side Supabase connection'});
  const token=(req.headers.authorization||'').replace(/^Bearer\s+/i,'');
  if(!token)return res.status(401).json({error:'Sign in required'});
  const auth=await fetch(url+'/auth/v1/user',{headers:{apikey:key,Authorization:'Bearer '+token}});
