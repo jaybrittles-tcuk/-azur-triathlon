@@ -20,6 +20,8 @@ export default function CoachWeeklyReview(){
  const [busy,setBusy]=useState('');
  const [note,setNote]=useState('');
  const [reload,setReload]=useState(0);
+ const [publishingEnabled,setPublishingEnabled]=useState(false);
+ useEffect(()=>{let live=true;fetch('/api/publish-week',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(x=>{if(live)setPublishingEnabled(x?.publishingEnabled===true)}).catch(()=>{if(live)setPublishingEnabled(false)});return()=>{live=false}},[reload]);
  useEffect(()=>{let live=true;(async()=>{
   setLoading(true);setError('');
   try{
@@ -51,6 +53,7 @@ export default function CoachWeeklyReview(){
   try{
    const {data:{session}}=await supabase.auth.getSession();
    if(!session?.access_token)throw new Error('Coach sign-in required');
+   if(!publishingEnabled)throw new Error('Publishing is disabled pending end-to-end verification');
    if(readiness(row).length)throw new Error(readiness(row).join('; '));
    const response=await fetch('/api/publish-week',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token},body:JSON.stringify({draftId:row.id,mode})});
    const payload=await response.json();
@@ -88,7 +91,7 @@ export default function CoachWeeklyReview(){
     <details><summary>Inspect proposed sessions</summary>
     {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item?.session?.prescription??item?.prescription??{},null,2)}</pre></div>):<p>Draft contains no sessions.</p>}
     </details></div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
-    {row.decision==='approved'&&<><button type="button" disabled={Boolean(busy)||readiness(row).length>0} onClick={()=>void publish(row,'full')}>Publish complete week</button><span title="Additive publication requires separate database verification">Additive publication pending safety verification</span></>}
+    {row.decision==='approved'&&<><button type="button" disabled={!publishingEnabled||Boolean(busy)||readiness(row).length>0} title={!publishingEnabled?'Publishing disabled until the coach-to-calendar workflow is verified':undefined} onClick={()=>void publish(row,'full')}>Publish complete week</button>{!publishingEnabled&&<small>Publishing locked until final staging verification.</small>}<span title="Additive publication requires separate database verification">Additive publication pending safety verification</span></>}
     {row.decision==='approved'&&<button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Revoke approval</button>}</div></article>)}
   </>}
  </section>;
