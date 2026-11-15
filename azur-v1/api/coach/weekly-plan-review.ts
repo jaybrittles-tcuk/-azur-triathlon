@@ -1,3 +1,4 @@
+import { reconcileWeeklyDraft } from '../../src/lib/calculations/weeklyDraftReconciliation.ts';
 // Read-only coach planning review. This endpoint never publishes or modifies sessions.
 export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
@@ -58,9 +59,16 @@ export default async function handler(req:any,res:any){
     x.prescription&&typeof x.prescription==='object'&&!Array.isArray(x.prescription);
   });
   const sportDates=draftSessions.map((item:any)=>String(item?.date)+'/'+String(item?.session?.sport));
+  const reconciliation=latestDraft?reconcileWeeklyDraft({
+   weekStart,existing:sessions.map((s:any)=>({...s,is_active_version:true})),
+   proposed:draftSessions.map((item:any)=>({date:item?.date,session:{id:String(item?.session?.id||''),sport:item?.session?.sport,durationMin:item?.session?.durationMin}})),
+   approvedCapacityMinutes:approved?Math.round(Number(a.approved_weekly_hours)*60):0,
+   weekTargetMinutes:w?Math.round(Number(w.target_hours)*60):0
+  }):null;
   const preflightBlockers=[
    ...blockers,
    ...(!latestDraft?['No saved draft for this week']:[]),
+   ...(reconciliation?.blockers||[]),
    ...(latestDraft&&!draftShapeValid?['Draft contains incomplete or invalid workouts']:[]),
    ...(new Set(sportDates).size!==sportDates.length?['Duplicate sport and date in draft']:[]),
    ...(latestDraft&&(!latestDecision||latestDecision.decision!=='approved'||latestDecision.coach_user_id!==user.id)?['Latest draft lacks approval by this assigned coach']:[]),
@@ -69,6 +77,6 @@ export default async function handler(req:any,res:any){
   ];
   const preflight={draftId:latestDraft?.id||null,revision:latestDraft?.revision||null,proposedSessions:draftSessions.length,proposedHours:Math.round(proposedMinutes/6)/10,readyForFullPublication:preflightBlockers.length===0,blockers:[...new Set(preflightBlockers)],readOnly:true};
   const ceiling=approved?Number(a.approved_weekly_hours):null;
-  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
+  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
  }catch{return res.status(503).json({error:'Unable to load planning review'});}
 }
