@@ -18,7 +18,7 @@ function stepLabel(step:WorkoutStep):string{
  return work+' — '+(step.target||step.purpose||'Coach-defined effort')+rest;
 }
 export default function CoachVipaPreview({athleteId,weekStart}:{athleteId:string;weekStart:string}){
- const [data,setData]=useState<Preview|null>(null);const [thresholds,setThresholds]=useState<Array<{sport:string;status:string;display:string}>>([]);const [verifiedReferences,setVerifiedReferences]=useState<Array<{sport:string;status:string;summary:string;targets:string[]}>>([]);const [loading,setLoading]=useState(false);const [error,setError]=useState('');
+ const [data,setData]=useState<Preview|null>(null);const [thresholds,setThresholds]=useState<Array<{sport:string;status:string;display:string}>>([]);const [verifiedReferences,setVerifiedReferences]=useState<Array<{sport:string;status:string;summary:string;targets:string[]}>>([]);const [personalisedSteps,setPersonalisedSteps]=useState<Array<{existingId:string;steps:Array<{calculated:string|null;status:string}>}>>([]);const [loading,setLoading]=useState(false);const [error,setError]=useState('');
  async function inspect(){
   setLoading(true);setError('');
   try{
@@ -27,7 +27,7 @@ export default function CoachVipaPreview({athleteId,weekStart}:{athleteId:string
    const r=await fetch('/api/coach/weekly-plan-review?athleteId='+encodeURIComponent(athleteId)+'&weekStart='+encodeURIComponent(weekStart),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
    const payload=await r.json();
    if(!r.ok)throw Error((payload.error||'Preview unavailable')+(payload.diagnosticCode?' · '+payload.diagnosticCode:''));
-   setData(payload.vipaPreview||null);setThresholds(payload.thresholdReadiness?.statuses||[]);setVerifiedReferences(payload.verifiedTargetReferences||[]);
+   setData(payload.vipaPreview||null);setThresholds(payload.thresholdReadiness?.statuses||[]);setVerifiedReferences(payload.verifiedTargetReferences||[]);setPersonalisedSteps(payload.personalisedStepPreviews||[]);
   }catch(e){setError(e instanceof Error?e.message:'Preview unavailable');}finally{setLoading(false);}
  }
  return <details><summary>VIPA structured replacement preview (read-only)</summary>
@@ -39,7 +39,7 @@ export default function CoachVipaPreview({athleteId,weekStart}:{athleteId:string
    {data.weeklyAssessment&&<div><p><strong>Volume decision:</strong> {data.weeklyAssessment.volumeExplanation}</p><p><strong>Recovery decision:</strong> {data.weeklyAssessment.recoveryExplanation}</p></div>}
    {data.blockers.map((x,i)=><p key={'b'+i}>Blocked: {x}</p>)}
    {data.gaps.map((x,i)=><p key={'g'+i}>Needs review: {x}</p>)}
-   {data.proposed.map((p,i)=><details key={p.existingId+i} className="coach-feedback-notes" style={{padding:'12px',marginBottom:'8px',borderRadius:'12px'}}><summary style={{cursor:'pointer'}}><strong>{new Date(p.date+'T12:00:00Z').toLocaleDateString('en-GB',{weekday:'short'})} · {p.replacement.title}</strong><span style={{display:'block',opacity:0.8,fontSize:'0.9em'}}>{p.replacement.sport} · {p.existingMinutes} → {p.replacement.durationMin} min</span></summary><p><strong>Why today matters</strong></p><p>{p.whyTodayMatters}</p><p><strong>Session structure</strong></p><ol>{readableSteps(p.replacement.prescription).map((step,j)=><li key={j}>{stepLabel(step)}</li>)}</ol>{readableSteps(p.replacement.prescription).length===0&&<p>Structured prescription requires coach inspection.</p>}</details>)}
+   {data.proposed.map((p,i)=><details key={p.existingId+i} className="coach-feedback-notes" style={{padding:'12px',marginBottom:'8px',borderRadius:'12px'}}><summary style={{cursor:'pointer'}}><strong>{new Date(p.date+'T12:00:00Z').toLocaleDateString('en-GB',{weekday:'short'})} · {p.replacement.title}</strong><span style={{display:'block',opacity:0.8,fontSize:'0.9em'}}>{p.replacement.sport} · {p.existingMinutes} → {p.replacement.durationMin} min</span></summary><p><strong>Why today matters</strong></p><p>{p.whyTodayMatters}</p><p><strong>Session structure</strong></p><ol>{readableSteps(p.replacement.prescription).map((step,j)=><li key={j}>{stepLabel(step)}{personalisedSteps.find(x=>x.existingId===p.existingId)?.steps[j]?.calculated&&<span style={{display:'block'}}><strong>Illustrative personalised target:</strong> {personalisedSteps.find(x=>x.existingId===p.existingId)?.steps[j]?.calculated}</span>}</li>)}</ol>{readableSteps(p.replacement.prescription).length===0&&<p>Structured prescription requires coach inspection.</p>}</details>)}
    <small>No workouts were changed. This preview is not a coach approval or publication.</small>
   </div>}
  </details>;
