@@ -39,8 +39,12 @@ export default async function handler(req,res){
   const sunday=new Date(draft.week_start+'T12:00:00Z');sunday.setUTCDate(sunday.getUTCDate()+6);
   const {data:existing,error:existingError}=await admin.from('planned_session').select('id,status,locked').eq('athlete_id',draft.athlete_id).eq('is_active_version',true).gte('planned_date',draft.week_start).lte('planned_date',sunday.toISOString().slice(0,10));
   if(existingError)return res.status(503).json({error:'Unable to verify existing sessions'});
+  const {data:seasonWeeks,error:weekError}=await admin.from('season_week').select('id,locked,target_hours').eq('athlete_id',draft.athlete_id).eq('week_start',draft.week_start).limit(2);
+  if(weekError||seasonWeeks?.length!==1||seasonWeeks[0].locked)return res.status(409).json({error:'Exactly one unlocked season week is required'});
   if(existing?.some(s=>s.locked||s.status!=='planned'))return res.status(409).json({error:'Completed, locked or edited sessions require separate reconciliation'});
   if(mode==='full'&&existing?.length)return res.status(409).json({error:'Full publication blocked: existing sessions must be reconciled, not overwritten'});
+  const {data:source,error:sourceError}=await admin.from('weekly_plan_draft').select('proposal_fingerprint').eq('id',draftId).single();
+  if(sourceError||!source||!/^[a-f0-9]{64}$/.test(source.proposal_fingerprint))return res.status(409).json({error:'Verified proposal fingerprint required'});
   const {data,error}=await admin.rpc('publish_verified_weekly_draft',{p_draft_id:draftId});
   if(error)return res.status(409).json({error:'Publication denied by database validation'});
   return res.status(200).json({result:data});
