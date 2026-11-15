@@ -25,7 +25,7 @@ function assessWeek(proposed:readonly VipaProposal[],active:readonly ExistingWee
  const covered=new Set(proposed.map(p=>p.existingId));
  const missing=active.filter(s=>!covered.has(s.id));
  if(missing.length)gaps.push(missing.length+' existing sessions do not have structured replacements');
- if(proposed.length>0&&sports.size<3)gaps.push('Full swim, bike and run coverage has not been confirmed');
+ if(new Set(active.map(s=>s.sport)).size===3&&sports.size<3)gaps.push('Full swim, bike and run coverage has not been confirmed');
  const quality=proposed.filter(p=>['threshold','strength_endurance','race_specific'].includes(p.replacement.family));
  if(quality.length>2)gaps.push('More than two quality-focused sessions: review intensity and recovery spacing');
  const dates=quality.map(p=>p.date).sort();
