@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { selectCoachSession } from './sessionSelection.ts';
 
 const base={sport:'bike',family:'threshold',phase:'build',maxMinutes:70,maxLevel:2};
-const entry=(id, overrides={})=>({id,sport:'bike',family:'threshold',title:id,durationMin:60,level:2,phases:['build'],prescription:{steps:[]},approved:true,...overrides});
+const entry=(id, overrides={})=>({id,sport:'bike',family:'threshold',title:id,durationMin:60,level:2,phases:['build'],prescription:{steps:[{duration_min:10,target:'threshold'}]},approved:true,...overrides});
 
 test('selects approved session fitting time, phase and development level',()=>{
  const r=selectCoachSession([entry('easy',{level:1}),entry('right'),entry('too-long',{durationMin:90})],base);
