@@ -8,13 +8,12 @@ export default function CoachThresholdValidation({athleteId,onSaved}:{athleteId:
  const [values,setValues]=useState<Values>(empty);const [approved,setApproved]=useState<Values|null>(null);
  const [validatedAt,setValidatedAt]=useState('');const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');
  useEffect(()=>{let active=true;(async()=>{
-  const [profile,onboarding,validation]=await Promise.all([
+  const [profile,validation]=await Promise.all([
    supabase.from('athlete_profile').select('user_id,ftp_w,swim_threshold_sec_per_100m,run_threshold_sec_per_km').eq('id',athleteId).maybeSingle(),
-   Promise.resolve({data:null,error:null}),
    supabase.from('coach_threshold_validation').select('ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,validated_at').eq('athlete_id',athleteId).maybeSingle()
   ]);
   if(!active)return;
-  if(profile.error||onboarding.error||validation.error){setMessage('Unable to read athlete thresholds: '+(profile.error?.message||onboarding.error?.message||validation.error?.message));return;}
+  if(profile.error||validation.error){setMessage('Unable to read athlete thresholds: '+(profile.error?.message||validation.error?.message));return;}
   const p=profile.data,a=validation.data;
   const onboardingResult=p?.user_id?await supabase.from('athlete_onboarding').select('ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km').eq('user_id',p.user_id).maybeSingle():null;
   if(!active)return;
@@ -38,13 +37,13 @@ export default function CoachThresholdValidation({athleteId,onSaved}:{athleteId:
    if(error)throw Error(error.message);
    const {data:verified,error:readError}=await supabase.from('coach_threshold_validation').select('ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,validated_at').eq('athlete_id',athleteId).eq('coach_user_id',user.id).single();
    if(readError||!verified)throw Error('Approval saved but could not be re-verified');
-   setApproved({ftp_watts:String(verified.ftp_watts??''),swim_css_seconds_per_100m:String(verified.swim_css_seconds_per_100m??''),run_threshold_seconds_per_km:String(verified.run_threshold_seconds_per_km??'')});
+   setApproved({ftp_watts:String(verified.ftp_watts??''),swim_css_seconds_per_100m:displayPace(verified.swim_css_seconds_per_100m),run_threshold_seconds_per_km:displayPace(verified.run_threshold_seconds_per_km)});
    setValidatedAt(verified.validated_at);setMessage('Coach validation saved and verified. Refresh the VIPA preview to see target references.');onSaved();
   }catch(e){setMessage(e instanceof Error?e.message:'Could not validate thresholds');}finally{setBusy(false);}
  }
  const changed=JSON.stringify(values)!==JSON.stringify(approved);
  return <details><summary>Coach threshold validation</summary><div style={{display:'grid',gap:10,padding:12}}>
-  <p>Review athlete-reported values before approval. Blank values remain unapproved. This does not publish or modify workouts.</p>
+  <p style={{fontSize:'0.9em',opacity:0.8}}>Review or correct the values. Approval updates training references only; it never publishes workouts.</p>
   {fields.map(([key,label,min,max])=><label key={key}>{key==='ftp_watts'?label:key==='swim_css_seconds_per_100m'?'Swim CSS (mm:ss / 100 m)':'Run threshold (mm:ss / km)'}<input style={{display:'block',width:'100%',maxWidth:260}} inputMode={key==='ftp_watts'?'numeric':'decimal'} type={key==='ftp_watts'?'number':'text'} placeholder={key==='ftp_watts'?'e.g. 310':key==='swim_css_seconds_per_100m'?'e.g. 1:30':'e.g. 4:00'} min={key==='ftp_watts'?min:undefined} max={key==='ftp_watts'?max:undefined} step={key==='ftp_watts'?'1':undefined} value={values[key]} onChange={e=>setValues(v=>({...v,[key]:e.target.value}))}/></label>)}
   {validatedAt&&<p>Last coach validation: {new Date(validatedAt).toLocaleString('en-GB')}</p>}
   <button type="button" disabled={busy||(!changed&&!!validatedAt)} onClick={()=>void approve()}>{busy?'Saving…':validatedAt?'Review and revalidate thresholds':'Approve entered thresholds'}</button>
