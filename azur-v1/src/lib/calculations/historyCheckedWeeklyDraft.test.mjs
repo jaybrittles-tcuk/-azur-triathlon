@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {draftHistoryCheckedWeek} from './historyCheckedWeeklyDraft.ts';
+const library=[{id:'approved-swim',sport:'swim',family:'technique',title:'Form swim',durationMin:45,level:1,phases:['base'],approved:true,prescription:{warmup:[{duration_min:10}],main_set:[{duration_min:25}],cooldown:[{duration_min:10}]}}];
+const history={validationStatus:'validated',recentWeeks:6,recentMedianMinutes:360,approvedWeeklyMinutes:480,recoveryReviewed:true,spikeVerified:true,fatigueFlag:false,injuryFlag:false};
+const base={weekStart:'2026-11-16',slots:[{day:0,sport:'swim',family:'technique',maxMinutes:45,maxLevel:1}],library,phase:'base',targetWeekMinutes:45,existingActiveSessions:0,athleteProfileReady:true,history};
+test('validated history permits a review-only approved session draft',()=>{const r=draftHistoryCheckedWeek(base);assert.equal(r.status,'ready_for_coach_review');assert.equal(r.sessions.length,1)});
+test('unvalidated or insufficient history blocks draft',()=>{for(const h of [{...history,validationStatus:'pending'},{...history,recentWeeks:3}]){const r=draftHistoryCheckedWeek({...base,history:h});assert.equal(r.status,'blocked');assert.equal(r.sessions.length,0)}});
+test('injury, fatigue and unchecked recovery block draft',()=>{for(const h of [{...history,injuryFlag:true},{...history,fatigueFlag:true},{...history,recoveryReviewed:false}])assert.equal(draftHistoryCheckedWeek({...base,history:h}).status,'blocked')});
+test('approved capacity and median progression both constrain target',()=>{assert.equal(draftHistoryCheckedWeek({...base,targetWeekMinutes:500}).status,'blocked');assert.equal(draftHistoryCheckedWeek({...base,targetWeekMinutes:400}).status,'blocked')});
+test('existing calendar remains a blocked draft even with validated history',()=>assert.equal(draftHistoryCheckedWeek({...base,existingActiveSessions:1}).status,'blocked'));
