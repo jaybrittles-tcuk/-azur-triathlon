@@ -110,46 +110,30 @@ export default function AthleteOnboardingDraft(){
   if(scheduleSaveError){setSaving(false);setMessage('Could not save your training preferences: '+scheduleSaveError.message);return;}
 
   if(nextStep===5){
-   const {data,error}=await supabase.rpc('complete_athlete_onboarding_and_plan',{
-    p_inputs:{
-     display_name:displayName.trim(),race_distance:race,race_date:raceDate||null,
-     experience,weekly_hours:Number(hours),training_days:trainingDays.map(day=>weekdays.indexOf(day)),
-     recent_weekly_hours:recentHours===''?null:Number(recentHours),
-     training_background:background,training_consistency:consistency,
-     current_training_concern:concern,can_swim_200m:canSwim,
-     ftp_watts:ftp===''?null:Number(ftp),
-     swim_css_seconds_per_100m:parsePace(css),
-     run_threshold_seconds_per_km:parsePace(runThreshold),device
-    }
-   });
+   // Beta safety: persist the athlete's inputs without invoking the legacy
+   // foundation generator. Coach review is required before calendar publication.
+   const {error:profileError}=await supabase.from('athlete_profile')
+     .select('id').eq('user_id',userId).limit(2);
+   if(profileError){setSaving(false);setMessage('Unable to verify your athlete profile: '+profileError.message);return;}
+   const {error:saveError}=await supabase.from('athlete_onboarding').upsert({
+    user_id:userId,race_distance:race,race_date:raceDate||null,
+    experience,weekly_hours:Number(hours),training_days:trainingDays.map(day=>weekdays.indexOf(day)),
+    training_background:background,training_consistency:consistency,
+    current_training_concern:concern,can_swim_200m:canSwim,
+    recent_weekly_hours:recentHours===''?null:Number(recentHours),
+    ftp_watts:ftp===''?null:Number(ftp),swim_css_seconds_per_100m:parsePace(css),
+    run_threshold_seconds_per_km:parsePace(runThreshold),device,onboarding_step:5,
+    updated_at:new Date().toISOString()
+   },{onConflict:'user_id'});
    setSaving(false);
-   if(error){setMessage('Unable to finish setup and create your training plan: '+error.message);return;}
-   if(data?.status==='ready'&&Number.isInteger(data.sessions)&&data.sessions>=1){
-    // The planning RPC currently writes onboarding_step=3 even on success.
-    // Mark complete only after verified sessions exist. Coach review stays pending.
-    const {error:completionError}=await supabase.from('athlete_onboarding')
-      .update({onboarding_step:5,updated_at:new Date().toISOString()})
-      .eq('user_id',userId);
-    if(completionError){
-     setMessage('Your setup was processed, but we could not confirm completion. Please contact your coach: '+completionError.message);
-     return;
-    }
-   }
-   if(data?.status==='review_required'){
-    const reason=typeof data.reason==='string'?data.reason:'Your coach needs to validate your recent training before prescribing sessions.';
-    const {error:reviewSaveError}=await supabase.from('athlete_scheduling_preferences').upsert({
-     user_id:userId,preferences:{...schedulePrefs,coachReview:{reason,requestedAt:new Date().toISOString()}},updated_at:new Date().toISOString()
-    },{onConflict:'user_id'});
-    if(reviewSaveError){setMessage('Your coach review was requested, but its status could not be saved: '+reviewSaveError.message);return;}
-    setReviewReason(reason);setReady(true);setMessage('');return;
-   }
-   if(data?.status!=='ready'||!Number.isInteger(data.sessions)||data.sessions<1){
-    setMessage('Training setup could not be verified. Please contact your coach.');return;
-   }
-   await supabase.from('athlete_scheduling_preferences').upsert({user_id:userId,preferences:schedulePrefs,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-   setPlanSummary({sessions:data.sessions,total_minutes:data.total_minutes,calendar:Array.isArray(data.calendar)?data.calendar:[]});
-   setMessage(`Your training plan is ready: ${data.sessions} sessions.`);
-   setReady(true);
+   if(saveError){setMessage('Unable to save your setup: '+saveError.message);return;}
+   const reason='Your coach will review your training history and approve a safe starting load before any sessions are published.';
+   const {error:reviewError}=await supabase.from('athlete_scheduling_preferences').upsert({
+    user_id:userId,preferences:{...schedulePrefs,coachReview:{reason,requestedAt:new Date().toISOString()}},
+    updated_at:new Date().toISOString()
+   },{onConflict:'user_id'});
+   if(reviewError){setMessage('Your setup was saved, but the coach review request could not be recorded: '+reviewError.message);return;}
+   setReviewReason(reason);setReady(true);setMessage('');
    return;
   }
   const {error}=await supabase.from('athlete_onboarding').upsert({
