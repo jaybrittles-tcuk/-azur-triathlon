@@ -161,11 +161,12 @@ export default function AthleteOnboardingDraft(){
   <p className="azur-review-lead">Your information has been saved successfully. AZUR has paused training allocation until your coach confirms a safe starting point.</p>
   <button type="button" className="primary-button" style={{display:"block",width:"100%",margin:"18px 0",padding:"15px 16px",textAlign:"center"}} onClick={()=>{setReviewReason(null);setReady(false);setStep(0);setMessage("");window.scrollTo({top:0,behavior:"smooth"});}}>Review onboarding from the beginning</button>
   <p style={{fontSize:13,opacity:.8}}>Your saved answers will remain in place. You can update them as you move through each step.</p>
-  <div className="azur-review-stats">
+  <div className="azur-review-stats" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:10}}>
    <div><small>Race goal</small><strong>{race.toUpperCase()}</strong></div>
    <div><small>Available time</small><strong>{hours} hrs/week</strong></div>
    <div><small>Recent training</small><strong>{recentHours!==''?`${recentHours} hrs/week`:'To confirm'}</strong></div>
   </div>
+  {recentHours!==''&&Number(recentHours)>Number(hours)&&<p role="note" style={{border:'1px solid #3d7290',borderRadius:12,padding:12}}>You reported {recentHours} hours of recent training but currently have {hours} hours available. Your coach will review how to fit training into your available time rather than assume you can maintain the previous volume.</p>}
   <section className="azur-review-next">
    <h2>What happens next?</h2>
    <ol><li><strong>Your coach reviews your baseline.</strong><p>Recent completed volume, training consistency and any return-to-training considerations.</p></li><li><strong>Your starting load is approved.</strong><p>Your available hours are a scheduling ceiling, not a target AZUR will automatically prescribe.</p></li><li><strong>Your calendar becomes available.</strong><p>Sessions and personalised explanations will appear once a plan has been approved and published.</p></li></ol>
@@ -223,6 +224,7 @@ export default function AthleteOnboardingDraft(){
    <p role="note">Your available training days are saved with onboarding. Detailed preferences are saved separately but do not yet change your generated plan.</p>
    <label>Hours actually trained per week recently (optional)<input type="number" min={0} max={25} step="0.5" value={recentHours} onChange={e=>setRecentHours(e.target.value)} placeholder="Unknown"/></label>
    {recentHours!==''&&Number(recentHours)<hours&&<p role="note">You currently train {recentHours} hours per week and have {hours} hours available. AZUR will build gradually rather than immediately filling your available time.</p>}
+   <details style={{marginTop:18,padding:'14px 12px',border:'1px solid #31536d',borderRadius:14,background:'#102b40'}}><summary style={{fontWeight:700,cursor:'pointer',fontSize:15}}>Training background &amp; readiness <span style={{fontWeight:400,opacity:.75}}>· 4 quick questions</span></summary><div style={{paddingTop:14}}>
    <p>Your event experience and recent training history are separate. An experienced racer returning after a break may still need a conservative first two weeks.</p>
    <label>Current training background<select value={background} onChange={e=>{setBackground(e.target.value);setBackgroundTouched(true)}}><option value="" disabled>Choose your current training background</option><option value="novice">New to structured training</option><option value="regular">Training regularly</option><option value="established">Established endurance athlete</option></select></label>
    {experience==='experienced'&&background==='novice'&&<p role="note">You selected experienced competitor and new to structured training. That's fine if you have race experience but are restarting structured training.</p>}
@@ -230,6 +232,7 @@ export default function AthleteOnboardingDraft(){
    <label>Any current injury or training concern?<select value={concern} onChange={e=>setConcern(e.target.value)}><option value="none">No</option><option value="yes">Yes — coach review needed</option><option value="unsure">Unsure — coach review needed</option></select></label>
    <label>Can you comfortably swim 200m continuously?<select value={canSwim?'yes':'no'} onChange={e=>setCanSwim(e.target.value==='yes')}><option value="yes">Yes</option><option value="no">Not yet</option></select></label>
 
+   </div></details>
   </div>}
   {step===2&&<div>
    <h3>Connect your training</h3><p>Choose how you record sessions. You can connect supported services later.</p>
@@ -237,7 +240,8 @@ export default function AthleteOnboardingDraft(){
    <div className="azur-onboarding-options">{devices.map(d=><label key={d.id} className={device===d.id?'selected':''}>
     <input type="radio" name="azur-device" checked={device===d.id} onChange={()=>setDevice(d.id)}/>{d.label}
    </label>)}</div>
-   <p>{device==='garmin'?'Garmin connection will be offered after setup where available.':device==='none'?'You can record workouts, RPE and benchmarks manually.':'You can start with manual workout logging. Direct syncing for this device is not yet available.'}</p>
+   <p>{device==='garmin'?'You can authorise Garmin from Data Sources after submitting setup. Device selection alone does not connect or import activities.':device==='none'?'You can record workouts, RPE and benchmarks manually.':'You can start with manual workout logging. Direct syncing for this device is not yet available.'}</p>
+   <p style={{fontSize:13,opacity:.8}}>For an existing Intervals.icu connection, visit Data Sources after finishing setup to review the available history. Import and validation are separate from selecting a device here.</p>
   </div>}
   {step===3&&<div>   <h3>Your current fitness</h3>
    <p>Already know your FTP, swim CSS or run threshold? You can add them now. Otherwise, skip these optional fields — your coach will review your history first.</p>
