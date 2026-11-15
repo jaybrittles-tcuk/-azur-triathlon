@@ -26,3 +26,11 @@ test('rejects unsafe percentages and missing validated threshold',()=>{
  assert.equal(previewPersonalisedSteps(s,verified).steps[0].calculated,null);
  assert.equal(previewPersonalisedSteps({...s,prescription:{steps:[{target:'65% FTP'}]}},{...verified,values:{...verified.values,ftpWatts:null}}).steps[0].calculated,null);
 });
+
+test('exact CSS pace gets a validated reference, never a silent workout rewrite',()=>{
+ const s={...base,sport:'swim',prescription:{poolSegments:[{target:'CSS pace, controlled stroke count'}]}};
+ const r=previewPersonalisedSteps(s,verified);
+ assert.match(r.steps[0].calculated,/1:30\/100 m/);
+ assert.equal(previewPersonalisedSteps(s,{...verified,coachValidated:false}).steps[0].calculated,null);
+ assert.equal(s.prescription.poolSegments[0].target,'CSS pace, controlled stroke count');
+});
