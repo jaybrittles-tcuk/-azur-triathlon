@@ -7,16 +7,20 @@ type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string
 export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource}:Props){
  const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('intervals');
  const [approvedFtp,setApprovedFtp]=useState<number|null>(null);
+ const [approvedCss,setApprovedCss]=useState<number|null>(null);
  useEffect(()=>{let active=true;(async()=>{
-  setApprovedFtp(null);
+  setApprovedFtp(null);setApprovedCss(null);
   const {data:{user},error:authError}=await supabase.auth.getUser();
   if(authError||!user||!active)return;
   const {data:profile,error:profileError}=await supabase.from('athlete_profile').select('id').eq('user_id',user.id).maybeSingle();
   if(profileError||!profile||!active)return;
-  const {data:approvals,error:approvalError}=await supabase.from('coach_threshold_validation').select('ftp_watts,validated_at').eq('athlete_id',profile.id).limit(2);
+  const {data:approvals,error:approvalError}=await supabase.from('coach_threshold_validation').select('ftp_watts,swim_css_seconds_per_100m,validated_at').eq('athlete_id',profile.id).limit(2);
   if(approvalError||!active||!approvals||approvals.length!==1)return;
   const record=approvals[0];
-  if(Number.isInteger(record.ftp_watts)&&record.ftp_watts>=60&&record.ftp_watts<=600&&record.validated_at)setApprovedFtp(record.ftp_watts);
+  if(record.validated_at){
+   if(Number.isInteger(record.ftp_watts)&&record.ftp_watts>=60&&record.ftp_watts<=600)setApprovedFtp(record.ftp_watts);
+   if(Number.isInteger(record.swim_css_seconds_per_100m)&&record.swim_css_seconds_per_100m>=45&&record.swim_css_seconds_per_100m<=300)setApprovedCss(record.swim_css_seconds_per_100m);
+  }
  })();return()=>{active=false}},[]);
  const source=prescription?.azurWorkout as {steps?:unknown}|undefined;
  const intervals=normalizeWorkoutIntervals(source?.steps);
@@ -42,12 +46,13 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
  const hasDistancePrescription=intervals.some(x=>x.distanceM!==null);
  const primaryTarget=middle.find(x=>x.kind==='work'&&x.target)?.target;
  const primaryEffort=primaryTarget?describeTarget(primaryTarget):'Follow the coach-prescribed effort';
+ const cssPace=approvedCss!==null?Math.floor(approvedCss/60)+':'+String(approvedCss%60).padStart(2,'0'):null;
  const validatedPower=primaryTarget?.metric==='ftp_percent'&&approvedFtp!==null?Math.round(approvedFtp*primaryTarget.low/100)+'–'+Math.round(approvedFtp*primaryTarget.high/100)+' W':null;
  const summary=prescribedDistance!==null?`${prescribedDistance} m prescribed`:hasDistancePrescription?'Distance-based intervals':`${plannedMinutes} min planned`;
  middle.forEach(x=>{const label=`${x.kind==='work'?'Work':'Recovery'}: ${describeBlock(x)}`;const prev=grouped[grouped.length-1];if(prev?.label===label)prev.count++;else grouped.push({count:1,label});});
  return <section className="azur-premium-workout-tabs">
   <div className="azur-workout-quick-summary" style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:12,padding:"4px 2px 12px"}}><strong style={{fontSize:"1.05rem"}}>Your session</strong><span style={{color:"#a9bed0",fontSize:".88rem"}}>{summary}</span></div>
-  <div className="azur-workout-facts" style={{marginBottom:12}}><div><small>Today's target</small><strong>{primaryEffort}{validatedPower?' · '+validatedPower:''}</strong></div><div><small>Planned</small><strong>{plannedMinutes} min</strong></div></div>
+  <div className="azur-workout-facts" style={{marginBottom:12}}><div><small>Today's target</small><strong>{primaryEffort}{validatedPower?' · '+validatedPower:''}{primaryTarget?.metric==='swim_pace_sec_per_100m'&&cssPace?' · Coach CSS '+cssPace+'/100m':''}</strong></div><div><small>Planned</small><strong>{plannedMinutes} min</strong></div></div>
   <div className="azur-workout-tab-nav" role="tablist" aria-label="Workout information">
    {(['overview','intervals','notes'] as const).map(t=><button type="button" key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t==='intervals'?'Workout':t==='notes'?'Coaching':'Overview'}</button>)}
   </div>
@@ -67,7 +72,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {distanceBased&&<p className="azur-workout-footnote">Distance-based workout · Follow the prescribed repetitions and recovery. No estimated time-based intensity chart is shown.</p>}
    {intervals.length ? <div className="azur-workout-compact-prescription" style={{padding:'12px 2px',lineHeight:1.55}}>
     <h4 style={{margin:'0 0 10px'}}>Your workout · {intervals.length} blocks</h4>
-    <WorkoutTargetDetails prescription={prescription} ftpWatts={approvedFtp} coachValidated={approvedFtp!==null}/>
+    <WorkoutTargetDetails prescription={prescription} ftpWatts={approvedFtp} coachValidated={approvedFtp!==null} swimCssSecondsPer100m={approvedCss}/>
    </div> : <p>Review the coach-prescribed warm-up, main set and cool-down in the detailed instructions below.</p>}
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
