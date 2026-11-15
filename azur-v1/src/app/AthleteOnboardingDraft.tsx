@@ -241,6 +241,13 @@ export default function AthleteOnboardingDraft(){
     <input type="radio" name="azur-device" checked={device===d.id} onChange={()=>setDevice(d.id)}/>{d.label}
    </label>)}</div>
    <p>{device==='garmin'?'You can authorise Garmin from Data Sources after submitting setup. Device selection alone does not connect or import activities.':device==='none'?'You can record workouts, RPE and benchmarks manually.':'You can start with manual workout logging. Direct syncing for this device is not yet available.'}</p>
+   <aside aria-label="Zwift connection information" style={{border:'1px solid #315d7c',background:'#102b40',borderRadius:14,padding:'16px',marginTop:16}}>
+    <strong style={{display:'block',fontSize:16,color:'#e9f6ff'}}>Using Zwift?</strong>
+    <p style={{margin:'8px 0',lineHeight:1.6}}>To bring Zwift rides into AZUR, first connect Zwift to <strong>Intervals.icu</strong>, then connect Intervals.icu to AZUR in <strong>Data Sources</strong> after setup.</p>
+    <ol style={{margin:'8px 0 12px',paddingLeft:22,lineHeight:1.7}}><li>Create or sign in to your Intervals.icu account.</li><li>Connect Zwift in your Intervals.icu settings.</li><li>Finish AZUR setup, then authorise Intervals.icu from Data Sources.</li></ol>
+    <a href="https://intervals.icu/" target="_blank" rel="noopener noreferrer" style={{color:'#65c9fa',fontWeight:700}}>Get started with Intervals.icu ↗</a>
+    <p style={{margin:'12px 0 0',fontSize:13,opacity:.85}}>This is the current Zwift connection route, not a direct AZUR–Zwift integration. Connecting is optional and can wait until after onboarding. Activities appear only after a successful sync.</p>
+   </aside>
    <div role="note" style={{border:'1px solid #31536d',background:'#102b40',borderRadius:12,padding:12,marginTop:12}}><strong>No device or training history? That's fine.</strong><p style={{margin:'8px 0 0'}}>You can continue without connecting anything. Your coach will use your goals, recent training answers and available time to establish a suitable starting point. Missing history will never block setup.</p></div><p style={{fontSize:13,opacity:.8}}>If you use Intervals.icu, visit Data Sources after setup to connect it and review your history. Import and validation are separate from selecting a device.</p>
   </div>}
   {step===3&&<div>   <h3>Your current fitness</h3>
