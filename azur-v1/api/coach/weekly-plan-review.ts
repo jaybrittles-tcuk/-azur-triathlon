@@ -6,7 +6,7 @@ import {previewThresholdTargets} from '../../src/lib/calculations/verifiedWorkou
 import {previewPersonalisedSteps} from '../../src/lib/calculations/personalisedWorkoutSteps.ts';
 // Read-only coach planning review. This endpoint never publishes or modifies sessions.
 export default async function handler(req:any,res:any){
- if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
+ if(req.method!=='GET'&&req.method!=='POST')return res.status(405).json({error:'Method not allowed'});
  const url=process.env.SUPABASE_URL||process.env.VITE_SUPABASE_URL,key=process.env.SUPABASE_ANON_KEY||process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
  if(!url||!key||!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url))return res.status(503).json({error:'Staging coach review requires a configured server-side Supabase connection'});
  const token=(req.headers.authorization||'').replace(/^Bearer\s+/i,'');
@@ -59,6 +59,22 @@ export default async function handler(req:any,res:any){
    library:library.map((item:any)=>({id:item.workout_key,title:item.title,sport:item.sport,family:item.family,durationMin:Number(item.duration_min),level:Number(item.level),phases:item.phases,prescription:item.prescription,approved:item.approved})),
    baseline:{onboardingComplete:true,requestedWeeklyHours:Number(setup.weekly_hours),recentWeeklyHours:setup.recent_weekly_hours==null?null:Number(setup.recent_weekly_hours),trainingBackground:setup.training_background,trainingConsistency:setup.training_consistency,trainingConcern:setup.current_training_concern||'unsure',canSwim200m:setup.can_swim_200m===true,coachApproved:approvalCurrent,approvedWeeklyHours:approvalCurrent?Number(questionnaireApproval.approved_weekly_hours):null}
   }):null;
+  if(req.method==='POST'){
+   if(req.body?.action!=='save_questionnaire_draft')return res.status(400).json({error:'Unsupported coach action'});
+   if(!approvalCurrent||questionnaireDraftPreview?.status!=='ready_for_coach_review')return res.status(409).json({error:'A current approved baseline and safe draft are required',reasons:questionnaireDraftPreview?.status==='blocked'?questionnaireDraftPreview.reasons:[]});
+   if(sessions.length||w?.locked)return res.status(409).json({error:'Existing sessions or a locked week prevent a new draft'});
+   const existingDrafts=await get('weekly_plan_draft?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id&limit=1');
+   if(existingDrafts.length)return res.status(409).json({error:'A saved draft already exists. Review it before creating another revision.'});
+   const proposed=questionnaireDraftPreview.sessions.map(item=>({date:item.date,reason:item.reason,session:{
+    id:item.session.id,sport:item.session.sport,title:item.session.title,durationMin:item.session.durationMin,
+    priority:1,sessionClass:'introductory',targets:{},prescription:item.session.prescription
+   }}));
+   const fingerprint='questionnaire:'+athleteId+':'+weekStart+':'+questionnaireApproval.reviewed_at;
+   const write=await fetch(url+'/rest/v1/weekly_plan_draft',{method:'POST',headers:{...headers,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({athlete_id:athleteId,week_start:weekStart,revision:1,phase:'base',sessions:proposed,proposal_fingerprint:fingerprint,created_by:user.id})});
+   if(!write.ok){console.error('[coach-weekly-review] draft insert failed',write.status);return res.status(409).json({error:'Draft could not be saved. No workouts were published.'});}
+   const saved=await write.json();
+   return res.status(201).json({draftId:saved[0]?.id||null,sessionCount:proposed.length,readOnly:true,published:false,message:'Introductory draft saved for explicit coach review. No workouts published.'});
+  }
   const scheduledMinutes=sessions.reduce((n:number,s:any)=>n+Number(s.duration_min||0),0);
   const blockers=[
    ...(!approved?[questionnaireComplete?'Questionnaire baseline available for coach assessment; approval and safe plan publication path not yet enabled':'Coach-validated history or completed questionnaire baseline and safety checks required']:[]),
