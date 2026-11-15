@@ -19,7 +19,7 @@ export default async function handler(req:any,res:any){
  const end=new Date(start);end.setUTCDate(end.getUTCDate()+6);
  // Use the verified coach's JWT and database RLS rather than a privileged service-role key.\n const headers={apikey:key,Authorization:'Bearer '+token};
  res.setHeader('Cache-Control','no-store');
- const get=async(path:string)=>{const r=await fetch(url+'/rest/v1/'+path,{headers});if(!r.ok)throw Error('Database review unavailable ('+r.status+')');return r.json()};
+ const get=async(path:string)=>{const r=await fetch(url+'/rest/v1/'+path,{headers});if(!r.ok){const resource=path.split('?')[0];console.error('[coach-weekly-review] database read failed',resource,r.status);throw Error('REVIEW_READ_'+resource.toUpperCase()+'_'+r.status)}return r.json()};
  try{
   const assignment=await get('coach_athlete_assignment?coach_user_id=eq.'+encodeURIComponent(user.id)+'&athlete_id=eq.'+athleteId+'&select=athlete_id&limit=2');
   if(assignment.length!==1)return res.status(403).json({error:'Coach assignment required'});
@@ -114,5 +114,5 @@ export default async function handler(req:any,res:any){
   });
   const ceiling=approved?Number(a.approved_weekly_hours):null;
   return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
- }catch{return res.status(503).json({error:'Unable to load planning review'});}
+ }catch(err){const code=err instanceof Error&&/^REVIEW_READ_[A-Z_]+_\d+$/.test(err.message)?err.message:'REVIEW_PROCESSING_ERROR';console.error('[coach-weekly-review] failed',code);return res.status(503).json({error:'Unable to load planning review',diagnosticCode:code});}
 }
