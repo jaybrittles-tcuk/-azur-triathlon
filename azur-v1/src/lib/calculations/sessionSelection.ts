@@ -26,6 +26,13 @@ export type SelectionResult =
   | { status: 'selected'; session: SessionEntry; explanation: string }
   | { status: 'unavailable'; reason: string };
 
+/** Reject empty or non-structured prescriptions before they enter an athlete draft. */
+export function hasStructuredPrescription(value:unknown):boolean {
+ if(!value||typeof value!=='object'||Array.isArray(value))return false;
+ const p=value as Record<string,unknown>;
+ return Object.values(p).some(v=>Array.isArray(v)&&v.length>0&&v.every(step=>step!==null&&typeof step==='object'&&!Array.isArray(step)));
+}
+
 export function selectCoachSession(library: readonly SessionEntry[], input: SelectionContext): SelectionResult {
   if (!Number.isFinite(input.maxMinutes) || input.maxMinutes <= 0) {
     return { status: 'unavailable', reason: 'Valid training availability required' };
@@ -38,7 +45,7 @@ export function selectCoachSession(library: readonly SessionEntry[], input: Sele
     session.durationMin <= input.maxMinutes &&
     session.level <= input.maxLevel &&
     !input.excludeIds?.includes(session.id) &&
-    session.prescription != null
+    hasStructuredPrescription(session.prescription)
   );
   if (!candidates.length) {
     return { status: 'unavailable', reason: 'No approved coach-designed session fits these constraints' };
