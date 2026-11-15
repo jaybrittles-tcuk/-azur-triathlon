@@ -112,9 +112,16 @@ export default function AthleteOnboardingDraft(){
   if(nextStep===5){
    // Beta safety: persist the athlete's inputs without invoking the legacy
    // foundation generator. Coach review is required before calendar publication.
-   const {error:profileError}=await supabase.from('athlete_profile')
+   const {data:profiles,error:profileError}=await supabase.from('athlete_profile')
      .select('id').eq('user_id',userId).limit(2);
-   if(profileError){setSaving(false);setMessage('Unable to verify your athlete profile: '+profileError.message);return;}
+   if(profileError||!profiles||profiles.length>1){setSaving(false);setMessage('Unable to verify your athlete profile. Please contact your coach.');return;}
+   if(profiles.length===0){
+    const {error:createError}=await supabase.from('athlete_profile').insert({user_id:userId,display_name:displayName.trim()});
+    if(createError){setSaving(false);setMessage('Unable to create your athlete profile: '+createError.message);return;}
+   }else{
+    const {error:nameError}=await supabase.from('athlete_profile').update({display_name:displayName.trim()}).eq('id',profiles[0].id).eq('user_id',userId);
+    if(nameError){setSaving(false);setMessage('Unable to update your athlete profile: '+nameError.message);return;}
+   }
    const {error:saveError}=await supabase.from('athlete_onboarding').upsert({
     user_id:userId,race_distance:race,race_date:raceDate||null,
     experience,weekly_hours:Number(hours),training_days:trainingDays.map(day=>weekdays.indexOf(day)),
