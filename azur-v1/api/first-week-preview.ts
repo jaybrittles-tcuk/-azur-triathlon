@@ -1,5 +1,6 @@
 import {draftApprovedTrainingWeek} from '../src/lib/calculations/weeklyDraftGenerator.ts';
 import {assessFirstWeekProfile} from '../src/lib/calculations/firstWeekProfileAssessment.ts';
+import {chooseIntroductoryDays} from '../src/lib/calculations/introductoryDaySelection.ts';
 
 /** Athlete-authenticated first-week preview. Never inserts drafts or publishes sessions.
  * No privileged credentials, coach impersonation or use of reported hours as verified history.
@@ -44,11 +45,13 @@ export default async function handler(req:any,res:any){
    read('season_week?athlete_id=eq.'+profile[0].id+'&week_start=eq.'+weekStart+'&select=id,locked&limit=2')
   ]);
   if(existing.length||weeks.some((w:any)=>w.locked))return res.status(200).json({status:'coach_review',reasons:['Existing or locked training week'],published:false});
+  const chosenDays=chooseIntroductoryDays(assessment.days);
+  if(!chosenDays)return res.status(200).json({status:'coach_review',reasons:['Three available training days are required'],published:false});
   const slots=[
    {sport:'swim',family:'technique',maxMinutes:45,maxLevel:1},
    {sport:'bike',family:'aerobic_endurance',maxMinutes:90,maxLevel:1},
    {sport:'run',family:'aerobic_endurance',maxMinutes:45,maxLevel:1}
-  ].map((s,i)=>({...s,day:assessment.days[i]??-1}));
+  ].map((s,i)=>({...s,day:chosenDays[i]}));
   const proposal=draftApprovedTrainingWeek({
    weekStart,phase:'base',slots:slots as any,
    library:library.map((x:any)=>({id:x.workout_key,title:x.title,sport:x.sport,family:x.family,durationMin:Number(x.duration_min),level:Number(x.level),phases:x.phases,prescription:x.prescription,approved:x.approved})),
