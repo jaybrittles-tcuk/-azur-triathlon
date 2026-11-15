@@ -34,7 +34,9 @@ function assessWeek(proposed:readonly VipaProposal[],active:readonly ExistingWee
   if(gap<2)gaps.push('Quality-focused sessions on consecutive days: confirm recovery is appropriate');
  }
  const delta=proposedMinutes-targetMinutes;
- return {qualitySessionCount:quality.length,missingReplacementCount:missing.length,proposedSportCount:sports.size,targetDeltaMinutes:delta,notes:gaps};
+ const volumeExplanation=delta===0?'Proposed duration matches the saved weekly target.':delta<0?`${Math.abs(delta)} minutes below target: approved library sessions were selected without adding unapproved filler. Coach should decide whether the difference is acceptable.`:`${delta} minutes above target: coach must review the overage before approval.`;
+ const recoveryExplanation=dates.some((d,i)=>i>0&&(Date.parse(d+'T12:00:00Z')-Date.parse(dates[i-1]+'T12:00:00Z'))/86400000<2)?'Quality-focused sessions fall on consecutive days. Review discipline-specific fatigue and recovery before approval.':'Quality-focused sessions are not on consecutive days.';
+ return {volumeExplanation,recoveryExplanation,qualitySessionCount:quality.length,missingReplacementCount:missing.length,proposedSportCount:sports.size,targetDeltaMinutes:delta,notes:gaps};
 }
 /** Read-only replacement preview. Does not alter or approve the athlete's calendar. */
 export function previewVipaReplacements(input:{
