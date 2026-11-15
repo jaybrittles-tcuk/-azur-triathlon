@@ -2,6 +2,7 @@ import AthleteSchedulePreferences from './AthleteSchedulePreferences';
 import { defaultSchedulingPreferences, validateSchedulingPreferences, type SchedulingPreferences, type Weekday } from '../domain/schedulingPreferences';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { assessFirstWeekProfile } from '../lib/calculations/firstWeekProfileAssessment';
 
 type Device = 'garmin'|'coros'|'polar'|'apple'|'other'|'none';
 type Race = 'sprint'|'olympic'|'70.3'|'ironman'|'other';
@@ -134,9 +135,25 @@ export default function AthleteOnboardingDraft(){
    },{onConflict:'user_id'});
    setSaving(false);
    if(saveError){setMessage('Unable to save your setup: '+saveError.message);return;}
-   const reason='Your coach will review your training history and approve a safe starting load before any sessions are published.';
+   // Evaluate the completed profile immediately. This is an advisory proposal,
+   // not verified training history, a coach approval or permission to publish.
+   const firstWeek=assessFirstWeekProfile({
+    onboardingComplete:true,availableHours:Number(hours),
+    recentReportedHours:recentHours===''?null:Number(recentHours),
+    background,consistency,concern,
+    trainingDays:trainingDays.map(day=>weekdays.indexOf(day)),
+    canSwim200m:canSwim
+   });
+   const reason=firstWeek.canPropose
+    ?'AZUR has assessed your profile and prepared a conservative starting-load recommendation for coach review. No workouts have been published yet.'
+    :'AZUR needs a coach to review your starting point: '+firstWeek.reasons.join('; ')+'.';
    const {error:reviewError}=await supabase.from('athlete_scheduling_preferences').upsert({
-    user_id:userId,preferences:{...schedulePrefs,coachReview:{reason,requestedAt:new Date().toISOString()}},
+    user_id:userId,preferences:{...schedulePrefs,coachReview:{
+     reason,requestedAt:new Date().toISOString(),
+     assessmentVersion:1,proposalReady:firstWeek.canPropose,
+     proposedHours:firstWeek.proposedHours,
+     blockers:firstWeek.reasons,automaticPublicationAuthorized:false
+    }},
     updated_at:new Date().toISOString()
    },{onConflict:'user_id'});
    if(reviewError){setMessage('Your setup was saved, but the coach review request could not be recorded: '+reviewError.message);return;}
