@@ -13,7 +13,7 @@ const devices: {id:Device;label:string}[]=[
  {id:'polar',label:'Polar / Wahoo'}, {id:'apple',label:'Apple Watch'},
  {id:'other',label:'Another device'}, {id:'none',label:'No training watch'},
 ];
-/** Athlete-owned setup. Finalisation invokes the staging atomic onboarding-and-plan RPC. */
+/** Athlete-owned setup. Completion saves inputs for coach review; it does not generate or publish a plan. */
 export default function AthleteOnboardingDraft(){
  const [step,setStep]=useState(0);
  const [device,setDevice]=useState<Device>('garmin');
@@ -199,12 +199,12 @@ export default function AthleteOnboardingDraft(){
  return <section className="azur-onboarding-draft" aria-label="AZUR beta onboarding preview">
   <div className="azur-onboarding-intro">
    <span className="eyebrow">PERSONALISED ATHLETE SETUP</span>
-   <h2>{['Your goal. Your journey.','Training that fits your life.','Understand your starting point.','Bring your training together.','Your next chapter starts here.'][step]}</h2>
-   <p>{['Tell us what you are working towards. Your plan begins with your goals, not a generic template.','Choose the days and routines that work in real life. We will respect your existing training and coach-approved limits.','Add the fitness information you know. You can leave benchmarks blank rather than guess.','Tell us how you record training. Connections and historical analysis are managed separately.','Review your information before your coach-approved training starts.'][step]}</p>
+   <h2>{['Your goal. Your journey.','Training that fits your life.','Bring your training together.','Understand your starting point.','Your next chapter starts here.'][step]}</h2>
+   <p>{['Tell us what you are working towards. We begin with your goals, not a generic template.','Choose the days and routines that work in real life. We will respect your existing training and coach-approved limits.','Tell us how you record training. Connections and historical analysis are managed separately.','Add only the fitness information you know. You can leave benchmarks blank rather than guess.','Review your information before your coach-approved training starts.'][step]}</p>
   </div>
   <div className="azur-onboarding-progress"><strong>YOUR AZUR JOURNEY</strong><span>Step {step+1} of 5</span></div>
   <div className="azur-onboarding-track" role="progressbar" aria-label="Onboarding progress" aria-valuemin={0} aria-valuemax={5} aria-valuenow={step+1}><span style={{width:`${(step+1)/5*100}%`}}/></div>
-  <ol className="azur-onboarding-milestones" aria-label="Setup stages">{['Goal','Lifestyle','Fitness','Devices','Review'].map((label,i)=><li key={label} aria-current={i===step?'step':undefined} className={i===step?'current':i<step?'completed':''}><span>{i<step?'✓':i+1}</span><small>{label}</small></li>)}</ol>
+  <ol className="azur-onboarding-milestones" aria-label="Setup stages">{['Goal','Lifestyle','Devices','Fitness','Review'].map((label,i)=><li key={label} aria-current={i===step?'step':undefined} className={i===step?'current':i<step?'completed':''}><span>{i<step?'✓':i+1}</span><small>{label}</small></li>)}</ol>
   {step===0&&<div>
    <h3>What are you training towards?</h3><p>Your goal sets the direction. Your current fitness and availability determine where we begin.</p>
    <label>Your name<input type="text" maxLength={90} required value={displayName} onChange={e=>setDisplayName(e.target.value)}/></label>
@@ -233,20 +233,20 @@ export default function AthleteOnboardingDraft(){
    <label>Can you comfortably swim 200m continuously?<select value={canSwim?'yes':'no'} onChange={e=>setCanSwim(e.target.value==='yes')}><option value="yes">Yes</option><option value="no">Not yet</option></select></label>
 
   </div>}
-  {step===2&&<div>   <h3>Your current fitness</h3>
-   <p>Enter recent reliable benchmarks to personalise training intensity. Unknown? Leave blank — AZUR will introduce appropriate testing when you're ready.</p>
-   <label>Bike FTP (watts)<input type="number" min={60} max={650} value={ftp} onChange={e=>setFtp(e.target.value)} placeholder="Unknown"/></label>
-   <div><strong>Swim CSS</strong><small> Optional · per 100m</small><div style={{display:'flex',alignItems:'center',gap:10,marginTop:8}}><label style={{flex:1,minWidth:0}}>Minutes<input type="number" inputMode="numeric" min={0} max={14} value={css.includes(':')?css.split(':')[0]:css} placeholder="min" onChange={e=>setCss(`${e.target.value}:${css.includes(':')?css.split(':')[1]:''}`)} /></label><span aria-hidden="true" style={{fontSize:24,fontWeight:700,alignSelf:'center'}}>:</span><label style={{flex:1,minWidth:0}}>Seconds<input type="number" inputMode="numeric" min={0} max={59} value={css.includes(':')?css.split(':')[1]:''} placeholder="sec" onChange={e=>setCss(`${css.includes(':')?css.split(':')[0]:css}:${e.target.value}`)} /></label></div></div>
-   <div><strong>Run threshold</strong><small> Optional · per km</small><div style={{display:'flex',alignItems:'center',gap:10,marginTop:8}}><label style={{flex:1,minWidth:0}}>Minutes<input type="number" inputMode="numeric" min={0} max={14} value={runThreshold.includes(':')?runThreshold.split(':')[0]:runThreshold} placeholder="min" onChange={e=>setRunThreshold(`${e.target.value}:${runThreshold.includes(':')?runThreshold.split(':')[1]:''}`)} /></label><span aria-hidden="true" style={{fontSize:24,fontWeight:700,alignSelf:'center'}}>:</span><label style={{flex:1,minWidth:0}}>Seconds<input type="number" inputMode="numeric" min={0} max={59} value={runThreshold.includes(':')?runThreshold.split(':')[1]:''} placeholder="sec" onChange={e=>setRunThreshold(`${runThreshold.includes(':')?runThreshold.split(':')[0]:runThreshold}:${e.target.value}`)} /></label></div></div>
-   <small>Leave unknown values blank — don't guess. AZUR will begin with appropriate endurance sessions and schedule benchmarks when you are ready.</small>
-  </div>}
-  {step===3&&<div>
+  {step===2&&<div>
    <h3>Connect your training</h3><p>Choose how you record sessions. You can connect supported services later.</p>
 
    <div className="azur-onboarding-options">{devices.map(d=><label key={d.id} className={device===d.id?'selected':''}>
     <input type="radio" name="azur-device" checked={device===d.id} onChange={()=>setDevice(d.id)}/>{d.label}
    </label>)}</div>
    <p>{device==='garmin'?'Garmin connection will be offered after setup where available.':device==='none'?'You can record workouts, RPE and benchmarks manually.':'You can start with manual workout logging. Direct syncing for this device is not yet available.'}</p>
+  </div>}
+  {step===3&&<div>   <h3>Your current fitness</h3>
+   <p>Already know your FTP, swim CSS or run threshold? You can add them now. Otherwise, skip these optional fields — your coach will review your history first.</p>
+   <label>Bike FTP (watts)<input type="number" min={60} max={650} value={ftp} onChange={e=>setFtp(e.target.value)} placeholder="Unknown"/></label>
+   <div><strong>Swim CSS</strong><small> Optional · per 100m</small><div style={{display:'flex',alignItems:'center',gap:10,marginTop:8}}><label style={{flex:1,minWidth:0}}>Minutes<input type="number" inputMode="numeric" min={0} max={14} value={css.includes(':')?css.split(':')[0]:css} placeholder="min" onChange={e=>setCss(`${e.target.value}:${css.includes(':')?css.split(':')[1]:''}`)} /></label><span aria-hidden="true" style={{fontSize:24,fontWeight:700,alignSelf:'center'}}>:</span><label style={{flex:1,minWidth:0}}>Seconds<input type="number" inputMode="numeric" min={0} max={59} value={css.includes(':')?css.split(':')[1]:''} placeholder="sec" onChange={e=>setCss(`${css.includes(':')?css.split(':')[0]:css}:${e.target.value}`)} /></label></div></div>
+   <div><strong>Run threshold</strong><small> Optional · per km</small><div style={{display:'flex',alignItems:'center',gap:10,marginTop:8}}><label style={{flex:1,minWidth:0}}>Minutes<input type="number" inputMode="numeric" min={0} max={14} value={runThreshold.includes(':')?runThreshold.split(':')[0]:runThreshold} placeholder="min" onChange={e=>setRunThreshold(`${e.target.value}:${runThreshold.includes(':')?runThreshold.split(':')[1]:''}`)} /></label><span aria-hidden="true" style={{fontSize:24,fontWeight:700,alignSelf:'center'}}>:</span><label style={{flex:1,minWidth:0}}>Seconds<input type="number" inputMode="numeric" min={0} max={59} value={runThreshold.includes(':')?runThreshold.split(':')[1]:''} placeholder="sec" onChange={e=>setRunThreshold(`${runThreshold.includes(':')?runThreshold.split(':')[0]:runThreshold}:${e.target.value}`)} /></label></div></div>
+   <small>Leave unknown values blank — don't guess. AZUR will begin with appropriate endurance sessions and schedule benchmarks when you are ready.</small>
   </div>}
   {step===4&&<div className="azur-beta-disclosure" role="group" aria-label="AZUR beta participation"><h3>Before you begin: AZUR beta</h3><p><strong>What AZUR offers:</strong> race-goal and availability-based setup, structured training plans, workout explanations, feedback and supported activity connections.</p><p><strong>What is still being tested:</strong> training adaptations, device imports, calendar syncing and some coaching insights may be incomplete or inaccurate. Training sessions may require coach review. Do not follow a workout that feels unsafe; report problems to your coach. AZUR is not medical advice.</p><label><input type="checkbox" checked={betaAcknowledged} onChange={e=>setBetaAcknowledged(e.target.checked)}/> I understand that AZUR is a beta product and will review any unsuitable sessions or missing data with my coach.</label><small>This acknowledgement is required to finish setup. It is not yet stored as a permanent consent record.</small></div>}
   {step===4&&<div className="azur-onboarding-recap"><h3>Your AZUR starting point</h3><p><strong>{displayName}</strong> · {race.toUpperCase()} {raceDate?'· '+raceDate:''}</p><p>{hours} hours available each week · {trainingDays.join(', ')}</p><p>{css?'Swim CSS '+css+'/100m':'Swim benchmark to be established'} · {runThreshold?'Run threshold '+runThreshold+'/km':'Run benchmark to be established'}</p><p><strong>Why your plan starts this way</strong></p><p>AZUR uses your recent training, availability and race goal to establish a sustainable starting point. Where benchmarks are missing, your first two weeks focus on manageable endurance and learning how your body responds before targeted intensity is introduced.</p></div>}
