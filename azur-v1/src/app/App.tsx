@@ -1281,7 +1281,7 @@ const [primaryRace, setPrimaryRace] = useState({
     target_total?: string;
   },
 });
-  const [activeNav, setActiveNav] = useState('Home');
+  const [activeNav, setActiveNav] = useState(() => new URLSearchParams(window.location.search).get('intervals') === 'connected' ? 'Data Sources' : 'Home');
   const [isCoachAccount, setIsCoachAccount] = useState(false);
   const [homeMode, setHomeMode] = useState<'athlete' | 'coach'>('athlete');
   useEffect(() => {
