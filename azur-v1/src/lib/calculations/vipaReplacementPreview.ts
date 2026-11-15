@@ -19,6 +19,23 @@ function explainWorkout(session:SessionEntry,phase:string):string{
  return (focus[session.family]||'This approved workout develops a specific training quality.')+' '+race+
   ' Selected for the '+phase+' phase; confirm the prescribed targets against the athlete’s current thresholds and recovery before approval.';
 }
+function assessWeek(proposed:readonly VipaProposal[],active:readonly ExistingWeekSession[],proposedMinutes:number,targetMinutes:number){
+ const gaps:string[]=[];
+ const sports=new Set(proposed.map(p=>p.replacement.sport));
+ const covered=new Set(proposed.map(p=>p.existingId));
+ const missing=active.filter(s=>!covered.has(s.id));
+ if(missing.length)gaps.push(missing.length+' existing sessions do not have structured replacements');
+ if(proposed.length>0&&sports.size<3)gaps.push('Full swim, bike and run coverage has not been confirmed');
+ const quality=proposed.filter(p=>['threshold','strength_endurance','race_specific'].includes(p.replacement.family));
+ if(quality.length>2)gaps.push('More than two quality-focused sessions: review intensity and recovery spacing');
+ const dates=quality.map(p=>p.date).sort();
+ for(let i=1;i<dates.length;i++){
+  const gap=(Date.parse(dates[i]+'T12:00:00Z')-Date.parse(dates[i-1]+'T12:00:00Z'))/86400000;
+  if(gap<2)gaps.push('Quality-focused sessions on consecutive days: confirm recovery is appropriate');
+ }
+ const delta=proposedMinutes-targetMinutes;
+ return {qualitySessionCount:quality.length,missingReplacementCount:missing.length,proposedSportCount:sports.size,targetDeltaMinutes:delta,notes:gaps};
+}
 /** Read-only replacement preview. Does not alter or approve the athlete's calendar. */
 export function previewVipaReplacements(input:{
  weekStart:string;phase:SessionEntry['phases'][number];targetMinutes:number;approvedCapacityMinutes:number;
@@ -57,8 +74,10 @@ export function previewVipaReplacements(input:{
   used.add(selected.session.id);
   proposed.push({date:day,existingId:current.id,existingMinutes:current.duration_min,replacement:selected.session,whyTodayMatters:explainWorkout(selected.session,input.phase)});
  }
+ const weeklyAssessment=assessWeek(proposed,active,proposedMinutes,input.targetMinutes);
+ gaps.push(...weeklyAssessment.notes);
  if(proposedMinutes>input.approvedCapacityMinutes)blockers.push('Proposed week exceeds approved capacity');
  if(proposedMinutes>input.targetMinutes)gaps.push('Proposed week exceeds saved weekly target; coach review required');
  if(proposedMinutes<input.targetMinutes*0.9)gaps.push('Proposed week remains materially below weekly target');
- return {status:blockers.length?'blocked' as const:gaps.length?'needs_library_review' as const:'ready_for_coach_review' as const,blockers,gaps,proposed,originalMinutes,proposedMinutes,readOnly:true as const};
+ return {status:blockers.length?'blocked' as const:gaps.length?'needs_library_review' as const:'ready_for_coach_review' as const,blockers,gaps,proposed,originalMinutes,proposedMinutes,weeklyAssessment,readOnly:true as const};
 }
