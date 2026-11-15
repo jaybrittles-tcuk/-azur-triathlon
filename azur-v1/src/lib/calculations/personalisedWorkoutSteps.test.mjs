@@ -34,3 +34,10 @@ test('exact CSS pace gets a validated reference, never a silent workout rewrite'
  assert.equal(previewPersonalisedSteps(s,{...verified,coachValidated:false}).steps[0].calculated,null);
  assert.equal(s.prescription.poolSegments[0].target,'CSS pace, controlled stroke count');
 });
+
+test('under FTP percentage is a ceiling rather than a fixed target',()=>{
+ const s={...base,prescription:{steps:[{target:'Easy cool-down under 55% FTP'},{target:'Easy spin below 60% FTP'}]}};
+ const r=previewPersonalisedSteps(s,{...verified,values:{...verified.values,ftpWatts:316}});
+ assert.equal(r.steps[0].calculated,'Below 174 W (<55% FTP; upper limit, not a fixed target)');
+ assert.equal(r.steps[1].calculated,'Below 190 W (<60% FTP; upper limit, not a fixed target)');
+});
