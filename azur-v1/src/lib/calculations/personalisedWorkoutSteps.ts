@@ -18,7 +18,9 @@ export function previewPersonalisedSteps(session:SessionEntry,source:VerifiedThr
    const ftp=source.values.ftpWatts;
    const range=original.match(/(?:^|\s)(\d{1,3})\s*[-–]\s*(\d{1,3})\s*%\s*FTP\b/i);
    const single=original.match(/(?:^|\s)(\d{1,3})\s*%\s*FTP\b/i);
+   const ceiling=original.match(/\b(?:under|below|less than|<)\s*(\d{1,3})\s*%\s*FTP\b/i);
    if(range){const a=Number(range[1]),b=Number(range[2]);if(a>=30&&a<=b&&b<=120)return {original,calculated:Math.round(ftp*a/100)+'–'+Math.round(ftp*b/100)+' W ('+a+'–'+b+'% FTP)',status:'illustrative' as const};}
+   if(ceiling){const a=Number(ceiling[1]);if(a>=30&&a<=120)return {original,calculated:'Below '+Math.round(ftp*a/100)+' W (<'+a+'% FTP; upper limit, not a fixed target)',status:'illustrative' as const};}
    if(single){const a=Number(single[1]);if(a>=30&&a<=120)return {original,calculated:Math.round(ftp*a/100)+' W ('+a+'% FTP)',status:'illustrative' as const};}
   }
   if(session.sport==='swim'&&source.values.swimCssSecondsPer100m!==null){
