@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessFirstWeekProfile} from './firstWeekProfileAssessment.ts';
+const claire={onboardingComplete:true,availableHours:15,recentReportedHours:12,background:'established',consistency:'4to7',concern:'none',trainingDays:[0,1,2,3,4,5,6],canSwim200m:true};
+test('complete questionnaire produces conservative proposal without publication',()=>{const r=assessFirstWeekProfile(claire);assert.equal(r.canPropose,true);assert.equal(r.proposedHours,3);assert.equal(r.automaticPublicationAuthorized,false)});
+test('reported hours are never treated as automatic clearance',()=>assert.equal(assessFirstWeekProfile({...claire,recentReportedHours:20}).proposedHours,3));
+test('concerns require review',()=>assert.equal(assessFirstWeekProfile({...claire,concern:'yes'}).canPropose,false));
+test('three available days required',()=>assert.equal(assessFirstWeekProfile({...claire,trainingDays:[0,2]}).canPropose,false));
+test('missing swim readiness requires review',()=>assert.equal(assessFirstWeekProfile({...claire,canSwim200m:null}).canPropose,false));
+test('low recent reported hours cap proposed volume',()=>assert.equal(assessFirstWeekProfile({...claire,recentReportedHours:2}).proposedHours,2));
