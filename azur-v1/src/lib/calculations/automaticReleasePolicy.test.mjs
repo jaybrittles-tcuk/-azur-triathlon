@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessAutomaticRelease} from './automaticReleasePolicy.ts';
+const valid={profileComplete:true,currentBaselineValidated:true,verifiedHistoryWeeks:6,verifiedRecentHours:4,verifiedCapacityHours:4,requestedHours:8,proposalMinutes:180,proposedDays:[0,3,6],availableDays:[0,1,2,3,4,5,6],approvedLibrarySessions:true,hasTrainingConcern:false,hasExistingWeek:false,weekLocked:false,profileChangedAfterProposal:false};
+test('verified, unchanged, safe week may enter atomic publication',()=>assert.equal(assessAutomaticRelease(valid).eligible,true));
+test('questionnaire only must not auto publish',()=>assert.equal(assessAutomaticRelease({...valid,currentBaselineValidated:false,verifiedHistoryWeeks:0}).action,'coach_review'));
+test('edited onboarding invalidates proposal',()=>assert.ok(assessAutomaticRelease({...valid,profileChangedAfterProposal:true}).blockers.includes('proposal_stale')));
+test('existing calendar is never overwritten',()=>assert.equal(assessAutomaticRelease({...valid,hasExistingWeek:true}).eligible,false));
+test('unapproved workout is rejected',()=>assert.equal(assessAutomaticRelease({...valid,approvedLibrarySessions:false}).eligible,false));
+test('volume above verified recent history is rejected',()=>assert.equal(assessAutomaticRelease({...valid,verifiedRecentHours:1}).eligible,false));
+test('available days are enforced',()=>assert.equal(assessAutomaticRelease({...valid,availableDays:[0,2,4]}).eligible,false));
+test('injury concern is held for coach',()=>assert.equal(assessAutomaticRelease({...valid,hasTrainingConcern:true}).eligible,false));
