@@ -157,6 +157,23 @@ export default function AthleteOnboardingDraft(){
     updated_at:new Date().toISOString()
    },{onConflict:'user_id'});
    if(reviewError){setMessage('Your setup was saved, but the coach review request could not be recorded: '+reviewError.message);return;}
+   // Ask the server to select approved workout templates immediately.
+   // Preview is read-only; calendar publication remains a separate verified action.
+   try{
+    const {data:{session}}=await supabase.auth.getSession();
+    if(session?.access_token){
+     const response=await fetch('/api/first-week-preview',{
+      method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token}
+     });
+     if(response.ok){
+      const preview=await response.json();
+      if(preview.status==='proposal_ready'&&Array.isArray(preview.sessions)){
+       setPlanSummary({sessions:preview.sessions.length,total_minutes:preview.sessions.reduce((n:number,x:{durationMin:number})=>n+x.durationMin,0),
+        calendar:preview.sessions.map((x:{date:string;sport:string;title:string;durationMin:number})=>({date:x.date,sport:x.sport,title:x.title,duration_min:x.durationMin}))});
+      }
+     }
+    }
+   }catch{ /* An unavailable preview must not undo successfully saved onboarding. */ }
    setReviewReason(reason);setReady(true);setMessage('');
    return;
   }
@@ -178,6 +195,12 @@ export default function AthleteOnboardingDraft(){
   <p className="azur-review-lead">Your information has been saved successfully. AZUR has paused training allocation until your coach confirms a safe starting point.</p>
   <button type="button" className="primary-button" style={{display:"block",width:"100%",margin:"18px 0",padding:"15px 16px",textAlign:"center"}} onClick={()=>{setReviewReason(null);setReady(false);setStep(0);setMessage("");window.scrollTo({top:0,behavior:"smooth"});}}>Review onboarding from the beginning</button>
   <p style={{fontSize:13,opacity:.8}}>Your saved answers will remain in place. You can update them as you move through each step.</p>
+  {planSummary&&<section className="azur-review-next" aria-label="Your first-week preview">
+   <h2>AZUR's suggested first week</h2>
+   <p>{planSummary.sessions} introductory sessions · {Math.round((planSummary.total_minutes||0)/6)/10} hours. This is a preview, not a published calendar.</p>
+   <ul>{(planSummary.calendar||[]).map(x=><li key={x.date+x.sport}><strong>{x.date} · {x.sport}</strong> — {x.title} ({x.duration_min} min)</li>)}</ul>
+   <p>Your coach will review the proposal before sessions appear on your training calendar.</p>
+  </section>}
   <div className="azur-review-stats" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:10}}>
    <div><small>Race goal</small><strong>{race.toUpperCase()}</strong></div>
    <div><small>Available time</small><strong>{hours} hrs/week</strong></div>
