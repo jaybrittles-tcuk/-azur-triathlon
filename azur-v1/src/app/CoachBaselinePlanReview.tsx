@@ -11,6 +11,7 @@ export default function CoachBaselinePlanReview(){
  const [review,setReview]=useState<Review|null>(null);
  const [busy,setBusy]=useState(false);
  const [approvalHours,setApprovalHours]=useState('3');
+ const [draftDecision,setDraftDecision]=useState<string|null>(null);
  const [drafts,setDrafts]=useState<Array<{id:string;week_start:string;revision:number;phase:string;sessions:unknown;created_at:string}>>([]);
  const [error,setError]=useState('');
  const [setup,setSetup]=useState<{onboarding_step:number;weekly_hours:number|null;updated_at:string;race_distance:string|null;device:string|null}|null>(null);
@@ -29,6 +30,16 @@ export default function CoachBaselinePlanReview(){
   const next=data||[];setAthletes(next);setSelected(next[0]?.id||'');
  })();return()=>{live=false}},[]);
  useEffect(()=>{if(selected)void inspect();},[selected,offset]);
+ async function approveSavedDraft(){
+  if(!selected||drafts.length!==1||draftDecision)return;
+  setBusy(true);setError('');
+  try{
+   const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token)throw Error('Coach sign-in required');
+   const response=await fetch('/api/coach/weekly-plan-review?'+new URLSearchParams({athleteId:selected,weekStart:monday(offset)}),{method:'POST',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:'approve_questionnaire_draft'})});
+   const result=await response.json();if(!response.ok)throw Error(result.error||'Could not approve proposal');
+   await inspect();
+  }catch(e){setError(e instanceof Error?e.message:'Approval failed');setBusy(false)}
+ }
  async function saveQuestionnaireDraft(){
   if(!selected||!review||review.questionnaireDraftPreview?.status!=='ready_for_coach_review'||drafts.length)return;
   setBusy(true);setError('');
@@ -55,7 +66,7 @@ export default function CoachBaselinePlanReview(){
  async function inspect(){
   if(!selected)return;
   const currentRequest=++requestId.current;
-  setBusy(true);setError('');setReview(null);setDrafts([]);setBaseline(null);setSetup(null);
+  setBusy(true);setError('');setReview(null);setDrafts([]);setDraftDecision(null);setBaseline(null);setSetup(null);
   try{
    const {data:{session}}=await supabase.auth.getSession();
    if(!session?.access_token)throw Error('Sign in to review athlete plans');
@@ -68,6 +79,7 @@ export default function CoachBaselinePlanReview(){
    const {data:draftRows,error:draftError}=await supabase.from('weekly_plan_draft').select('id,week_start,revision,phase,sessions,created_at').eq('athlete_id',selected).eq('week_start',monday(offset)).order('revision',{ascending:false}).limit(3);
    if(draftError)throw Error('Calendar review loaded, but saved drafts could not be inspected: '+draftError.message);
    if(currentRequest===requestId.current)setDrafts(draftRows||[]);
+   if(draftRows?.[0]){const {data:decisions,error:de}=await supabase.from('weekly_plan_decision').select('decision').eq('draft_id',draftRows[0].id).order('decided_at',{ascending:false}).limit(1);if(de)throw Error('Draft approval status unavailable: '+de.message);if(currentRequest===requestId.current)setDraftDecision(decisions?.[0]?.decision||null)}
    const {data:history,error:historyError}=await supabase.from('athlete_history_baseline').select('source,validation_status,activity_count,excluded_count,window_start,window_end,sport_summary').eq('athlete_id',selected).order('window_end',{ascending:false}).limit(1).maybeSingle();
    if(historyError)throw Error('Historical baseline could not be inspected: '+historyError.message);
    if(currentRequest===requestId.current)setBaseline(history||null);
@@ -98,7 +110,7 @@ export default function CoachBaselinePlanReview(){
    {review.preflight&&<details style={{marginTop:12,padding:'12px',border:'1px solid rgba(120,177,212,.24)',borderRadius:12}}><summary style={{cursor:'pointer',fontWeight:700}}>Publication safety check · {review.preflight.readyForFullPublication?'Draft passes checks':'Not ready'}</summary><div style={{paddingTop:10,fontSize:13}}><p>Read-only assessment · {review.preflight.proposedSessions} proposed sessions · {review.preflight.proposedHours.toFixed(2)} hours</p>{review.preflight.blockers.length>0?<ul>{review.preflight.blockers.map((reason,i)=><li key={i}>{reason}</li>)}</ul>:<p>Preliminary checks passed. Publication is still disabled until the authenticated end-to-end test is complete.</p>}<p>No calendar changes are made by this check.</p></div></details>}
    <details style={{marginTop:12}}><summary style={{cursor:'pointer',padding:'10px 0',fontWeight:700}}>View {review.sessionCount} planned sessions</summary><div style={{paddingTop:6}}>{review.sessions.map(s=><div key={s.id} style={{padding:'9px 0',borderBottom:'1px solid #31536d'}}><strong>{s.planned_date} · {s.sport} · {s.duration_min} min</strong><div style={{opacity:.85,fontSize:13,marginTop:3}}>{s.title} · {s.status}</div></div>)}</div></details>
    <p style={{fontSize:13,opacity:.75,marginTop:12}}><strong>Read-only:</strong> {review.message}</p>
-   <details style={{padding:'12px 0'}}><summary style={{cursor:'pointer',fontWeight:700}}>Saved weekly proposals ({drafts.length})</summary>{drafts.length===0?<p>No saved proposal exists for this week. Automatic generation is not connected.</p>:drafts.map(d=><details key={d.id} style={{marginTop:10}}><summary>Draft revision {d.revision} · {d.phase} · {Array.isArray(d.sessions)?d.sessions.length:0} sessions</summary><p>Draft ID: {d.id}</p><p>Created: {new Date(d.created_at).toLocaleString()}</p><p>Not automatically approved or published.</p></details>)}</details>
+   <details style={{padding:'12px 0'}}><summary style={{cursor:'pointer',fontWeight:700}}>Saved weekly proposals ({drafts.length})</summary>{drafts.length===0?<p>No saved proposal exists for this week. Automatic generation is not connected.</p>:drafts.map(d=><details key={d.id} style={{marginTop:10}}><summary>Draft revision {d.revision} · {d.phase} · {Array.isArray(d.sessions)?d.sessions.length:0} sessions</summary><p>Draft ID: {d.id}</p><p>Created: {new Date(d.created_at).toLocaleString()}</p><p>{draftDecision==='approved'?'Approved by coach · not published':'Awaiting coach approval · not published'}</p>{draftDecision===null&&drafts.length===1&&review?.questionnaireApproval?.approved&&<button type='button' disabled={busy} onClick={()=>void approveSavedDraft()}>Approve saved introductory week</button>}</details>)}</details>
   </div>}
  </section>;
 }
