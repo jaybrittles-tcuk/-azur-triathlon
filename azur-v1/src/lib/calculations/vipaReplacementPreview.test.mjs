@@ -21,3 +21,14 @@ test('rejects a replacement that exceeds approved weekly capacity',()=>{
  const r=previewVipaReplacements({...base,library:[{...library[0],durationMin:55}],approvedCapacityMinutes:50});
  assert.equal(r.proposed.length,0);assert.equal(r.status,'needs_library_review');
 });
+
+test('flags an unreplaced session rather than claiming a complete week',()=>{
+ const r=previewVipaReplacements({...base,existing:[...existing,{...existing[0],id:'other',planned_date:'2026-11-17',sport:'bike',duration_min:10}],targetMinutes:55});
+ assert.equal(r.weeklyAssessment.missingReplacementCount,1);
+ assert.ok(r.gaps.some(x=>x.includes('do not have structured replacements')));
+});
+test('summarises target delta and quality workload',()=>{
+ const r=previewVipaReplacements(base);
+ assert.equal(r.weeklyAssessment.qualitySessionCount,1);
+ assert.equal(r.weeklyAssessment.targetDeltaMinutes,0);
+});
