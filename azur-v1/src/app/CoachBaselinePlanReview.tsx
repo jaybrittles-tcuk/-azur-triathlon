@@ -55,7 +55,7 @@ export default function CoachBaselinePlanReview(){
   if(!selected||!setup?.updated_at||!review?.questionnaireReview?.eligibleForCoachAssessment)return;
   const hours=Number(approvalHours);
   const ceiling=Math.min(Number(setup.weekly_hours||0),review.questionnaireReview.recentWeeklyHours!=null&&review.questionnaireReview.recentWeeklyHours>0?review.questionnaireReview.recentWeeklyHours*1.1:6,review.questionnaireReview.trainingConcern==='none'?6:0);
-  if(!Number.isFinite(hours)||hours<=0||hours>ceiling){setError('Choose a positive starting volume no higher than availability, recent reported volume or the conservative safety cap. Training concerns require individual assessment.');return;}
+  if(!Number.isFinite(hours)||hours<=0||hours>ceiling){setError('Starting hours must be between 0.5 and '+Math.max(0,ceiling).toFixed(1)+' hours for this questionnaire-only review.');return;}
   setBusy(true);setError('');
   try{
    const {data:{user}}=await supabase.auth.getUser();if(!user||user.app_metadata?.role!=='coach')throw Error('Verified coach required');
@@ -98,6 +98,9 @@ export default function CoachBaselinePlanReview(){
  const canSave=approved&&preview?.status==='ready_for_coach_review'&&drafts.length===0;
  const canApprove=approved&&drafts.length===1&&draftDecision===null;
  const stage=!setup||setup.onboarding_step!==5?'setup':!approved?'baseline':drafts.length===0?'draft':draftDecision!=='approved'?'approve':'complete';
+ const maxStartingHours=Math.max(0,Math.min(Number(setup?.weekly_hours||0),review?.questionnaireReview?.recentWeeklyHours!=null&&review.questionnaireReview.recentWeeklyHours>0?review.questionnaireReview.recentWeeklyHours*1.1:6,review?.questionnaireReview?.trainingConcern==='none'?6:0));
+ const enteredHours=Number(approvalHours);
+ const hoursValid=Number.isFinite(enteredHours)&&enteredHours>=0.5&&enteredHours<=maxStartingHours;
  const card:CSSProperties={background:'#102b40',border:'1px solid #31536d',borderRadius:16,padding:16};
  const primary:CSSProperties={background:'#148ec9',color:'#fff',border:0,borderRadius:12,padding:'13px 18px',fontWeight:700,width:'100%',cursor:'pointer'};
  return <section className="coach-attention-group" aria-label="Coach athlete review" style={{padding:'12px 12px 90px',maxWidth:900,margin:'auto'}}>
@@ -124,7 +127,7 @@ export default function CoachBaselinePlanReview(){
     <div style={{display:'flex',gap:8,alignItems:'center',marginBottom:12,fontSize:12,opacity:.85}}><span>1 · Starting load</span><span>›</span><span>2 · Training week</span><span>›</span><span>3 · Publish</span></div>
     {stage==='setup'?<><h4>Awaiting athlete setup</h4><p>The athlete must finish onboarding before you can approve their starting training load.</p></>:null}
     {stage==='baseline'&&<><h4 style={{margin:'0 0 8px'}}>Approve a safe starting load</h4><p style={{margin:'0 0 14px',fontSize:14,opacity:.85}}>Reported training is not verified activity history. Start conservatively and adjust once you have evidence.</p>
-     {review.questionnaireReview?.eligibleForCoachAssessment?<><label style={{display:'grid',gap:6,maxWidth:200,marginBottom:12}}>Starting hours per week<input type="number" min="0.5" max="6" step="0.5" value={approvalHours} onChange={e=>setApprovalHours(e.target.value)} /></label><button type="button" style={primary} disabled={busy} onClick={()=>void approveQuestionnaire()}>{busy?'Saving…':'Approve starting load'}</button></>:<p>Questionnaire requires further assessment before approval.</p>}</>}
+     {review.questionnaireReview?.eligibleForCoachAssessment?<><label style={{display:'grid',gap:6,maxWidth:240,marginBottom:12}}>Starting hours per week<input type="number" min="0.5" max={maxStartingHours} step="0.5" value={approvalHours} aria-invalid={!hoursValid} aria-describedby="starting-load-help" onChange={e=>{setApprovalHours(e.target.value);setError('')}} /></label><p id="starting-load-help" style={{fontSize:13,margin:'0 0 12px',color:hoursValid?'#b5d4e8':'#ffc49c'}}>Allowed range: 0.5–{maxStartingHours.toFixed(1)} hours. {hoursValid?'This is a conservative initial cap, not Claire’s full training potential.':'Enter a value within this range to continue.'}</p><button type="button" style={primary} disabled={busy||!hoursValid} onClick={()=>void approveQuestionnaire()}>{busy?'Saving…':'Approve starting load'}</button></>:<p>Questionnaire requires further assessment before approval.</p>}</>}
     {stage==='draft'&&<><h4 style={{margin:'0 0 8px'}}>Build the first training week</h4><p style={{fontSize:14,opacity:.85}}>Starting load approved: {review.questionnaireApproval?.approvedWeeklyHours??'—'}h. Review the proposed sessions below before saving.</p>
      {preview?.sessions?.length?<div style={{display:'grid',gap:8,marginBottom:14}}>{preview.sessions.map((x,i)=><div key={i} style={{borderBottom:'1px solid #31536d',padding:'7px 0'}}><strong>{x.sport.toUpperCase()} · {x.durationMin} min</strong><div style={{fontSize:13,opacity:.85}}>{x.date} · {x.title}</div></div>)}</div>:null}
      {canSave?<button type="button" style={primary} disabled={busy} onClick={()=>void saveQuestionnaireDraft()}>{busy?'Saving…':'Save training week for review'}</button>:<p role="status">{preview?.reasons?.join(' · ')||'No suitable draft available yet.'}</p>}</>}
