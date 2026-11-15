@@ -31,15 +31,17 @@ export default async function handler(req: any, res: any) {
     });
   }
 
-  // 1. Find the server-side OAuth state.
+  // 1. Atomically consume the single-use OAuth state before exchanging tokens.
   const stateResponse = await fetch(
     `${supabaseUrl}/rest/v1/garmin_oauth_state?state=eq.${encodeURIComponent(
       returnedState,
-    )}&select=id,athlete_id,code_verifier,expires_at&limit=1`,
+    )}&select=id,athlete_id,code_verifier,expires_at`,
     {
+      method: 'DELETE',
       headers: {
         apikey: serviceKey,
         Authorization: `Bearer ${serviceKey}`,
+        Prefer: 'return=representation',
       },
     },
   );
@@ -60,7 +62,8 @@ export default async function handler(req: any, res: any) {
   }
 
   if (
-    new Date(savedState.expires_at).getTime() <
+    !Number.isFinite(Date.parse(savedState.expires_at)) ||
+    new Date(savedState.expires_at).getTime() <=
     Date.now()
   ) {
     return res.status(400).json({
@@ -70,20 +73,6 @@ export default async function handler(req: any, res: any) {
 
   const athleteId = savedState.athlete_id;
   const codeVerifier = savedState.code_verifier;
-
-  // 2. Delete the temporary state so it cannot be reused.
-  await fetch(
-    `${supabaseUrl}/rest/v1/garmin_oauth_state?id=eq.${encodeURIComponent(
-      savedState.id,
-    )}`,
-    {
-      method: 'DELETE',
-      headers: {
-        apikey: serviceKey,
-        Authorization: `Bearer ${serviceKey}`,
-      },
-    },
-  );
 
   // 3. Exchange Garmin authorization code for tokens.
   const redirectUri =
