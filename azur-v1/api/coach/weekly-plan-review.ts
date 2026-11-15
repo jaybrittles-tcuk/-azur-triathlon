@@ -2,6 +2,7 @@ import { reconcileWeeklyDraft } from '../../src/lib/calculations/weeklyDraftReco
 import {previewVipaReplacements} from '../../src/lib/calculations/vipaReplacementPreview.ts';
 import {inspectAthleteThresholds} from '../../src/lib/calculations/athleteThresholdReadiness.ts';
 import {previewThresholdTargets} from '../../src/lib/calculations/verifiedWorkoutTargets.ts';
+import {previewPersonalisedSteps} from '../../src/lib/calculations/personalisedWorkoutSteps.ts';
 // Read-only coach planning review. This endpoint never publishes or modifies sessions.
 export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
@@ -123,7 +124,8 @@ export default async function handler(req:any,res:any){
   const validatedValues={ftpWatts:validated?.ftp_watts??null,swimCssSecondsPer100m:validated?.swim_css_seconds_per_100m??null,runThresholdSecondsPerKm:validated?.run_threshold_seconds_per_km??null};
   const verifiedSource={values:validatedValues,coachValidated:!!validated,validatedAt:validated?.validated_at??null};
   const verifiedTargetReferences=(['swim','bike','run'] as const).map(sport=>previewThresholdTargets(sport,verifiedSource));
+  const personalisedStepPreviews=(vipaPreview.proposed||[]).map((proposal:any)=>({existingId:proposal.existingId,...previewPersonalisedSteps(proposal.replacement,verifiedSource)}));
   const ceiling=approved?Number(a.approved_weekly_hours):null;
-  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,thresholdReadiness,verifiedTargetReferences,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
+  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,thresholdReadiness,verifiedTargetReferences,personalisedStepPreviews,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
  }catch(err){const code=err instanceof Error&&/^REVIEW_READ_[A-Z_]+_\d+$/.test(err.message)?err.message:'REVIEW_PROCESSING_ERROR';console.error('[coach-weekly-review] failed',code);return res.status(503).json({error:'Unable to load planning review',diagnosticCode:code});}
 }
