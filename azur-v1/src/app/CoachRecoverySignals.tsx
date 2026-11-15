@@ -66,6 +66,8 @@ export default function CoachRecoverySignals(){
    const query=next?supabase.from('coach_recovery_review').insert({coach_user_id:coachId,athlete_id:signal.athleteId,source_type:signal.sourceType,source_id:signal.sourceId}):supabase.from('coach_recovery_review').delete().eq('coach_user_id',coachId).eq('source_type',signal.sourceType).eq('source_id',signal.sourceId);
    const {error:writeError}=await query;
    if(writeError)throw writeError;
+   // Update immediately; a later refresh reconciles with the server record.
+   setSignals(previous=>previous.map(item=>item.id===signal.id?{...item,reviewed:next}:item));
    await refresh();
   }catch(e){setError(e instanceof Error?e.message:'Could not save review status');}
   finally{setBusy('')}
@@ -78,6 +80,7 @@ export default function CoachRecoverySignals(){
   {error&&<p role="alert">{error}</p>}
   {!loading&&!error&&count===0&&<p>No assigned athletes.</p>}
   {!loading&&!error&&count>0&&signals.length===0&&<p>No high-effort RPE reports found in the latest available records. This does not confirm recovery readiness.</p>}
+  {!loading&&!error&&signals.length>0&&signals.every(s=>s.reviewed)&&!showReviewed&&<p>All detected high-effort reports have been reviewed. Reopen a reviewed alert if new information emerges.</p>}
   <label style={{display:'flex',gap:8,alignItems:'center',marginTop:12}}><input type="checkbox" checked={showReviewed} onChange={e=>setShowReviewed(e.target.checked)}/> Show reviewed alerts ({signals.filter(s=>s.reviewed).length})</label>
   {signals.filter(s=>showReviewed||!s.reviewed).map(s=><article key={s.id} style={{padding:10,marginTop:10,border:'1px solid #46617a',borderRadius:8}}>
    <strong>{s.reviewed?'Reviewed':'Needs review'} · RPE {s.reportedRpe}/10</strong>
