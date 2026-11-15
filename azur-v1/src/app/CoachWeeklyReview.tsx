@@ -5,6 +5,17 @@ import { supabase } from '../lib/supabase';
 type Draft={id:string;athlete_id:string;week_start:string;revision:number;phase:string;sessions:unknown;proposal_fingerprint:string;created_at:string};
 type Decision={draft_id:string;decision:string;decided_at:string};
 type Row=Draft&{athleteName:string;decision:string};
+function describePrescription(value:unknown){
+ if(!value||typeof value!=='object')return 'Structured workout details missing';
+ const p=value as Record<string,unknown>;
+ const parts=Object.entries(p).filter(([key])=>!['metadata','internal'].includes(key)).map(([key,val])=>{
+  const label=key.replace(/_/g,' ');
+  if(typeof val==='string'||typeof val==='number')return label+': '+val;
+  if(Array.isArray(val))return label+': '+val.length+' prescribed step'+(val.length===1?'':'s');
+  return label+': '+JSON.stringify(val);
+ });
+ return parts.length?parts.join(' · '):'Structured workout details missing';
+}
 function readiness(row:Row){
  const sessions=Array.isArray(row.sessions)?row.sessions:[];
  const problems:string[]=[];
@@ -89,7 +100,7 @@ export default function CoachWeeklyReview(){
    <label className="coach-attention-heading">Decision notes (optional)<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Reason or coach observations" maxLength={500}/></label>
    {rows.map(row=><article key={row.id} className="coach-attention-row"><div><strong>{row.athleteName} · Week of {row.week_start}</strong><p>Revision {row.revision} · {row.phase} · {row.decision}</p><p>{readiness(row).length?`Publication blocked: ${readiness(row).join('; ')}`:'Coach-approved draft · publication requires protected server workflow and calendar readback'}</p>
     <details><summary>Inspect proposed sessions</summary>
-    {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(item?.session?.prescription??item?.prescription??{},null,2)}</pre></div>):<p>Draft contains no sessions.</p>}
+    {Array.isArray(row.sessions)&&row.sessions.length?row.sessions.map((item:any,i:number)=><div key={i} className="coach-feedback-notes"><strong>{String(item?.date??item?.planned_date??'Date not provided')} · {String(item?.session?.title??item?.title??'Untitled')}</strong><p>{String(item?.session?.durationMin??item?.duration_min??'—')} min · {String(item?.session?.sport??item?.sport??'Unknown sport')}</p><p><strong>Workout structure:</strong> {describePrescription(item?.session?.prescription??item?.prescription)}</p><p><strong>Training targets:</strong> {describePrescription(item?.session?.targets)}</p>{item?.reason&&<p><strong>Why this workout:</strong> {String(item.reason)}</p>}</div>):<p>Draft contains no sessions.</p>}
     </details></div><div>{row.decision==='pending'&&<><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'approved')}>Approve draft</button><button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Reject</button></>}
     {row.decision==='approved'&&<><button type="button" disabled={!publishingEnabled||Boolean(busy)||readiness(row).length>0} title={!publishingEnabled?'Publishing disabled until the coach-to-calendar workflow is verified':undefined} onClick={()=>void publish(row,'full')}>Publish complete week</button>{!publishingEnabled&&<small>Publishing locked until final staging verification.</small>}<span title="Additive publication requires separate database verification">Additive publication pending safety verification</span></>}
     {row.decision==='approved'&&<button type="button" disabled={Boolean(busy)} onClick={()=>void decide(row,'rejected')}>Revoke approval</button>}</div></article>)}
