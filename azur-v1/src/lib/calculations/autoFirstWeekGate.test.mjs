@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {assessAutoFirstWeek} from './autoFirstWeekGate.ts';
+const safe={onboardingComplete:true,hasTrainingConcern:false,validatedHistory:true,validatedCapacityHours:4,requestedHours:8,recentVerifiedHours:4,scheduledMinutes:180,trainingDays:[0,2,4],proposedDays:[0,2,4],hasExistingSessions:false,weekLocked:false,approvedWorkoutCount:3,proposalWorkoutCount:3,publisherEnabled:true};
+test('eligible only when every guard passes',()=>assert.equal(assessAutoFirstWeek(safe).eligible,true));
+test('questionnaire-only athlete is held for review',()=>{const r=assessAutoFirstWeek({...safe,validatedHistory:false,validatedCapacityHours:null,recentVerifiedHours:null});assert.equal(r.eligible,false);assert.match(r.reasons.join(' '),/validated training baseline/)});
+test('never publish outside availability',()=>assert.equal(assessAutoFirstWeek({...safe,proposedDays:[1,2,4]}).eligible,false));
+test('never overwrite an existing week',()=>assert.equal(assessAutoFirstWeek({...safe,hasExistingSessions:true}).eligible,false));
+test('training concern always requires review',()=>assert.equal(assessAutoFirstWeek({...safe,hasTrainingConcern:true}).eligible,false));
+test('feature flag defaults to no publication',()=>assert.equal(assessAutoFirstWeek({...safe,publisherEnabled:false}).eligible,false));
+test('reject unapproved workouts',()=>assert.equal(assessAutoFirstWeek({...safe,approvedWorkoutCount:2}).eligible,false));
