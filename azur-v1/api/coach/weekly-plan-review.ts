@@ -1,3 +1,4 @@
+import {draftQuestionnaireWeek} from '../../src/lib/calculations/questionnaireCheckedWeeklyDraft.ts';
 import { reconcileWeeklyDraft } from '../../src/lib/calculations/weeklyDraftReconciliation.ts';
 import {previewVipaReplacements} from '../../src/lib/calculations/vipaReplacementPreview.ts';
 import {inspectAthleteThresholds} from '../../src/lib/calculations/athleteThresholdReadiness.ts';
@@ -46,6 +47,13 @@ export default async function handler(req:any,res:any){
   const questionnaireComplete=!!(setup&&Number(setup.onboarding_step)>=5&&Number.isFinite(Number(setup.weekly_hours))&&Number(setup.weekly_hours)>=2&&Number(setup.weekly_hours)<=25&&['novice','regular','established'].includes(setup.training_background)&&['under4','4to7','8plus'].includes(setup.training_consistency));
   const questionnaireReview={eligibleForCoachAssessment:questionnaireComplete,source:'athlete_reported',historyRequired:false,requestedWeeklyHours:questionnaireComplete?Number(setup.weekly_hours):null,recentWeeklyHours:setup?.recent_weekly_hours==null?null:Number(setup.recent_weekly_hours),trainingConcern:setup?.current_training_concern||'unknown',swimReadiness:setup?.can_swim_200m??null,coachApprovalRequired:true,canPublish:false};
   const approved=!!(h&&b&&a&&h.validation_status==='validated'&&h.recent_weeks>=4&&b.validation_status==='validated'&&a.decision==='validated'&&a.spike_verified&&a.recovery_reviewed&&Number(a.approved_weekly_hours)>0);
+  const questionnaireDraftPreview=questionnaireComplete?draftQuestionnaireWeek({
+   weekStart,phase:'base',targetWeekMinutes:Math.round(Math.min(Number(setup.weekly_hours),4)*60),
+   existingActiveSessions:sessions.length,athleteProfileReady:true,
+   slots:[{day:0,sport:'swim',family:'technique',maxMinutes:45,maxLevel:1},{day:2,sport:'bike',family:'aerobic_endurance',maxMinutes:60,maxLevel:1},{day:4,sport:'run',family:'aerobic_endurance',maxMinutes:40,maxLevel:1}],
+   library:library.map((item:any)=>({id:item.workout_key,title:item.title,sport:item.sport,family:item.family,durationMin:Number(item.duration_min),level:Number(item.level),phases:item.phases,prescription:item.prescription,approved:item.approved})),
+   baseline:{onboardingComplete:true,requestedWeeklyHours:Number(setup.weekly_hours),recentWeeklyHours:setup.recent_weekly_hours==null?null:Number(setup.recent_weekly_hours),trainingBackground:setup.training_background,trainingConsistency:setup.training_consistency,trainingConcern:setup.current_training_concern||'unsure',canSwim200m:setup.can_swim_200m===true,coachApproved:false,approvedWeeklyHours:null}
+  }):null;
   const scheduledMinutes=sessions.reduce((n:number,s:any)=>n+Number(s.duration_min||0),0);
   const blockers=[
    ...(!approved?[questionnaireComplete?'Questionnaire baseline available for coach assessment; approval and safe plan publication path not yet enabled':'Coach-validated history or completed questionnaire baseline and safety checks required']:[]),
@@ -133,6 +141,6 @@ export default async function handler(req:any,res:any){
   const verifiedTargetReferences=(['swim','bike','run'] as const).map(sport=>previewThresholdTargets(sport,verifiedSource));
   const personalisedStepPreviews=(vipaPreview.proposed||[]).map((proposal:any)=>({existingId:proposal.existingId,...previewPersonalisedSteps(proposal.replacement,verifiedSource)}));
   const ceiling=approved?Number(a.approved_weekly_hours):null;
-  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,thresholdReadiness,verifiedTargetReferences,personalisedStepPreviews,activityCount:b?.activity_count||0,questionnaireReview,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
+  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,thresholdReadiness,verifiedTargetReferences,personalisedStepPreviews,activityCount:b?.activity_count||0,questionnaireReview,questionnaireDraftPreview:questionnaireDraftPreview?{status:questionnaireDraftPreview.status,reasons:questionnaireDraftPreview.reasons,sessionCount:questionnaireDraftPreview.sessions.length,readOnly:true}:null,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
  }catch(err){const code=err instanceof Error&&/^REVIEW_READ_[A-Z_]+_\d+$/.test(err.message)?err.message:'REVIEW_PROCESSING_ERROR';console.error('[coach-weekly-review] failed',code);return res.status(503).json({error:'Unable to load planning review',diagnosticCode:code});}
 }
