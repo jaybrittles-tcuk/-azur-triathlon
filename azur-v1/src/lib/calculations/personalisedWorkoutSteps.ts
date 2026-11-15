@@ -27,6 +27,7 @@ export function previewPersonalisedSteps(session:SessionEntry,source:VerifiedThr
    const single=original.match(/CSS\s*\+\s*(\d{1,2})\s*s\s*\/\s*100\s*m/i);
    if(range){const a=Number(range[1]),b=Number(range[2]);if(a<=b&&b<=45)return {original,calculated:pace(css+a)+'–'+pace(css+b)+'/100 m (CSS +'+a+'–'+b+' s)',status:'illustrative' as const};}
    if(single){const a=Number(single[1]);if(a<=45)return {original,calculated:pace(css+a)+'/100 m (CSS +'+a+' s)',status:'illustrative' as const};}
+   if(/^CSS pace(?:,|$)/i.test(original.trim()))return {original,calculated:pace(css)+'/100 m (CSS reference; coach to confirm effort and repeat sustainability)',status:'illustrative' as const};
   }
   return {original,calculated:null,status:'not_convertible' as const};
  });
