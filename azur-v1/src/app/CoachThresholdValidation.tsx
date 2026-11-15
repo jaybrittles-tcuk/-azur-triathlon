@@ -9,13 +9,17 @@ export default function CoachThresholdValidation({athleteId,onSaved}:{athleteId:
  const [validatedAt,setValidatedAt]=useState('');const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');
  useEffect(()=>{let active=true;(async()=>{
   const [profile,onboarding,validation]=await Promise.all([
-   supabase.from('athlete_profile').select('ftp_w,swim_threshold_sec_per_100m,run_threshold_sec_per_km').eq('user_id',athleteId).maybeSingle(),
-   supabase.from('athlete_onboarding').select('ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km').eq('user_id',athleteId).maybeSingle(),
+   supabase.from('athlete_profile').select('user_id,ftp_w,swim_threshold_sec_per_100m,run_threshold_sec_per_km').eq('id',athleteId).maybeSingle(),
+   Promise.resolve({data:null,error:null}),
    supabase.from('coach_threshold_validation').select('ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,validated_at').eq('athlete_id',athleteId).maybeSingle()
   ]);
   if(!active)return;
   if(profile.error||onboarding.error||validation.error){setMessage('Unable to read athlete thresholds: '+(profile.error?.message||onboarding.error?.message||validation.error?.message));return;}
-  const p=profile.data,o=onboarding.data,a=validation.data;
+  const p=profile.data,a=validation.data;
+  const onboardingResult=p?.user_id?await supabase.from('athlete_onboarding').select('ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km').eq('user_id',p.user_id).maybeSingle():null;
+  if(!active)return;
+  if(onboardingResult?.error){setMessage('Unable to read onboarding thresholds: '+onboardingResult.error.message);return;}
+  const o=onboardingResult?.data;
   const next:Values={ftp_watts:String(a?.ftp_watts??p?.ftp_w??o?.ftp_watts??''),swim_css_seconds_per_100m:displayPace(a?.swim_css_seconds_per_100m??p?.swim_threshold_sec_per_100m??o?.swim_css_seconds_per_100m),run_threshold_seconds_per_km:displayPace(a?.run_threshold_seconds_per_km??p?.run_threshold_sec_per_km??o?.run_threshold_seconds_per_km)};
   setValues(next);if(a){setApproved({ftp_watts:String(a.ftp_watts??''),swim_css_seconds_per_100m:displayPace(a.swim_css_seconds_per_100m),run_threshold_seconds_per_km:displayPace(a.run_threshold_seconds_per_km)});setValidatedAt(a.validated_at);}
  })();return()=>{active=false}},[athleteId]);
