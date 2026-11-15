@@ -2,17 +2,17 @@ import './premiumWorkoutV103.css';
 import { useState } from 'react';
 import { normalizeWorkoutIntervals } from '../lib/calculations/workoutIntensity';
 
-type Props = { prescription: Record<string,unknown>|null|undefined; ftpWatts?:number|null; compact?:boolean };
+type Props = { prescription: Record<string,unknown>|null|undefined; ftpWatts?:number|null; coachValidated?:boolean; compact?:boolean };
 type Step = ReturnType<typeof normalizeWorkoutIntervals>[number];
 const duration = (s:Step) => s.durationSec == null ? (s.distanceM == null ? 'Distance / time not supplied' : s.distanceM+' m') : s.durationSec < 60 ? s.durationSec+' sec' : Number((s.durationSec/60).toFixed(1))+' min';
-const targetText = (s:Step,ftp?:number|null) => {
+const targetText = (s:Step,ftp?:number|null,coachValidated=false) => {
  if(!s.target) return 'Target not supplied';
  const t=s.target;
  const value=t.low===t.high?String(t.low):t.low+'–'+t.high;
- const watts=t.metric==='ftp_percent'&&ftp&&ftp>0?' · '+Math.round(ftp*t.low/100)+'–'+Math.round(ftp*t.high/100)+' W':'';
+ const watts=t.metric==='ftp_percent'&&coachValidated&&ftp&&ftp>0?' · '+Math.round(ftp*t.low/100)+'–'+Math.round(ftp*t.high/100)+' W':'';
  return value+' '+t.unit+watts;
 };
-export default function WorkoutTargetDetails({prescription,ftpWatts,compact=false}:Props){
+export default function WorkoutTargetDetails({prescription,ftpWatts,coachValidated=false,compact=false}:Props){
  const [expanded,setExpanded]=useState(false);
  const workout=prescription?.azurWorkout as {steps?:unknown}|undefined;
  const steps=normalizeWorkoutIntervals(workout?.steps);
@@ -30,7 +30,7 @@ export default function WorkoutTargetDetails({prescription,ftpWatts,compact=fals
    {shown.map(({step,count,start})=><div className={'azur-v103-step '+step.kind} key={start}>
     <div className="azur-v103-step-marker" aria-hidden="true"/>
     <div className="azur-v103-step-body"><div className="azur-v103-step-top"><strong>{step.kind.charAt(0).toUpperCase()+step.kind.slice(1)}{count>1?' × '+count:''}</strong><b>{duration(step)}</b></div>
-    <div className="azur-v103-step-target">{targetText(step,ftpWatts)}</div></div>
+    <div className="azur-v103-step-target">{targetText(step,ftpWatts,coachValidated)}</div></div>
    </div>)}
   </div>
   {!compact&&groups.length>5&&<button type="button" className="azur-v103-expand" onClick={()=>setExpanded(!expanded)} aria-expanded={expanded}>{expanded?'Show fewer steps':'Show all '+groups.length+' groups'}</button>}
