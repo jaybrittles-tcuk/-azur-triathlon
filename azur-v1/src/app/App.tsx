@@ -1184,6 +1184,7 @@ export function App() {
   // Keep review state stable while background profile/session loads rerender App.
   const [intervalsPreview, setIntervalsPreview] = useState<{
     activities?: Array<{sourceId:string|number;name?:string;start?:string;type?:string;durationSec?:number;distanceMeters?:number;averageWatts?:number;normalizedWatts?:number;alreadyImported?:boolean;loadStatus?:string;possibleCrossPlatformDuplicate?:boolean;reviewRequired?:boolean;status?:string;reason?:string;sessionCandidates?:Array<{id:string;title?:string}>;safeToAutoImport?:boolean;proposedPlannedSessionId?:string|null}>;
+    historySummary?:{status:string;sports:Record<'swim'|'bike'|'run',{activities:number;minutes:number}>};
     stagingEnabled?:boolean;
     acceptanceEnabled?:boolean;
     loadValidationEnabled?:boolean;
@@ -9649,7 +9650,7 @@ function DataSourcesView() {
       const data = await response.json();
       if (intervalsReviewOwner.current !== session.user.id) return;
       if (!response.ok) throw new Error(data?.error ?? 'Unable to retrieve activities');
-      setIntervalsPreview({activities: data.activities ?? [],stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true,loadValidationEnabled:data.loadValidationEnabled===true});
+      setIntervalsPreview({activities: data.activities ?? [],historySummary:data.historySummary,stagingEnabled:data.stagingEnabled===true,acceptanceEnabled:data.acceptanceEnabled===true,loadValidationEnabled:data.loadValidationEnabled===true});
       if (data.acceptanceEnabled===true) await refreshRideInbox();
       if (data.loadValidationEnabled===true) await refreshLoadReview();
     } catch (error) {
@@ -9728,7 +9729,8 @@ function DataSourcesView() {
             </div>
             {intervalsPreview && (
               <div className="azur-intervals-preview" aria-live="polite">
-                <div className="azur-intervals-review-header"><strong>Ride review</strong><span>Previewing rides leaves your training load unchanged</span></div>
+                <div className="azur-intervals-review-header"><strong>90-day training history</strong><span>Read-only preview · no changes to training load</span></div>
+                {intervalsPreview.historySummary && <section aria-label="Unvalidated multisport history" style={{margin:'12px 0'}}><p>Activity evidence from Intervals.icu, not yet deduplicated against other devices or approved by your coach.</p><div style={{display:'grid',gridTemplateColumns:'repeat(3,minmax(0,1fr))',gap:8}}>{(['swim','bike','run'] as const).map(sport=><div key={sport} style={{border:'1px solid #385875',borderRadius:10,padding:10}}><strong style={{display:'block',textTransform:'capitalize'}}>{sport}</strong><span>{intervalsPreview.historySummary!.sports[sport].activities} activities</span><small style={{display:'block'}}>{(intervalsPreview.historySummary!.sports[sport].minutes/60).toFixed(1)} h</small></div>)}</div></section>}
                 {intervalsPreview.error && <p role="alert">{intervalsPreview.error}</p>}
                 {intervalsPreview.activities && intervalsPreview.activities.length === 0 && <p>No cycling activities returned for the last 90 days. This does not establish zero training history.</p>}
                 {rideMessage && <p role="status">{rideMessage}</p>}
