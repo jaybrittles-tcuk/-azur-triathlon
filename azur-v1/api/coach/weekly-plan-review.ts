@@ -3,8 +3,8 @@ import {previewVipaReplacements} from '../../src/lib/calculations/vipaReplacemen
 // Read-only coach planning review. This endpoint never publishes or modifies sessions.
 export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
- const url=process.env.SUPABASE_URL,service=process.env.SUPABASE_SERVICE_ROLE_KEY,key=process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
- if(!url||!service||!key||!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url))return res.status(503).json({error:'Staging coach review requires a configured server-side Supabase connection'});
+ const url=process.env.SUPABASE_URL||process.env.VITE_SUPABASE_URL,key=process.env.SUPABASE_ANON_KEY||process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+ if(!url||!key||!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url))return res.status(503).json({error:'Staging coach review requires a configured server-side Supabase connection'});
  const token=(req.headers.authorization||'').replace(/^Bearer\s+/i,'');
  if(!token)return res.status(401).json({error:'Sign in required'});
  const auth=await fetch(url+'/auth/v1/user',{headers:{apikey:key,Authorization:'Bearer '+token}});
@@ -17,9 +17,9 @@ export default async function handler(req:any,res:any){
  const start=new Date(weekStart+'T00:00:00Z');
  if(Number.isNaN(start.valueOf())||start.toISOString().slice(0,10)!==weekStart||start.getUTCDay()!==1)return res.status(400).json({error:'Week must begin on Monday'});
  const end=new Date(start);end.setUTCDate(end.getUTCDate()+6);
- const headers={apikey:service,Authorization:'Bearer '+service};
+ // Use the verified coach's JWT and database RLS rather than a privileged service-role key.\n const headers={apikey:key,Authorization:'Bearer '+token};
  res.setHeader('Cache-Control','no-store');
- const get=async(path:string)=>{const r=await fetch(url+'/rest/v1/'+path,{headers});if(!r.ok)throw Error('Database review unavailable');return r.json()};
+ const get=async(path:string)=>{const r=await fetch(url+'/rest/v1/'+path,{headers});if(!r.ok)throw Error('Database review unavailable ('+r.status+')');return r.json()};
  try{
   const assignment=await get('coach_athlete_assignment?coach_user_id=eq.'+encodeURIComponent(user.id)+'&athlete_id=eq.'+athleteId+'&select=athlete_id&limit=2');
   if(assignment.length!==1)return res.status(403).json({error:'Coach assignment required'});
