@@ -12,6 +12,7 @@ export default function CoachBaselinePlanReview(){
  const [busy,setBusy]=useState(false);
  const [drafts,setDrafts]=useState<Array<{id:string;week_start:string;revision:number;phase:string;sessions:unknown;created_at:string}>>([]);
  const [error,setError]=useState('');
+ const [setup,setSetup]=useState<{onboarding_step:number;weekly_hours:number|null;race_distance:string|null;device:string|null}|null>(null);
  const [baseline,setBaseline]=useState<{source:string;validation_status:string;activity_count:number;excluded_count:number;window_start:string;window_end:string;sport_summary:Record<string,{count?:number;minutes?:number}>}|null>(null);
  const requestId=useRef(0);
  useEffect(()=>{let live=true;void(async()=>{
@@ -30,7 +31,7 @@ export default function CoachBaselinePlanReview(){
  async function inspect(){
   if(!selected)return;
   const currentRequest=++requestId.current;
-  setBusy(true);setError('');setReview(null);setDrafts([]);setBaseline(null);
+  setBusy(true);setError('');setReview(null);setDrafts([]);setBaseline(null);setSetup(null);
   try{
    const {data:{session}}=await supabase.auth.getSession();
    if(!session?.access_token)throw Error('Sign in to review athlete plans');
@@ -46,6 +47,12 @@ export default function CoachBaselinePlanReview(){
    const {data:history,error:historyError}=await supabase.from('athlete_history_baseline').select('source,validation_status,activity_count,excluded_count,window_start,window_end,sport_summary').eq('athlete_id',selected).order('window_end',{ascending:false}).limit(1).maybeSingle();
    if(historyError)throw Error('Historical baseline could not be inspected: '+historyError.message);
    if(currentRequest===requestId.current)setBaseline(history||null);
+   const {data:profile,error:profileError}=await supabase.from('athlete_profile').select('user_id').eq('id',selected).maybeSingle();
+   if(profileError)throw Error('Athlete ownership lookup unavailable: '+profileError.message);
+   if(!profile?.user_id)throw Error('Assigned athlete profile missing');
+   const {data:setupRow,error:setupError}=await supabase.from('athlete_onboarding').select('onboarding_step,weekly_hours,race_distance,device').eq('user_id',profile.user_id).maybeSingle();
+   if(setupError)throw Error('Athlete onboarding review unavailable: '+setupError.message);
+   if(currentRequest===requestId.current)setSetup(setupRow||null);
   }catch(e){if(currentRequest===requestId.current)setError(e instanceof Error?e.message:'Review unavailable')}finally{if(currentRequest===requestId.current)setBusy(false)}
  }
  return <section className="coach-attention-group" aria-label="Validated baseline weekly plan review" style={{padding:'16px 14px',paddingBottom:96}}>
@@ -59,6 +66,7 @@ export default function CoachBaselinePlanReview(){
   {review&&<div style={{marginTop:16}}>
    <strong>{review.weekStart} · {review.phase||'No phase set'}</strong>
    <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:8,margin:'12px 0'}}>{[['Approved capacity',review.approvedCapacityHours==null?'Pending':review.approvedCapacityHours.toFixed(1)+' h'],['Weekly target',review.storedTargetHours==null?'Not set':review.storedTargetHours.toFixed(2)+' h'],['Calendar',review.scheduledHours.toFixed(2)+' h · '+review.sessionCount+' sessions'],['History',review.activityCount+' activities']].map(([label,value])=><div key={label} style={{background:'rgba(10,31,49,.5)',border:'1px solid rgba(120,177,212,.18)',borderRadius:12,padding:'10px 12px',minWidth:0}}><small style={{display:'block',opacity:.75,marginBottom:4}}>{label}</small><strong style={{fontSize:16}}>{value}</strong></div>)}</div>
+   <section aria-label="First week readiness" style={{border:'1px solid rgba(120,177,212,.24)',borderRadius:12,padding:12,margin:'12px 0'}}><strong>First-week readiness</strong><div style={{display:'grid',gap:6,marginTop:8}}><span>{setup?.onboarding_step===5?'✓ Athlete onboarding completed':'• Athlete onboarding incomplete or missing'}</span><span>{setup?.device?'✓ Device selected: '+setup.device:'• Device selection missing'}</span><span>{baseline?.validation_status==='validated'?'✓ Saved training history validated':'• Saved training history awaiting validation'}</span><span>{review.approvedCapacityHours!=null?'✓ Starting capacity approved: '+review.approvedCapacityHours+' h':'• Starting capacity awaiting coach approval'}</span><span>{drafts.length>0?'✓ Weekly proposal saved for review':'• Weekly proposal not generated'}</span></div><p style={{fontSize:12,opacity:.8}}>Read-only readiness indicators. No workouts are published by this screen.</p></section>
    <section aria-label="Historical baseline evidence" style={{border:'1px solid rgba(120,177,212,.24)',borderRadius:12,padding:12,margin:'12px 0'}}><strong>Training history evidence</strong>{!baseline?<p>No saved multisport baseline. Athlete device preview alone does not establish an approved starting capacity.</p>:<><p>{baseline.activity_count} activities · {baseline.excluded_count} excluded · {baseline.window_start} to {baseline.window_end}</p><p>Source: {baseline.source} · {baseline.validation_status==='validated'?'Validated historical summary':'Coach validation required'}</p><div style={{display:'flex',gap:12,flexWrap:'wrap'}}>{(['swim','bike','run'] as const).map(sport=><span key={sport} style={{fontSize:13,textTransform:'capitalize'}}>{sport}: {baseline.sport_summary?.[sport]?.count??0} activities · {Math.round((baseline.sport_summary?.[sport]?.minutes??0)/60)} h</span>)}</div></>}</section>
    {review.blockers.length>0&&<div role="status"><strong>Publication blockers</strong>{review.blockers.map((b,i)=><p key={i}>{b}</p>)}</div>}
    {review.preflight&&<details style={{marginTop:12,padding:'12px',border:'1px solid rgba(120,177,212,.24)',borderRadius:12}}><summary style={{cursor:'pointer',fontWeight:700}}>Publication safety check · {review.preflight.readyForFullPublication?'Draft passes checks':'Not ready'}</summary><div style={{paddingTop:10,fontSize:13}}><p>Read-only assessment · {review.preflight.proposedSessions} proposed sessions · {review.preflight.proposedHours.toFixed(2)} hours</p>{review.preflight.blockers.length>0?<ul>{review.preflight.blockers.map((reason,i)=><li key={i}>{reason}</li>)}</ul>:<p>Preliminary checks passed. Publication is still disabled until the authenticated end-to-end test is complete.</p>}<p>No calendar changes are made by this check.</p></div></details>}
