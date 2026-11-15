@@ -66,11 +66,8 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {intervals.length > 0 && !distanceBased && <details><summary style={{cursor:'pointer',fontWeight:600}}>View intensity chart</summary><CalendarIntensityProfile steps={source?.steps} /></details>}
    {distanceBased&&<p className="azur-workout-footnote">Distance-based workout · Follow the prescribed repetitions and recovery. No estimated time-based intensity chart is shown.</p>}
    {intervals.length ? <div className="azur-workout-compact-prescription" style={{padding:'12px 2px',lineHeight:1.55}}>
-    <h4 style={{margin:'0 0 10px'}}>Your workout</h4>
-    {warmups.length>0&&<p style={{margin:'8px 0'}}><strong>Warm-up:</strong> {warmups.map(describeBlock).join(' · ')}</p>}
-    {middle.length>0&&<p style={{margin:'8px 0'}}><strong>Main set:</strong> {grouped.map(x=>(x.count>1?x.count+' × ':'')+x.label).join(' · ')}</p>}
-    {cooldowns.length>0&&<p style={{margin:'8px 0'}}><strong>Cool-down:</strong> {cooldowns.map(describeBlock).join(' · ')}</p>}
-    <details style={{marginTop:14}}><summary style={{cursor:'pointer',fontWeight:600}}>View all {intervals.length} interval blocks and targets</summary><WorkoutTargetDetails prescription={prescription} ftpWatts={approvedFtp} coachValidated={approvedFtp!==null}/></details>
+    <h4 style={{margin:'0 0 10px'}}>Your workout · {intervals.length} blocks</h4>
+    <WorkoutTargetDetails prescription={prescription} ftpWatts={approvedFtp} coachValidated={approvedFtp!==null}/>
    </div> : <p>Review the coach-prescribed warm-up, main set and cool-down in the detailed instructions below.</p>}
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
