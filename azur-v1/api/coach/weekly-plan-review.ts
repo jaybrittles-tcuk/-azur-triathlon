@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {draftQuestionnaireWeek} from '../../src/lib/calculations/questionnaireCheckedWeeklyDraft.ts';
 import { reconcileWeeklyDraft } from '../../src/lib/calculations/weeklyDraftReconciliation.ts';
 import {previewVipaReplacements} from '../../src/lib/calculations/vipaReplacementPreview.ts';
@@ -69,7 +70,7 @@ export default async function handler(req:any,res:any){
     id:item.session.id,sport:item.session.sport,title:item.session.title,durationMin:item.session.durationMin,
     priority:1,sessionClass:'introductory',targets:{},prescription:item.session.prescription
    }}));
-   const fingerprint='questionnaire:'+athleteId+':'+weekStart+':'+questionnaireApproval.reviewed_at;
+   const fingerprint=createHash('sha256').update(JSON.stringify({athleteId,weekStart,approvedAt:questionnaireApproval.reviewed_at,proposed})).digest('hex');
    const write=await fetch(url+'/rest/v1/weekly_plan_draft',{method:'POST',headers:{...headers,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({athlete_id:athleteId,week_start:weekStart,revision:1,phase:'base',sessions:proposed,proposal_fingerprint:fingerprint,created_by:user.id})});
    if(!write.ok){console.error('[coach-weekly-review] draft insert failed',write.status);return res.status(409).json({error:'Draft could not be saved. No workouts were published.'});}
    const saved=await write.json();
