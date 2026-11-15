@@ -65,7 +65,7 @@ export default async function handler(req:any,res:any){
    if(!['save_questionnaire_draft','approve_questionnaire_draft'].includes(req.body?.action))return res.status(400).json({error:'Unsupported coach action'});
    if(!approvalCurrent||questionnaireDraftPreview?.status!=='ready_for_coach_review')return res.status(409).json({error:'A current approved baseline and safe draft are required',reasons:questionnaireDraftPreview?.status==='blocked'?questionnaireDraftPreview.reasons:[]});
    if(sessions.length||w?.locked||!w)return res.status(409).json({error:'An unlocked season week with no existing sessions is required'});
-   const existingDrafts=await get('weekly_plan_draft?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id,proposal_fingerprint,sessions&limit=2');
+   const existingDrafts=await get('weekly_plan_draft?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id,proposal_fingerprint,sessions,created_at&limit=2');
    if(req.body.action==='approve_questionnaire_draft'){
     if(existingDrafts.length!==1)return res.status(409).json({error:'Exactly one saved proposal is required for approval'});
     // PostgreSQL jsonb reorders object keys. Compare canonical session values rather than
@@ -74,11 +74,8 @@ export default async function handler(req:any,res:any){
     const canonical=(value:any):string=>JSON.stringify(value,(_key,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
     const saved=existingDrafts[0].sessions;
     if(canonical(saved)!==canonical(current))return res.status(409).json({error:'Saved proposal no longer matches the current athlete baseline and session selection'});
-    // Fingerprint the original ordered projection, retaining the approved baseline timestamp.
-    const projected=saved.map((item:any)=>({date:item.date,reason:item.reason,session:{id:item.session.id,sport:item.session.sport,title:item.session.title,durationMin:item.session.durationMin,priority:item.session.priority,sessionClass:item.session.sessionClass,targets:item.session.targets,prescription:item.session.prescription}}));
-    // Existing drafts use the legacy byte-order fingerprint. A mismatch is expected
-    // after jsonb round-tripping, so verify the saved proposal against the current
-    // baseline and selection above. New approvals remain bound to this exact draft ID.
+    // A baseline reapproval after draft creation invalidates the draft.
+    if(new Date(questionnaireApproval.reviewed_at).getTime()>new Date(existingDrafts[0].created_at).getTime())return res.status(409).json({error:'Starting load was changed after this draft was saved. A new proposal is required.'});
     const prior=await get('weekly_plan_decision?draft_id=eq.'+existingDrafts[0].id+'&select=id&limit=1');
     if(prior.length)return res.status(409).json({error:'A coach decision already exists for this proposal'});
     const response=await fetch(url+'/rest/v1/weekly_plan_decision',{method:'POST',headers:{...headers,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({draft_id:existingDrafts[0].id,coach_user_id:user.id,decision:'approved',reason:'Coach reviewed introductory questionnaire-based training proposal. Publication requires separate safety verification.'})});
