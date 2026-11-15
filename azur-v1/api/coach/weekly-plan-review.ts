@@ -17,7 +17,8 @@ export default async function handler(req:any,res:any){
  const start=new Date(weekStart+'T00:00:00Z');
  if(Number.isNaN(start.valueOf())||start.toISOString().slice(0,10)!==weekStart||start.getUTCDay()!==1)return res.status(400).json({error:'Week must begin on Monday'});
  const end=new Date(start);end.setUTCDate(end.getUTCDate()+6);
- // Use the verified coach's JWT and database RLS rather than a privileged service-role key.\n const headers={apikey:key,Authorization:'Bearer '+token};
+ // Use the verified coach's JWT and database RLS rather than a privileged service-role key.
+ const headers={apikey:key,Authorization:'Bearer '+token};
  res.setHeader('Cache-Control','no-store');
  const get=async(path:string)=>{const r=await fetch(url+'/rest/v1/'+path,{headers});if(!r.ok){const resource=path.split('?')[0];console.error('[coach-weekly-review] database read failed',resource,r.status);throw Error('REVIEW_READ_'+resource.toUpperCase()+'_'+r.status)}return r.json()};
  try{
