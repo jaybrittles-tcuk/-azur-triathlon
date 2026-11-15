@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {supabase} from '../lib/supabase';
 import CoachThresholdValidation from './CoachThresholdValidation';
+import CoachLibraryTargetSandbox from './CoachLibraryTargetSandbox';
 type Preview={status:string;originalMinutes:number;proposedMinutes:number;blockers:string[];gaps:string[];weeklyAssessment?:{volumeExplanation:string;recoveryExplanation:string;qualitySessionCount:number;missingReplacementCount:number;proposedSportCount:number;targetDeltaMinutes:number};proposed:Array<{date:string;existingId:string;existingMinutes:number;replacement:{title:string;sport:string;durationMin:number;prescription:unknown};whyTodayMatters:string}>};
 type WorkoutStep={target?:string;durationMin?:number;duration_min?:number;distanceMeters?:number;repeats?:number;restSeconds?:number;purpose?:string};
 function readableSteps(prescription:unknown):WorkoutStep[]{
@@ -33,6 +34,7 @@ export default function CoachVipaPreview({athleteId,weekStart}:{athleteId:string
  return <details><summary>VIPA structured replacement preview (read-only)</summary>
   <button type="button" disabled={loading} onClick={()=>void inspect()}>{loading?'Inspecting…':'Inspect approved workout alternatives'}</button>
   {error&&<p role="alert">{error}</p>}
+  <CoachLibraryTargetSandbox athleteId={athleteId}/>
   <CoachThresholdValidation athleteId={athleteId} onSaved={()=>{setData(null);setVerifiedReferences([]);setError('Thresholds saved. Select Inspect approved workout alternatives to refresh.')}}/>
   {data&&<div><details style={{marginTop:10,marginBottom:10}}><summary><strong>Coach-validated training references</strong> · {verifiedReferences.filter(t=>t.status==='ready_for_coach_review').length}/3 sports</summary><ul>{verifiedReferences.map(t=><li key={t.sport}>{t.sport}: {t.targets.length?t.targets.join('; '):t.summary}</li>)}</ul><p style={{fontSize:'0.85em'}}>Athlete-reported baseline (separate from coach approval): {thresholds.map(t=>t.sport+' '+t.display).join(' · ')}</p></details><p><strong>{data.status.replaceAll('_',' ')}</strong> · {data.proposed.length} proposed replacements · Existing {data.originalMinutes} min · Proposed {data.proposedMinutes} min</p>
    {data.weeklyAssessment&&<p><strong>Week quality:</strong> {data.weeklyAssessment.qualitySessionCount} quality-focused sessions · {data.weeklyAssessment.proposedSportCount} sports covered · {data.weeklyAssessment.missingReplacementCount} unreplaced sessions · {data.weeklyAssessment.targetDeltaMinutes>0?'+':''}{data.weeklyAssessment.targetDeltaMinutes} min vs target</p>}
