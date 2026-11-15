@@ -34,8 +34,8 @@ export default async function handler(req:any,res:any){
    get('coach_history_baseline_review?athlete_id=eq.'+athleteId+'&coach_user_id=eq.'+encodeURIComponent(user.id)+'&select=decision,approved_weekly_hours,spike_verified,recovery_reviewed&limit=2'),
    get('planned_session?athlete_id=eq.'+athleteId+'&planned_date=gte.'+weekStart+'&planned_date=lte.'+end.toISOString().slice(0,10)+'&is_active_version=eq.true&select=id,planned_date,sport,title,duration_min,status,locked&order=planned_date.asc'),
    get('coach_workout_library?approved=eq.true&select=workout_key,title,sport,family,duration_min,level,phases,prescription,approved&limit=500'),
-   get('athlete_profile?user_id=eq.'+athleteId+'&select=ftp_w,swim_threshold_sec_per_100m,run_threshold_sec_per_km&limit=2'),
-   get('athlete_onboarding?user_id=eq.'+athleteId+'&select=ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km&limit=2'),
+   get('athlete_profile?id=eq.'+athleteId+'&select=user_id,ftp_w,swim_threshold_sec_per_100m,run_threshold_sec_per_km&limit=2'),
+   Promise.resolve([]),
    get('coach_threshold_validation?athlete_id=eq.'+athleteId+'&coach_user_id=eq.'+user.id+'&select=ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km,validated_at&limit=2')
   ]);
   if([week,history,baseline,review,profiles,onboarding,validatedThresholdRows].some(a=>a.length>1))return res.status(409).json({error:'Conflicting review records'});
@@ -119,7 +119,9 @@ export default async function handler(req:any,res:any){
    existing:sessions.map((s:any)=>({...s,is_active_version:true})),slots:slots as any,
    library:library.map((s:any)=>({id:s.workout_key,title:s.title,sport:s.sport,family:s.family,durationMin:Number(s.duration_min),level:s.level,phases:s.phases,prescription:s.prescription,approved:s.approved}))
   });
-  const thresholdReadiness=inspectAthleteThresholds(profiles[0]||null,onboarding[0]||null);
+  const onboardingForProfile=profiles[0]?.user_id?await get('athlete_onboarding?user_id=eq.'+profiles[0].user_id+'&select=ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km&limit=2'):[];
+  if(onboardingForProfile.length>1)return res.status(409).json({error:'Conflicting onboarding records'});
+  const thresholdReadiness=inspectAthleteThresholds(profiles[0]||null,onboardingForProfile[0]||null);
   const validated=validatedThresholdRows[0]||null;
   const validatedValues={ftpWatts:validated?.ftp_watts??null,swimCssSecondsPer100m:validated?.swim_css_seconds_per_100m??null,runThresholdSecondsPerKm:validated?.run_threshold_seconds_per_km??null};
   const verifiedSource={values:validatedValues,coachValidated:!!validated,validatedAt:validated?.validated_at??null};
