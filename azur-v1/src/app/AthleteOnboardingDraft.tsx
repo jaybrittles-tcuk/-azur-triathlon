@@ -67,6 +67,13 @@ export default function AthleteOnboardingDraft(){
      }
      setSchedulePrefs(loaded);
      setTrainingDays(loaded.availableDays.map(day=>weekdays[day]));
+     const preview=(savedSchedule.preferences as Record<string,unknown>).firstWeekPreview;
+     if(preview&&typeof preview==='object'){
+      const p=preview as {status?:string;sessions?:{date:string;sport:string;title:string;duration_min:number}[]};
+      if(p.status==='awaiting_coach_review'&&Array.isArray(p.sessions)&&p.sessions.length>0){
+       setPlanSummary({sessions:p.sessions.length,total_minutes:p.sessions.reduce((n,x)=>n+Number(x.duration_min||0),0),calendar:p.sessions});
+      }
+     }
     }
    }
    const {data:profile}=await supabase.from('athlete_profile').select('display_name').eq('user_id',user.id).maybeSingle();
