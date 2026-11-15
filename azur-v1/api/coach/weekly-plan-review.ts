@@ -1,5 +1,6 @@
 import { reconcileWeeklyDraft } from '../../src/lib/calculations/weeklyDraftReconciliation.ts';
 import {previewVipaReplacements} from '../../src/lib/calculations/vipaReplacementPreview.ts';
+import {inspectAthleteThresholds} from '../../src/lib/calculations/athleteThresholdReadiness.ts';
 // Read-only coach planning review. This endpoint never publishes or modifies sessions.
 export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
@@ -24,15 +25,17 @@ export default async function handler(req:any,res:any){
  try{
   const assignment=await get('coach_athlete_assignment?coach_user_id=eq.'+encodeURIComponent(user.id)+'&athlete_id=eq.'+athleteId+'&select=athlete_id&limit=2');
   if(assignment.length!==1)return res.status(403).json({error:'Coach assignment required'});
-  const [week,history,baseline,review,sessions,library]=await Promise.all([
+  const [week,history,baseline,review,sessions,library,profiles,onboarding]=await Promise.all([
    get('season_week?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id,phase,target_hours,locked&limit=2'),
    get('athlete_history_robust_review?athlete_id=eq.'+athleteId+'&select=validation_status,recent_weeks,recent_median_hours,recent_mean_hours,three_sport_weeks&limit=2'),
    get('athlete_history_baseline?athlete_id=eq.'+athleteId+'&select=validation_status,activity_count,excluded_count&limit=2'),
    get('coach_history_baseline_review?athlete_id=eq.'+athleteId+'&coach_user_id=eq.'+encodeURIComponent(user.id)+'&select=decision,approved_weekly_hours,spike_verified,recovery_reviewed&limit=2'),
    get('planned_session?athlete_id=eq.'+athleteId+'&planned_date=gte.'+weekStart+'&planned_date=lte.'+end.toISOString().slice(0,10)+'&is_active_version=eq.true&select=id,planned_date,sport,title,duration_min,status,locked&order=planned_date.asc'),
-   get('coach_workout_library?approved=eq.true&select=workout_key,title,sport,family,duration_min,level,phases,prescription,approved&limit=500')
+   get('coach_workout_library?approved=eq.true&select=workout_key,title,sport,family,duration_min,level,phases,prescription,approved&limit=500'),
+   get('athlete_profile?user_id=eq.'+athleteId+'&select=ftp_w,swim_threshold_sec_per_100m,run_threshold_sec_per_km&limit=2'),
+   get('athlete_onboarding?user_id=eq.'+athleteId+'&select=ftp_watts,swim_css_seconds_per_100m,run_threshold_seconds_per_km&limit=2')
   ]);
-  if([week,history,baseline,review].some(a=>a.length>1))return res.status(409).json({error:'Conflicting review records'});
+  if([week,history,baseline,review,profiles,onboarding].some(a=>a.length>1))return res.status(409).json({error:'Conflicting review records'});
   const h=history[0],b=baseline[0],a=review[0],w=week[0];
   const approved=!!(h&&b&&a&&h.validation_status==='validated'&&h.recent_weeks>=4&&b.validation_status==='validated'&&a.decision==='validated'&&a.spike_verified&&a.recovery_reviewed&&Number(a.approved_weekly_hours)>0);
   const scheduledMinutes=sessions.reduce((n:number,s:any)=>n+Number(s.duration_min||0),0);
@@ -113,7 +116,8 @@ export default async function handler(req:any,res:any){
    existing:sessions.map((s:any)=>({...s,is_active_version:true})),slots:slots as any,
    library:library.map((s:any)=>({id:s.workout_key,title:s.title,sport:s.sport,family:s.family,durationMin:Number(s.duration_min),level:s.level,phases:s.phases,prescription:s.prescription,approved:s.approved}))
   });
+  const thresholdReadiness=inspectAthleteThresholds(profiles[0]||null,onboarding[0]||null);
   const ceiling=approved?Number(a.approved_weekly_hours):null;
-  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
+  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,thresholdReadiness,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
  }catch(err){const code=err instanceof Error&&/^REVIEW_READ_[A-Z_]+_\d+$/.test(err.message)?err.message:'REVIEW_PROCESSING_ERROR';console.error('[coach-weekly-review] failed',code);return res.status(503).json({error:'Unable to load planning review',diagnosticCode:code});}
 }
