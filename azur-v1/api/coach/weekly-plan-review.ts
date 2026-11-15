@@ -61,9 +61,10 @@ export default async function handler(req:any,res:any){
    baseline:{onboardingComplete:true,requestedWeeklyHours:Number(setup.weekly_hours),recentWeeklyHours:setup.recent_weekly_hours==null?null:Number(setup.recent_weekly_hours),trainingBackground:setup.training_background,trainingConsistency:setup.training_consistency,trainingConcern:setup.current_training_concern||'unsure',canSwim200m:setup.can_swim_200m===true,coachApproved:approvalCurrent,approvedWeeklyHours:approvalCurrent?Number(questionnaireApproval.approved_weekly_hours):null}
   }):null;
   if(req.method==='POST'){
+   if(req.headers.origin&&req.headers.host&&new URL(req.headers.origin).host!==req.headers.host)return res.status(403).json({error:'Cross-origin coach action blocked'});
    if(!['save_questionnaire_draft','approve_questionnaire_draft'].includes(req.body?.action))return res.status(400).json({error:'Unsupported coach action'});
    if(!approvalCurrent||questionnaireDraftPreview?.status!=='ready_for_coach_review')return res.status(409).json({error:'A current approved baseline and safe draft are required',reasons:questionnaireDraftPreview?.status==='blocked'?questionnaireDraftPreview.reasons:[]});
-   if(sessions.length||w?.locked)return res.status(409).json({error:'Existing sessions or a locked week prevent a new draft'});
+   if(sessions.length||w?.locked||!w)return res.status(409).json({error:'An unlocked season week with no existing sessions is required'});
    const existingDrafts=await get('weekly_plan_draft?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id,proposal_fingerprint&limit=2');
    if(req.body.action==='approve_questionnaire_draft'){
     if(existingDrafts.length!==1)return res.status(409).json({error:'Exactly one saved proposal is required for approval'});
