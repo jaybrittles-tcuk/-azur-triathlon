@@ -38,7 +38,37 @@ export default async function handler(req:any,res:any){
    ...(w?.locked?['Season week is locked']:[]),
    ...(sessions.some((s:any)=>s.locked||s.status!=='planned')?['Week includes locked or modified/completed sessions']:[])
   ];
+  // Read-only pre-publication assessment. The database publisher remains the final authority.
+  const drafts=await get('weekly_plan_draft?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id,revision,sessions,created_at&order=revision.desc&limit=2');
+  const latestDraft=drafts[0]||null;
+  let latestDecision:any=null;
+  if(latestDraft){
+   const decisions=await get('weekly_plan_decision?draft_id=eq.'+latestDraft.id+'&select=decision,coach_user_id,decided_at&order=decided_at.desc&limit=1');
+   latestDecision=decisions[0]||null;
+  }
+  const draftSessions=Array.isArray(latestDraft?.sessions)?latestDraft.sessions:[];
+  const proposedMinutes=draftSessions.reduce((sum:number,item:any)=>sum+(Number(item?.session?.durationMin)||0),0);
+  const draftShapeValid=draftSessions.length>0&&draftSessions.length<=21&&draftSessions.every((item:any)=>{
+   const x=item?.session;
+   return typeof item?.date==='string'&&item.date>=weekStart&&item.date<=end.toISOString().slice(0,10)&&
+    ['swim','bike','run'].includes(x?.sport)&&typeof x?.title==='string'&&x.title.trim().length>0&&
+    Number.isInteger(x?.durationMin)&&x.durationMin>=10&&x.durationMin<=240&&
+    [1,2,3].includes(Number(x?.priority))&&typeof x?.sessionClass==='string'&&x.sessionClass.length>0&&
+    x.targets&&typeof x.targets==='object'&&!Array.isArray(x.targets)&&
+    x.prescription&&typeof x.prescription==='object'&&!Array.isArray(x.prescription);
+  });
+  const sportDates=draftSessions.map((item:any)=>String(item?.date)+'/'+String(item?.session?.sport));
+  const preflightBlockers=[
+   ...blockers,
+   ...(!latestDraft?['No saved draft for this week']:[]),
+   ...(latestDraft&&!draftShapeValid?['Draft contains incomplete or invalid workouts']:[]),
+   ...(new Set(sportDates).size!==sportDates.length?['Duplicate sport and date in draft']:[]),
+   ...(latestDraft&&(!latestDecision||latestDecision.decision!=='approved'||latestDecision.coach_user_id!==user.id)?['Latest draft lacks approval by this assigned coach']:[]),
+   ...(sessions.length?['Existing calendar sessions require reconciliation before full publication']:[]),
+   ...(w&&approved&&proposedMinutes>Math.min(Number(w.target_hours),Number(a.approved_weekly_hours))*60?['Draft exceeds approved capacity or saved week target']:[])
+  ];
+  const preflight={draftId:latestDraft?.id||null,revision:latestDraft?.revision||null,proposedSessions:draftSessions.length,proposedHours:Math.round(proposedMinutes/6)/10,readyForFullPublication:preflightBlockers.length===0,blockers:[...new Set(preflightBlockers)],readOnly:true};
   const ceiling=approved?Number(a.approved_weekly_hours):null;
-  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
+  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
  }catch{return res.status(503).json({error:'Unable to load planning review'});}
 }
