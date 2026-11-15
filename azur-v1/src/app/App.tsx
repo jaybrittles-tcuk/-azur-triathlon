@@ -9583,6 +9583,15 @@ function AthleteHistoryBaselineStatus() {
 }
 
 function DataSourcesView() {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('intervals') !== 'connected') return;
+    params.delete('intervals');
+    const remaining = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (remaining ? '?' + remaining : '') + window.location.hash);
+    // Preview only. Never import or publish sessions from an OAuth callback.
+    void previewIntervals();
+  }, []);
   async function rideRequest(path:string, body?:object) {
     const {data:{session}} = await supabase.auth.getSession();
     if (!session?.access_token) throw new Error('Please sign in again.');
