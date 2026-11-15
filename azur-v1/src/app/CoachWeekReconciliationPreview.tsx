@@ -1,4 +1,5 @@
 import ApprovedWorkoutReconciliation from './ApprovedWorkoutReconciliation';
+import CoachVipaPreview from './CoachVipaPreview';
 import {useEffect,useState} from 'react';
 import {supabase} from '../lib/supabase';
 import {reviewWeekTarget} from '../lib/calculations/weeklyPlanSafety';
@@ -29,6 +30,6 @@ export default function CoachWeekReconciliationPreview(){
  }
  useEffect(()=>{void inspect()},[]);
  return <section className="coach-attention-group"><header className="coach-attention-heading"><div><h4>Weekly completeness inspection</h4><p>Read-only training target reconciliation; never changes the athlete calendar.</p></div><button type="button" disabled={loading} onClick={()=>void inspect()}>Refresh</button></header>
- {error&&<p role="alert">{error}</p>}{loading?<p>Checking planned training…</p>:rows.length?rows.map(r=><article key={r.athleteId} className="coach-attention-row"><div><strong>{r.athleteName} · {r.weekStart} · {r.status}</strong><p>{r.sessions} sessions · {r.plannedMinutes} of {Math.round(r.targetHours*60)} planned minutes · shortfall {r.shortfall} min</p>{r.reasons.map(x=><p key={x}>{x}</p>)}<small>Only approved workouts can be proposed; publication remains disabled.</small><ApprovedWorkoutReconciliation weekStart={r.weekStart} targetHours={r.targetHours} phase={r.phase} existing={r.existing}/></div></article>):<p>No assigned athlete has a weekly target record for the current week.</p>}
+ {error&&<p role="alert">{error}</p>}{loading?<p>Checking planned training…</p>:rows.length?rows.map(r=><article key={r.athleteId} className="coach-attention-row"><div><strong>{r.athleteName} · {r.weekStart} · {r.status}</strong><p>{r.sessions} sessions · {r.plannedMinutes} of {Math.round(r.targetHours*60)} planned minutes · shortfall {r.shortfall} min</p>{r.reasons.map(x=><p key={x}>{x}</p>)}<small>Only approved workouts can be proposed; publication remains disabled.</small><CoachVipaPreview athleteId={r.athleteId} weekStart={r.weekStart}/><ApprovedWorkoutReconciliation weekStart={r.weekStart} targetHours={r.targetHours} phase={r.phase} existing={r.existing}/></div></article>):<p>No assigned athlete has a weekly target record for the current week.</p>}
  </section>;
 }
