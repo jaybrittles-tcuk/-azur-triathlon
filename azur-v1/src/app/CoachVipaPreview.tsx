@@ -10,7 +10,7 @@ export default function CoachVipaPreview({athleteId,weekStart}:{athleteId:string
    if(!session?.access_token)throw Error('Coach sign-in required');
    const r=await fetch('/api/coach/weekly-plan-review?athleteId='+encodeURIComponent(athleteId)+'&weekStart='+encodeURIComponent(weekStart),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
    const payload=await r.json();
-   if(!r.ok)throw Error(payload.error||'Preview unavailable');
+   if(!r.ok)throw Error((payload.error||'Preview unavailable')+(payload.diagnosticCode?' · '+payload.diagnosticCode:''));
    setData(payload.vipaPreview||null);
   }catch(e){setError(e instanceof Error?e.message:'Preview unavailable');}finally{setLoading(false);}
  }
