@@ -40,10 +40,15 @@ export default async function handler(req:any,res:any){
   ]);
   if([week,history,baseline,review,profiles,onboarding,validatedThresholdRows].some(a=>a.length>1))return res.status(409).json({error:'Conflicting review records'});
   const h=history[0],b=baseline[0],a=review[0],w=week[0];
+  const setupRows=profiles[0]?.user_id?await get('athlete_onboarding?user_id=eq.'+profiles[0].user_id+'&select=onboarding_step,weekly_hours,recent_weekly_hours,training_background,training_consistency,current_training_concern,can_swim_200m,race_distance,device&limit=2'):[];
+  if(setupRows.length>1)return res.status(409).json({error:'Conflicting athlete onboarding records'});
+  const setup=setupRows[0]||null;
+  const questionnaireComplete=!!(setup&&Number(setup.onboarding_step)>=5&&Number.isFinite(Number(setup.weekly_hours))&&Number(setup.weekly_hours)>=2&&Number(setup.weekly_hours)<=25&&['novice','regular','established'].includes(setup.training_background)&&['under4','4to7','8plus'].includes(setup.training_consistency));
+  const questionnaireReview={eligibleForCoachAssessment:questionnaireComplete,source:'athlete_reported',historyRequired:false,requestedWeeklyHours:questionnaireComplete?Number(setup.weekly_hours):null,recentWeeklyHours:setup?.recent_weekly_hours==null?null:Number(setup.recent_weekly_hours),trainingConcern:setup?.current_training_concern||'unknown',swimReadiness:setup?.can_swim_200m??null,coachApprovalRequired:true,canPublish:false};
   const approved=!!(h&&b&&a&&h.validation_status==='validated'&&h.recent_weeks>=4&&b.validation_status==='validated'&&a.decision==='validated'&&a.spike_verified&&a.recovery_reviewed&&Number(a.approved_weekly_hours)>0);
   const scheduledMinutes=sessions.reduce((n:number,s:any)=>n+Number(s.duration_min||0),0);
   const blockers=[
-   ...(!approved?['Coach-validated history and safety checks required']:[]),
+   ...(!approved?[questionnaireComplete?'Questionnaire baseline available for coach assessment; approval and safe plan publication path not yet enabled':'Coach-validated history or completed questionnaire baseline and safety checks required']:[]),
    ...(!w?['No season week exists']:[]),
    ...(w?.locked?['Season week is locked']:[]),
    ...(sessions.some((s:any)=>s.locked||s.status!=='planned')?['Week includes locked or modified/completed sessions']:[])
@@ -128,6 +133,6 @@ export default async function handler(req:any,res:any){
   const verifiedTargetReferences=(['swim','bike','run'] as const).map(sport=>previewThresholdTargets(sport,verifiedSource));
   const personalisedStepPreviews=(vipaPreview.proposed||[]).map((proposal:any)=>({existingId:proposal.existingId,...previewPersonalisedSteps(proposal.replacement,verifiedSource)}));
   const ceiling=approved?Number(a.approved_weekly_hours):null;
-  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,thresholdReadiness,verifiedTargetReferences,personalisedStepPreviews,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
+  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,thresholdReadiness,verifiedTargetReferences,personalisedStepPreviews,activityCount:b?.activity_count||0,questionnaireReview,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
  }catch(err){const code=err instanceof Error&&/^REVIEW_READ_[A-Z_]+_\d+$/.test(err.message)?err.message:'REVIEW_PROCESSING_ERROR';console.error('[coach-weekly-review] failed',code);return res.status(503).json({error:'Unable to load planning review',diagnosticCode:code});}
 }
