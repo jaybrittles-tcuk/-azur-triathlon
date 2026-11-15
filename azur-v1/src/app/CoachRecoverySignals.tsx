@@ -1,6 +1,7 @@
 import {useEffect,useState} from 'react';
 import {supabase} from '../lib/supabase';
 import {assessSessionEffortReview} from '../lib/calculations/sessionEffortReview';
+import {normalizeWorkoutIntervals} from '../lib/calculations/workoutIntensity';
 
 type Signal={id:string;athleteId:string;source:string;reportedRpe:number;reason:string;date:string;athleteName:string;workoutTitle:string};
 export default function CoachRecoverySignals(){
@@ -26,11 +27,12 @@ export default function CoachRecoverySignals(){
    const sessionIds=[...new Set([...(feedback.data||[]),...(activities.data||[])].map(r=>r.planned_session_id).filter((id):id is string=>typeof id==='string'))];
    const [profiles,sessions]=await Promise.all([
     supabase.from('athlete_profile').select('id,display_name').in('id',ids),
-    sessionIds.length?supabase.from('planned_session').select('id,athlete_id,title').in('id',sessionIds):Promise.resolve({data:[],error:null})
+    sessionIds.length?supabase.from('planned_session').select('id,athlete_id,title,duration_min,prescription').in('id',sessionIds):Promise.resolve({data:[],error:null})
    ]);
    if(profiles.error||sessions.error)throw Error(profiles.error?.message||sessions.error?.message||'Unable to load athlete and workout context');
    const names=new Map((profiles.data||[]).map(p=>[p.id,p.display_name||'Assigned athlete']));
    const titles=new Map((sessions.data||[]).map(p=>[p.id+':'+p.athlete_id,p.title||'Workout title unavailable']));
+   const sessionById=new Map((sessions.data||[]).map(p=>[p.id+':'+p.athlete_id,p]));
    const seen=new Set<string>();const result:Signal[]=[];
    // Prefer feedback for a session when both tables have a reported RPE.
    for(const [rows,source] of [[feedback.data||[],'athlete feedback'],[activities.data||[],'recorded activity']] as const){
@@ -38,8 +40,13 @@ export default function CoachRecoverySignals(){
      const key=row.athlete_id+':'+(row.planned_session_id||source+':'+row.id);
      if(seen.has(key))continue;
      seen.add(key);
-     const assessment=assessSessionEffortReview({reportedRpe:row.session_rpe,source:source==='athlete feedback'?'manual':'unknown'});
-     if(assessment.requiresCoachReview)result.push({id:source+row.id,athleteId:row.athlete_id,source,reportedRpe:row.session_rpe,reason:assessment.reason,date:row.created_at,athleteName:names.get(row.athlete_id)||'Assigned athlete',workoutTitle:row.planned_session_id?titles.get(row.planned_session_id+':'+row.athlete_id)||'Workout details unavailable':'Unlinked activity / feedback'});
+     const session=row.planned_session_id?sessionById.get(row.planned_session_id+':'+row.athlete_id):undefined;
+     const prescription=session?.prescription as {azurWorkout?:{steps?:unknown}}|undefined;
+     const intervals=normalizeWorkoutIntervals(prescription?.azurWorkout?.steps);
+     const workRpe=intervals.filter(x=>x.kind==='work'&&x.target?.metric==='rpe').map(x=>x.target!.high);
+     const plannedRpeHigh=workRpe.length?Math.max(...workRpe):null;
+     const assessment=assessSessionEffortReview({reportedRpe:row.session_rpe,plannedRpeHigh,source:source==='athlete feedback'?'manual':'unknown'});
+     if(assessment.requiresCoachReview)result.push({id:source+row.id,athleteId:row.athlete_id,source,reportedRpe:row.session_rpe,reason:assessment.reason+(plannedRpeHigh!==null?' Prescribed work effort: up to RPE '+plannedRpeHigh+'/10.':' Prescribed RPE unavailable; no effort mismatch inferred.'),date:row.created_at,athleteName:names.get(row.athlete_id)||'Assigned athlete',workoutTitle:row.planned_session_id?titles.get(row.planned_session_id+':'+row.athlete_id)||'Workout details unavailable':'Unlinked activity / feedback'});
     }
    }
    setSignals(result.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,25));
