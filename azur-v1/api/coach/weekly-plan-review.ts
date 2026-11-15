@@ -1,4 +1,5 @@
 import { reconcileWeeklyDraft } from '../../src/lib/calculations/weeklyDraftReconciliation.ts';
+import {previewVipaReplacements} from '../../src/lib/calculations/vipaReplacementPreview.ts';
 // Read-only coach planning review. This endpoint never publishes or modifies sessions.
 export default async function handler(req:any,res:any){
  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
@@ -22,12 +23,13 @@ export default async function handler(req:any,res:any){
  try{
   const assignment=await get('coach_athlete_assignment?coach_user_id=eq.'+encodeURIComponent(user.id)+'&athlete_id=eq.'+athleteId+'&select=athlete_id&limit=2');
   if(assignment.length!==1)return res.status(403).json({error:'Coach assignment required'});
-  const [week,history,baseline,review,sessions]=await Promise.all([
+  const [week,history,baseline,review,sessions,library]=await Promise.all([
    get('season_week?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id,phase,target_hours,locked&limit=2'),
    get('athlete_history_robust_review?athlete_id=eq.'+athleteId+'&select=validation_status,recent_weeks,recent_median_hours,recent_mean_hours,three_sport_weeks&limit=2'),
    get('athlete_history_baseline?athlete_id=eq.'+athleteId+'&select=validation_status,activity_count,excluded_count&limit=2'),
    get('coach_history_baseline_review?athlete_id=eq.'+athleteId+'&coach_user_id=eq.'+encodeURIComponent(user.id)+'&select=decision,approved_weekly_hours,spike_verified,recovery_reviewed&limit=2'),
-   get('planned_session?athlete_id=eq.'+athleteId+'&planned_date=gte.'+weekStart+'&planned_date=lte.'+end.toISOString().slice(0,10)+'&is_active_version=eq.true&select=id,planned_date,sport,title,duration_min,status,locked&order=planned_date.asc')
+   get('planned_session?athlete_id=eq.'+athleteId+'&planned_date=gte.'+weekStart+'&planned_date=lte.'+end.toISOString().slice(0,10)+'&is_active_version=eq.true&select=id,planned_date,sport,title,duration_min,status,locked&order=planned_date.asc'),
+   get('coach_workout_library?approved=eq.true&select=workout_key,title,sport,family,duration_min,level,phases,prescription,approved&limit=500')
   ]);
   if([week,history,baseline,review].some(a=>a.length>1))return res.status(409).json({error:'Conflicting review records'});
   const h=history[0],b=baseline[0],a=review[0],w=week[0];
@@ -84,7 +86,33 @@ export default async function handler(req:any,res:any){
    decision:latestDecision?.decision||'pending',shapeValid:draftShapeValid
   }:null;
   const preflight={draftId:latestDraft?.id||null,revision:latestDraft?.revision||null,proposedSessions:draftSessions.length,proposedHours:Math.round(proposedMinutes/6)/10,readyForFullPublication:preflightBlockers.length===0,blockers:[...new Set(preflightBlockers)],readOnly:true};
+  // Read-only VIPA preview: never writes to planned_session or weekly_plan_draft.
+  // Preserve every existing day/sport; preview only structured replacements.
+  const slots=sessions.map((s:any)=>({
+   day:Math.round((Date.parse(s.planned_date+'T12:00:00Z')-Date.parse(weekStart+'T12:00:00Z'))/86400000),
+   sport:s.sport,
+   family:s.sport==='swim'?(s.planned_date===weekStart?'threshold':'technique'):
+    s.sport==='bike'?(s.planned_date===weekStart?'strength_endurance':'aerobic_endurance'):
+    (s.planned_date===weekStart?'technique':'aerobic_endurance'),
+   maxMinutes:Number(s.duration_min)+15,maxLevel:2
+  }));
+  // For each sport, prefer a quality session on its first appearance and aerobic/technique thereafter.
+  for(const sport of ['swim','bike','run']){
+   const sportSlots=slots.filter((s:any)=>s.sport===sport);
+   if(sportSlots.length){
+    sportSlots[0].family=sport==='swim'?'threshold':sport==='bike'?'strength_endurance':'technique';
+    for(const later of sportSlots.slice(1))later.family=sport==='swim'?'technique':'aerobic_endurance';
+   }
+  }
+  const vipaPreview=previewVipaReplacements({
+   weekStart,phase:'base',targetMinutes:w?Math.round(Number(w.target_hours)*60):0,
+   approvedCapacityMinutes:approved?Math.round(Number(a.approved_weekly_hours)*60):0,
+   historyValidated:approved,recoveryReviewed:!!a?.recovery_reviewed,spikeVerified:!!a?.spike_verified,
+   fatigueFlag:false,injuryFlag:false,
+   existing:sessions.map((s:any)=>({...s,is_active_version:true})),slots:slots as any,
+   library:library.map((s:any)=>({id:s.workout_key,title:s.title,sport:s.sport,family:s.family,durationMin:Number(s.duration_min),level:s.level,phases:s.phases,prescription:s.prescription,approved:s.approved}))
+  });
   const ceiling=approved?Number(a.approved_weekly_hours):null;
-  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
+  return res.status(200).json({weekStart,phase:w?.phase||null,storedTargetHours:w?Number(w.target_hours):null,approvedCapacityHours:ceiling,scheduledHours:Math.round(scheduledMinutes/6)/10,vipaPreview,activityCount:b?.activity_count||0,sessionCount:sessions.length,sessions,blockers,preflight,reconciliation,savedProposal,requiresReview:true,canPublish:false,message:'Coach review only. No calendar changes have been made.'});
  }catch{return res.status(503).json({error:'Unable to load planning review'});}
 }
