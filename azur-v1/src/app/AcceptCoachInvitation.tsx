@@ -21,7 +21,12 @@ export default function AcceptCoachInvitation(){
  async function accept(){
   if(!invitation||busy)return;
   setBusy(true);setStatus('Accepting your invitation…');
-  const {data,error}=await supabase.from('coach_athlete_invitation').update({accepted_at:new Date().toISOString()}).eq('id',invitation.id).is('accepted_at',null).select('id').maybeSingle();
+  const {data:{user},error:authError}=await supabase.auth.getUser();
+  if(authError||!user||!user.email_confirmed_at||user.email?.toLowerCase()!==invitation.invitee_email.toLowerCase()){
+   setBusy(false);setStatus('Please sign in with your verified invited email address.');return;
+  }
+  // Onboarding verifies accepted_by = auth.uid(). Save both fields atomically.
+  const {data,error}=await supabase.from('coach_athlete_invitation').update({accepted_at:new Date().toISOString(),accepted_by:user.id}).eq('id',invitation.id).is('accepted_at',null).is('accepted_by',null).select('id').maybeSingle();
   setBusy(false);
   if(error||!data){setStatus('We could not verify acceptance: '+(error?.message||'Please request a new link.'));return;}
   window.location.assign('/onboarding');
