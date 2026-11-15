@@ -32,3 +32,14 @@ test('summarises target delta and quality workload',()=>{
  assert.equal(r.weeklyAssessment.qualitySessionCount,1);
  assert.equal(r.weeklyAssessment.targetDeltaMinutes,0);
 });
+
+test('explains target shortfall without silently filling the plan',()=>{
+ const r=previewVipaReplacements({...base,targetMinutes:55});
+ assert.equal(r.proposedMinutes,45);
+ assert.match(r.weeklyAssessment.volumeExplanation,/10 minutes below target/);
+ assert.match(r.weeklyAssessment.volumeExplanation,/without adding unapproved filler/);
+});
+test('explains why a matched target does not need filler',()=>{
+ const r=previewVipaReplacements(base);
+ assert.match(r.weeklyAssessment.volumeExplanation,/matches the saved weekly target/);
+});
