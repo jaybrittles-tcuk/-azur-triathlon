@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {reconcileWeeklyDraft} from './weeklyDraftReconciliation.ts';
+const base={weekStart:'2026-11-16',existing:[],proposed:[{date:'2026-11-16',session:{id:'swim-1',sport:'swim',durationMin:45}}],approvedCapacityMinutes:480,weekTargetMinutes:390};
+const calendar={id:'old-swim',planned_date:'2026-11-16',sport:'swim',duration_min:45,locked:false,status:'planned',is_active_version:true};
+test('empty week passes read-only reconciliation',()=>{const r=reconcileWeeklyDraft(base);assert.equal(r.status,'clear');assert.equal(r.combinedMinutes,45)});
+test('same sport/day cannot be silently duplicated',()=>{const r=reconcileWeeklyDraft({...base,existing:[calendar]});assert.equal(r.status,'blocked');assert.equal(r.overlaps.length,1)});
+test('unrelated existing workout still requires review',()=>{const r=reconcileWeeklyDraft({...base,existing:[{...calendar,sport:'bike'}]});assert.equal(r.status,'needs_coach_review')});
+test('completed or locked workout blocks',()=>{for(const existing of [{...calendar,sport:'bike',locked:true},{...calendar,sport:'bike',status:'completed'}])assert.equal(reconcileWeeklyDraft({...base,existing:[existing]}).status,'blocked')});
+test('combined workload respects lower weekly target',()=>{const r=reconcileWeeklyDraft({...base,existing:[{...calendar,sport:'bike',duration_min:360}]});assert.equal(r.status,'blocked');assert.match(r.blockers.join(' '),/Combined workload/)});
+test('invalid or duplicate proposal is blocked',()=>{assert.equal(reconcileWeeklyDraft({...base,proposed:[...base.proposed,...base.proposed]}).status,'blocked');assert.equal(reconcileWeeklyDraft({...base,proposed:[{...base.proposed[0],date:'2026-11-23'}]}).status,'blocked')});
