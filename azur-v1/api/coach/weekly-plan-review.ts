@@ -61,10 +61,20 @@ export default async function handler(req:any,res:any){
    baseline:{onboardingComplete:true,requestedWeeklyHours:Number(setup.weekly_hours),recentWeeklyHours:setup.recent_weekly_hours==null?null:Number(setup.recent_weekly_hours),trainingBackground:setup.training_background,trainingConsistency:setup.training_consistency,trainingConcern:setup.current_training_concern||'unsure',canSwim200m:setup.can_swim_200m===true,coachApproved:approvalCurrent,approvedWeeklyHours:approvalCurrent?Number(questionnaireApproval.approved_weekly_hours):null}
   }):null;
   if(req.method==='POST'){
-   if(req.body?.action!=='save_questionnaire_draft')return res.status(400).json({error:'Unsupported coach action'});
+   if(!['save_questionnaire_draft','approve_questionnaire_draft'].includes(req.body?.action))return res.status(400).json({error:'Unsupported coach action'});
    if(!approvalCurrent||questionnaireDraftPreview?.status!=='ready_for_coach_review')return res.status(409).json({error:'A current approved baseline and safe draft are required',reasons:questionnaireDraftPreview?.status==='blocked'?questionnaireDraftPreview.reasons:[]});
    if(sessions.length||w?.locked)return res.status(409).json({error:'Existing sessions or a locked week prevent a new draft'});
-   const existingDrafts=await get('weekly_plan_draft?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id&limit=1');
+   const existingDrafts=await get('weekly_plan_draft?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id,proposal_fingerprint&limit=2');
+   if(req.body.action==='approve_questionnaire_draft'){
+    if(existingDrafts.length!==1)return res.status(409).json({error:'Exactly one saved proposal is required for approval'});
+    const expected=createHash('sha256').update(JSON.stringify({athleteId,weekStart,approvedAt:questionnaireApproval.reviewed_at,proposed:questionnaireDraftPreview.sessions.map(item=>({date:item.date,reason:item.reason,session:{id:item.session.id,sport:item.session.sport,title:item.session.title,durationMin:item.session.durationMin,priority:1,sessionClass:'introductory',targets:{},prescription:item.session.prescription}}))})).digest('hex');
+    if(existingDrafts[0].proposal_fingerprint!==expected)return res.status(409).json({error:'Saved proposal no longer matches the current athlete baseline and session selection'});
+    const prior=await get('weekly_plan_decision?draft_id=eq.'+existingDrafts[0].id+'&select=id&limit=1');
+    if(prior.length)return res.status(409).json({error:'A coach decision already exists for this proposal'});
+    const response=await fetch(url+'/rest/v1/weekly_plan_decision',{method:'POST',headers:{...headers,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({draft_id:existingDrafts[0].id,coach_user_id:user.id,decision:'approved',reason:'Coach reviewed introductory questionnaire-based training proposal. Publication requires separate safety verification.'})});
+    if(!response.ok){console.error('[coach-weekly-review] decision insert failed',response.status);return res.status(409).json({error:'Approval could not be recorded. No workouts were published.'});}
+    return res.status(201).json({draftId:existingDrafts[0].id,approved:true,published:false,message:'Coach approval recorded. Publication remains disabled.'});
+   }
    if(existingDrafts.length)return res.status(409).json({error:'A saved draft already exists. Review it before creating another revision.'});
    const proposed=questionnaireDraftPreview.sessions.map(item=>({date:item.date,reason:item.reason,session:{
     id:item.session.id,sport:item.session.sport,title:item.session.title,durationMin:item.session.durationMin,
