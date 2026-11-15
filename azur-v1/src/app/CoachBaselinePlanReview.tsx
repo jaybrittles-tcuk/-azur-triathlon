@@ -12,6 +12,7 @@ export default function CoachBaselinePlanReview(){
  const [busy,setBusy]=useState(false);
  const [drafts,setDrafts]=useState<Array<{id:string;week_start:string;revision:number;phase:string;sessions:unknown;created_at:string}>>([]);
  const [error,setError]=useState('');
+ const [baseline,setBaseline]=useState<{source:string;validation_status:string;activity_count:number;excluded_count:number;window_start:string;window_end:string;sport_summary:Record<string,{count?:number;minutes?:number}>}|null>(null);
  const requestId=useRef(0);
  useEffect(()=>{let live=true;void(async()=>{
   const {data:{user}}=await supabase.auth.getUser();
@@ -29,7 +30,7 @@ export default function CoachBaselinePlanReview(){
  async function inspect(){
   if(!selected)return;
   const currentRequest=++requestId.current;
-  setBusy(true);setError('');setReview(null);setDrafts([]);
+  setBusy(true);setError('');setReview(null);setDrafts([]);setBaseline(null);
   try{
    const {data:{session}}=await supabase.auth.getSession();
    if(!session?.access_token)throw Error('Sign in to review athlete plans');
@@ -42,6 +43,9 @@ export default function CoachBaselinePlanReview(){
    const {data:draftRows,error:draftError}=await supabase.from('weekly_plan_draft').select('id,week_start,revision,phase,sessions,created_at').eq('athlete_id',selected).eq('week_start',monday(offset)).order('revision',{ascending:false}).limit(3);
    if(draftError)throw Error('Calendar review loaded, but saved drafts could not be inspected: '+draftError.message);
    if(currentRequest===requestId.current)setDrafts(draftRows||[]);
+   const {data:history,error:historyError}=await supabase.from('athlete_history_baseline').select('source,validation_status,activity_count,excluded_count,window_start,window_end,sport_summary').eq('athlete_id',selected).order('window_end',{ascending:false}).limit(1).maybeSingle();
+   if(historyError)throw Error('Historical baseline could not be inspected: '+historyError.message);
+   if(currentRequest===requestId.current)setBaseline(history||null);
   }catch(e){if(currentRequest===requestId.current)setError(e instanceof Error?e.message:'Review unavailable')}finally{if(currentRequest===requestId.current)setBusy(false)}
  }
  return <section className="coach-attention-group" aria-label="Validated baseline weekly plan review" style={{padding:'16px 14px',paddingBottom:96}}>
@@ -55,6 +59,7 @@ export default function CoachBaselinePlanReview(){
   {review&&<div style={{marginTop:16}}>
    <strong>{review.weekStart} · {review.phase||'No phase set'}</strong>
    <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:8,margin:'12px 0'}}>{[['Approved capacity',review.approvedCapacityHours==null?'Pending':review.approvedCapacityHours.toFixed(1)+' h'],['Weekly target',review.storedTargetHours==null?'Not set':review.storedTargetHours.toFixed(2)+' h'],['Calendar',review.scheduledHours.toFixed(2)+' h · '+review.sessionCount+' sessions'],['History',review.activityCount+' activities']].map(([label,value])=><div key={label} style={{background:'rgba(10,31,49,.5)',border:'1px solid rgba(120,177,212,.18)',borderRadius:12,padding:'10px 12px',minWidth:0}}><small style={{display:'block',opacity:.75,marginBottom:4}}>{label}</small><strong style={{fontSize:16}}>{value}</strong></div>)}</div>
+   <section aria-label="Historical baseline evidence" style={{border:'1px solid rgba(120,177,212,.24)',borderRadius:12,padding:12,margin:'12px 0'}}><strong>Training history evidence</strong>{!baseline?<p>No saved multisport baseline. Athlete device preview alone does not establish an approved starting capacity.</p>:<><p>{baseline.activity_count} activities · {baseline.excluded_count} excluded · {baseline.window_start} to {baseline.window_end}</p><p>Source: {baseline.source} · {baseline.validation_status==='validated'?'Validated historical summary':'Coach validation required'}</p><div style={{display:'flex',gap:12,flexWrap:'wrap'}}>{(['swim','bike','run'] as const).map(sport=><span key={sport} style={{fontSize:13,textTransform:'capitalize'}}>{sport}: {baseline.sport_summary?.[sport]?.count??0} activities · {Math.round((baseline.sport_summary?.[sport]?.minutes??0)/60)} h</span>)}</div></>}</section>
    {review.blockers.length>0&&<div role="status"><strong>Publication blockers</strong>{review.blockers.map((b,i)=><p key={i}>{b}</p>)}</div>}
    {review.preflight&&<details style={{marginTop:12,padding:'12px',border:'1px solid rgba(120,177,212,.24)',borderRadius:12}}><summary style={{cursor:'pointer',fontWeight:700}}>Publication safety check · {review.preflight.readyForFullPublication?'Draft passes checks':'Not ready'}</summary><div style={{paddingTop:10,fontSize:13}}><p>Read-only assessment · {review.preflight.proposedSessions} proposed sessions · {review.preflight.proposedHours.toFixed(2)} hours</p>{review.preflight.blockers.length>0?<ul>{review.preflight.blockers.map((reason,i)=><li key={i}>{reason}</li>)}</ul>:<p>Preliminary checks passed. Publication is still disabled until the authenticated end-to-end test is complete.</p>}<p>No calendar changes are made by this check.</p></div></details>}
    <details style={{marginTop:12}}><summary style={{cursor:'pointer',padding:'10px 0',fontWeight:700}}>View {review.sessionCount} planned sessions</summary><div style={{paddingTop:6}}>{review.sessions.map(s=><div key={s.id} style={{padding:'9px 0',borderBottom:'1px solid #31536d'}}><strong>{s.planned_date} · {s.sport} · {s.duration_min} min</strong><div style={{opacity:.85,fontSize:13,marginTop:3}}>{s.title} · {s.status}</div></div>)}</div></details>
