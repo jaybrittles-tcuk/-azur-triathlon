@@ -1,5 +1,6 @@
 import {useState} from 'react';
 import {supabase} from '../lib/supabase';
+import CoachThresholdValidation from './CoachThresholdValidation';
 type Preview={status:string;originalMinutes:number;proposedMinutes:number;blockers:string[];gaps:string[];weeklyAssessment?:{volumeExplanation:string;recoveryExplanation:string;qualitySessionCount:number;missingReplacementCount:number;proposedSportCount:number;targetDeltaMinutes:number};proposed:Array<{date:string;existingId:string;existingMinutes:number;replacement:{title:string;sport:string;durationMin:number;prescription:unknown};whyTodayMatters:string}>};
 type WorkoutStep={target?:string;durationMin?:number;duration_min?:number;distanceMeters?:number;repeats?:number;restSeconds?:number;purpose?:string};
 function readableSteps(prescription:unknown):WorkoutStep[]{
@@ -32,6 +33,7 @@ export default function CoachVipaPreview({athleteId,weekStart}:{athleteId:string
  return <details><summary>VIPA structured replacement preview (read-only)</summary>
   <button type="button" disabled={loading} onClick={()=>void inspect()}>{loading?'Inspecting…':'Inspect approved workout alternatives'}</button>
   {error&&<p role="alert">{error}</p>}
+  <CoachThresholdValidation athleteId={athleteId} onSaved={()=>{setData(null);setVerifiedReferences([]);setError('Thresholds saved. Select Inspect approved workout alternatives to refresh.')}}/>
   {data&&<div><p><strong>Athlete thresholds — coach validation required</strong></p><p>{thresholds.map(t=>t.sport+': '+t.display+' ('+(t.status==='available_unverified'?'unverified':'missing')+')').join(' · ')}</p><p>Stored onboarding values are not approved targets. Only explicitly coach-validated thresholds can produce numerical references.</p><p><strong>Coach-validated references</strong></p><ul>{verifiedReferences.map(t=><li key={t.sport}>{t.sport}: {t.targets.length?t.targets.join('; '):t.summary}</li>)}</ul><p><strong>{data.status.replaceAll('_',' ')}</strong> · {data.proposed.length} proposed replacements · Existing {data.originalMinutes} min · Proposed {data.proposedMinutes} min</p>
    {data.weeklyAssessment&&<p><strong>Week quality:</strong> {data.weeklyAssessment.qualitySessionCount} quality-focused sessions · {data.weeklyAssessment.proposedSportCount} sports covered · {data.weeklyAssessment.missingReplacementCount} unreplaced sessions · {data.weeklyAssessment.targetDeltaMinutes>0?'+':''}{data.weeklyAssessment.targetDeltaMinutes} min vs target</p>}
    {data.weeklyAssessment&&<div><p><strong>Volume decision:</strong> {data.weeklyAssessment.volumeExplanation}</p><p><strong>Recovery decision:</strong> {data.weeklyAssessment.recoveryExplanation}</p></div>}
