@@ -3,27 +3,33 @@ import {supabase} from '../lib/supabase';
 import {assessSessionEffortReview} from '../lib/calculations/sessionEffortReview';
 import {normalizeWorkoutIntervals} from '../lib/calculations/workoutIntensity';
 
-type Signal={id:string;athleteId:string;source:string;reportedRpe:number;reason:string;date:string;athleteName:string;workoutTitle:string};
+type Signal={id:string;athleteId:string;source:string;reportedRpe:number;reason:string;date:string;athleteName:string;workoutTitle:string;sourceType:'session_feedback'|'completed_activity';sourceId:string;reviewed:boolean};
 export default function CoachRecoverySignals(){
  const [signals,setSignals]=useState<Signal[]>([]);
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState('');
  const [count,setCount]=useState(0);
+ const [coachId,setCoachId]=useState('');
+ const [busy,setBusy]=useState('');
+ const [showReviewed,setShowReviewed]=useState(false);
  async function refresh(){
   setLoading(true);setError('');
   try{
    const {data:{user},error:authError}=await supabase.auth.getUser();
    if(authError||!user||user.app_metadata?.role!=='coach')throw Error('Verified coach sign-in required');
+   setCoachId(user.id);
    const {data:assign,error:assignError}=await supabase.from('coach_athlete_assignment').select('athlete_id').eq('coach_user_id',user.id);
    if(assignError)throw assignError;
    const ids=[...new Set((assign||[]).map(a=>a.athlete_id))];
    setCount(ids.length);
    if(!ids.length){setSignals([]);return;}
-   const [feedback,activities]=await Promise.all([
+   const [feedback,activities,reviewStates]=await Promise.all([
     supabase.from('session_feedback').select('id,athlete_id,planned_session_id,session_rpe,created_at').in('athlete_id',ids).order('created_at',{ascending:false}).limit(100),
-    supabase.from('completed_activity').select('id,athlete_id,planned_session_id,session_rpe,created_at,source').in('athlete_id',ids).not('session_rpe','is',null).order('created_at',{ascending:false}).limit(100)
+    supabase.from('completed_activity').select('id,athlete_id,planned_session_id,session_rpe,created_at,source').in('athlete_id',ids).not('session_rpe','is',null).order('created_at',{ascending:false}).limit(100),
+    supabase.from('coach_recovery_review').select('source_type,source_id').eq('coach_user_id',user.id).in('athlete_id',ids)
    ]);
-   if(feedback.error||activities.error)throw Error(feedback.error?.message||activities.error?.message||'Unable to load recovery evidence');
+   if(feedback.error||activities.error||reviewStates.error)throw Error(feedback.error?.message||activities.error?.message||reviewStates.error?.message||'Unable to load recovery evidence');
+   const reviewed=new Set((reviewStates.data||[]).map(r=>r.source_type+':'+r.source_id));
    const sessionIds=[...new Set([...(feedback.data||[]),...(activities.data||[])].map(r=>r.planned_session_id).filter((id):id is string=>typeof id==='string'))];
    const [profiles,sessions]=await Promise.all([
     supabase.from('athlete_profile').select('id,display_name').in('id',ids),
@@ -46,25 +52,38 @@ export default function CoachRecoverySignals(){
      const workRpe=intervals.filter(x=>x.kind==='work'&&x.target?.metric==='rpe').map(x=>x.target!.high);
      const plannedRpeHigh=workRpe.length?Math.max(...workRpe):null;
      const assessment=assessSessionEffortReview({reportedRpe:row.session_rpe,plannedRpeHigh,source:source==='athlete feedback'?'manual':'unknown'});
-     if(assessment.requiresCoachReview)result.push({id:source+row.id,athleteId:row.athlete_id,source,reportedRpe:row.session_rpe,reason:assessment.reason+(plannedRpeHigh!==null?' Prescribed work effort: up to RPE '+plannedRpeHigh+'/10.':' Prescribed RPE unavailable; no effort mismatch inferred.'),date:row.created_at,athleteName:names.get(row.athlete_id)||'Assigned athlete',workoutTitle:row.planned_session_id?titles.get(row.planned_session_id+':'+row.athlete_id)||'Workout details unavailable':'Unlinked activity / feedback'});
+     if(assessment.requiresCoachReview)result.push({id:source+row.id,athleteId:row.athlete_id,source,reportedRpe:row.session_rpe,reason:assessment.reason+(plannedRpeHigh!==null?' Prescribed work effort: up to RPE '+plannedRpeHigh+'/10.':' Prescribed RPE unavailable; no effort mismatch inferred.'),date:row.created_at,athleteName:names.get(row.athlete_id)||'Assigned athlete',workoutTitle:row.planned_session_id?titles.get(row.planned_session_id+':'+row.athlete_id)||'Workout details unavailable':'Unlinked activity / feedback',sourceType:source==='athlete feedback'?'session_feedback':'completed_activity',sourceId:row.id,reviewed:reviewed.has((source==='athlete feedback'?'session_feedback':'completed_activity')+':'+row.id)});
     }
    }
    setSignals(result.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,25));
   }catch(e){setError(e instanceof Error?e.message:'Recovery review unavailable');setSignals([]);}
   finally{setLoading(false)}
  }
+ async function setReviewed(signal:Signal,next:boolean){
+  if(!coachId)return;
+  setBusy(signal.id);setError('');
+  try{
+   const query=next?supabase.from('coach_recovery_review').insert({coach_user_id:coachId,athlete_id:signal.athleteId,source_type:signal.sourceType,source_id:signal.sourceId}):supabase.from('coach_recovery_review').delete().eq('coach_user_id',coachId).eq('source_type',signal.sourceType).eq('source_id',signal.sourceId);
+   const {error:writeError}=await query;
+   if(writeError)throw writeError;
+   await refresh();
+  }catch(e){setError(e instanceof Error?e.message:'Could not save review status');}
+  finally{setBusy('')}
+ }
  useEffect(()=>{void refresh()},[]);
  return <details style={{margin:'12px 0',padding:14,border:'1px solid #385875',borderRadius:12}}>
-  <summary><strong>Recovery review signals</strong> · {loading?'loading':signals.length+' high-effort report'+(signals.length===1?'':'s')}</summary>
+  <summary><strong>Recovery review signals</strong> · {loading?'loading':signals.filter(s=>!s.reviewed).length+' needing review'}</summary>
   <p style={{fontSize:13,opacity:.85}}>Read-only signals from saved session feedback and activity reports for assigned athletes. No changes to training are made.</p>
   <button type="button" onClick={()=>void refresh()} disabled={loading}>Refresh recovery signals</button>
   {error&&<p role="alert">{error}</p>}
   {!loading&&!error&&count===0&&<p>No assigned athletes.</p>}
   {!loading&&!error&&count>0&&signals.length===0&&<p>No high-effort RPE reports found in the latest available records. This does not confirm recovery readiness.</p>}
-  {signals.map(s=><article key={s.id} style={{padding:10,marginTop:10,border:'1px solid #46617a',borderRadius:8}}>
-   <strong>Review recovery · RPE {s.reportedRpe}/10</strong>
+  <label style={{display:'flex',gap:8,alignItems:'center',marginTop:12}}><input type="checkbox" checked={showReviewed} onChange={e=>setShowReviewed(e.target.checked)}/> Show reviewed alerts ({signals.filter(s=>s.reviewed).length})</label>
+  {signals.filter(s=>showReviewed||!s.reviewed).map(s=><article key={s.id} style={{padding:10,marginTop:10,border:'1px solid #46617a',borderRadius:8}}>
+   <strong>{s.reviewed?'Reviewed':'Needs review'} · RPE {s.reportedRpe}/10</strong>
    <p style={{fontSize:12,opacity:.8}}>{s.athleteName} · {s.workoutTitle} · {s.source} · {new Date(s.date).toLocaleDateString('en-GB')}</p>
    <p>{s.reason}</p>
+   <button type="button" disabled={Boolean(busy)||loading} onClick={()=>void setReviewed(s,!s.reviewed)}>{busy===s.id?'Saving…':s.reviewed?'Reopen review':'Mark reviewed'}</button>
   </article>)}
  </details>;
 }
