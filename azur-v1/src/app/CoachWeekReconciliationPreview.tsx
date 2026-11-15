@@ -5,15 +5,16 @@ import {supabase} from '../lib/supabase';
 import {reviewWeekTarget} from '../lib/calculations/weeklyPlanSafety';
 type Row={athleteId:string;athleteName:string;weekStart:string;targetHours:number;plannedMinutes:number;shortfall:number;status:string;reasons:string[];sessions:number;phase:string;existing:any[]};
 function currentMonday(){const d=new Date();const n=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-n);return d.toISOString().slice(0,10)}
+function nextMonday(){const d=new Date(currentMonday()+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+7);return d.toISOString().slice(0,10)}
 export default function CoachWeekReconciliationPreview(){
- const [rows,setRows]=useState<Row[]>([]);const [loading,setLoading]=useState(false);const [error,setError]=useState('');
+ const [rows,setRows]=useState<Row[]>([]);const [selectedWeek,setSelectedWeek]=useState(nextMonday);const [loading,setLoading]=useState(false);const [error,setError]=useState('');
  async function inspect(){
   setLoading(true);setError('');
   try{
    const {data:{user}}=await supabase.auth.getUser();if(!user||user.app_metadata?.role!=='coach')throw new Error('Verified coach account required');
    const {data:assigned,error:ae}=await supabase.from('coach_athlete_assignment').select('athlete_id').eq('coach_user_id',user.id);
    if(ae)throw ae;const ids=(assigned??[]).map(x=>x.athlete_id);if(!ids.length){setRows([]);return}
-   const monday=currentMonday();const sunday=new Date(monday+'T12:00:00Z');sunday.setUTCDate(sunday.getUTCDate()+6);
+   const monday=selectedWeek;const sunday=new Date(monday+'T12:00:00Z');sunday.setUTCDate(sunday.getUTCDate()+6);
    const [profiles,weeks,planned]=await Promise.all([
     supabase.from('athlete_profile').select('id,display_name').in('id',ids),
     supabase.from('season_week').select('athlete_id,week_start,target_hours,phase').in('athlete_id',ids).eq('week_start',monday),
@@ -28,8 +29,8 @@ export default function CoachWeekReconciliationPreview(){
    }));
   }catch(e){setError(e instanceof Error?e.message:'Unable to inspect training week');}finally{setLoading(false)}
  }
- useEffect(()=>{void inspect()},[]);
- return <section className="coach-attention-group"><header className="coach-attention-heading"><div><h4>Weekly completeness inspection</h4><p>Read-only training target reconciliation; never changes the athlete calendar.</p></div><button type="button" disabled={loading} onClick={()=>void inspect()}>Refresh</button></header>
- {error&&<p role="alert">{error}</p>}{loading?<p>Checking planned training…</p>:rows.length?rows.map(r=><article key={r.athleteId} className="coach-attention-row"><div><strong>{r.athleteName} · {r.weekStart} · {r.status}</strong><p>{r.sessions} sessions · {r.plannedMinutes} of {Math.round(r.targetHours*60)} planned minutes · shortfall {r.shortfall} min</p>{r.reasons.map(x=><p key={x}>{x}</p>)}<small>Only approved workouts can be proposed; publication remains disabled.</small><CoachVipaPreview athleteId={r.athleteId} weekStart={r.weekStart}/><ApprovedWorkoutReconciliation weekStart={r.weekStart} targetHours={r.targetHours} phase={r.phase} existing={r.existing}/></div></article>):<p>No assigned athlete has a weekly target record for the current week.</p>}
+ useEffect(()=>{void inspect()},[selectedWeek]);
+ return <section className="coach-attention-group"><header className="coach-attention-heading"><div><h4>Weekly completeness inspection</h4><p>Read-only training target reconciliation; never changes the athlete calendar.</p></div><div><label htmlFor="azur-inspection-week">Week beginning </label><input id="azur-inspection-week" type="date" value={selectedWeek} onChange={e=>setSelectedWeek(e.target.value)} /><button type="button" disabled={loading} onClick={()=>void inspect()}>Refresh</button></div></header>
+ {error&&<p role="alert">{error}</p>}{loading?<p>Checking planned training…</p>:rows.length?rows.map(r=><article key={r.athleteId} className="coach-attention-row"><div><strong>{r.athleteName} · {r.weekStart} · {r.status}</strong><p>{r.sessions} sessions · {r.plannedMinutes} of {Math.round(r.targetHours*60)} planned minutes · shortfall {r.shortfall} min</p>{r.reasons.map(x=><p key={x}>{x}</p>)}<small>Only approved workouts can be proposed; publication remains disabled.</small><CoachVipaPreview athleteId={r.athleteId} weekStart={r.weekStart}/><ApprovedWorkoutReconciliation weekStart={r.weekStart} targetHours={r.targetHours} phase={r.phase} existing={r.existing}/></div></article>):<p>No assigned athlete has a weekly target record for the selected week. Choose another Monday above.</p>}
  </section>;
 }
