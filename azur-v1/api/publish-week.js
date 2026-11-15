@@ -3,13 +3,14 @@ import {createClient} from '@supabase/supabase-js';
 export default async function handler(req,res){
  res.setHeader('Cache-Control','no-store');
  if(req.method==='GET'){
-  const enabled=process.env.AZUR_WEEK_PUBLISH_ENABLED==='true'&&Boolean(process.env.AZUR_PUBLISH_ALLOWED_ORIGIN&&process.env.SUPABASE_URL&&process.env.SUPABASE_ANON_KEY&&process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const enabled=process.env.AZUR_WEEK_PUBLISH_ENABLED==='true'&&Boolean((process.env.VERCEL_URL||process.env.AZUR_PUBLISH_ALLOWED_ORIGIN)&&process.env.SUPABASE_URL&&process.env.SUPABASE_ANON_KEY&&process.env.SUPABASE_SERVICE_ROLE_KEY);
   return res.status(200).json({publishingEnabled:enabled,message:enabled?'Protected coach publication available':'Coach publishing remains disabled pending end-to-end verification'});
  }
  if(req.method!=='POST'){res.setHeader('Allow','GET, POST');return res.status(405).json({error:'Method not allowed'});}
  if(process.env.AZUR_WEEK_PUBLISH_ENABLED!=='true')return res.status(503).json({error:'Weekly publishing is disabled'});
  const origin=req.headers.origin;
- const expected=process.env.AZUR_PUBLISH_ALLOWED_ORIGIN;
+ const ownPreviewOrigin=process.env.VERCEL_ENV==='preview'&&process.env.VERCEL_URL?'https://'+process.env.VERCEL_URL:null;
+ const expected=ownPreviewOrigin||process.env.AZUR_PUBLISH_ALLOWED_ORIGIN;
  if(!expected||!origin||origin!==expected)return res.status(403).json({error:'Origin not allowed'});
  const url=process.env.SUPABASE_URL;const anon=process.env.SUPABASE_ANON_KEY;const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!url||!anon||!key)return res.status(503).json({error:'Publisher not configured'});
