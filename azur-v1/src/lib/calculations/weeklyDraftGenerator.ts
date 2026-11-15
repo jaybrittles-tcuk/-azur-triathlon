@@ -32,11 +32,20 @@ export function draftApprovedTrainingWeek(input:{
   if(!input.slots.length)reasons.push('No coach-defined weekly training structure');
   const sessions:DraftItem[]=[];
   const used:string[]=[];
+  const occupiedSportDays=new Set<string>();
   let totalMinutes=0;
   for(const slot of input.slots){
     if(!Number.isInteger(slot.day)||slot.day<0||slot.day>6){
       reasons.push('Invalid day in weekly structure');continue;
     }
+    if(!Number.isFinite(slot.maxMinutes)||slot.maxMinutes<=0||![1,2,3].includes(slot.maxLevel)){
+      reasons.push('Invalid duration or level for day '+(slot.day+1));continue;
+    }
+    const sportDay=slot.day+'/'+slot.sport;
+    if(occupiedSportDays.has(sportDay)){
+      reasons.push('Duplicate '+slot.sport+' training slot on day '+(slot.day+1));continue;
+    }
+    occupiedSportDays.add(sportDay);
     const result=selectCoachSession(input.library,{
       sport:slot.sport,family:slot.family,phase:input.phase,
       maxMinutes:Math.min(slot.maxMinutes,input.weeklyLimitMinutes-totalMinutes),
