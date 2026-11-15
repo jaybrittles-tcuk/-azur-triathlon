@@ -2,11 +2,12 @@ name: AZUR calculation checks
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, fix/weekly-draft-slot-safety-20261115]
     paths:
       - 'azur-v1/src/lib/calculations/**'
       - 'azur-v1/src/domain/bikeWorkout*.ts'
       - 'azur-v1/package.json'
+      - 'azur-v1/tests/**'
       - '.github/workflows/azur-calculations.yml'
   pull_request:
     paths:
