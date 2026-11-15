@@ -159,6 +159,8 @@ export default function AthleteOnboardingDraft(){
   <span className="eyebrow">ATHLETE PROFILE RECEIVED</span>
   <h1>You're all set. Your coach is next.</h1>
   <p className="azur-review-lead">Your information has been saved successfully. AZUR has paused training allocation until your coach confirms a safe starting point.</p>
+  <button type="button" className="primary-button" style={{display:"block",width:"100%",margin:"18px 0",padding:"15px 16px",textAlign:"center"}} onClick={()=>{setReviewReason(null);setReady(false);setStep(0);setMessage("");window.scrollTo({top:0,behavior:"smooth"});}}>Review onboarding from the beginning</button>
+  <p style={{fontSize:13,opacity:.8}}>Your saved answers will remain in place. You can update them as you move through each step.</p>
   <div className="azur-review-stats">
    <div><small>Race goal</small><strong>{race.toUpperCase()}</strong></div>
    <div><small>Available time</small><strong>{hours} hrs/week</strong></div>
@@ -169,7 +171,7 @@ export default function AthleteOnboardingDraft(){
    <ol><li><strong>Your coach reviews your baseline.</strong><p>Recent completed volume, training consistency and any return-to-training considerations.</p></li><li><strong>Your starting load is approved.</strong><p>Your available hours are a scheduling ceiling, not a target AZUR will automatically prescribe.</p></li><li><strong>Your calendar becomes available.</strong><p>Sessions and personalised explanations will appear once a plan has been approved and published.</p></li></ol>
   </section>
   <details className="azur-review-detail"><summary>Why is my plan awaiting review?</summary><p>{reviewReason}</p></details>
-  <div className="azur-review-actions"><a className="primary-button" href="/">Continue to my dashboard &amp; device connections</a><button type="button" onClick={()=>{setReviewReason(null);setReady(false);setStep(1);window.scrollTo(0,0)}}>Update my training information</button></div>
+  <div className="azur-review-actions"><a className="primary-button" href="/">Continue to my dashboard &amp; device connections</a><button type="button" onClick={()=>{setReviewReason(null);setReady(false);setStep(0);setMessage("");window.scrollTo(0,0)}}>Update my training information</button></div>
   <p className="azur-review-footnote">Your setup is saved. You can close this screen and return later. Your coach must approve a safe starting load before sessions are published.</p>
  </section></main>;
  if(loading)return <section className="azur-onboarding-draft"><p>Loading your setup…</p></section>;
