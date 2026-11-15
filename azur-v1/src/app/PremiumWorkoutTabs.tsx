@@ -4,7 +4,7 @@ import WorkoutTargetDetails from './WorkoutTargetDetails';
 import CalendarIntensityProfile from './CalendarIntensityProfile';
 type Props={prescription:Record<string,unknown>|null|undefined;rationale?:string|null;ftpWatts:number|null;plannedMinutes:number;completedMinutes?:number|null;completedSource?:string|null};
 export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plannedMinutes,completedMinutes,completedSource}:Props){
- const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('overview');
+ const [tab,setTab]=useState<'overview'|'intervals'|'notes'>('intervals');
  const source=prescription?.azurWorkout as {steps?:unknown}|undefined;
  const intervals=normalizeWorkoutIntervals(source?.steps);
  const valid=intervals.filter(x=>x.durationSec!==null);
@@ -27,10 +27,13 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
  const middle=intervals.filter(x=>x.kind==='work'||x.kind==='recovery');
  const grouped:{count:number;label:string}[]=[];
  const hasDistancePrescription=intervals.some(x=>x.distanceM!==null);
+ const primaryTarget=middle.find(x=>x.kind==='work'&&x.target)?.target;
+ const primaryEffort=primaryTarget?describeTarget(primaryTarget):'Follow the coach-prescribed effort';
  const summary=prescribedDistance!==null?`${prescribedDistance} m prescribed`:hasDistancePrescription?'Distance-based intervals':`${plannedMinutes} min planned`;
  middle.forEach(x=>{const label=`${x.kind==='work'?'Work':'Recovery'}: ${describeBlock(x)}`;const prev=grouped[grouped.length-1];if(prev?.label===label)prev.count++;else grouped.push({count:1,label});});
  return <section className="azur-premium-workout-tabs">
   <div className="azur-workout-quick-summary" style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:12,padding:"4px 2px 12px"}}><strong style={{fontSize:"1.05rem"}}>Your session</strong><span style={{color:"#a9bed0",fontSize:".88rem"}}>{summary}</span></div>
+  <div className="azur-workout-facts" style={{marginBottom:12}}><div><small>Today's target</small><strong>{primaryEffort}</strong></div><div><small>Planned</small><strong>{plannedMinutes} min</strong></div></div>
   <div className="azur-workout-tab-nav" role="tablist" aria-label="Workout information">
    {(['overview','intervals','notes'] as const).map(t=><button type="button" key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)}>{t==='intervals'?'Workout':t==='notes'?'Coaching':'Overview'}</button>)}
   </div>
@@ -46,10 +49,10 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {duration>0&&<p className="azur-workout-footnote">Timed intervals: {Math.round(duration)} min. Distance-based intervals are not converted into estimated durations.</p>}
   </div>}
   {tab==='intervals'&&<div role="tabpanel" className="azur-workout-tab-content">
-   {intervals.length > 0 && !distanceBased && <CalendarIntensityProfile steps={source?.steps} />}
+   {intervals.length > 0 && !distanceBased && <details><summary style={{cursor:'pointer',fontWeight:600}}>View intensity chart</summary><CalendarIntensityProfile steps={source?.steps} /></details>}
    {distanceBased&&<p className="azur-workout-footnote">Distance-based workout · Follow the prescribed repetitions and recovery. No estimated time-based intensity chart is shown.</p>}
    {intervals.length ? <div className="azur-workout-compact-prescription" style={{padding:'12px 2px',lineHeight:1.55}}>
-    <h4 style={{margin:'0 0 10px'}}>Workout structure</h4>
+    <h4 style={{margin:'0 0 10px'}}>Your workout</h4>
     {warmups.length>0&&<p style={{margin:'8px 0'}}><strong>Warm-up:</strong> {warmups.map(describeBlock).join(' · ')}</p>}
     {middle.length>0&&<p style={{margin:'8px 0'}}><strong>Main set:</strong> {grouped.map(x=>(x.count>1?x.count+' × ':'')+x.label).join(' · ')}</p>}
     {cooldowns.length>0&&<p style={{margin:'8px 0'}}><strong>Cool-down:</strong> {cooldowns.map(describeBlock).join(' · ')}</p>}
@@ -58,7 +61,7 @@ export default function PremiumWorkoutTabs({prescription,rationale,ftpWatts,plan
    {cadenceNotes.length>0&&<p>Prescribed cadence: {[...new Set(cadenceNotes)].join(', ')}. Maintain technique and appropriate torque.</p>}
   </div>}
   {tab==='notes'&&<div role="tabpanel" className="azur-workout-tab-content">
-   <h4>Coach guidance</h4><p>{rationale||'No additional coaching rationale recorded.'}</p>
+   <h4>Why today matters</h4><p>{rationale||'No additional coaching rationale recorded.'}</p>
    <p>{typeof prescription?.focus==='string'?prescription.focus:'No additional focus notes supplied.'}</p>
    <small>Record your actual effort and feedback in the workout completion section.</small>
   </div>}
