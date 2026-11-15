@@ -27,6 +27,30 @@ export function createActivityPreviewHandler(fetcher: typeof fetch = globalThis.
  if(!upstream.ok)return res.status(502).json({error:'Intervals.icu activity read failed',upstreamStatus:upstream.status});
  const entries=await upstream.json();
  if(!Array.isArray(entries))return res.status(502).json({error:'Unexpected upstream response'});
+ // Separate multisport history evidence from the cycling-only review inbox.
+ // This is deliberately not a validated baseline: overlapping providers and
+ // activity quality still require deduplication and coach review.
+ const sportFor=(type:unknown):'swim'|'bike'|'run'|null=>{
+  const t=String(type??'').toLowerCase().replace(/[^a-z]/g,'');
+  if(['swim','poolswim','openwaterswim','swimming'].includes(t))return 'swim';
+  if(['ride','virtualride','indoorride','virtualcycling','cycling','bikeride'].includes(t))return 'bike';
+  if(['run','virtualrun','treadmill','trailrun','running'].includes(t))return 'run';
+  return null;
+ };
+ const summary:{[sport:string]:{activities:number;minutes:number}}={
+  swim:{activities:0,minutes:0},bike:{activities:0,minutes:0},run:{activities:0,minutes:0}
+ };
+ const seenHistoryIds=new Set<string>();
+ for(const a of entries){
+  const sport=sportFor(a.type);if(!sport)continue;
+  const sourceId=String(a.id??'');
+  if(!sourceId||seenHistoryIds.has(sourceId))continue;
+  seenHistoryIds.add(sourceId);
+  const seconds=Number(a.moving_time??a.elapsed_time);
+  if(!Number.isFinite(seconds)||seconds<=0||seconds>172800)continue;
+  summary[sport].activities++;
+  summary[sport].minutes+=Math.round(seconds/60);
+ }
  const rides=entries.filter((a:any)=>['ride','virtualride','indoorride','virtualcycling'].includes(String(a.type??'').toLowerCase().replace(/[^a-z]/g,'')));
  // Read-only review of existing activities; never change completion status here.
  const existingResponse=await fetcher(url+'/rest/v1/completed_activity?athlete_id=eq.'+encodeURIComponent(athlete.id)+'&start_time=gte.'+encodeURIComponent(oldest+'T00:00:00Z')+'&select=source,source_activity_id,sport,start_time,duration_sec,distance_m&limit=500',{headers});
@@ -37,7 +61,7 @@ export function createActivityPreviewHandler(fetcher: typeof fetch = globalThis.
  const plans=await plannedResponse.json();
  const assess=(a:any)=>reviewIntervalsActivity(a,existing,plans);
  res.setHeader('Cache-Control','private, no-store');
- return res.status(200).json({mode:'preview_only',stagingEnabled:process.env.INTERVALS_STAGING_ENABLED==='true',acceptanceEnabled:process.env.INTERVALS_ACCEPTANCE_ENABLED==='true',loadValidationEnabled:process.env.INTERVALS_LOAD_VALIDATION_ENABLED==='true',dateRange:{oldest,newest},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
+ return res.status(200).json({mode:'preview_only',stagingEnabled:process.env.INTERVALS_STAGING_ENABLED==='true',acceptanceEnabled:process.env.INTERVALS_ACCEPTANCE_ENABLED==='true',loadValidationEnabled:process.env.INTERVALS_LOAD_VALIDATION_ENABLED==='true',dateRange:{oldest,newest},historySummary:{status:'unvalidated_provider_preview',sports:summary},activities:rides.map((a:any)=>({sourceId:a.id,type:a.type,name:a.name,start:a.start_date_local,durationSec:a.moving_time??a.elapsed_time??null,distanceMeters:a.distance??null,averageWatts:a.icu_average_watts??a.average_watts??null,normalizedWatts:a.icu_weighted_avg_watts??null,origin:a.source??null,...assess(a)})),count:rides.length});
 }
 }
 export default async function handler(req:any,res:any) {
