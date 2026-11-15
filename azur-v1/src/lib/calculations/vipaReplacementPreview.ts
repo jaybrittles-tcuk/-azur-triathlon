@@ -5,6 +5,20 @@ import {mondayOf} from './weeklyPlanSafety.ts';
 export type ExistingWeekSession={id:string;planned_date:string;sport:string;duration_min:number;status:string;locked:boolean;is_active_version:boolean};
 export type VipaReplacementSlot={day:0|1|2|3|4|5|6;sport:SessionEntry['sport'];family:SessionFamily;maxMinutes:number;maxLevel:1|2|3};
 export type VipaProposal={date:string;existingId:string;existingMinutes:number;replacement:SessionEntry;whyTodayMatters:string};
+function explainWorkout(session:SessionEntry,phase:string):string{
+ const focus:Record<string,string>={
+  threshold:'Controlled threshold work develops sustainable speed and pacing discipline.',
+  strength_endurance:'Low-cadence controlled intervals develop bike-specific muscular endurance without requiring maximal efforts.',
+  technique:'Technical practice builds movement economy and control while keeping most of the session easy.',
+  aerobic_endurance:'Steady conversational endurance develops aerobic durability and supports repeatable training.',
+  race_specific:'Controlled race-oriented efforts connect aerobic fitness to sustainable competition pacing.'
+ };
+ const race=session.sport==='swim'?'For a long-course swim, this supports maintaining form and pace across the distance.':
+  session.sport==='bike'?'For a long-course bike leg, this supports steady power and a more manageable transition to running.':
+  'For a long-course run, this supports sustainable pacing and economical movement.';
+ return (focus[session.family]||'This approved workout develops a specific training quality.')+' '+race+
+  ' Selected for the '+phase+' phase; confirm the prescribed targets against the athlete’s current thresholds and recovery before approval.';
+}
 /** Read-only replacement preview. Does not alter or approve the athlete's calendar. */
 export function previewVipaReplacements(input:{
  weekStart:string;phase:SessionEntry['phases'][number];targetMinutes:number;approvedCapacityMinutes:number;
@@ -41,7 +55,7 @@ export function previewVipaReplacements(input:{
   if(selected.status!=='selected'){gaps.push('No approved structured '+slot.sport+' '+slot.family+' workout for '+day);continue;}
   proposedMinutes+=selected.session.durationMin-current.duration_min;
   used.add(selected.session.id);
-  proposed.push({date:day,existingId:current.id,existingMinutes:current.duration_min,replacement:selected.session,whyTodayMatters:'Coach-approved '+slot.family.replaceAll('_',' ')+' focus supports the current training phase; coach must confirm athlete-specific targets and recovery.'});
+  proposed.push({date:day,existingId:current.id,existingMinutes:current.duration_min,replacement:selected.session,whyTodayMatters:explainWorkout(selected.session,input.phase)});
  }
  if(proposedMinutes>input.approvedCapacityMinutes)blockers.push('Proposed week exceeds approved capacity');
  if(proposedMinutes>input.targetMinutes)gaps.push('Proposed week exceeds saved weekly target; coach review required');
