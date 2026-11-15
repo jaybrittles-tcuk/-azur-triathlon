@@ -168,8 +168,20 @@ export default function AthleteOnboardingDraft(){
      if(response.ok){
       const preview=await response.json();
       if(preview.status==='proposal_ready'&&Array.isArray(preview.sessions)){
-       setPlanSummary({sessions:preview.sessions.length,total_minutes:preview.sessions.reduce((n:number,x:{durationMin:number})=>n+x.durationMin,0),
-        calendar:preview.sessions.map((x:{date:string;sport:string;title:string;durationMin:number})=>({date:x.date,sport:x.sport,title:x.title,duration_min:x.durationMin}))});
+       const calendar=preview.sessions.map((x:{date:string;sport:string;title:string;durationMin:number})=>({date:x.date,sport:x.sport,title:x.title,duration_min:x.durationMin}));
+       setPlanSummary({sessions:calendar.length,total_minutes:calendar.reduce((n:number,x:{duration_min:number})=>n+x.duration_min,0),calendar});
+       // Persist the generated recommendation for the coach and for returning athletes.
+       // This athlete-owned preview is NOT a weekly_plan_draft, approval or publication.
+       const {error:proposalSaveError}=await supabase.from('athlete_scheduling_preferences').upsert({
+        user_id:userId,preferences:{...schedulePrefs,
+         coachReview:{reason,requestedAt:new Date().toISOString(),assessmentVersion:1,
+          proposalReady:true,proposedHours:firstWeek.proposedHours,blockers:[],
+          automaticPublicationAuthorized:false},
+         firstWeekPreview:{version:1,weekStart:preview.weekStart,createdAt:new Date().toISOString(),
+          source:'approved_workout_library',status:'awaiting_coach_review',sessions:calendar}
+        },updated_at:new Date().toISOString()
+       },{onConflict:'user_id'});
+       if(proposalSaveError)console.warn('[azur-onboarding] first-week preview not persisted',proposalSaveError.code);
       }
      }
     }
