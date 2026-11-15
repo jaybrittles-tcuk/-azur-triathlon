@@ -17,7 +17,7 @@ function stepLabel(step:WorkoutStep):string{
  return work+' — '+(step.target||step.purpose||'Coach-defined effort')+rest;
 }
 export default function CoachVipaPreview({athleteId,weekStart}:{athleteId:string;weekStart:string}){
- const [data,setData]=useState<Preview|null>(null);const [thresholds,setThresholds]=useState<Array<{sport:string;status:string;display:string}>>([]);const [loading,setLoading]=useState(false);const [error,setError]=useState('');
+ const [data,setData]=useState<Preview|null>(null);const [thresholds,setThresholds]=useState<Array<{sport:string;status:string;display:string}>>([]);const [verifiedReferences,setVerifiedReferences]=useState<Array<{sport:string;status:string;summary:string;targets:string[]}>>([]);const [loading,setLoading]=useState(false);const [error,setError]=useState('');
  async function inspect(){
   setLoading(true);setError('');
   try{
@@ -26,13 +26,13 @@ export default function CoachVipaPreview({athleteId,weekStart}:{athleteId:string
    const r=await fetch('/api/coach/weekly-plan-review?athleteId='+encodeURIComponent(athleteId)+'&weekStart='+encodeURIComponent(weekStart),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
    const payload=await r.json();
    if(!r.ok)throw Error((payload.error||'Preview unavailable')+(payload.diagnosticCode?' · '+payload.diagnosticCode:''));
-   setData(payload.vipaPreview||null);setThresholds(payload.thresholdReadiness?.statuses||[]);
+   setData(payload.vipaPreview||null);setThresholds(payload.thresholdReadiness?.statuses||[]);setVerifiedReferences(payload.verifiedTargetReferences||[]);
   }catch(e){setError(e instanceof Error?e.message:'Preview unavailable');}finally{setLoading(false);}
  }
  return <details><summary>VIPA structured replacement preview (read-only)</summary>
   <button type="button" disabled={loading} onClick={()=>void inspect()}>{loading?'Inspecting…':'Inspect approved workout alternatives'}</button>
   {error&&<p role="alert">{error}</p>}
-  {data&&<div><p><strong>Athlete thresholds — coach validation required</strong></p><p>{thresholds.map(t=>t.sport+': '+t.display+' ('+(t.status==='available_unverified'?'unverified':'missing')+')').join(' · ')}</p><p>These stored values are not approved training targets. No personalised wattage or pace prescription is generated until validation.</p><p><strong>{data.status.replaceAll('_',' ')}</strong> · {data.proposed.length} proposed replacements · Existing {data.originalMinutes} min · Proposed {data.proposedMinutes} min</p>
+  {data&&<div><p><strong>Athlete thresholds — coach validation required</strong></p><p>{thresholds.map(t=>t.sport+': '+t.display+' ('+(t.status==='available_unverified'?'unverified':'missing')+')').join(' · ')}</p><p>Stored onboarding values are not approved targets. Only explicitly coach-validated thresholds can produce numerical references.</p><p><strong>Coach-validated references</strong></p><ul>{verifiedReferences.map(t=><li key={t.sport}>{t.sport}: {t.targets.length?t.targets.join('; '):t.summary}</li>)}</ul><p><strong>{data.status.replaceAll('_',' ')}</strong> · {data.proposed.length} proposed replacements · Existing {data.originalMinutes} min · Proposed {data.proposedMinutes} min</p>
    {data.weeklyAssessment&&<p><strong>Week quality:</strong> {data.weeklyAssessment.qualitySessionCount} quality-focused sessions · {data.weeklyAssessment.proposedSportCount} sports covered · {data.weeklyAssessment.missingReplacementCount} unreplaced sessions · {data.weeklyAssessment.targetDeltaMinutes>0?'+':''}{data.weeklyAssessment.targetDeltaMinutes} min vs target</p>}
    {data.weeklyAssessment&&<div><p><strong>Volume decision:</strong> {data.weeklyAssessment.volumeExplanation}</p><p><strong>Recovery decision:</strong> {data.weeklyAssessment.recoveryExplanation}</p></div>}
    {data.blockers.map((x,i)=><p key={'b'+i}>Blocked: {x}</p>)}
