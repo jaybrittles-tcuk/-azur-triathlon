@@ -21,3 +21,17 @@ test('unapproved or wrong phase sessions never selected',()=>{
  assert.equal(draftApprovedTrainingWeek({...base,library:[{...library[0],approved:false}]}).status,'blocked');
  assert.equal(draftApprovedTrainingWeek({...base,phase:'taper'}).status,'blocked');
 });
+
+test('duplicate sport and day cannot silently create two workouts',()=>{
+ const result=draftApprovedTrainingWeek({...base,library:[...library,{...library[0],id:'coach-bike-2'}],slots:[base.slots[0],base.slots[0]]});
+ assert.equal(result.status,'blocked');
+ assert.match(result.reasons.join(' '),/Duplicate bike training slot/);
+ assert.equal(result.sessions.length,1);
+});
+test('invalid slot duration or level blocks generation',()=>{
+ for(const slot of [{...base.slots[0],maxMinutes:0},{...base.slots[0],maxLevel:4}]){
+  const result=draftApprovedTrainingWeek({...base,slots:[slot]});
+  assert.equal(result.status,'blocked');
+  assert.match(result.reasons.join(' '),/Invalid duration or level/);
+ }
+});
