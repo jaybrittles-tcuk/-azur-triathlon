@@ -7089,3 +7089,30 @@ strong {
 .azur-review-actions button.primary-button {display:block;width:100%;min-height:50px;background:#168ec7;border:0;color:#fff;font-weight:750;border-radius:12px;font-size:15px;}
 .azur-review-footnote {margin-top:14px;}
 @media(max-width:390px){.azur-onboarding-page{padding-left:10px;padding-right:10px}.azur-review-complete{padding:20px!important}.azur-review-stats>div{padding:12px 8px}.azur-review-stats small{font-size:10px}.azur-review-next li{padding-left:36px}}
+
+
+/* AZUR premium athlete dashboard — restrained dark navy, blue and gold. */
+.azur-white-dashboard{background:#071726;color:#e9f3fb;border:1px solid #23445c;box-shadow:0 18px 50px #020c1980}
+.azur-white-dashboard .awd-hero{background:linear-gradient(180deg,rgba(3,14,28,.58),#071b2feF),url('/race-images/roth.jpg') center 40%/cover;min-height:235px}
+.azur-white-dashboard .awd-body{gap:14px}
+.azur-white-dashboard .awd-card{background:linear-gradient(145deg,#122a40,#0d2134);border:1px solid #28475d;color:#e8f4ff;box-shadow:0 10px 24px #010b1740;border-radius:20px}
+.azur-white-dashboard .awd-heading h2,.azur-white-dashboard .awd-eyebrow{color:#8fb5ce;letter-spacing:.12em}
+.azur-white-dashboard .awd-workout-title h3,.azur-white-dashboard .awd-unscheduled h3,.azur-white-dashboard .awd-week-total strong,.azur-white-dashboard .awd-readiness strong,.azur-white-dashboard .awd-insight h2{color:#f4f9fd}
+.azur-white-dashboard .awd-workout-title p,.azur-white-dashboard .awd-target,.azur-white-dashboard .awd-week-total>span,.azur-white-dashboard .awd-readiness small,.azur-white-dashboard .awd-insight>p,.azur-white-dashboard .awd-insight details p,.azur-white-dashboard .awd-note{color:#a4c0d2}
+.azur-white-dashboard .awd-sport-row{color:#dcebf5}
+.azur-white-dashboard .awd-sport-row>div{background:#264155}
+.azur-white-dashboard .awd-workout+.awd-workout{border-color:#2b475b}
+.azur-white-dashboard .awd-primary{background:linear-gradient(100deg,#168bc5,#0875ad);font-size:13px;min-height:44px;box-shadow:0 5px 15px #0273b233}
+.azur-white-dashboard .awd-tag{background:#173e4b;color:#92e2cf}
+.azur-white-dashboard .awd-insight{border-left:3px solid #e7b947}
+.azur-white-dashboard .awd-insight details,.azur-white-dashboard .awd-load-link,.azur-white-dashboard .awd-more-link{color:#7bc5f3}
+.azur-white-dashboard .awd-load-link{border-color:#2c485d}
+.azur-white-dashboard .awd-sport-row>strong{font-size:12px;font-weight:700;color:#f2f8fc;text-align:right;white-space:nowrap}
+.azur-white-dashboard .awd-insight .awd-sport-row{grid-template-columns:28px 1fr auto}
+.azur-white-dashboard .awd-insight .awd-week-sports{padding:14px 0 4px;gap:12px}
+.azur-white-dashboard .awd-insight .awd-note{line-height:1.5}
+.azur-white-dashboard .awd-insight .awd-load-link{margin-top:14px}
+.mobile-bottom-nav.awd-navigation{background:#0b1e30!important;border-color:#28465c!important;box-shadow:0 -8px 28px #030e1e80!important}
+.mobile-bottom-nav.awd-navigation button{color:#a2bfd1!important}
+.mobile-bottom-nav.awd-navigation button.active{background:#123c59!important;color:#6ec9ff!important;border-color:#26658a!important}
+@media(max-width:420px){.azur-white-dashboard .awd-card{padding:16px}.azur-white-dashboard .awd-hero{padding:20px 18px 38px}.azur-white-dashboard .awd-body{padding:0 12px 20px}}
