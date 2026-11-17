@@ -15,6 +15,8 @@ export default function CoachBaselinePlanReview(){
  const [draftDecision,setDraftDecision]=useState<string|null>(null);
  const [drafts,setDrafts]=useState<Array<{id:string;week_start:string;revision:number;phase:string;sessions:unknown;created_at:string}>>([]);
  const [error,setError]=useState('');
+ const [publicationCheck,setPublicationCheck]=useState<'idle'|'eligible'|'published'>('idle');
+ const [publicationMessage,setPublicationMessage]=useState('');
  const [setup,setSetup]=useState<{onboarding_step:number;weekly_hours:number|null;updated_at:string;race_distance:string|null;device:string|null}|null>(null);
  const [baseline,setBaseline]=useState<{source:string;validation_status:string;activity_count:number;excluded_count:number;window_start:string;window_end:string;sport_summary:Record<string,{count?:number;minutes?:number}>}|null>(null);
  const requestId=useRef(0);
@@ -40,6 +42,26 @@ export default function CoachBaselinePlanReview(){
    const result=await response.json();if(!response.ok)throw Error(result.error||'Could not approve proposal');
    await inspect();
   }catch(e){setError(e instanceof Error?e.message:'Approval failed');setBusy(false)}
+ }
+ async function publicationAction(mode:'preflight'|'full'){
+  if(!selected||drafts.length!==1||draftDecision!=='approved')return;
+  if(mode==='full'&&publicationCheck!=='eligible')return;
+  if(mode==='full'&&!window.confirm('Publish the three approved workouts to this athlete’s staging calendar? This cannot be undone automatically.'))return;
+  setBusy(true);setError('');
+  try{
+   const {data:{session}}=await supabase.auth.getSession();
+   if(!session?.access_token)throw Error('Coach sign-in required');
+   const response=await fetch('/api/publish-week',{method:'POST',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({draftId:drafts[0].id,mode})});
+   const result=await response.json();
+   if(!response.ok)throw Error(result.error||'Publication check failed');
+   if(mode==='preflight'){
+    if(result.eligibleForDatabaseValidation!==true)throw Error('Preflight did not confirm eligibility');
+    setPublicationCheck('eligible');setPublicationMessage('Safety preflight passed. Final database checks still apply.');
+   }else{
+    setPublicationCheck('published');setPublicationMessage('Workouts published to the athlete staging calendar.');
+    await inspect();
+   }
+  }catch(e){setPublicationCheck('idle');setError(e instanceof Error?e.message:'Publication failed')}finally{setBusy(false)}
  }
  async function saveQuestionnaireDraft(){
   if(!selected||!review||review.questionnaireDraftPreview?.status!=='ready_for_coach_review'||drafts.length)return;
@@ -67,7 +89,7 @@ export default function CoachBaselinePlanReview(){
  async function inspect(){
   if(!selected)return;
   const currentRequest=++requestId.current;
-  setBusy(true);setError('');setReview(null);setDrafts([]);setDraftDecision(null);setBaseline(null);setSetup(null);
+  setPublicationCheck('idle');setPublicationMessage('');setBusy(true);setError('');setReview(null);setDrafts([]);setDraftDecision(null);setBaseline(null);setSetup(null);
   try{
    const {data:{session}}=await supabase.auth.getSession();
    if(!session?.access_token)throw Error('Sign in to review athlete plans');
@@ -135,7 +157,12 @@ export default function CoachBaselinePlanReview(){
     {stage==='approve'&&<><h4 style={{margin:'0 0 8px'}}>Approve the training week</h4><p style={{fontSize:14,opacity:.85}}>The proposal is saved, but no workouts have been sent to the athlete.</p>
      {drafts[0]&&Array.isArray(drafts[0].sessions)&&<div style={{marginBottom:12,fontSize:14}}>{drafts[0].sessions.length} sessions in this draft</div>}
      {canApprove?<button type="button" style={primary} disabled={busy} onClick={()=>void approveSavedDraft()}>{busy?'Approving…':'Approve training week'}</button>:<p>Approval unavailable. See safety details below.</p>}</>}
-    {stage==='complete'&&<><h4 style={{margin:'0 0 8px'}}>Training week approved</h4><p style={{fontSize:14,opacity:.85}}>The coach has approved this proposal. Publication is still gated for testing, so the athlete calendar has not been updated by this action.</p></>}
+    {stage==='complete'&&<><h4 style={{margin:'0 0 8px'}}>Training week approved</h4><p style={{fontSize:14,opacity:.85}}>This proposal is approved. Publishing requires a separate safety check and explicit coach confirmation.</p>
+     {review?.sessionCount===0?<div style={{display:'grid',gap:10}}>
+       <button type="button" style={primary} disabled={busy} onClick={()=>void publicationAction('preflight')}>Run publication safety check</button>
+       {publicationCheck==='eligible'?<button type="button" style={primary} disabled={busy} onClick={()=>void publicationAction('full')}>Publish approved week to staging calendar</button>:null}
+       {publicationMessage?<p role="status">{publicationMessage}</p>:null}
+     </div>:<p role="status">The calendar already contains sessions. No further publication is offered.</p>}</>}
    </section>
    <details style={{...card,padding:14}}><summary style={{cursor:'pointer',fontWeight:700}}>Athlete profile and training evidence</summary>
     <div style={{paddingTop:12,fontSize:14}}><p>Onboarding: {setup?.onboarding_step===5?'Complete':'Incomplete'} · Availability: {setup?.weekly_hours??'—'}h · Reported recent training: {review.questionnaireReview?.recentWeeklyHours??'—'}h</p><p>Training concern: {review.questionnaireReview?.trainingConcern??'Not supplied'} · Device: {setup?.device||'Not connected'}</p><p>Historical data: {baseline?baseline.activity_count+' activities · '+baseline.validation_status:'No validated baseline'}</p></div>
