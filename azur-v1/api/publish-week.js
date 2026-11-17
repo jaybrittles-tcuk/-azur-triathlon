@@ -7,7 +7,8 @@ export default async function handler(req,res){
   return res.status(200).json({publishingEnabled:enabled,message:enabled?'Protected coach publication available':'Coach publishing remains disabled pending end-to-end verification'});
  }
  if(req.method!=='POST'){res.setHeader('Allow','GET, POST');return res.status(405).json({error:'Method not allowed'});}
- if(process.env.AZUR_WEEK_PUBLISH_ENABLED!=='true')return res.status(503).json({error:'Weekly publishing is disabled'});
+ const preflight=req.body?.mode==='preflight';
+ if(!preflight&&process.env.AZUR_WEEK_PUBLISH_ENABLED!=='true')return res.status(503).json({error:'Weekly publishing is disabled'});
  const origin=req.headers.origin;
  const ownPreviewOrigin=process.env.VERCEL_ENV==='preview'&&process.env.VERCEL_URL?'https://'+process.env.VERCEL_URL:null;
  const expected=ownPreviewOrigin||process.env.AZUR_PUBLISH_ALLOWED_ORIGIN;
@@ -19,7 +20,7 @@ export default async function handler(req,res){
  if(!token)return res.status(401).json({error:'Authentication required'});
  const draftId=req.body?.draftId;
  const mode=req.body?.mode;
- if(typeof draftId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(draftId)||mode!=='full')
+ if(typeof draftId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(draftId)||!['full','preflight'].includes(mode))
   return res.status(400).json({error:'Valid draft and publishing mode required'});
  try{
   const userClient=createClient(url,anon,{auth:{persistSession:false,autoRefreshToken:false}});
@@ -42,9 +43,10 @@ export default async function handler(req,res){
   const {data:seasonWeeks,error:weekError}=await admin.from('season_week').select('id,locked,target_hours').eq('athlete_id',draft.athlete_id).eq('week_start',draft.week_start).limit(2);
   if(weekError||seasonWeeks?.length!==1||seasonWeeks[0].locked)return res.status(409).json({error:'Exactly one unlocked season week is required'});
   if(existing?.some(s=>s.locked||s.status!=='planned'))return res.status(409).json({error:'Completed, locked or edited sessions require separate reconciliation'});
-  if(mode==='full'&&existing?.length)return res.status(409).json({error:'Full publication blocked: existing sessions must be reconciled, not overwritten'});
+  if(existing?.length)return res.status(409).json({error:'Full publication blocked: existing sessions must be reconciled, not overwritten'});
   const {data:source,error:sourceError}=await admin.from('weekly_plan_draft').select('proposal_fingerprint').eq('id',draftId).single();
   if(sourceError||!source||!/^[a-f0-9]{64}$/.test(source.proposal_fingerprint))return res.status(409).json({error:'Verified proposal fingerprint required'});
+  if(preflight)return res.status(200).json({eligibleForDatabaseValidation:true,published:false,checks:['assigned_coach','latest_revision','coach_approval','unlocked_week','empty_calendar','proposal_fingerprint'],message:'Read-only checks passed. Final database publication validation has not run.'});
   const {data,error}=await admin.rpc('publish_verified_weekly_draft',{p_draft_id:draftId});
   if(error)return res.status(409).json({error:'Publication denied by database validation'});
   return res.status(200).json({result:data});
