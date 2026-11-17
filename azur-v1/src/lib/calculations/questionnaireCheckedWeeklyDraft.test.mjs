@@ -10,3 +10,5 @@ test('conservative capacity prevents large starting weeks',()=>assert.equal(draf
 test('injury concerns block automatic drafts',()=>assert.equal(draftQuestionnaireWeek({...input,baseline:{...baseline,trainingConcern:'yes'}}).status,'blocked'));
 test('non-swimmers cannot receive advanced swim prescriptions',()=>assert.equal(draftQuestionnaireWeek({...input,slots:[{day:0,sport:'swim',family:'threshold',maxMinutes:30,maxLevel:2}]}).status,'blocked'));
 test('reported recent training constrains progression',()=>assert.equal(draftQuestionnaireWeek({...input,baseline:{...baseline,recentWeeklyHours:0.2},targetWeekMinutes:30}).status,'blocked'));
+
+test('zero reported recent training blocks questionnaire drafts',()=>{const r=draftQuestionnaireWeek({...input,baseline:{...baseline,recentWeeklyHours:0}});assert.equal(r.status,'blocked');assert.ok(r.reasons.some(x=>x.includes('No recent training')))});
