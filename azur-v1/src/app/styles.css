@@ -7116,3 +7116,20 @@ strong {
 .mobile-bottom-nav.awd-navigation button{color:#a2bfd1!important}
 .mobile-bottom-nav.awd-navigation button.active{background:#123c59!important;color:#6ec9ff!important;border-color:#26658a!important}
 @media(max-width:420px){.azur-white-dashboard .awd-card{padding:16px}.azur-white-dashboard .awd-hero{padding:20px 18px 38px}.azur-white-dashboard .awd-body{padding:0 12px 20px}}
+
+
+/* Compact, tappable training agenda — a single clear route into each workout. */
+.azur-white-dashboard .awd-agenda{padding-bottom:8px}
+.azur-white-dashboard .awd-agenda-list{display:grid;gap:0}
+.azur-white-dashboard .awd-agenda-item{display:grid;grid-template-columns:38px 38px minmax(0,1fr) 18px;align-items:center;gap:11px;width:100%;min-height:75px;padding:11px 0;text-align:left;background:transparent;border:0;border-top:1px solid #294459;color:#dcecf6;font:inherit;cursor:pointer}
+.azur-white-dashboard .awd-agenda-item:first-child{border-top:0}
+.azur-white-dashboard .awd-agenda-item .awd-agenda-date{display:grid;justify-items:center;gap:1px;color:#8bb3cb;text-transform:uppercase;font-size:11px}
+.azur-white-dashboard .awd-agenda-item .awd-agenda-date small{font-size:20px;font-weight:750;color:#f1f7fc}
+.azur-white-dashboard .awd-agenda-item .awd-sport-icon{width:35px;height:35px}
+.azur-white-dashboard .awd-agenda-copy{min-width:0;display:grid;gap:5px}
+.azur-white-dashboard .awd-agenda-copy strong{font-size:13px;color:#f4f8fd;line-height:1.3}
+.azur-white-dashboard .awd-agenda-copy small{font-size:11px;color:#9db9cb;text-transform:capitalize}
+.azur-white-dashboard .awd-agenda-item>svg{color:#6da9ca}
+.azur-white-dashboard .awd-agenda-item:focus-visible{outline:2px solid #e9bc4d;outline-offset:2px;border-radius:8px}
+.azur-white-dashboard .awd-coaching-brief h2{font-size:20px;letter-spacing:-.025em;margin:12px 0}
+.azur-white-dashboard .awd-coaching-brief .awd-note{font-size:10px}
