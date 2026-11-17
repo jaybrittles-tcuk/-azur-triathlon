@@ -154,6 +154,7 @@ export default function AthleteOnboardingDraft(){
    const reason=firstWeek.canPropose
     ?'AZUR has assessed your profile and prepared a conservative starting-load recommendation for coach review. No workouts have been published yet.'
     :'AZUR needs a coach to review your starting point: '+firstWeek.reasons.join('; ')+'.';
+   setPlanSummary(null);
    const {error:reviewError}=await supabase.from('athlete_scheduling_preferences').upsert({
     user_id:userId,preferences:{...schedulePrefs,coachReview:{
      reason,requestedAt:new Date().toISOString(),
@@ -223,7 +224,7 @@ export default function AthleteOnboardingDraft(){
   <div className="azur-review-stats" style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:10}}>
    <div><small>Race goal</small><strong>{race.toUpperCase()}</strong></div>
    <div><small>Available time</small><strong>{hours} hrs/week</strong></div>
-   <div><small>Recent training</small><strong>{recentHours!==''?`${recentHours} hrs/week`:'No history needed'}</strong></div>
+   <div><small>Recent training</small><strong>{recentHours!==''?`${recentHours} hrs/week`:'Not reported'}</strong></div>
   </div>
   {recentHours!==''&&Number(recentHours)>Number(hours)&&<p role="note" style={{border:'1px solid #3d7290',borderRadius:12,padding:12}}>You reported {recentHours} hours of recent training but currently have {hours} hours available. Your coach will review how to fit training into your available time rather than assume you can maintain the previous volume.</p>}
   <section className="azur-review-next">
