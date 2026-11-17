@@ -7203,6 +7203,11 @@ onClick={() => {
                 simpleSteps.every((step: any) => Number.isFinite(Number(step.durationMin)) && Number(step.durationMin) > 0 &&
                   typeof step.target === 'string' && step.target.trim().length > 0) &&
                 simpleSteps.reduce((total: number, step: any) => total + Number(step.durationMin), 0) === selected.durationMin) return null;
+            const poolSegments=selected.prescription?.poolSegments;
+            if(selected.sport==='swim'&&Array.isArray(poolSegments)&&poolSegments.length>0&&
+              poolSegments.every((segment:any)=>Number.isInteger(Number(segment.repeats))&&Number(segment.repeats)>0&&
+                Number(segment.distanceMeters)>0&&Number.isFinite(Number(segment.restSeconds))&&Number(segment.restSeconds)>=0&&
+                typeof segment.target==='string'&&segment.target.trim().length>0))return null;
             if (check.complete) return null;
             return <div className="session-prescription-warning" role="note">
               <strong>Prescription needs coach clarification</strong>
@@ -7210,6 +7215,22 @@ onClick={() => {
               <small>Do not infer missing targets or rest periods. Ask your coach before completing an unclear session.</small>
             </div>;
           })()}
+          {selected.sport==='swim'&&Array.isArray(selected.prescription?.poolSegments)&&selected.prescription.poolSegments.length>0&&(
+            <section className="session-foundation-timeline" aria-label="Your prescribed swim sets">
+              <span className="eyebrow">YOUR SWIM WORKOUT</span>
+              <h3>Follow your swim sets</h3>
+              {selected.prescription.poolSegments.map((segment:any,index:number)=>(
+                <div className="session-foundation-step" key={index}>
+                  <span className="session-foundation-step-index">{index+1}</span>
+                  <div><strong>{String(segment.purpose||'Swim set').replace(/_/g,' ')}</strong>
+                    <p>{segment.repeats} × {segment.distanceMeters}m · {segment.target}</p>
+                    <p>{Number(segment.restSeconds)===0?'Continuous swimming':segment.restSeconds+' seconds rest between repeats'}</p>
+                  </div>
+                </div>
+              ))}
+              <p className="session-foundation-coaching">Follow the prescribed effort and technique cues. If your CSS pace or technique focus has not been established with your coach, use the stated RPE guidance and ask for clarification before attempting a pace-specific set.</p>
+            </section>
+          )}
           {Array.isArray(selected.prescription?.steps) && selected.prescription.steps.length > 0 && !(Array.isArray(selected.prescription?.azurWorkout?.steps) && selected.prescription.azurWorkout.steps.length > 0) && (
             <section className="session-foundation-timeline" aria-label="Your prescribed workout">
               <span className="eyebrow">YOUR WORKOUT</span>
