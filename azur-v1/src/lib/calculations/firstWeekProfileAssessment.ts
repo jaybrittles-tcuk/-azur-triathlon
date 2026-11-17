@@ -27,6 +27,6 @@ export function assessFirstWeekProfile(profile:FirstWeekProfile){
  const cap=profile.consistency==='under4'?4:profile.background==='novice'?5:6;
  // 3h is a conservative proposal ceiling, NOT automatic medical or training clearance.
  const proposedHours=Math.min(3,cap,profile.availableHours,profile.recentReportedHours&&profile.recentReportedHours>0?profile.recentReportedHours*1.1:3);
- if(proposedHours<2)reasons.push('Starting volume is below the introductory three-sport planning threshold; coach review required');
+ if(proposedHours<3)reasons.push('Available starting volume is below the current three-hour approved workout set; coach review required');
  return {canPropose:reasons.length===0,proposedHours:reasons.length===0?Math.floor(proposedHours*2)/2:null,days:reasons.length===0?days:[],reasons,requiresCoachReview:reasons.length>0,automaticPublicationAuthorized:false};
 }
