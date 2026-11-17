@@ -29,6 +29,13 @@ export default async function handler(req,res){
   const admin=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
   const {data:draft,error:de}=await admin.from('weekly_plan_draft').select('id,athlete_id,week_start').eq('id',draftId).single();
   if(de||!draft)return res.status(404).json({error:'Draft not found'});
+  // First publication must not backdate workouts into a completed or current week.
+  // Require a future Monday; existing sessions remain protected independently.
+  const now=new Date();
+  const todayUtc=Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate());
+  const draftMonday=Date.parse(draft.week_start+'T00:00:00Z');
+  if(!Number.isFinite(draftMonday)||draftMonday<=todayUtc)
+   return res.status(409).json({error:'Publication requires a future training week; create and approve a fresh proposal'});
   const {data:assignment,error:ae}=await admin.from('coach_athlete_assignment').select('athlete_id').eq('athlete_id',draft.athlete_id).eq('coach_user_id',user.id).maybeSingle();
   if(ae||!assignment)return res.status(403).json({error:'Coach not assigned to athlete'});
   // Never invoke a publisher until the requested revision has a current,
