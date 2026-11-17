@@ -37,6 +37,8 @@ export function draftQuestionnaireWeek(input:{
  if(b.approvedWeeklyHours!=null&&b.approvedWeeklyHours>capHours)blockers.push('Questionnaire-only starting volume exceeds conservative beta cap');
  if(!Number.isFinite(input.targetWeekMinutes)||input.targetWeekMinutes<=0)blockers.push('Valid weekly target required');
  if(b.approvedWeeklyHours!=null&&input.targetWeekMinutes>b.approvedWeeklyHours*60)blockers.push('Weekly target exceeds coach-approved capacity');
+ const minimumApprovedTemplateMinutes=input.slots.reduce((sum,slot)=>sum+Math.min(slot.maxMinutes,slot.sport==='bike'?90:45),0);
+ if(b.approvedWeeklyHours!=null&&minimumApprovedTemplateMinutes>b.approvedWeeklyHours*60)blockers.push('Introductory workout structure exceeds coach-approved capacity');
  if(b.recentWeeklyHours===0)blockers.push('No recent training reported; coach must assess an appropriate return-to-training start');
  if(b.recentWeeklyHours!=null&&b.recentWeeklyHours>0&&input.targetWeekMinutes>b.recentWeeklyHours*60*1.1)blockers.push('Weekly target exceeds recent reported volume progression guard');
  if(!b.canSwim200m&&input.slots.some(x=>x.sport==='swim'&&x.family!=='technique'))blockers.push('Swim readiness requires technique-only starting sessions');
