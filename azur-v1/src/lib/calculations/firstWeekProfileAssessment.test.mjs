@@ -8,3 +8,6 @@ test('concerns require review',()=>assert.equal(assessFirstWeekProfile({...clair
 test('three available days required',()=>assert.equal(assessFirstWeekProfile({...claire,trainingDays:[0,2]}).canPropose,false));
 test('missing swim readiness requires review',()=>assert.equal(assessFirstWeekProfile({...claire,canSwim200m:null}).canPropose,false));
 test('low recent reported hours cap proposed volume',()=>assert.equal(assessFirstWeekProfile({...claire,recentReportedHours:2}).proposedHours,2));
+
+test('zero recent hours requires coach review',()=>{const r=assessFirstWeekProfile({...claire,recentReportedHours:0});assert.equal(r.canPropose,false);assert.ok(r.reasons.some(x=>x.includes('No recent training')))});
+test('very low recent volume requires coach review',()=>assert.equal(assessFirstWeekProfile({...claire,recentReportedHours:0.5}).canPropose,false));
