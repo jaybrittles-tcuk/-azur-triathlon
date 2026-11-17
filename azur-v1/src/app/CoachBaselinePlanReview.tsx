@@ -137,7 +137,7 @@ export default function CoachBaselinePlanReview(){
    <section style={card}>
     <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'flex-start',flexWrap:'wrap'}}>
      <div><h4 style={{margin:'0 0 4px',fontSize:21}}>{athlete?.display_name||'Athlete'}</h4><span style={{opacity:.8,fontSize:13}}>{setup?.race_distance||'Training'} · Week of {review.weekStart}</span></div>
-     <span style={{fontSize:12,padding:'5px 10px',borderRadius:20,background:stage==='complete'?'#164c48':'#244359',color:'#e4f7ff'}}>{stage==='complete'?'Plan approved · awaiting publication':stage==='setup'?'Setup incomplete':stage==='baseline'?'Needs starting-load review':stage==='draft'?'Ready to build a week':'Week needs approval'}</span>
+     <span style={{fontSize:12,padding:'5px 10px',borderRadius:20,background:stage==='complete'?'#164c48':'#244359',color:'#e4f7ff'}}>{stage==='complete'?(review?.sessionCount===3&&review?.scheduledHours===3?'Published · 3 sessions':'Plan approved · awaiting publication'):stage==='setup'?'Setup incomplete':stage==='baseline'?'Needs starting-load review':stage==='draft'?'Ready to build a week':'Week needs approval'}</span>
     </div>
     <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:14}}>
      <span style={{padding:'8px 10px',borderRadius:9,background:'#1b3c53',fontSize:13}}>{setup?.weekly_hours??'—'}h available</span>
@@ -157,12 +157,12 @@ export default function CoachBaselinePlanReview(){
     {stage==='approve'&&<><h4 style={{margin:'0 0 8px'}}>Approve the training week</h4><p style={{fontSize:14,opacity:.85}}>The proposal is saved, but no workouts have been sent to the athlete.</p>
      {drafts[0]&&Array.isArray(drafts[0].sessions)&&<div style={{marginBottom:12,fontSize:14}}>{drafts[0].sessions.length} sessions in this draft</div>}
      {canApprove?<button type="button" style={primary} disabled={busy} onClick={()=>void approveSavedDraft()}>{busy?'Approving…':'Approve training week'}</button>:<p>Approval unavailable. See safety details below.</p>}</>}
-    {stage==='complete'&&<><h4 style={{margin:'0 0 8px'}}>Training week approved</h4><p style={{fontSize:14,opacity:.85}}>This proposal is approved. Publishing requires a separate safety check and explicit coach confirmation.</p>
+    {stage==='complete'&&<><h4 style={{margin:'0 0 8px'}}>Training week approved</h4><p style={{fontSize:14,opacity:.85}}>{review?.sessionCount===3&&review?.scheduledHours===3?'Three workouts are now on the athlete calendar.':'This proposal is approved. Publishing requires a separate safety check and explicit coach confirmation.'}</p>
      {review?.sessionCount===0?<div style={{display:'grid',gap:10}}>
        <button type="button" style={primary} disabled={busy} onClick={()=>void publicationAction('preflight')}>Run publication safety check</button>
        {publicationCheck==='eligible'?<button type="button" style={primary} disabled={busy} onClick={()=>void publicationAction('full')}>Publish approved week to staging calendar</button>:null}
        {publicationMessage?<p role="status">{publicationMessage}</p>:null}
-     </div>:<p role="status">The calendar already contains sessions. No further publication is offered.</p>}</>}
+     </div>:<p role="status">The calendar contains {review?.sessionCount??0} sessions ({review?.scheduledHours??0}h). Duplicate publication is blocked.</p>}</>}
    </section>
    <details style={{...card,padding:14}}><summary style={{cursor:'pointer',fontWeight:700}}>Athlete profile and training evidence</summary>
     <div style={{paddingTop:12,fontSize:14}}><p>Onboarding: {setup?.onboarding_step===5?'Complete':'Incomplete'} · Availability: {setup?.weekly_hours??'—'}h · Reported recent training: {review.questionnaireReview?.recentWeeklyHours??'—'}h</p><p>Training concern: {review.questionnaireReview?.trainingConcern??'Not supplied'} · Device: {setup?.device||'Not connected'}</p><p>Historical data: {baseline?baseline.activity_count+' activities · '+baseline.validation_status:'No validated baseline'}</p></div>
