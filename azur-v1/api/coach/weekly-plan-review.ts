@@ -67,7 +67,16 @@ export default async function handler(req:any,res:any){
    if(req.headers.origin&&req.headers.host&&new URL(req.headers.origin).host!==req.headers.host)return res.status(403).json({error:'Cross-origin coach action blocked'});
    if(!['save_questionnaire_draft','approve_questionnaire_draft'].includes(req.body?.action))return res.status(400).json({error:'Unsupported coach action'});
    if(!approvalCurrent||questionnaireDraftPreview?.status!=='ready_for_coach_review')return res.status(409).json({error:'A current approved baseline and safe draft are required',reasons:questionnaireDraftPreview?.status==='blocked'?questionnaireDraftPreview.reasons:[]});
-   if(sessions.length||w?.locked||!w)return res.status(409).json({error:'An unlocked season week with no existing sessions is required'});
+   if(sessions.length||w?.locked)return res.status(409).json({error:'An unlocked season week with no existing sessions is required'});
+   // A safe draft save can initialise the missing week using the assigned coach's
+   // JWT and RLS. Approval still requires a separately saved proposal.
+   if(!w){
+    if(req.body.action!=='save_questionnaire_draft')return res.status(409).json({error:'Save the introductory draft before approving it'});
+    const create=await fetch(url+'/rest/v1/season_week',{method:'POST',headers:{...headers,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify({
+     athlete_id:athleteId,week_start:weekStart,phase:'base',target_hours:3,locked:false,benchmark_week:false
+    })});
+    if(!create.ok){console.error('[coach-weekly-review] initial week insert failed',create.status);return res.status(409).json({error:'Unable to prepare an introductory calendar week; no workouts published'});}
+   }
    const existingDrafts=await get('weekly_plan_draft?athlete_id=eq.'+athleteId+'&week_start=eq.'+weekStart+'&select=id,proposal_fingerprint,sessions,created_at&limit=2');
    if(req.body.action==='approve_questionnaire_draft'){
     if(existingDrafts.length!==1)return res.status(409).json({error:'Exactly one saved proposal is required for approval'});
