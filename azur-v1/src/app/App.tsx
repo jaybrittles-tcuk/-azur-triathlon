@@ -7219,6 +7219,9 @@ onClick={() => {
             <section className="session-foundation-timeline" aria-label="Your prescribed swim sets">
               <span className="eyebrow">YOUR SWIM WORKOUT</span>
               <h3>Follow your swim sets</h3>
+              <p>{selected.prescription.poolSegments.reduce((total:number,segment:any)=>total+Number(segment.repeats)*Number(segment.distanceMeters),0)}m total prescribed distance · {selected.durationMin} min planned. Actual duration depends on your pace and rest.</p>
+              {selected.prescription.poolSegments.some((segment:any)=>/coach-assigned|CSS/i.test(String(segment.target||'')))&&
+                <p role="note">Coach clarification: a technique drill or CSS-based pace may still need individual confirmation. Do not guess an unvalidated pace or drill.</p>}
               {selected.prescription.poolSegments.map((segment:any,index:number)=>(
                 <div className="session-foundation-step" key={index}>
                   <span className="session-foundation-step-index">{index+1}</span>
