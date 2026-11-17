@@ -59,7 +59,7 @@ export default async function handler(req:any,res:any){
   const questionnaireDraftPreview=questionnaireComplete?draftQuestionnaireWeek({
    weekStart,phase:'base',targetWeekMinutes:180,
    existingActiveSessions:sessions.length,athleteProfileReady:true,
-   slots:[{sport:'swim',family:'technique',maxMinutes:45,maxLevel:1},{sport:'bike',family:'aerobic_endurance',maxMinutes:90,maxLevel:1},{sport:'run',family:'aerobic_endurance',maxMinutes:45,maxLevel:1}].map((slot,i)=>({...slot,day:(introductoryDays?.[i]??-1)) as any,
+   slots:[{sport:'swim',family:'technique',maxMinutes:45,maxLevel:1},{sport:'bike',family:'aerobic_endurance',maxMinutes:90,maxLevel:1},{sport:'run',family:'aerobic_endurance',maxMinutes:45,maxLevel:1}].map((slot,i)=>({...slot,day:(introductoryDays?.[i]??-1)})) as any,
    library:library.map((item:any)=>({id:item.workout_key,title:item.title,sport:item.sport,family:item.family,durationMin:Number(item.duration_min),level:Number(item.level),phases:item.phases,prescription:item.prescription,approved:item.approved})),
    baseline:{onboardingComplete:true,requestedWeeklyHours:Number(setup.weekly_hours),recentWeeklyHours:setup.recent_weekly_hours==null?null:Number(setup.recent_weekly_hours),trainingBackground:setup.training_background,trainingConsistency:setup.training_consistency,trainingConcern:setup.current_training_concern||'unsure',canSwim200m:setup.can_swim_200m===true,coachApproved:approvalCurrent,approvedWeeklyHours:approvalCurrent?Number(questionnaireApproval.approved_weekly_hours):null}
   }):null;
