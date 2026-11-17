@@ -67,6 +67,11 @@ export default async function handler(req:any,res:any){
    if(req.headers.origin&&req.headers.host&&new URL(req.headers.origin).host!==req.headers.host)return res.status(403).json({error:'Cross-origin coach action blocked'});
    if(!['save_questionnaire_draft','approve_questionnaire_draft'].includes(req.body?.action))return res.status(400).json({error:'Unsupported coach action'});
    if(!approvalCurrent||questionnaireDraftPreview?.status!=='ready_for_coach_review')return res.status(409).json({error:'A current approved baseline and safe draft are required',reasons:questionnaireDraftPreview?.status==='blocked'?questionnaireDraftPreview.reasons:[]});
+   // Do not save a questionnaire week unless its actual selected workout minutes
+   // fit the approved limit and the week's fixed introductory target.
+   const proposalMinutes=questionnaireDraftPreview.sessions.reduce((total,item)=>total+item.session.durationMin,0);
+   if(proposalMinutes!==180||proposalMinutes>Number(questionnaireApproval.approved_weekly_hours)*60)
+    return res.status(409).json({error:'Selected introductory workouts do not match the approved three-hour week; coach review required'});
    if(sessions.length||w?.locked)return res.status(409).json({error:'An unlocked season week with no existing sessions is required'});
    // A safe draft save can initialise the missing week using the assigned coach's
    // JWT and RLS. Approval still requires a separately saved proposal.
