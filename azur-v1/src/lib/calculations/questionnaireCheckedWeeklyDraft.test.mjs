@@ -12,3 +12,5 @@ test('non-swimmers cannot receive advanced swim prescriptions',()=>assert.equal(
 test('reported recent training constrains progression',()=>assert.equal(draftQuestionnaireWeek({...input,baseline:{...baseline,recentWeeklyHours:0.2},targetWeekMinutes:30}).status,'blocked'));
 
 test('zero reported recent training blocks questionnaire drafts',()=>{const r=draftQuestionnaireWeek({...input,baseline:{...baseline,recentWeeklyHours:0}});assert.equal(r.status,'blocked');assert.ok(r.reasons.some(x=>x.includes('No recent training')))});
+
+test('three-hour introductory structure cannot fit a two-hour coach-approved limit',()=>{const slots=[{day:0,sport:'swim',family:'technique',maxMinutes:45,maxLevel:1},{day:3,sport:'bike',family:'aerobic_endurance',maxMinutes:90,maxLevel:1},{day:6,sport:'run',family:'aerobic_endurance',maxMinutes:45,maxLevel:1}];const r=draftQuestionnaireWeek({...input,slots,baseline:{...baseline,approvedWeeklyHours:2},targetWeekMinutes:120});assert.equal(r.status,'blocked');assert.ok(r.reasons.some(x=>x.includes('structure exceeds coach-approved capacity')))});
